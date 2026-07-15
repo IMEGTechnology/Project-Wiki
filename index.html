@@ -476,7 +476,7 @@
 
     #reader-content {
       display: none;
-      max-width: 860px;
+      max-width: 1290px; /* ~50% wider than the original 860px */
       margin: 0 auto;
       padding: 40px 48px 80px;
       font-size: 15px;
@@ -1258,6 +1258,11 @@ const CONFIG = {
   vaultRelPath: '[VAULT_RELATIVE_PATH]', // server-relative path to vault folder
                                          // e.g. "/sites/TeamSite/WikiBase/vault"
   ignoreFolders: new Set(['config', 'themes', 'assets']),
+  // Obsidian setting: Files & Links → Default location for new attachments
+  // → "In subfolder under current folder". Whatever name you used there
+  // goes here — every folder gets its own copy of this subfolder, and
+  // it's always hidden from the nav tree, same as zSystem.
+  attachmentsFolderName: 'Attachments',
   authorName:   '[YOUR_NAME]',           // displayed on comments you post
   // S9 Editor mode: names allowed to edit. Empty array = everyone can edit
   // (small-team default). Names must match the authorName each user sets.
@@ -1320,6 +1325,7 @@ function isIgnored(name) {
   if (name.endsWith('.comments.md'))               return true;
   if (name.endsWith('.changes.md'))                return true; // S9 change-log sidecars
   if (name.toLowerCase() === 'zsystem')            return true; // change-log sidecar folder — always hidden
+  if (name.toLowerCase() === CONFIG.attachmentsFolderName.toLowerCase()) return true; // per-folder attachments — always hidden
   if (CONFIG.ignoreFolders.has(name.toLowerCase())) return true;
   return false;
 }
@@ -1337,6 +1343,15 @@ function changesUrlFor(fileUrl) {
   const slash = fileUrl.lastIndexOf('/');
   const dir   = slash === -1 ? '' : fileUrl.slice(0, slash);
   const name  = (slash === -1 ? fileUrl : fileUrl.slice(slash + 1)).replace(/\.md$/i, '.changes.md');
+  return dir ? `${dir}/zSystem/${name}` : `zSystem/${name}`;
+}
+
+// Comments sidecars live in the same hidden zSystem subfolder as the
+// change log — one system folder per note's folder, not two.
+function commentsUrlFor(fileUrl) {
+  const slash = fileUrl.lastIndexOf('/');
+  const dir   = slash === -1 ? '' : fileUrl.slice(0, slash);
+  const name  = (slash === -1 ? fileUrl : fileUrl.slice(slash + 1)).replace(/\.md$/i, '.comments.md');
   return dir ? `${dir}/zSystem/${name}` : `zSystem/${name}`;
 }
 
@@ -1555,17 +1570,38 @@ async function readVaultFileOrNull(url) { // missing → null, never throws
   } catch (_) { return null; }
 }
 
-// Local mode: resolve ![[image]] embeds to blob URLs after render
-// (looks in the vault's /assets/ folder, same convention as SharePoint).
+// Walks to the folder handle containing fileUrl (no create — read lookup
+// only). Empty parts array (a vault-root file) resolves to LOCAL.root.
+async function localFileDirHandle(fileUrl) {
+  const parts = fileUrl.replace(/^local:\//, '').split('/');
+  parts.pop(); // drop the filename itself
+  let dir = LOCAL.root;
+  for (const seg of parts) dir = await dir.getDirectoryHandle(seg);
+  return dir;
+}
+
+// Local mode: resolve ![[image]] embeds to blob URLs after render.
+// Matches Obsidian's "in subfolder under current folder" attachment
+// setting — the image lives in a subfolder (CONFIG.attachmentsFolderName)
+// next to whatever note references it, not one global vault-root folder.
+// Falls back to a root-level "assets" folder for anyone still using that
+// older convention.
 async function hydrateLocalImages(container) {
   if (!LOCAL.on) return;
   const imgs = container.querySelectorAll('img[data-wb-asset]');
-  if (!imgs.length) return;
-  let assets = null;
-  try { assets = await LOCAL.root.getDirectoryHandle('assets'); } catch (_) { return; }
+  if (!imgs.length || !state.activeUrl) return;
+
+  let attDir = null;
+  try {
+    const noteDir = await localFileDirHandle(state.activeUrl);
+    attDir = await noteDir.getDirectoryHandle(CONFIG.attachmentsFolderName);
+  } catch (_) {
+    try { attDir = await LOCAL.root.getDirectoryHandle('assets'); } catch (_) { return; }
+  }
+
   for (const img of imgs) {
     try {
-      const h = await assets.getFileHandle(img.dataset.wbAsset);
+      const h = await attDir.getFileHandle(img.dataset.wbAsset);
       img.src = URL.createObjectURL(await h.getFile());
     } catch (_) {} // onerror fallback in the markup handles missing files
   }
@@ -1655,6 +1691,7 @@ const ICON = {
 // ── Render sidebar ───────────────────────────────────────────────
 let vaultFolders   = [];
 let vaultRootFiles = [];
+let vaultReady     = false; // true once bootVault() has completed at least once
 
 function renderSidebar() {
   const tree = $('sb-tree');
@@ -1759,6 +1796,17 @@ function isImageExt(name) {
   return IMAGE_EXTS.has((name.split('.').pop() || '').toLowerCase());
 }
 
+// The `src=` attribute only matters for SharePoint mode's direct HTTP
+// fetch. In local mode it's a placeholder that hydrateLocalImages()
+// replaces with a real blob URL via data-wb-asset — but it's still built
+// the same way (attachments subfolder next to the open note) for
+// consistency between the two modes.
+function attachmentSrcFor(name) {
+  const base = state.activeUrl || CONFIG.vaultRelPath;
+  const dir  = base.slice(0, base.lastIndexOf('/'));
+  return `${dir}/${CONFIG.attachmentsFolderName}/${encodeURIComponent(name)}`;
+}
+
 function escHtml(s) {
   return String(s)
     .replace(/&/g,'&amp;')
@@ -1836,7 +1884,7 @@ function renderInline(text) {
   s = s.replace(/!\[\[([^\]]+)\]\]/g, (_, raw) => {
     const name = raw.trim();
     if (isImageExt(name)) {
-      const src = `${CONFIG.vaultRelPath}/assets/${encodeURIComponent(name)}`;
+      const src = attachmentSrcFor(name);
       return `<img class="md-img" data-wb-asset="${escHtml(name)}" src="${src}" alt="${escHtml(name)}" onerror="this.outerHTML='<span class=md-img-err>${ICON.imgErr} ${escHtml(name)}</span>'">`;
     }
     return buildEmbedStub(name, true);
@@ -2167,8 +2215,8 @@ function renderSingleBlock(block) {
     }
 
     case 'image': {
-      const src = `${CONFIG.vaultRelPath}/assets/${encodeURIComponent(block.name)}`;
-      return `<div class="md-img-wrap"><img class="md-img" src="${src}" alt="${escHtml(block.name)}" onerror="this.parentNode.innerHTML='<div class=md-img-err>${ICON.imgErr} ${escHtml(block.name)}</div>'"></div>`;
+      const src = attachmentSrcFor(block.name);
+      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}" src="${src}" alt="${escHtml(block.name)}" onerror="this.parentNode.innerHTML='<div class=md-img-err>${ICON.imgErr} ${escHtml(block.name)}</div>'"></div>`;
     }
 
     case 'embed':
@@ -2220,6 +2268,7 @@ async function openFile(url, name) {
   try {
     const text = await readVaultFile(url);
     rc.innerHTML = parseMarkdown(text);
+    rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
     $('reader').scrollTop = 0;
 
@@ -2895,7 +2944,7 @@ async function scanBadges() {
     let openCmts = 0;
     const review = [];
     await Promise.all(files.map(async f => {
-      const cTxt = await readVaultFileOrNull(f.url.replace(/\.md$/i, '.comments.md'));
+      const cTxt = await readVaultFileOrNull(commentsUrlFor(f.url));
       if (cTxt) openCmts += parseComments(cTxt).filter(c => c.status === 'open').length;
       if (state.reviewTools) {
         const chUrl = changesUrlFor(f.url);
@@ -3499,12 +3548,12 @@ async function submitMove() {
     if (await readVaultFileOrNull(destUrl) !== null) {
       throw new Error('A file with that name already exists in the destination.');
     }
-    // Move the file and its sidecars (.comments.md, and the .changes.md
-    // log, which lives in a zSystem subfolder of the file's own folder)
+    // Move the file and its sidecars (.comments.md and .changes.md, both
+    // of which live in a zSystem subfolder of the file's own folder)
     // together.
     const pairs = [
       [srcUrl, destUrl],
-      [srcUrl.replace(/\.md$/i, '.comments.md'), destUrl.replace(/\.md$/i, '.comments.md')],
+      [commentsUrlFor(srcUrl), commentsUrlFor(destUrl)],
       [changesUrlFor(srcUrl), changesUrlFor(destUrl)],
     ];
     for (const [s, d] of pairs) {
@@ -4078,7 +4127,7 @@ async function renderCommentsTab() {
     return;
   }
 
-  const commentsUrl = state.activeUrl.replace(/\.md$/i, '.comments.md');
+  const commentsUrl = commentsUrlFor(state.activeUrl);
   let comments = [];
 
   pane.innerHTML = '<div class="rp-empty">Loading…</div>';
@@ -4204,13 +4253,14 @@ async function postComment() {
 
   const pane       = $('rp-comments');
   const existing   = pane._wbComments || [];
-  const commentsUrl = pane._wbCommentsUrl || state.activeUrl.replace(/\.md$/i, '.comments.md');
+  const commentsUrl = pane._wbCommentsUrl || commentsUrlFor(state.activeUrl);
 
   const newComment = { type, status: 'open', ts, author, body };
   const allComments = [...existing, newComment];
 
   try {
     bodyEl.disabled = true;
+    await ensureZSystemDir(commentsUrl);
     await spWriteFile(commentsUrl, serializeComments(allComments));
     bodyEl.value    = '';
     bodyEl.disabled = false;
@@ -4275,7 +4325,7 @@ async function openReviewView() {
   // Parallel-fetch all potential .comments.md sidecar files
   // 404 = no comments for that file — silently skip
   const results = await Promise.all(mdFiles.map(async f => {
-    const commentsUrl = f.url.replace(/\.md$/i, '.comments.md');
+    const commentsUrl = commentsUrlFor(f.url);
     const text = await readVaultFileOrNull(commentsUrl);
     if (text === null) return null;
     const comments = parseComments(text);
@@ -4396,6 +4446,7 @@ async function bootVault() {
     renderSidebar();
     refreshEditControls(); // New/Move/Edit grayed unless Settings → Enable editing
     scanBadges(); // S14 — async, fills comment + review badges
+    vaultReady = true; // enables the focus-regain refresh below
   } catch (e) {
     $('sb-tree').innerHTML = `<div class="sb-msg">Could not load vault.<br><span style="font-size:11px">${escHtml(e.message)}</span></div>`;
   }
@@ -4442,6 +4493,60 @@ async function boot() {
 
   await bootVault();
 }
+
+// ── Refresh on regained focus ─────────────────────────────────────
+// File System Access has no folder-watch API, so there's no way to be
+// pushed updates when someone else edits or comments. Instead, re-read
+// live from disk whenever the app regains visibility (switching back
+// from another tab/app) — covers "someone else commented while I was
+// away" without background polling or a manual refresh button.
+// Re-enumerates the vault root and whatever folders are currently open,
+// so files created/removed/renamed outside the app (e.g. directly in
+// Obsidian) appear without a full app restart. Folders that are loaded
+// but currently collapsed are just marked stale — they re-fetch next
+// time they're expanded, rather than paying for a fetch no one will see.
+async function refreshVaultTree() {
+  const openIds = Object.keys(state.openFolders)
+    .filter(id => state.openFolders[id])
+    .sort((a, b) => a.split('/').length - b.split('/').length); // parents before children
+
+  const { folders, files } = await loadVaultRoot();
+  vaultFolders   = folders;
+  vaultRootFiles = files;
+  files.forEach(indexFile);
+
+  Object.keys(state.folderLoaded).forEach(id => { state.folderLoaded[id] = false; });
+  state.folderFiles = {};
+  state.folderKids  = {};
+
+  for (const id of openIds) {
+    const folder = findFolder(id); // resolvable once its parent has just reloaded above
+    if (folder) await loadFolderFiles(folder);
+  }
+
+  renderSidebar();
+}
+
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible' || !vaultReady) return;
+  if (state.editing) return; // never yank content out from under an open edit
+  try {
+    await refreshVaultTree(); // catches new/removed/rogue files from outside the app
+
+    if (state.activeUrl) {
+      const text = await readVaultFile(state.activeUrl);
+      const rc = $('reader-content');
+      if (rc && rc.dataset.wbText !== text) {
+        rc.innerHTML = parseMarkdown(text);
+        rc.dataset.wbText = text;
+        hydrateLocalImages(rc);
+        extractAndRegisterLinks(text, state.activeUrl);
+      }
+    }
+    refreshRightPanel(); // re-reads comments/outline/backlinks/review live
+    scanBadges();        // vault-wide comment + review counts
+  } catch (e) { /* silent — the file's own error state will show on next explicit open */ }
+});
 
 boot();
 
