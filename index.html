@@ -583,19 +583,20 @@
     .md-h-row-h2 {
       border-bottom: 2px solid var(--heading-2);
       padding-bottom: 5px;
+      margin-bottom: 6px;
       /* Zero just the bottom corners so the underline runs flat edge to
          edge — the row still keeps its top-rounded hover/fold highlight. */
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
     }
-    body.h2-underline-off .md-h-row-h2 { border-bottom: none; padding-bottom: 0; }
+    body.h2-underline-off .md-h-row-h2 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
     h3.md-h { font-size: 19px; font-weight: 600; color: var(--heading-3); line-height: 1.5; margin: 0; }
     h4.md-h { font-size: 17px; font-weight: 600; color: var(--heading-4); line-height: 1.5; margin: 0; }
     h5.md-h { font-size: 14px; font-weight: 600; color: var(--heading-5); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
     h6.md-h { font-size: 14px; font-weight: 600; color: var(--heading-6); margin: 0; }
 
     /* Heading section spacing */
-    .md-h-block { margin-top: 1.5rem; }
+    .md-h-block { margin-top: 1.15rem; }
     .md-h-block:first-child { margin-top: 0; }
     h1.md-h ~ .md-section,
     .md-section { padding-left: 0; }
@@ -672,6 +673,13 @@
       gap: 5px;
     }
     .md-callout-body { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+    /* Body now runs through the full block renderer (needed for nested
+       >> / >>> callouts), which wraps plain text in .md-p — kill that
+       paragraph's own top/bottom margin so a simple one-line callout
+       doesn't gain extra padding it never had before. */
+    .md-callout-body > .md-p:first-child { margin-top: 0; }
+    .md-callout-body > .md-p:last-child  { margin-bottom: 0; }
+    .md-callout-body .md-callout { margin: 0.5rem 0; }
     /* 13 Obsidian callout types -> 9 color families (locked S7) */
     .md-callout.note, .md-callout.info, .md-callout.todo         { background: var(--co-blue-bg);   border-color: var(--co-blue-bd); }
     .md-callout.note .md-callout-label, .md-callout.info .md-callout-label, .md-callout.todo .md-callout-label { color: var(--co-blue-txt); }
@@ -1476,6 +1484,8 @@ const state = {
                         // for collapsed folders (was the "counts flash to 0/·" bug).
   activeUrl:    null,
   activeName:   null,  // display name of the open file (S9 — editor re-open)
+  helpOpen:     false, // true while help.md is showing — lets Outline render
+                        // its headings even though activeUrl is deliberately null
   editing:      false, // S9 — editor mode active
   editUrl:      null,  // S9 — file being edited
   editName:     null,  // S9 — its display name
@@ -2191,16 +2201,25 @@ function buildEmbedStub(name, inline) {
 // ── Block parser ─────────────────────────────────────────────────
 function parseMarkdown(md) {
   const lines = md.split('\n');
-  const blocks = [];
-  let i = 0;
+  let start = 0;
 
   // Skip YAML frontmatter (--- ... ---) at file start. S9 saves write review
   // flags there; the Properties panel (Phase 2) will surface it. Not reader content.
   if (lines[0] === '---') {
     for (let k = 1; k < lines.length; k++) {
-      if (lines[k].trim() === '---') { i = k + 1; break; }
+      if (lines[k].trim() === '---') { start = k + 1; break; }
     }
   }
+
+  return renderBlockTree(parseBlocks(lines.slice(start)));
+}
+
+// Block-level parser — used for the top-level document and recursively for
+// callout/blockquote bodies. Each ">" strips down one level per recursion,
+// so ">>" / ">>>" nest automatically instead of needing special-case depth logic.
+function parseBlocks(lines) {
+  const blocks = [];
+  let i = 0;
 
   while (i < lines.length) {
     const line = lines[i];
@@ -2237,7 +2256,9 @@ function parseMarkdown(md) {
       continue;
     }
 
-    // Callout / blockquote
+    // Callout / blockquote — each level of ">" is stripped one at a time and
+    // the remainder re-parsed via parseBlocks, so a line that started as
+    // ">>" or ">>>" recurses into a nested callout/blockquote automatically.
     if (line.startsWith('>')) {
       const coM = line.match(/^>\s*\[!(\w+)\](.*)/);
       if (coM) {
@@ -2249,14 +2270,14 @@ function parseMarkdown(md) {
           bodyLines.push(lines[i].replace(/^>\s?/, ''));
           i++;
         }
-        blocks.push({ type: 'callout', cType, customTitle, body: bodyLines.join('\n') });
+        blocks.push({ type: 'callout', cType, customTitle, body: parseBlocks(bodyLines) });
       } else {
         const quoteLines = [];
         while (i < lines.length && lines[i].startsWith('>')) {
           quoteLines.push(lines[i].replace(/^>\s?/, ''));
           i++;
         }
-        blocks.push({ type: 'blockquote', lines: quoteLines });
+        blocks.push({ type: 'blockquote', body: parseBlocks(quoteLines) });
       }
       continue;
     }
@@ -2327,7 +2348,7 @@ function parseMarkdown(md) {
     }
   }
 
-  return renderBlockTree(blocks);
+  return blocks;
 }
 
 // ── Block tree renderer (handles heading nesting) ─────────────────
@@ -2380,12 +2401,12 @@ function renderSingleBlock(block) {
     }
 
     case 'blockquote':
-      return `<blockquote class="md-blockquote">${block.lines.map(l => `<p>${renderInline(l)}</p>`).join('')}</blockquote>`;
+      return `<blockquote class="md-blockquote">${renderBlockTree(block.body)}</blockquote>`;
 
     case 'callout': {
       const meta  = CALLOUT_META[block.cType] || { icon: '·', cls: 'note', label: block.cType };
       const title = block.customTitle || meta.label;
-      const body  = block.body ? `<div class="md-callout-body">${renderInline(block.body)}</div>` : '';
+      const body  = block.body.length ? `<div class="md-callout-body">${renderBlockTree(block.body)}</div>` : '';
       return `<div class="md-callout ${meta.cls}"><div class="md-callout-label">${meta.icon} ${escHtml(title)}</div>${body}</div>`;
     }
 
@@ -2450,8 +2471,42 @@ function renderSingleBlock(block) {
 function toggleFold(row) {
   const section = row.nextElementSibling;
   if (!section) return;
-  row.classList.toggle('folded');
-  section.classList.toggle('folded');
+  const folded = row.classList.toggle('folded');
+  section.classList.toggle('folded', folded);
+  persistFoldState(row, folded);
+}
+
+// Per-file collapsed-heading memory (Obsidian-style). Keyed by file URL,
+// stores the heading ids currently folded. Applied on next open of that file.
+function foldStateKey(url) { return 'wb_folds:' + url; }
+
+function persistFoldState(row, folded) {
+  if (!state.activeUrl) return; // help / no file open — nothing to key it to
+  const h = row.querySelector('.md-h');
+  if (!h || !h.id) return;
+  const key = foldStateKey(state.activeUrl);
+  let ids = [];
+  try { ids = JSON.parse(localStorage.getItem(key)) || []; } catch (e) { ids = []; }
+  if (folded) {
+    if (!ids.includes(h.id)) ids.push(h.id);
+  } else {
+    ids = ids.filter(id => id !== h.id);
+  }
+  if (ids.length) localStorage.setItem(key, JSON.stringify(ids));
+  else localStorage.removeItem(key);
+}
+
+function applyFoldState(url) {
+  let ids = [];
+  try { ids = JSON.parse(localStorage.getItem(foldStateKey(url))) || []; } catch (e) { ids = []; }
+  if (!ids.length) return;
+  ids.forEach(id => {
+    const h = document.getElementById(id);
+    const row = h && h.closest('.md-h-row');
+    const section = row && row.nextElementSibling;
+    if (row) row.classList.add('folded');
+    if (section) section.classList.add('folded');
+  });
 }
 
 // ── Same-page anchor scroll ───────────────────────────────────────
@@ -2470,6 +2525,7 @@ async function openFile(url, name) {
   if (state.activeUrl !== url) closeDiffStrip(); // S14+ — diff belongs to the old file
   state.activeUrl  = url;
   state.activeName = name;
+  state.helpOpen   = false;
 
   const bc = $('breadcrumb');
   if (bc) bc.textContent = '/ ' + name;
@@ -2489,6 +2545,7 @@ async function openFile(url, name) {
     rc.innerHTML = parseMarkdown(text);
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
+    applyFoldState(url); // restore collapsed headings from last visit
     $('reader').scrollTop = 0;
 
     // Settings → "Open last note" reads this back at next boot. Written on
@@ -2541,6 +2598,8 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
   const panel      = $(panelId);
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
   const otherKey   = side === 'left' ? 'wb_rp_width'   : 'wb_sb_width';
+  const DBLCLICK_MS = 400; // two plain clicks within this window = collapse
+  let lastPlainClick = 0;
 
   handle.addEventListener('mousedown', e => {
     e.preventDefault();
@@ -2598,11 +2657,19 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
       handle.classList.remove('dragging');
 
       if (!moved) {
-        // A plain click, no drag — toggle the panel closed
-        panel.style.width    = '';
-        panel.style.minWidth = '';
-        panel.classList.add('closed');
-        onClose();
+        // A plain click, no drag — only collapse on the second click within
+        // the window (double-click). A single click is a no-op, so an
+        // accidental click while aiming for a drag doesn't collapse the panel.
+        const now = Date.now();
+        if (now - lastPlainClick < DBLCLICK_MS) {
+          lastPlainClick = 0;
+          panel.style.width    = '';
+          panel.style.minWidth = '';
+          panel.classList.add('closed');
+          onClose();
+        } else {
+          lastPlainClick = now;
+        }
       } else if (panel.offsetWidth < SNAP_THRESHOLD) {
         // Snap closed — clear inline widths so CSS closed state takes over cleanly
         panel.style.width    = '';
@@ -2688,6 +2755,7 @@ async function openHelp() {
 
   state.activeUrl  = null; // deselect any active sidebar file
   state.activeName = null;
+  state.helpOpen   = true; // lets Outline read help.md's own headings below
   renderSidebar();
   updateEditBtn();
 
@@ -2715,6 +2783,11 @@ async function openHelp() {
       rc.innerHTML = `<p class="md-p" style="color:var(--text-muted);padding-top:32px">Help file not found. Add <code class="md-code">help.md</code> to the app folder${LOCAL.on ? ' (or copy it into your local test vault)' : ''}.</p>`;
     }
   }
+
+  // Comments/backlinks/review don't apply to help — they'll correctly show
+  // their "open a file" empty state since activeUrl is null. Outline is the
+  // one tab that should still work here, reading help.md's own headings.
+  refreshRightPanel();
 }
 
 $('btn-help').addEventListener('click', () => {
@@ -4344,7 +4417,7 @@ function refreshRightPanel() {
 // ── Outline tab ──────────────────────────────────────────────────
 function renderOutlineTab() {
   const pane = $('rp-outline');
-  if (!state.activeUrl) {
+  if (!state.activeUrl && !state.helpOpen) {
     pane.innerHTML = '<div class="rp-empty">Open a file to see its outline.</div>';
     return;
   }
@@ -4397,11 +4470,19 @@ function setupOutlineObserver(headings) {
   headings.forEach(h => state.outlineObserver.observe(h));
 }
 
-// ── Backlinks tab ─────────────────────────────────────────────────
-// Called after each file is fetched — registers this file's outgoing [[links]]
+// ── Links tab ────────────────────────────────────────────────────
+// Two different things live here, both under the same "Links" tab:
+//  1. Links IN this file (outgoing) — computed live from the open file's own
+//     text every time the tab renders. Always accurate, no scanning needed.
+//  2. Backlinks (files that link TO this one) — can only be known from files
+//     WikiBase has actually loaded, so it's necessarily session-scoped. Still
+//     built the same way as before via extractAndRegisterLinks.
+
+// Called after each file is fetched — registers this file's outgoing
+// [[links]] into the vault-wide backlinksMap (powers section 2 above).
 function extractAndRegisterLinks(rawMd, sourceUrl) {
   const sourceName = sourceUrl.split('/').pop().replace(/\.md$/i, '');
-  const linkRe = /\[\[([^\]]+)\]\]/g;
+  const linkRe = /(?<!!)\[\[([^\]]+)\]\]/g; // (?<!!) skips ![[embeds]]
   let m;
   while ((m = linkRe.exec(rawMd)) !== null) {
     // Handle [[target|alias]] and [[target#heading]]
@@ -4414,27 +4495,121 @@ function extractAndRegisterLinks(rawMd, sourceUrl) {
   }
 }
 
+// True if `lowerName` matches a folder name anywhere in the vault tree.
+// Walked live off vaultFolders/state.folderKids rather than kept as a
+// separate cached index — the tree is small (staff of 2–10) and this only
+// runs when the Links tab renders, not on every keystroke.
+function isFolderName(lowerName) {
+  let found = false;
+  (function walk(list) {
+    if (found) return;
+    for (const f of list) {
+      if (f.name.toLowerCase() === lowerName) { found = true; return; }
+      walk(state.folderKids[f.id] || []);
+      if (found) return;
+    }
+  })(vaultFolders);
+  return found;
+}
+
+// Scans one file's raw text for every outgoing link and buckets each one:
+// MD Files (resolves in the vault), Websites (http/https), Folders (matches
+// a vault folder name), Other (internal link that doesn't resolve to either —
+// usually a note that hasn't been created yet, or a typo).
+function extractLinksForDisplay(rawMd) {
+  const out  = { md: [], web: [], folder: [], other: [] };
+  const seen = new Set();
+
+  const addInternal = (rawTarget, display) => {
+    const target = (rawTarget || '').trim();
+    if (!target) return;
+    const dedupeKey = 'i:' + target.toLowerCase();
+    if (seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    const lc  = target.toLowerCase();
+    const url = state.fileIndex[lc];
+    if (url) out.md.push({ name: display || target, url });
+    else if (isFolderName(lc)) out.folder.push({ name: display || target });
+    else out.other.push({ name: display || target });
+  };
+
+  const addWeb = (href, display) => {
+    const dedupeKey = 'w:' + href.toLowerCase();
+    if (seen.has(dedupeKey)) return;
+    seen.add(dedupeKey);
+    out.web.push({ name: display || href, href });
+  };
+
+  // [[wiki links]] — (?<!!) skips ![[image/note embeds]]
+  let m;
+  const wikiRe = /(?<!!)\[\[([^\]]+)\]\]/g;
+  while ((m = wikiRe.exec(rawMd)) !== null) {
+    const inner = m[1].trim();
+    const [left, alias] = inner.split('|');
+    const target = left.split('#')[0].trim();
+    addInternal(target, (alias || target || '').trim());
+  }
+
+  // [text](url) — (?<!!) skips ![alt](image.png). .md → internal, http(s) → web.
+  const mdLinkRe = /(?<!!)\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+  while ((m = mdLinkRe.exec(rawMd)) !== null) {
+    const text = m[1].trim();
+    const href = m[2].trim();
+    if (/^https?:\/\//i.test(href)) {
+      addWeb(href, text || href);
+    } else if (/\.md($|#)/i.test(href)) {
+      const name = decodeURIComponent(href.replace(/\.md($|#).*$/i, '').split('/').pop());
+      addInternal(name, text || name);
+    }
+  }
+
+  return out;
+}
+
+function renderLinkGroup(label, items, kind) {
+  if (!items.length) return '';
+  const rows = items.map(item => {
+    if (kind === 'md')  return `<div class="backlink-item" onclick="openFile('${escHtml(item.url)}','${escHtml(item.name)}')">${ICON.file} ${escHtml(item.name)}</div>`;
+    if (kind === 'web') return `<div class="backlink-item" onclick="window.open('${escHtml(item.href)}','_blank','noopener')">↗ ${escHtml(item.name)}</div>`;
+    if (kind === 'folder') return `<div class="backlink-item" style="cursor:default">${ICON.folder} ${escHtml(item.name)}</div>`;
+    return `<div class="backlink-item" style="cursor:default;color:var(--text-muted)">${escHtml(item.name)}</div>`;
+  }).join('');
+  return `<div class="rv-ov-label">${label}</div>${rows}`;
+}
+
 function renderBacklinksTab() {
   const pane = $('rp-backlinks');
   if (!state.activeUrl) {
-    pane.innerHTML = '<div class="rp-empty">Open a file to see backlinks.</div>';
+    pane.innerHTML = '<div class="rp-empty">Open a file to see its links.</div>';
     return;
+  }
+
+  const rc      = $('reader-content');
+  const rawText = rc.dataset.wbText || '';
+  const out     = extractLinksForDisplay(rawText);
+
+  let html = '';
+  html += renderLinkGroup('MD Files', out.md, 'md');
+  html += renderLinkGroup('Websites', out.web, 'web');
+  html += renderLinkGroup('Folders', out.folder, 'folder');
+  html += renderLinkGroup('Other', out.other, 'other');
+  if (!out.md.length && !out.web.length && !out.folder.length && !out.other.length) {
+    html += '<div class="rp-empty">No links in this file.</div>';
   }
 
   const currentKey = state.activeUrl.split('/').pop().replace(/\.md$/i, '').toLowerCase();
-  const links      = state.backlinksMap[currentKey] || [];
-
-  if (!links.length) {
-    pane.innerHTML = '<div class="rp-empty">No backlinks found.<br><span style="font-size:11px">Backlinks appear here as you open other files that link to this one.</span></div>';
-    return;
+  const backlinks  = state.backlinksMap[currentKey] || [];
+  html += '<div class="rv-ov-label">Backlinks</div>';
+  if (backlinks.length) {
+    html += backlinks.map(l =>
+      `<div class="backlink-item" onclick="openFile('${escHtml(l.url)}','${escHtml(l.name)}')">${ICON.file} ${escHtml(l.name)}</div>`
+    ).join('');
+  } else {
+    html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No backlinks found this session.</div>';
   }
+  html += `<div class="backlink-note">Backlinks only include files opened this session — WikiBase has no way to scan the whole vault for links without opening each file.</div>`;
 
-  const items = links.map(l =>
-    `<div class="backlink-item" onclick="openFile('${escHtml(l.url)}','${escHtml(l.name)}')">${ICON.file} ${escHtml(l.name)}</div>`
-  ).join('');
-
-  pane.innerHTML = items +
-    `<div class="backlink-note">Only files opened this session are scanned.</div>`;
+  pane.innerHTML = html;
 }
 
 // ── Search tab (S6 — compiled this session) ─────────────────────
@@ -5074,6 +5249,7 @@ document.addEventListener('visibilitychange', async () => {
         rc.innerHTML = parseMarkdown(text);
         rc.dataset.wbText = text;
         hydrateLocalImages(rc);
+        applyFoldState(state.activeUrl); // re-rendered content — restore collapsed headings
         extractAndRegisterLinks(text, state.activeUrl);
       }
     }
