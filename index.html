@@ -108,6 +108,10 @@
     body[data-theme="dark"][data-headers="mica"]   { --heading-1: #60CDFF; --heading-2: #3AA0F3; --heading-3: #6CCB5F; --heading-4: #C5C5C5; }
     body[data-theme="dark"][data-headers="marble"] { --heading-1: #409CFF; --heading-2: #7D7AFF; --heading-3: #6AC4DC; --heading-4: #98989D; }
     body[data-theme="dark"][data-headers="things"] { --heading-1: #5B9CF6; --heading-2: #FF8080; --heading-3: #5FD98A; --heading-4: #A0A0A5; }
+    /* 8th identity — Obsidian Minimal theme's default accent colors
+       (--color-blue/red/green), heading-4 kept muted gray like every
+       other palette rather than spending a 5th saturated color on it. */
+    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #027aff; --heading-2: #fb464c; --heading-3: #44cf6e; --heading-4: #999999; }
     body[data-theme="light"][data-headers="dark"]   { --heading-1: #64B5F6; --heading-2: #e8e5df; --heading-3: #d8d5cf; --heading-4: #c8c5bf; }
     body[data-theme="light"][data-headers="light"]  { --heading-1: #0b3d66; --heading-2: #14559c; --heading-3: #1a6ef5; --heading-4: #5b93d9; }
     body[data-theme="light"][data-headers="frost"]  { --heading-1: #0A5DC2; --heading-2: #007AFF; --heading-3: #34AADC; --heading-4: #6E7F96; }
@@ -115,6 +119,7 @@
     body[data-theme="light"][data-headers="mica"]   { --heading-1: #005A9E; --heading-2: #0078D4; --heading-3: #107C10; --heading-4: #5B5B5B; }
     body[data-theme="light"][data-headers="marble"] { --heading-1: #1E6FD9; --heading-2: #5E5CE6; --heading-3: #30B0C7; --heading-4: #8E8E93; }
     body[data-theme="light"][data-headers="things"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; }
+    body[data-theme="light"][data-headers="minimal"] { --heading-1: #086ddd; --heading-2: #e93147; --heading-3: #08b94e; --heading-4: #707070; }
 
     /* Background-color palette per named theme identity — the second
        "slice" of each theme (Settings → Background color). Gated by
@@ -131,6 +136,9 @@
     body[data-theme="dark"][data-bg="mica"]    { --bg-app: #202020; --bg-sidebar: #2c2c2c; --bg-reader: #323232; --bg-header: #2c2c2c; }
     body[data-theme="dark"][data-bg="marble"]  { --bg-app: #1e1e1e; --bg-sidebar: #262626; --bg-reader: #2c2c2c; --bg-header: #262626; }
     body[data-theme="dark"][data-bg="things"]  { --bg-app: #17181c; --bg-sidebar: #1e1f24; --bg-reader: #24252b; --bg-header: #1e1f24; }
+    /* 8th identity — Minimal's own neutral base-color scale (no tint,
+       just steps of gray), matching its "distraction-free" look. */
+    body[data-theme="dark"][data-bg="minimal"] { --bg-app: #1e1e1e; --bg-sidebar: #212121; --bg-reader: #242424; --bg-header: #212121; }
     body[data-theme="light"][data-bg="dark"]   { --bg-app: #e8e8e8; --bg-sidebar: #dedede; --bg-reader: #f5f5f5; --bg-header: #dedede; }
     body[data-theme="light"][data-bg="light"]  { --bg-app: #f5f5f3; --bg-sidebar: #f0efec; --bg-reader: #ffffff; --bg-header: #f0efec; }
     body[data-theme="light"][data-bg="frost"]  { --bg-app: #eef4fb; --bg-sidebar: #e4edf8; --bg-reader: #ffffff; --bg-header: #e4edf8; }
@@ -138,6 +146,7 @@
     body[data-theme="light"][data-bg="mica"]   { --bg-app: #f3f3f3; --bg-sidebar: #e9e9e9; --bg-reader: #ffffff; --bg-header: #e9e9e9; }
     body[data-theme="light"][data-bg="marble"] { --bg-app: #ececec; --bg-sidebar: #e4e4e4; --bg-reader: #ffffff; --bg-header: #e4e4e4; }
     body[data-theme="light"][data-bg="things"] { --bg-app: #fbfbfa; --bg-sidebar: #f4f3f1; --bg-reader: #ffffff; --bg-header: #f4f3f1; }
+    body[data-theme="light"][data-bg="minimal"] { --bg-app: #fafafa; --bg-sidebar: #f6f6f6; --bg-reader: #ffffff; --bg-header: #f6f6f6; }
 
     html, body {
       height: 100%;
@@ -567,7 +576,15 @@
        is a flex container spanning the full reading width, the h2 element
        inside it only sizes to its own text. Putting the border on the h2
        made the underline stop at the text (and it used generic gray). */
-    .md-h-row-h2 { border-bottom: 2px solid var(--heading-2); padding-bottom: 5px; }
+    .md-h-row-h2 {
+      border-bottom: 2px solid var(--heading-2);
+      padding-bottom: 5px;
+      /* Zero just the bottom corners so the underline runs flat edge to
+         edge — the row still keeps its top-rounded hover/fold highlight. */
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    body.h2-underline-off .md-h-row-h2 { border-bottom: none; padding-bottom: 0; }
     h3.md-h { font-size: 19px; font-weight: 600; color: var(--heading-3); line-height: 1.5; margin: 0; }
     h4.md-h { font-size: 17px; font-weight: 600; color: var(--heading-4); line-height: 1.5; margin: 0; }
     h5.md-h { font-size: 14px; font-weight: 600; color: var(--heading-5); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
@@ -1278,6 +1295,7 @@
         <option value="mica">Mica</option>
         <option value="marble">Marble</option>
         <option value="things" selected>Things</option>
+        <option value="minimal">Minimal</option>
       </select>
       <div class="s-sublabel">Background color</div>
       <select class="s-select" id="sel-bgcolor">
@@ -1288,7 +1306,16 @@
         <option value="mica">Mica</option>
         <option value="marble">Marble</option>
         <option value="things">Things</option>
+        <option value="minimal">Minimal</option>
       </select>
+      <div class="toggle-row">
+        H2 underline
+        <label class="toggle">
+          <input type="checkbox" id="tgl-h2underline" checked>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
     </div>
 
     <div class="s-section">
@@ -1402,7 +1429,8 @@ const state = {
   showBadges:   true,
   theme:        'dark',   // S7 — 'dark' | 'light', drives body[data-theme]
   headers:      'things', // Header colors — one of 7 theme identities, drives body[data-headers]
-  bgColor:      'dark',   // Background color — one of 7 theme identities, drives body[data-bg]
+  bgColor:      'dark',   // Background color — one of 8 theme identities, drives body[data-bg]
+  h2Underline:  true,     // Settings "H2 underline" toggle — drives body.h2-underline-off
   fileIndex:    {},    // { [lc-name-without-ext]: serverRelativeUrl } — for link resolution
   activeRPTab:     'outline',
   backlinksMap:    {},  // { [targetKey]: [{name, url}] } — populated as files are opened
@@ -2178,12 +2206,17 @@ function parseMarkdown(md) {
       continue;
     }
 
-    // Standalone block image/embed: ![[...]] on its own line
+    // Standalone block image/embed: ![[...]] on its own line. Same
+    // pipe-size suffix as the inline version (e.g. ![[foo.png|691]]) —
+    // must split it off before the extension check or isImageExt() sees
+    // "png|691" and misses every sized embed.
     const standaloneEmbed = trimmed.match(/^!\[\[([^\]]+)\]\]$/);
     if (standaloneEmbed) {
-      const name = standaloneEmbed[1].trim();
+      const [namePart, sizePart] = standaloneEmbed[1].split('|');
+      const name = namePart.trim();
+      const size = (sizePart || '').trim();
       if (isImageExt(name)) {
-        blocks.push({ type: 'image', name });
+        blocks.push({ type: 'image', name, size });
       } else {
         blocks.push({ type: 'embed', name });
       }
@@ -2335,7 +2368,8 @@ function renderSingleBlock(block) {
 
     case 'image': {
       const src = attachmentSrcFor(block.name);
-      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}" src="${src}" alt="${escHtml(block.name)}" onerror="this.parentNode.innerHTML='<div class=md-img-err>${ICON.imgErr} ${escHtml(block.name)}</div>'"></div>`;
+      const widthAttr = /^\d+$/.test(block.size || '') ? ` width="${block.size}"` : '';
+      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}" src="${src}" alt="${escHtml(block.name)}"${widthAttr} onerror="this.parentNode.innerHTML='<div class=md-img-err>${ICON.imgErr} ${escHtml(block.name)}</div>'"></div>`;
     }
 
     case 'embed':
@@ -3914,6 +3948,11 @@ function applyBgColor(bg) {
   state.bgColor = bg;
 }
 
+function applyH2Underline(on) {
+  document.body.classList.toggle('h2-underline-off', !on);
+  state.h2Underline = on;
+}
+
 // Advanced Settings — collapsed by default, remembers open/closed.
 function toggleAdvancedSettings(forceOpen) {
   const header = $('adv-settings-toggle');
@@ -3938,6 +3977,11 @@ $('sel-headers').addEventListener('change', e => {
 $('sel-bgcolor').addEventListener('change', e => {
   applyBgColor(e.target.value);
   persist('wb_bgcolor', e.target.value);
+});
+
+$('tgl-h2underline').addEventListener('change', e => {
+  applyH2Underline(e.target.checked);
+  persist('wb_h2underline', e.target.checked);
 });
 
 // ── Persistence ──────────────────────────────────────────────────
@@ -4009,6 +4053,12 @@ function loadPersistedState() {
       applyBgColor(b);
       const selBg = $('sel-bgcolor');
       if (selBg) selBg.value = b;
+    }
+
+    const h2u = localStorage.getItem('wb_h2underline');
+    if (h2u !== null) {
+      applyH2Underline(JSON.parse(h2u));
+      $('tgl-h2underline').checked = state.h2Underline;
     }
 
     const advOpen = localStorage.getItem('wb_adv_open');
