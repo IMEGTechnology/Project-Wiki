@@ -108,10 +108,14 @@
     body[data-theme="dark"][data-headers="mica"]   { --heading-1: #60CDFF; --heading-2: #3AA0F3; --heading-3: #6CCB5F; --heading-4: #C5C5C5; }
     body[data-theme="dark"][data-headers="marble"] { --heading-1: #409CFF; --heading-2: #7D7AFF; --heading-3: #6AC4DC; --heading-4: #98989D; }
     body[data-theme="dark"][data-headers="things"] { --heading-1: #5B9CF6; --heading-2: #FF8080; --heading-3: #5FD98A; --heading-4: #A0A0A5; }
-    /* 8th identity — Obsidian Minimal theme's default accent colors
-       (--color-blue/red/green), heading-4 kept muted gray like every
-       other palette rather than spending a 5th saturated color on it. */
-    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #fb464c; --heading-2: #027aff; --heading-3: #44cf6e; --heading-4: #999999; }
+    /* 8th identity — Obsidian Minimal theme's actual built-in accent
+       palette (.theme-dark/.theme-light --color-red/orange/yellow/green/
+       blue in the real theme.css — same 8 hex values in both modes, not
+       redder/bluer per-mode like the other 7 identities here). Goes to
+       H5 (not just H4 like every other identity) so the rainbow reads
+       red→orange→yellow→green→blue the way Minimal's own colorful
+       headings feature does. */
+    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; }
     body[data-theme="light"][data-headers="dark"]   { --heading-1: #64B5F6; --heading-2: #e8e5df; --heading-3: #d8d5cf; --heading-4: #c8c5bf; }
     body[data-theme="light"][data-headers="light"]  { --heading-1: #0b3d66; --heading-2: #14559c; --heading-3: #1a6ef5; --heading-4: #5b93d9; }
     body[data-theme="light"][data-headers="frost"]  { --heading-1: #0A5DC2; --heading-2: #007AFF; --heading-3: #34AADC; --heading-4: #6E7F96; }
@@ -119,7 +123,7 @@
     body[data-theme="light"][data-headers="mica"]   { --heading-1: #005A9E; --heading-2: #0078D4; --heading-3: #107C10; --heading-4: #5B5B5B; }
     body[data-theme="light"][data-headers="marble"] { --heading-1: #1E6FD9; --heading-2: #5E5CE6; --heading-3: #30B0C7; --heading-4: #8E8E93; }
     body[data-theme="light"][data-headers="things"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; }
-    body[data-theme="light"][data-headers="minimal"] { --heading-1: #e93147; --heading-2: #086ddd; --heading-3: #08b94e; --heading-4: #707070; }
+    body[data-theme="light"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; }
 
     /* Background-color palette per named theme identity — the second
        "slice" of each theme (Settings → Background color). Gated by
@@ -1248,7 +1252,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <div id="app-version">v0.9a</div>
+      <div id="app-version">v0.9a-1</div>
     </aside>
 
   </div>
@@ -1358,7 +1362,7 @@
       </div>
     </div>
 
-    <!-- Advanced Settings — Review + Editing + Audit, collapsed by default -->
+    <!-- Advanced Settings — Review + Editing, collapsed by default -->
     <div class="s-section">
       <div class="s-label s-label-collapsible" id="adv-settings-toggle" onclick="toggleAdvancedSettings()">
         <svg class="s-adv-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -1382,11 +1386,6 @@
             <div class="toggle-track"></div>
             <div class="toggle-thumb"></div>
           </label>
-        </div>
-        <div class="s-sublabel">Audit</div>
-        <div class="toggle-row">
-          <span>New files without properties (<span id="audit-count">0</span>)</span>
-          <button class="ed-btn" id="audit-review-btn" onclick="openAuditView()" disabled>Review</button>
         </div>
       </div>
     </div>
@@ -3203,11 +3202,6 @@ function updateBadges() {
   rc.style.display = (state.reviewTools && total) ? '' : 'none';
   // if review got switched off while its tab was active, fall back to outline
   if (!state.reviewTools && state.activeRPTab === 'review') switchRPTab('outline');
-
-  const auditCountEl = $('audit-count');
-  const auditBtn     = $('audit-review-btn');
-  if (auditCountEl) auditCountEl.textContent = state.unauditedFiles.length;
-  if (auditBtn)     auditBtn.disabled = !state.unauditedFiles.length;
 }
 
 // Inbox buttons live with their tabs: Comment Inbox only on the comments
@@ -3234,7 +3228,7 @@ async function openChangesView() {
   if (bc) bc.textContent = '/ Review changes';
   empty.style.display = 'none';
   rc.style.display    = 'block';
-  rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault for changes…</p>';
+  rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault…</p>';
   await scanBadges();
   rc.innerHTML = buildChangesHTML();
 }
@@ -3248,10 +3242,16 @@ function renderDiffBody(body) {
 }
 
 function buildChangesHTML() {
-  if (!state.reviewChanges.length) {
+  const hasChanges = !!state.reviewChanges.length;
+  const hasAudit    = !!state.unauditedFiles.length;
+  if (!hasChanges && !hasAudit) {
     return '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Nothing to review.</p>';
   }
-  let html = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">Changes to review</h1>';
+
+  let html = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">Document Changes</h1>';
+  if (!hasChanges) {
+    html += '<p class="md-p" style="color:var(--text-muted);margin-bottom:24px">No pending changes.</p>';
+  }
   state.reviewChanges.forEach((r, ri) => {
     html += `<div class="rv-file">
       <div class="rv-file-head">
@@ -3275,45 +3275,49 @@ function buildChangesHTML() {
     });
     html += '</div>';
   });
+
+  html += '<h1 class="md-h" style="font-size:22px;margin:32px 0 16px">New Files</h1>';
+  if (!hasAudit) {
+    html += '<p class="md-p" style="color:var(--text-muted)">No new files found — every file has WikiBase properties.</p>';
+  } else {
+    html += '<p class="md-p" style="color:var(--text-secondary);margin-bottom:12px">Files with no WikiBase properties block — likely added outside the app. Open one to review it, then Update to fill in its properties.</p>';
+    state.unauditedFiles.forEach((f, fi) => {
+      html += `<div class="rv-file">
+        <div class="rv-file-head">
+          <span class="rv-file-name" onclick="openFile('${escHtml(f.url)}','${f.name.replace(/'/g, "\\'")}')">${escHtml(f.name)}</span>
+          <button class="rv-mark-btn" onclick="approveNewFile(${fi})">Update</button>
+        </div>
+      </div>`;
+    });
+  }
   return html;
 }
 
-// ── File audit view (S12) — lists files with no WikiBase frontmatter ──
-// Read-only report: opening a file from here does not change anything.
-// Filling in Properties (via the flyout, opened for you) is what resolves
-// an entry — it drops off the list on the next scan once "status" exists.
-function openAuditView() {
-  if (!guardLeaveEdit()) return;
-  const empty = $('reader-empty');
-  const rc    = $('reader-content');
-  state.activeUrl  = null;
-  state.activeName = null;
-  renderSidebar();
-  updateEditBtn();
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ File audit';
-  empty.style.display = 'none';
-  rc.style.display    = 'block';
-
-  if (!state.unauditedFiles.length) {
-    rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">No new files found — every file has WikiBase properties.</p>';
-    return;
+// New Files (S12 file audit): a file with no WikiBase "status" key has
+// never been touched by the app — Update writes in whatever's missing
+// from the standard property set (same defaults as new-file creation)
+// WITHOUT touching keys that already exist, so it can never clobber
+// properties or tags someone already set directly in Obsidian.
+async function approveNewFile(idx) {
+  const f = state.unauditedFiles[idx];
+  if (!f) return;
+  try {
+    const text = await readVaultFile(f.url);
+    const fm = parseFm(text);
+    const defaults = {
+      tags: '[]', aliases: '[]', status: 'Needs Review', reviewed: 'false',
+      created: new Date().toISOString().slice(0, 10), due: '', section: '',
+      author: wbAuthor(),
+    };
+    const flags = Object.entries(defaults).filter(([k]) => !(k in fm));
+    flags.push(['edited-by', wbAuthor()], ['edited-at', new Date().toISOString().slice(0, 16)]);
+    await spWriteFile(f.url, setFmKeys(text, flags));
+    await scanBadges();
+    if (state.activeUrl === f.url) openFile(f.url, f.name); // re-render if it's the open file
+    $('reader-content').innerHTML = buildChangesHTML();
+  } catch (e) {
+    alert('Could not update: ' + e.message);
   }
-
-  rc.innerHTML = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">File audit</h1>'
-    + '<p class="md-p" style="color:var(--text-secondary);margin-bottom:16px">Files with no WikiBase properties block — likely added outside the app. Open one to fill in its properties; nothing changes until you do.</p>'
-    + '<div class="rv-file">'
-    + state.unauditedFiles.map(f => `
-      <div class="rv-file-head">
-        <span class="rv-file-name" onclick="openAuditFile('${escHtml(f.url)}','${f.name.replace(/'/g, "\\'")}')">${escHtml(f.name)}</span>
-      </div>`).join('')
-    + '</div>';
-}
-
-async function openAuditFile(url, name) {
-  await openFile(url, name);
-  closePropsPanel();
-  await togglePropsPanel(); // panel is closed at this point — opens fresh for this file
 }
 
 async function inboxEntryAction(fileIdx, entryIdx, value) {
@@ -3579,7 +3583,12 @@ function ensureVisible(el) {
 
 // Two-pass match: exact text first, substring only as a fallback. Pure
 // substring matching could lock onto the first block containing a short/
-// generic phrase instead of the actual changed one.
+// generic phrase instead of the actual changed one — a short block (like
+// a title) being a substring of a longer added line was matching almost
+// anything, which is why the wrong row (often the title) used to light up.
+// The length-ratio check requires the two strings to be close in size
+// before accepting a substring match, so a short block can no longer
+// swallow a long added line just because its words happen to appear in it.
 function findMatchingBlock(blocks, text) {
   for (const el of blocks) {
     if (el.classList.contains('wb-changed')) continue;
@@ -3589,7 +3598,10 @@ function findMatchingBlock(blocks, text) {
   for (const el of blocks) {
     if (el.classList.contains('wb-changed')) continue;
     const t = el.textContent.replace(/\s+/g, ' ').trim();
-    if (t && t.length > 3 && (t.includes(text) || text.includes(t))) return el;
+    if (!t || t.length < 4) continue;
+    if (!(t.includes(text) || text.includes(t))) continue;
+    const ratio = Math.min(t.length, text.length) / Math.max(t.length, text.length);
+    if (ratio > 0.6) return el;
   }
   return null;
 }
@@ -3611,10 +3623,13 @@ function highlightChangedLines(entry) {
   const added = entry.body.split('\n')
     .filter(l => l.startsWith('+ '))
     .map(l => normalizeMdLine(l.slice(2)))
-    .filter(t => t.length > 3);
+    .filter(t => t.length > 6); // was > 3 — very short lines matched almost any block
   if (!added.length) return;
+  // No h1 here on purpose: the file's own title is short and generic enough
+  // that it kept winning the substring fallback above instead of the actual
+  // changed row — body edits essentially never touch the title anyway.
   const blocks = document.querySelectorAll(
-    '#reader-content p, #reader-content h1, #reader-content h2, #reader-content h3, #reader-content h4, #reader-content h5, #reader-content h6, #reader-content li, #reader-content .md-callout, #reader-content blockquote, #reader-content td'
+    '#reader-content p, #reader-content h2, #reader-content h3, #reader-content h4, #reader-content h5, #reader-content h6, #reader-content li, #reader-content .md-callout, #reader-content blockquote, #reader-content td'
   );
   added.forEach(text => {
     const el = findMatchingBlock(blocks, text);
