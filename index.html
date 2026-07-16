@@ -117,18 +117,27 @@
     body[data-theme="light"][data-headers="things"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; }
 
     /* Background-color palette per named theme identity — the second
-       "slice" of each theme (Settings → Background color). Independent
-       of the Dark/Light toggle, same as header colors are: pick any
-       background regardless of what Dark/Light or Header colors are
-       set to. Dark/Light entries here just restate the toggle's own
-       backgrounds so the dropdown covers all 7 names consistently. */
-    body[data-bg="dark"]   { --bg-app: #1c1c1a; --bg-sidebar: #212120; --bg-reader: #252523; --bg-header: #212120; }
-    body[data-bg="light"]  { --bg-app: #f5f5f3; --bg-sidebar: #f0efec; --bg-reader: #ffffff; --bg-header: #f0efec; }
-    body[data-bg="frost"]  { --bg-app: #eef4fb; --bg-sidebar: #e4edf8; --bg-reader: #ffffff; --bg-header: #e4edf8; }
-    body[data-bg="clay"]   { --bg-app: #f7f2fa; --bg-sidebar: #efe6f3; --bg-reader: #fffbfe; --bg-header: #efe6f3; }
-    body[data-bg="mica"]   { --bg-app: #f3f3f3; --bg-sidebar: #e9e9e9; --bg-reader: #ffffff; --bg-header: #e9e9e9; }
-    body[data-bg="marble"] { --bg-app: #ececec; --bg-sidebar: #e4e4e4; --bg-reader: #ffffff; --bg-header: #e4e4e4; }
-    body[data-bg="things"] { --bg-app: #fbfbfa; --bg-sidebar: #f4f3f1; --bg-reader: #ffffff; --bg-header: #f4f3f1; }
+       "slice" of each theme (Settings → Background color). Gated by
+       data-theme, same as header colors, so a light-flavored background
+       never lands under dark-mode text/borders/accent (or vice versa).
+       7 names x 2 modes = 14 rules. "Dark"/"Light" are just two more
+       named flavors here (graphite vs airy neutral), not literally
+       "the app's own dark/light" — their home-row values match the
+       base theme exactly; their off-row values are new neutral variants. */
+    body[data-theme="dark"][data-bg="dark"]    { --bg-app: #1c1c1a; --bg-sidebar: #212120; --bg-reader: #252523; --bg-header: #212120; }
+    body[data-theme="dark"][data-bg="light"]   { --bg-app: #201f1c; --bg-sidebar: #262521; --bg-reader: #2b2a26; --bg-header: #262521; }
+    body[data-theme="dark"][data-bg="frost"]   { --bg-app: #0d1117; --bg-sidebar: #131a24; --bg-reader: #171f2b; --bg-header: #131a24; }
+    body[data-theme="dark"][data-bg="clay"]    { --bg-app: #1c1b1f; --bg-sidebar: #211f26; --bg-reader: #26232b; --bg-header: #211f26; }
+    body[data-theme="dark"][data-bg="mica"]    { --bg-app: #202020; --bg-sidebar: #2c2c2c; --bg-reader: #323232; --bg-header: #2c2c2c; }
+    body[data-theme="dark"][data-bg="marble"]  { --bg-app: #1e1e1e; --bg-sidebar: #262626; --bg-reader: #2c2c2c; --bg-header: #262626; }
+    body[data-theme="dark"][data-bg="things"]  { --bg-app: #17181c; --bg-sidebar: #1e1f24; --bg-reader: #24252b; --bg-header: #1e1f24; }
+    body[data-theme="light"][data-bg="dark"]   { --bg-app: #e8e8e8; --bg-sidebar: #dedede; --bg-reader: #f5f5f5; --bg-header: #dedede; }
+    body[data-theme="light"][data-bg="light"]  { --bg-app: #f5f5f3; --bg-sidebar: #f0efec; --bg-reader: #ffffff; --bg-header: #f0efec; }
+    body[data-theme="light"][data-bg="frost"]  { --bg-app: #eef4fb; --bg-sidebar: #e4edf8; --bg-reader: #ffffff; --bg-header: #e4edf8; }
+    body[data-theme="light"][data-bg="clay"]   { --bg-app: #f7f2fa; --bg-sidebar: #efe6f3; --bg-reader: #fffbfe; --bg-header: #efe6f3; }
+    body[data-theme="light"][data-bg="mica"]   { --bg-app: #f3f3f3; --bg-sidebar: #e9e9e9; --bg-reader: #ffffff; --bg-header: #e9e9e9; }
+    body[data-theme="light"][data-bg="marble"] { --bg-app: #ececec; --bg-sidebar: #e4e4e4; --bg-reader: #ffffff; --bg-header: #e4e4e4; }
+    body[data-theme="light"][data-bg="things"] { --bg-app: #fbfbfa; --bg-sidebar: #f4f3f1; --bg-reader: #ffffff; --bg-header: #f4f3f1; }
 
     html, body {
       height: 100%;
@@ -552,12 +561,17 @@
     .md-section.folded { display: none; }
 
     /* Heading sizes */
-    h1.md-h { font-size: 26px; font-weight: 600; color: var(--heading-1); line-height: 1.2; margin: 0; }
-    h2.md-h { font-size: 20px; font-weight: 600; color: var(--heading-2); line-height: 1.3; margin: 0; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
-    h3.md-h { font-size: 17px; font-weight: 600; color: var(--heading-3); line-height: 1.3; margin: 0; }
-    h4.md-h { font-size: 15px; font-weight: 600; color: var(--heading-4); line-height: 1.3; margin: 0; }
-    h5.md-h { font-size: 12px; font-weight: 600; color: var(--heading-5); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
-    h6.md-h { font-size: 11px; font-weight: 600; color: var(--heading-6); text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
+    h1.md-h { font-size: 28px; font-weight: 600; color: var(--heading-1); line-height: 1.5; margin: 0; }
+    h2.md-h { font-size: 22px; font-weight: 600; color: var(--heading-2); line-height: 1.5; margin: 0; }
+    /* H2's underline lives on the row wrapper, not the h2 itself — the row
+       is a flex container spanning the full reading width, the h2 element
+       inside it only sizes to its own text. Putting the border on the h2
+       made the underline stop at the text (and it used generic gray). */
+    .md-h-row-h2 { border-bottom: 2px solid var(--heading-2); padding-bottom: 5px; }
+    h3.md-h { font-size: 19px; font-weight: 600; color: var(--heading-3); line-height: 1.5; margin: 0; }
+    h4.md-h { font-size: 17px; font-weight: 600; color: var(--heading-4); line-height: 1.5; margin: 0; }
+    h5.md-h { font-size: 14px; font-weight: 600; color: var(--heading-5); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+    h6.md-h { font-size: 14px; font-weight: 600; color: var(--heading-6); margin: 0; }
 
     /* Heading section spacing */
     .md-h-block { margin-top: 1.5rem; }
@@ -740,6 +754,32 @@
       letter-spacing: 0.06em;
       margin-bottom: 8px;
     }
+
+    /* Sub-grouping label within a settings section — e.g. "Header colors"
+       and "Background color" both living under the "Theme" section label. */
+    .s-sublabel {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin: 10px 0 4px;
+    }
+    .s-sublabel:first-of-type { margin-top: 2px; }
+
+    /* Advanced Settings — collapsible section header */
+    .s-label-collapsible {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      margin-bottom: 0;
+    }
+    .s-adv-chevron {
+      width: 11px; height: 11px; flex-shrink: 0;
+      fill: none; stroke: currentColor; stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+      transition: transform 0.15s;
+    }
+    .s-label-collapsible.open .s-adv-chevron { transform: rotate(180deg); }
+    #adv-settings-body { padding-top: 10px; }
 
     .toggle-row {
       display: flex;
@@ -1042,7 +1082,7 @@
     </button>
 
     <div id="vault-title">
-      WikiBase <span id="breadcrumb"></span>
+      WikiBase <span></span>
     </div>
 
     <!-- Right panel toggle (left of settings) -->
@@ -1185,7 +1225,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <div id="app-version">v0.8c</div>
+      <div id="app-version">v0.8d</div>
     </aside>
 
   </div>
@@ -1228,7 +1268,8 @@
   <div id="settings-panel" role="dialog" aria-label="Settings">
 
     <div class="s-section">
-      <div class="s-label">Header colors</div>
+      <div class="s-label">Theme</div>
+      <div class="s-sublabel">Header colors</div>
       <select class="s-select" id="sel-headers">
         <option value="dark">Dark</option>
         <option value="light">Light</option>
@@ -1238,10 +1279,7 @@
         <option value="marble">Marble</option>
         <option value="things" selected>Things</option>
       </select>
-    </div>
-
-    <div class="s-section">
-      <div class="s-label">Background color</div>
+      <div class="s-sublabel">Background color</div>
       <select class="s-select" id="sel-bgcolor">
         <option value="dark" selected>Dark</option>
         <option value="light">Light</option>
@@ -1254,7 +1292,7 @@
     </div>
 
     <div class="s-section">
-      <div class="s-label">Display</div>
+      <div class="s-label">Navigation</div>
       <div class="toggle-row">
         Strip folder prefixes
         <label class="toggle">
@@ -1273,29 +1311,31 @@
       </div>
     </div>
 
-    <!-- S14 Review mode -->
+    <!-- Advanced Settings — Review + Editing, collapsed by default -->
     <div class="s-section">
-      <div class="s-label">Review</div>
-      <div class="toggle-row">
-        Show review tools
-        <label class="toggle">
-          <input type="checkbox" id="tgl-review">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
+      <div class="s-label s-label-collapsible" id="adv-settings-toggle" onclick="toggleAdvancedSettings()">
+        <svg class="s-adv-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        Advanced Settings
       </div>
-    </div>
-
-    <!-- Editing controls — off by default, same pattern as review tools -->
-    <div class="s-section">
-      <div class="s-label">Editing</div>
-      <div class="toggle-row">
-        Enable editing (New / Move / Edit)
-        <label class="toggle">
-          <input type="checkbox" id="tgl-editing">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
+      <div id="adv-settings-body" style="display:none">
+        <div class="s-sublabel">Review</div>
+        <div class="toggle-row">
+          Show review tools
+          <label class="toggle">
+            <input type="checkbox" id="tgl-review">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="s-sublabel">Editing</div>
+        <div class="toggle-row">
+          Enable editing (New / Move / Edit)
+          <label class="toggle">
+            <input type="checkbox" id="tgl-editing">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -2210,7 +2250,7 @@ function renderBlockTree(blocks) {
       const sectionHtml = j > i + 1 ? renderBlockTree(blocks.slice(i + 1, j)) : '';
       const hid = headingId(block.content);
       html += `<div class="md-h-block">
-<div class="md-h-row" onclick="toggleFold(this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}">${renderInline(block.content)}</h${level}></div>
+<div class="md-h-row${level === 2 ? ' md-h-row-h2' : ''}" onclick="toggleFold(this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}">${renderInline(block.content)}</h${level}></div>
 <div class="md-section">${sectionHtml}</div>
 </div>`;
       i = j;
@@ -3397,6 +3437,40 @@ function clearChangeHighlights() {
     .forEach(el => el.classList.remove('wb-changed'));
 }
 
+// If a highlight target sits under a folded (collapsed) heading, it's
+// display:none, and scrollToBlock's position math against a hidden
+// element resolves to a meaningless spot — looked like "wrong area."
+// Un-fold every ancestor section on the way up so the target is always
+// actually visible before we scroll to it.
+function ensureVisible(el) {
+  let node = el;
+  while (node && node !== document.body) {
+    if (node.classList && node.classList.contains('md-section') && node.classList.contains('folded')) {
+      node.classList.remove('folded');
+      const row = node.previousElementSibling;
+      if (row && row.classList.contains('md-h-row')) row.classList.remove('folded');
+    }
+    node = node.parentElement;
+  }
+}
+
+// Two-pass match: exact text first, substring only as a fallback. Pure
+// substring matching could lock onto the first block containing a short/
+// generic phrase instead of the actual changed one.
+function findMatchingBlock(blocks, text) {
+  for (const el of blocks) {
+    if (el.classList.contains('wb-changed')) continue;
+    const t = el.textContent.replace(/\s+/g, ' ').trim();
+    if (t && t === text) return el;
+  }
+  for (const el of blocks) {
+    if (el.classList.contains('wb-changed')) continue;
+    const t = el.textContent.replace(/\s+/g, ' ').trim();
+    if (t && t.length > 3 && (t.includes(text) || text.includes(t))) return el;
+  }
+  return null;
+}
+
 // Best-effort: match added lines to rendered blocks by normalized text.
 function normalizeMdLine(l) {
   return l
@@ -3420,13 +3494,10 @@ function highlightChangedLines(entry) {
     '#reader-content p, #reader-content h1, #reader-content h2, #reader-content h3, #reader-content h4, #reader-content h5, #reader-content h6, #reader-content li, #reader-content .md-callout, #reader-content blockquote, #reader-content td'
   );
   added.forEach(text => {
-    for (const el of blocks) {
-      if (el.classList.contains('wb-changed')) continue;
-      const t = el.textContent.replace(/\s+/g, ' ').trim();
-      if (t && (t === text || t.includes(text))) {
-        el.classList.add('wb-changed');
-        break;
-      }
+    const el = findMatchingBlock(blocks, text);
+    if (el) {
+      el.classList.add('wb-changed');
+      ensureVisible(el);
     }
   });
 }
@@ -3843,6 +3914,16 @@ function applyBgColor(bg) {
   state.bgColor = bg;
 }
 
+// Advanced Settings — collapsed by default, remembers open/closed.
+function toggleAdvancedSettings(forceOpen) {
+  const header = $('adv-settings-toggle');
+  const body   = $('adv-settings-body');
+  const open   = forceOpen !== undefined ? forceOpen : body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  header.classList.toggle('open', open);
+  persist('wb_adv_open', open);
+}
+
 $('btn-theme').addEventListener('click', () => {
   const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   applyTheme(next);
@@ -3929,6 +4010,9 @@ function loadPersistedState() {
       const selBg = $('sel-bgcolor');
       if (selBg) selBg.value = b;
     }
+
+    const advOpen = localStorage.getItem('wb_adv_open');
+    if (advOpen !== null) toggleAdvancedSettings(JSON.parse(advOpen));
 
     const review = localStorage.getItem('wb_review');
     if (review) {
@@ -4322,13 +4406,11 @@ function selectCommentCard(i) {
   clearChangeHighlights();
   const firstLine = normalizeMdLine(c.body.split('\n').find(l => l.trim()) || '');
   if (firstLine.length < 4) return;
-  for (const el of document.querySelectorAll(READER_BLOCKS)) {
-    const t = el.textContent.replace(/\s+/g, ' ').trim();
-    if (t.length > 3 && (t.includes(firstLine) || firstLine.includes(t))) {
-      el.classList.add('wb-changed');
-      scrollToBlock(el);
-      break;
-    }
+  const el = findMatchingBlock(document.querySelectorAll(READER_BLOCKS), firstLine);
+  if (el) {
+    el.classList.add('wb-changed');
+    ensureVisible(el);
+    scrollToBlock(el);
   }
 }
 
