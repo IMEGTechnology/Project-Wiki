@@ -111,7 +111,7 @@
     /* 8th identity — Obsidian Minimal theme's default accent colors
        (--color-blue/red/green), heading-4 kept muted gray like every
        other palette rather than spending a 5th saturated color on it. */
-    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #027aff; --heading-2: #fb464c; --heading-3: #44cf6e; --heading-4: #999999; }
+    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #fb464c; --heading-2: #027aff; --heading-3: #44cf6e; --heading-4: #999999; }
     body[data-theme="light"][data-headers="dark"]   { --heading-1: #64B5F6; --heading-2: #e8e5df; --heading-3: #d8d5cf; --heading-4: #c8c5bf; }
     body[data-theme="light"][data-headers="light"]  { --heading-1: #0b3d66; --heading-2: #14559c; --heading-3: #1a6ef5; --heading-4: #5b93d9; }
     body[data-theme="light"][data-headers="frost"]  { --heading-1: #0A5DC2; --heading-2: #007AFF; --heading-3: #34AADC; --heading-4: #6E7F96; }
@@ -119,7 +119,7 @@
     body[data-theme="light"][data-headers="mica"]   { --heading-1: #005A9E; --heading-2: #0078D4; --heading-3: #107C10; --heading-4: #5B5B5B; }
     body[data-theme="light"][data-headers="marble"] { --heading-1: #1E6FD9; --heading-2: #5E5CE6; --heading-3: #30B0C7; --heading-4: #8E8E93; }
     body[data-theme="light"][data-headers="things"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; }
-    body[data-theme="light"][data-headers="minimal"] { --heading-1: #086ddd; --heading-2: #e93147; --heading-3: #08b94e; --heading-4: #707070; }
+    body[data-theme="light"][data-headers="minimal"] { --heading-1: #e93147; --heading-2: #086ddd; --heading-3: #08b94e; --heading-4: #707070; }
 
     /* Background-color palette per named theme identity — the second
        "slice" of each theme (Settings → Background color). Gated by
@@ -781,6 +781,12 @@
     }
     .s-sublabel:first-of-type { margin-top: 2px; }
 
+    /* Two settings side by side (e.g. Header colors + Background color) —
+       halves the vertical space a stacked pair would take. */
+    .s-inline-row { display: flex; gap: 10px; }
+    .s-inline-col { flex: 1; min-width: 0; }
+    .s-inline-col .s-sublabel:first-of-type { margin-top: 2px; }
+
     /* Advanced Settings — collapsible section header */
     .s-label-collapsible {
       display: flex;
@@ -1242,7 +1248,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <div id="app-version">v0.8e</div>
+      <div id="app-version">v0.9a</div>
     </aside>
 
   </div>
@@ -1286,28 +1292,34 @@
 
     <div class="s-section">
       <div class="s-label">Theme</div>
-      <div class="s-sublabel">Header colors</div>
-      <select class="s-select" id="sel-headers">
-        <option value="dark">Dark</option>
-        <option value="light">Light</option>
-        <option value="frost">Frost</option>
-        <option value="clay">Clay</option>
-        <option value="mica">Mica</option>
-        <option value="marble">Marble</option>
-        <option value="things" selected>Things</option>
-        <option value="minimal">Minimal</option>
-      </select>
-      <div class="s-sublabel">Background color</div>
-      <select class="s-select" id="sel-bgcolor">
-        <option value="dark" selected>Dark</option>
-        <option value="light">Light</option>
-        <option value="frost">Frost</option>
-        <option value="clay">Clay</option>
-        <option value="mica">Mica</option>
-        <option value="marble">Marble</option>
-        <option value="things">Things</option>
-        <option value="minimal">Minimal</option>
-      </select>
+      <div class="s-inline-row">
+        <div class="s-inline-col">
+          <div class="s-sublabel">Header colors</div>
+          <select class="s-select" id="sel-headers">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="frost">Frost</option>
+            <option value="clay">Clay</option>
+            <option value="mica">Mica</option>
+            <option value="marble">Marble</option>
+            <option value="things" selected>Things</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </div>
+        <div class="s-inline-col">
+          <div class="s-sublabel">Background color</div>
+          <select class="s-select" id="sel-bgcolor">
+            <option value="dark" selected>Dark</option>
+            <option value="light">Light</option>
+            <option value="frost">Frost</option>
+            <option value="clay">Clay</option>
+            <option value="mica">Mica</option>
+            <option value="marble">Marble</option>
+            <option value="things">Things</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </div>
+      </div>
       <div class="toggle-row">
         H2 underline
         <label class="toggle">
@@ -1320,6 +1332,14 @@
 
     <div class="s-section">
       <div class="s-label">Navigation</div>
+      <div class="toggle-row">
+        Open last note
+        <label class="toggle">
+          <input type="checkbox" id="tgl-last-note" checked>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
       <div class="toggle-row">
         Strip folder prefixes
         <label class="toggle">
@@ -1338,7 +1358,7 @@
       </div>
     </div>
 
-    <!-- Advanced Settings — Review + Editing, collapsed by default -->
+    <!-- Advanced Settings — Review + Editing + Audit, collapsed by default -->
     <div class="s-section">
       <div class="s-label s-label-collapsible" id="adv-settings-toggle" onclick="toggleAdvancedSettings()">
         <svg class="s-adv-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -1362,6 +1382,11 @@
             <div class="toggle-track"></div>
             <div class="toggle-thumb"></div>
           </label>
+        </div>
+        <div class="s-sublabel">Audit</div>
+        <div class="toggle-row">
+          <span>New files without properties (<span id="audit-count">0</span>)</span>
+          <button class="ed-btn" id="audit-review-btn" onclick="openAuditView()" disabled>Review</button>
         </div>
       </div>
     </div>
@@ -1432,11 +1457,15 @@ const state = {
   bgColor:      'dark',   // Background color — one of 8 theme identities, drives body[data-bg]
   h2Underline:  true,     // Settings "H2 underline" toggle — drives body.h2-underline-off
   fileIndex:    {},    // { [lc-name-without-ext]: serverRelativeUrl } — for link resolution
+  fileFolder:   {},    // { [url]: folderId|null } — populated alongside fileIndex, used to
+                        // expand the right folder chain when restoring the last-opened file
   activeRPTab:     'outline',
   backlinksMap:    {},  // { [targetKey]: [{name, url}] } — populated as files are opened
   outlineObserver: null,// IntersectionObserver for active heading highlight
   reviewData:      null,// cached inbox data (array of {name, url, commentsUrl, comments})
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
+  openLastNote:    true,  // Settings "Open last note" — default on
+  unauditedFiles:  [],    // files with no WikiBase "status" frontmatter key (S12 file audit)
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -1469,9 +1498,10 @@ function isIgnored(name) {
   return false;
 }
 
-function indexFile(f) {
+function indexFile(f, folderId = null) {
   const key = displayFileName(f.name).toLowerCase();
-  state.fileIndex[key] = f.url;
+  state.fileIndex[key]  = f.url;
+  state.fileFolder[f.url] = folderId;
 }
 
 // Change-log sidecars live in a hidden "zSystem" subfolder next to
@@ -1617,7 +1647,7 @@ async function localEnumRoot() {
     }
   }
   files.sort((a, b) => a.name.localeCompare(b.name));
-  files.forEach(indexFile);
+  files.forEach(f => indexFile(f, null));
   return { folders: numericSort(folders, 'name'), files };
 }
 
@@ -1642,7 +1672,7 @@ async function localEnumFolder(folder) {
   files.sort((a, b) => a.name.localeCompare(b.name));
   state.folderFiles[folder.id]  = files;
   state.folderKids[folder.id]   = numericSort(kids, 'name');
-  files.forEach(indexFile);
+  files.forEach(f => indexFile(f, folder.id));
   state.folderLoaded[folder.id] = true;
   delete state.folderStale[folder.id];
 }
@@ -1780,7 +1810,7 @@ async function loadVaultRoot() {
     .filter(f => f.Name.endsWith('.md') && !isIgnored(f.Name))
     .map(f => ({ name: f.Name, url: f.ServerRelativeUrl, modified: f.TimeLastModified }));
 
-  files.forEach(indexFile);
+  files.forEach(f => indexFile(f, null));
 
   return { folders, files };
 }
@@ -1804,7 +1834,7 @@ async function loadFolderFiles(folder) {
     'name'
   );
 
-  state.folderFiles[folder.id].forEach(indexFile);
+  state.folderFiles[folder.id].forEach(f => indexFile(f, folder.id));
   state.folderLoaded[folder.id] = true;
   delete state.folderStale[folder.id];
 }
@@ -1916,7 +1946,9 @@ async function toggleFolder(folderId) {
 
   const opening = !state.openFolders[folderId];
   state.openFolders[folderId] = opening;
-  persist('wb_folders', state.openFolders);
+  // Not persisted — folder-open state at boot is governed entirely by the
+  // Settings → "Open last note" toggle (see bootVault), not by whatever was
+  // left open last session.
 
   if (opening && (!state.folderLoaded[folderId] || state.folderStale[folderId])) {
     renderSidebar();
@@ -2424,6 +2456,10 @@ async function openFile(url, name) {
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
     $('reader').scrollTop = 0;
+
+    // Settings → "Open last note" reads this back at next boot. Written on
+    // success only, so a broken link never becomes "the file to reopen".
+    persist('wb_last_file', { url, name, folderId: state.fileFolder[url] ?? null });
 
     // Register this file's outgoing links so other files can show it as a backlink
     extractAndRegisterLinks(text, url);
@@ -3124,6 +3160,7 @@ async function scanBadges() {
     const files  = allMdFiles();
     let openCmts = 0;
     const review = [];
+    const audit  = [];
     await Promise.all(files.map(async f => {
       const cTxt = await readVaultFileOrNull(commentsUrlFor(f.url));
       if (cTxt) openCmts += parseComments(cTxt).filter(c => c.status === 'open').length;
@@ -3136,9 +3173,18 @@ async function scanBadges() {
           if (unreviewed) review.push({ name: displayFileName(f.name), url: f.url, changesUrl: chUrl, entries, unreviewed });
         }
       }
+      // File audit — WikiBase is the only writer of the "status" frontmatter
+      // key (new-file creation, editor saves, the Properties flyout). No
+      // status key = never touched by the app = a new file dropped in
+      // directly. Read-only: this only lists files, never writes anything.
+      const mainTxt = await readVaultFileOrNull(f.url);
+      if (mainTxt !== null && !parseFm(mainTxt).status) {
+        audit.push({ name: displayFileName(f.name), url: f.url });
+      }
     }));
-    state.cmtOpenCount  = openCmts;
-    state.reviewChanges = review;
+    state.cmtOpenCount   = openCmts;
+    state.reviewChanges  = review;
+    state.unauditedFiles = audit;
     updateBadges();
   } catch (_) {} finally { scanBusy = false; }
 }
@@ -3157,6 +3203,11 @@ function updateBadges() {
   rc.style.display = (state.reviewTools && total) ? '' : 'none';
   // if review got switched off while its tab was active, fall back to outline
   if (!state.reviewTools && state.activeRPTab === 'review') switchRPTab('outline');
+
+  const auditCountEl = $('audit-count');
+  const auditBtn     = $('audit-review-btn');
+  if (auditCountEl) auditCountEl.textContent = state.unauditedFiles.length;
+  if (auditBtn)     auditBtn.disabled = !state.unauditedFiles.length;
 }
 
 // Inbox buttons live with their tabs: Comment Inbox only on the comments
@@ -3225,6 +3276,44 @@ function buildChangesHTML() {
     html += '</div>';
   });
   return html;
+}
+
+// ── File audit view (S12) — lists files with no WikiBase frontmatter ──
+// Read-only report: opening a file from here does not change anything.
+// Filling in Properties (via the flyout, opened for you) is what resolves
+// an entry — it drops off the list on the next scan once "status" exists.
+function openAuditView() {
+  if (!guardLeaveEdit()) return;
+  const empty = $('reader-empty');
+  const rc    = $('reader-content');
+  state.activeUrl  = null;
+  state.activeName = null;
+  renderSidebar();
+  updateEditBtn();
+  const bc = $('breadcrumb');
+  if (bc) bc.textContent = '/ File audit';
+  empty.style.display = 'none';
+  rc.style.display    = 'block';
+
+  if (!state.unauditedFiles.length) {
+    rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">No new files found — every file has WikiBase properties.</p>';
+    return;
+  }
+
+  rc.innerHTML = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">File audit</h1>'
+    + '<p class="md-p" style="color:var(--text-secondary);margin-bottom:16px">Files with no WikiBase properties block — likely added outside the app. Open one to fill in its properties; nothing changes until you do.</p>'
+    + '<div class="rv-file">'
+    + state.unauditedFiles.map(f => `
+      <div class="rv-file-head">
+        <span class="rv-file-name" onclick="openAuditFile('${escHtml(f.url)}','${f.name.replace(/'/g, "\\'")}')">${escHtml(f.name)}</span>
+      </div>`).join('')
+    + '</div>';
+}
+
+async function openAuditFile(url, name) {
+  await openFile(url, name);
+  closePropsPanel();
+  await togglePropsPanel(); // panel is closed at this point — opens fresh for this file
 }
 
 async function inboxEntryAction(fileIdx, entryIdx, value) {
@@ -3644,7 +3733,6 @@ async function submitCreate() {
         state.folderLoaded[folder.id] = false;
         await loadFolderFiles(folder);
         state.openFolders[folder.id] = true;
-        persist('wb_folders', state.openFolders);
         renderSidebar();
       } else {
         await refreshVaultRoot();
@@ -3688,7 +3776,6 @@ async function submitCreate() {
         state.folderLoaded[folder.id] = false;
         await loadFolderFiles(folder);
         state.openFolders[folder.id] = true;
-        persist('wb_folders', state.openFolders);
         renderSidebar();
       } else {
         await refreshVaultRoot();
@@ -3984,6 +4071,11 @@ $('tgl-h2underline').addEventListener('change', e => {
   persist('wb_h2underline', e.target.checked);
 });
 
+$('tgl-last-note').addEventListener('change', e => {
+  state.openLastNote = e.target.checked;
+  persist('wb_last_note', e.target.checked);
+});
+
 // ── Persistence ──────────────────────────────────────────────────
 function persist(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch (_) {}
@@ -3991,8 +4083,14 @@ function persist(key, val) {
 
 function loadPersistedState() {
   try {
-    const folders = localStorage.getItem('wb_folders');
-    if (folders) state.openFolders = JSON.parse(folders);
+    // Folder-open state at boot is NOT restored from storage — it's derived
+    // fresh every boot from the "Open last note" toggle below (see bootVault).
+
+    const lastNote = localStorage.getItem('wb_last_note');
+    if (lastNote !== null) {
+      state.openLastNote = JSON.parse(lastNote);
+      $('tgl-last-note').checked = state.openLastNote;
+    }
 
     const strip = localStorage.getItem('wb_strip');
     if (strip !== null) {
@@ -4691,21 +4789,56 @@ async function closeCommentInReview(commentsUrl, fileName, idx) {
 }
 
 // ── Boot ─────────────────────────────────────────────────────────
+// Recursively preload every folder currently marked open in state.openFolders,
+// at any nesting depth. Loading a folder can reveal deeper kids that are also
+// marked open, so keep sweeping until a pass finds nothing left to load.
+// (Previously only top-level open folders were preloaded at boot — a nested
+// open subfolder never got its files, so it sat on "Loading…" forever, badge
+// stuck unloaded, until you manually closed and reopened it.)
+async function preloadOpenFolders() {
+  let more = true;
+  while (more) {
+    more = false;
+    const all = [];
+    (function walk(list) { list.forEach(f => { all.push(f); walk(state.folderKids[f.id] || []); }); })(vaultFolders);
+    const due = all.filter(f => state.openFolders[f.id] && !state.folderLoaded[f.id]);
+    if (due.length) {
+      await Promise.all(due.map(f => loadFolderFiles(f)));
+      more = true;
+    }
+  }
+}
+
+function getLastFile() {
+  try {
+    const raw = localStorage.getItem('wb_last_file');
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
 async function bootVault() {
   try {
     const { folders, files } = await loadVaultRoot();
     vaultFolders   = folders;
     vaultRootFiles = files;
 
-    const toPreload = folders.filter(f => state.openFolders[f.id]);
-    if (toPreload.length) {
-      await Promise.all(toPreload.map(f => loadFolderFiles(f)));
+    // Folder-open state at boot: Settings → "Open last note" decides it fresh
+    // every time, not whatever was left open last session (see toggleFolder).
+    const last = state.openLastNote ? getLastFile() : null;
+    state.openFolders = {};
+    if (last && last.folderId) {
+      let acc = '';
+      last.folderId.split('/').forEach(seg => { acc = acc ? `${acc}/${seg}` : seg; state.openFolders[acc] = true; });
     }
+
+    await preloadOpenFolders();
 
     renderSidebar();
     refreshEditControls(); // New/Move/Edit grayed unless Settings → Enable editing
     scanBadges(); // S14 — async, fills comment + review badges
     vaultReady = true; // enables the focus-regain refresh below
+
+    if (last) openFile(last.url, last.name);
   } catch (e) {
     $('sb-tree').innerHTML = `<div class="sb-msg">Could not load vault.<br><span style="font-size:11px">${escHtml(e.message)}</span></div>`;
   }
