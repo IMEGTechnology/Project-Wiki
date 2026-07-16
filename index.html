@@ -861,6 +861,11 @@
     body[data-theme="light"] .theme-toggle-btn .ic-sun  { display: none; }
     body[data-theme="light"] .theme-toggle-btn .ic-moon { display: flex; }
 
+    /* Update-available arrow — accent-colored so it actually catches the
+       eye; it's only ever visible when there's something to click. */
+    #btn-update { color: var(--accent); }
+    #btn-update:hover { color: var(--accent); opacity: 0.8; }
+
     /* === Resize handles ====================================== */
     .resize-handle {
       width: 4px;
@@ -1040,6 +1045,28 @@
     .backlink-item:hover { background: var(--hover); color: var(--accent); }
     .backlink-note { padding: 8px 12px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 4px; line-height: 1.5; }
 
+    /* Review tab — vault-wide overview (File changes / New files), always
+       on top of the per-file card list. Rows reuse .backlink-item. */
+    .rv-ov-label {
+      padding: 10px 12px 4px;
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .rv-ov-name {
+      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .rv-ov-count {
+      font-size: 11px; color: var(--text-muted); flex-shrink: 0;
+    }
+    .rv-ov-btn {
+      flex-shrink: 0; padding: 2px 7px; font-size: 11px; font-family: inherit;
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+    }
+    .rv-ov-btn:hover { color: var(--text-primary); }
+    .rv-ov-accept:hover { border-color: var(--co-green-bd); color: var(--co-green-txt); }
+    .rv-ov-reject:hover { border-color: var(--co-red-bd); color: var(--co-red-txt); }
+
     /* Right panel inbox strip (S5) */
     .rp-inbox-strip { padding: 6px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .rp-inbox-btn {
@@ -1132,6 +1159,14 @@
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
+    </button>
+
+    <!-- Update available (S11+) — hidden until the service worker reports a
+         newer app shell is active. PWAs (and some browsers) don't reliably
+         pick up a new version on an already-open tab/installed app, so this
+         is a manual "a newer version is ready, click to reload" signal. -->
+    <button class="icon-btn" id="btn-update" title="Update available — click to reload" aria-label="Update available" style="display:none" onclick="location.reload()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
     </button>
 
     <!-- Help -->
@@ -1252,7 +1287,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <div id="app-version">v0.9a-1</div>
+      <div id="app-version">v0.9a-2</div>
     </aside>
 
   </div>
@@ -3298,21 +3333,29 @@ function buildChangesHTML() {
 // from the standard property set (same defaults as new-file creation)
 // WITHOUT touching keys that already exist, so it can never clobber
 // properties or tags someone already set directly in Obsidian.
+// Shared write: injects only the frontmatter keys actually missing (same
+// defaults as new-file creation), then rescans. Never touches a key that's
+// already there, so it can't clobber tags/properties set outside the app.
+async function approveNewFileCore(f) {
+  const text = await readVaultFile(f.url);
+  const fm = parseFm(text);
+  const defaults = {
+    tags: '[]', aliases: '[]', status: 'Needs Review', reviewed: 'false',
+    created: new Date().toISOString().slice(0, 10), due: '', section: '',
+    author: wbAuthor(),
+  };
+  const flags = Object.entries(defaults).filter(([k]) => !(k in fm));
+  flags.push(['edited-by', wbAuthor()], ['edited-at', new Date().toISOString().slice(0, 16)]);
+  await spWriteFile(f.url, setFmKeys(text, flags));
+  await scanBadges();
+}
+
+// From the reader's Document Changes screen.
 async function approveNewFile(idx) {
   const f = state.unauditedFiles[idx];
   if (!f) return;
   try {
-    const text = await readVaultFile(f.url);
-    const fm = parseFm(text);
-    const defaults = {
-      tags: '[]', aliases: '[]', status: 'Needs Review', reviewed: 'false',
-      created: new Date().toISOString().slice(0, 10), due: '', section: '',
-      author: wbAuthor(),
-    };
-    const flags = Object.entries(defaults).filter(([k]) => !(k in fm));
-    flags.push(['edited-by', wbAuthor()], ['edited-at', new Date().toISOString().slice(0, 16)]);
-    await spWriteFile(f.url, setFmKeys(text, flags));
-    await scanBadges();
+    await approveNewFileCore(f);
     if (state.activeUrl === f.url) openFile(f.url, f.name); // re-render if it's the open file
     $('reader-content').innerHTML = buildChangesHTML();
   } catch (e) {
@@ -3362,25 +3405,103 @@ async function markReviewed(idx) {
 }
 
 // ── Review tab (right panel, per-file — mirrors the comments tab) ─
+// Vault-wide overview — always at the top of the Review tab, in two
+// subsections ("File changes" / "New files"), so you can browse and act
+// on either list while the reader shows whatever file you're actually
+// looking at. This is the same data as the Review Inbox reader screen
+// (buildChangesHTML) — just laid out as a compact right-panel list
+// instead of taking over the reader.
+function renderReviewOverview() {
+  const hasChanges = !!state.reviewChanges.length;
+  const hasAudit    = !!state.unauditedFiles.length;
+  if (!hasChanges && !hasAudit) return '';
+
+  let html = '<div class="rv-ov-label">File changes</div>';
+  if (!hasChanges) {
+    html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No pending changes.</div>';
+  } else {
+    state.reviewChanges.forEach((r, ri) => {
+      const head = headOpenIdx(r.entries);
+      const openCount = r.entries.filter(e => e.reviewed === 'no').length;
+      html += `<div class="backlink-item">
+        <span class="rv-ov-name" onclick="openFile('${escHtml(r.url)}','${r.name.replace(/'/g, "\\'")}')">${escHtml(r.name)}</span>
+        <span class="rv-ov-count" title="${openCount} pending change${openCount > 1 ? 's' : ''}">${openCount}</span>
+        <button class="rv-ov-btn rv-ov-accept" title="Accept" onclick="event.stopPropagation();inboxEntryActionOverview(${ri},${head},'yes')">✓</button>
+        <button class="rv-ov-btn rv-ov-reject" title="Reject" onclick="event.stopPropagation();inboxEntryActionOverview(${ri},${head},'rejected')">✕</button>
+      </div>`;
+    });
+  }
+
+  html += '<div class="rv-ov-label">New files</div>';
+  if (!hasAudit) {
+    html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No new files found.</div>';
+  } else {
+    state.unauditedFiles.forEach((f, fi) => {
+      html += `<div class="backlink-item">
+        <span class="rv-ov-name" onclick="openFile('${escHtml(f.url)}','${f.name.replace(/'/g, "\\'")}')">${escHtml(f.name)}</span>
+        <button class="rv-ov-btn" onclick="event.stopPropagation();approveNewFileFromOverview(${fi})">Update</button>
+      </div>`;
+    });
+  }
+  return html;
+}
+
+// Same core actions as the reader's Document Changes screen, but these
+// refresh the right panel (and the open file, if it's the one touched)
+// instead of overwriting reader-content — the overview never hijacks
+// whatever you're actually reading.
+async function inboxEntryActionOverview(fileIdx, entryIdx, value) {
+  const r = state.reviewChanges[fileIdx];
+  if (!r) return;
+  try {
+    if (value === 'rejected') {
+      const done = await rejectChangeCore(r.url, r.changesUrl, entryIdx);
+      if (!done) return;
+    } else {
+      await setEntryReviewed(r.changesUrl, entryIdx, value);
+    }
+    await maybeFlipFileReviewed(r.url, r.changesUrl);
+    await scanBadges();
+    if (state.activeUrl === r.url) openFile(r.url, state.activeName);
+    else renderReviewTab();
+  } catch (e) {
+    alert('Could not update: ' + e.message);
+  }
+}
+
+async function approveNewFileFromOverview(idx) {
+  const f = state.unauditedFiles[idx];
+  if (!f) return;
+  try {
+    await approveNewFileCore(f);
+    if (state.activeUrl === f.url) openFile(f.url, f.name);
+    else renderReviewTab();
+  } catch (e) {
+    alert('Could not update: ' + e.message);
+  }
+}
+
 async function renderReviewTab() {
   const pane = $('rp-review');
+  const overview = renderReviewOverview();
+
   if (!state.activeUrl) {
-    pane.innerHTML = '<div class="rp-empty">Open a file to see its changes.</div>';
+    pane.innerHTML = overview || '<div class="rp-empty">Open a file to see its changes.</div>';
     return;
   }
   const changesUrl = changesUrlFor(state.activeUrl);
-  pane.innerHTML = '<div class="rp-empty">Loading…</div>';
+  pane.innerHTML = overview + '<div class="rp-empty">Loading…</div>';
   const txt = await readVaultFileOrNull(changesUrl);
   const entries = txt ? parseChanges(txt) : [];
   pane._wbEntries = entries;
 
   if (!entries.length) {
-    pane.innerHTML = '<div class="rp-empty">No recorded changes for this file.</div>';
+    pane.innerHTML = overview || '<div class="rp-empty">No recorded changes for this file.</div>';
     return;
   }
   const open = entries.filter(e => e.reviewed === 'no').length;
   const head = headOpenIdx(entries);
-  let html = '';
+  let html = overview;
   if (open > 1) {
     html += `<div style="padding:10px 12px;border-bottom:1px solid var(--border)">
       <button class="rv-mark-btn" style="width:100%" onclick="markReviewedFromTab()">Accept all (${open})</button>
@@ -4967,8 +5088,32 @@ boot();
 // App-shell cache only (sw.js) — vault files and SharePoint API are
 // never cached. Registers only over HTTPS, so local test mode
 // (file:// or the FSA adapter) is untouched.
+//
+// Update-available arrow: installed PWAs (and some browsers, per Jayson's
+// report — a plain browser tab updates fine) don't reliably hand an
+// already-open page the newer app shell. sw.js already calls skipWaiting()
+// + clients.claim() on its own, so a NEW service worker takes control
+// automatically — "controllerchange" firing is exactly that happening.
+// The only wrinkle: it also fires once on a page's very first-ever load
+// (no prior controller → first controller), which isn't an update. Only
+// treat it as an update if this page already had a controller before the
+// change — i.e. a second, newer SW just swapped in for the first one.
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController) {
+        const btn = $('btn-update');
+        if (btn) btn.style.display = '';
+      }
+      hadController = true;
+    });
+    // Nudge a check whenever the app regains focus — PWAs don't poll for
+    // updates as eagerly as a browser tab does on its own.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update().catch(() => {});
+    });
+  }).catch(() => {});
 }
 </script>
 </body>
