@@ -4,7 +4,7 @@
    content is always fetched live (SharePoint auth requires it anyway).
    To ship an update: bump CACHE version below. */
 
-const CACHE = 'wikibase-shell-v1';
+const CACHE = 'wikibase-shell-v2';
 
 // Core shell. Individual failures tolerated (e.g. /themes/ optional).
 const SHELL = [
