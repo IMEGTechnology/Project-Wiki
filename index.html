@@ -512,8 +512,11 @@
        fades the reader background from solid to transparent, so text
        dissolves before it reaches the icons instead of clipping under them. */
     #reader-fade {
-      position: absolute; top: 0; left: 0; right: 0; height: 48px;
-      background: linear-gradient(to bottom, var(--bg-reader) 0%, var(--bg-reader) 45%, transparent 100%);
+      position: absolute; top: 0; left: 0; right: 0; height: 72px;
+      /* Solid through 60% (~43px) — clears the button row (top:8px,
+         ~28px tall) with room to spare instead of fading through it —
+         then tapers over the remaining ~29px. */
+      background: linear-gradient(to bottom, var(--bg-reader) 0%, var(--bg-reader) 60%, transparent 100%);
       pointer-events: none; z-index: 5;
     }
     /* Fold controls (collapse all / collapse unused / expand all) for the
@@ -607,6 +610,14 @@
       padding: 2px 6px;
     }
     .md-h-row:hover { background: var(--hover); }
+    /* "You are here" cue after an Outline click or anchor jump — same
+       tint as the hover state, fading out on its own so it doesn't linger
+       like a permanent selection marker. */
+    .md-h-row.wb-jump-flash { animation: wbJumpFlash 1.4s ease-out; }
+    @keyframes wbJumpFlash {
+      0%   { background: var(--hover); }
+      100% { background: transparent; }
+    }
 
     .md-fold-icon {
       flex-shrink: 0;
@@ -1995,14 +2006,18 @@ async function hydrateLocalImages(container) {
     const noteDir = await localFileDirHandle(state.activeUrl);
     attDir = await noteDir.getDirectoryHandle(CONFIG.attachmentsFolderName);
   } catch (_) {
-    try { attDir = await LOCAL.root.getDirectoryHandle('assets'); } catch (_) { return; }
+    try { attDir = await LOCAL.root.getDirectoryHandle('assets'); } catch (_) { attDir = null; }
   }
 
+  // These images render with no src attribute (see attachmentSrcFor) so
+  // there's no network request to fail and no onerror to fall back on —
+  // a missing file has to be flagged explicitly here instead.
   for (const img of imgs) {
+    if (!attDir) { wbImgError(img); continue; }
     try {
       const h = await attDir.getFileHandle(img.dataset.wbAsset);
       img.src = URL.createObjectURL(await h.getFile());
-    } catch (_) {} // onerror fallback in the markup handles missing files
+    } catch (_) { wbImgError(img); }
   }
 }
 
@@ -2234,6 +2249,16 @@ function isImageExt(name) {
 // the same way (attachments subfolder next to the open note) for
 // consistency between the two modes.
 function attachmentSrcFor(name) {
+  // Local test mode: state.activeUrl is WikiBase's own "local:/..." file
+  // identifier, not a real fetchable path — local files are read through
+  // a FileSystemDirectoryHandle, not a URL. Building a src from it here
+  // produced "local:/Folder/Attachments/img.png", and setting that as an
+  // <img src> made the browser try to load "local:" as an actual protocol
+  // — instant ERR_UNKNOWN_URL_SCHEME, before hydrateLocalImages() ever got
+  // to the file. Returning empty means no src, no request, no premature
+  // error; hydrateLocalImages() supplies the real blob URL once it reads
+  // the file (or calls wbImgError itself if the file's genuinely missing).
+  if (LOCAL.on) return '';
   const base = state.activeUrl || CONFIG.vaultRelPath;
   const dir  = base.slice(0, base.lastIndexOf('/'));
   return `${dir}/${CONFIG.attachmentsFolderName}/${encodeURIComponent(name)}`;
@@ -2354,8 +2379,12 @@ function renderInline(text) {
     const size = (sizePart || '').trim();
     if (isImageExt(name)) {
       const src = attachmentSrcFor(name);
+      // No src attribute at all when empty (local mode, pre-hydration) —
+      // src="" is its own foot-gun, browsers treat it as "reload the
+      // current page" and that would error too.
+      const srcAttr = src ? ` src="${src}"` : '';
       const widthAttr = /^\d+$/.test(size) ? ` width="${size}"` : '';
-      return slot(`<img class="md-img" data-wb-asset="${escHtml(name)}" src="${src}" alt="${escHtml(name)}"${widthAttr} onerror="wbImgError(this)">`);
+      return slot(`<img class="md-img" data-wb-asset="${escHtml(name)}"${srcAttr} alt="${escHtml(name)}"${widthAttr} onerror="wbImgError(this)">`);
     }
     return slot(buildEmbedStub(name, true));
   });
@@ -2798,8 +2827,9 @@ function renderSingleBlock(block, seenIds) {
 
     case 'image': {
       const src = attachmentSrcFor(block.name);
+      const srcAttr = src ? ` src="${src}"` : '';
       const widthAttr = /^\d+$/.test(block.size || '') ? ` width="${block.size}"` : '';
-      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}" src="${src}" alt="${escHtml(block.name)}"${widthAttr} onerror="wbImgError(this)"></div>`;
+      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}"${srcAttr} alt="${escHtml(block.name)}"${widthAttr} onerror="wbImgError(this)"></div>`;
     }
 
     case 'embed':
@@ -3010,14 +3040,52 @@ function outlineCollapseUnused() {
   renderOutlineTab();
 }
 
-// ── Same-page anchor scroll ───────────────────────────────────────
+// ── Jump to a heading — shared by the Outline (scrollToHeading, below)
+// and same-page/cross-file anchor links (scrollToAnchor) ──────────────
+// A heading inside a folded ancestor section is display:none, so its
+// rect is empty — getBoundingClientRect/scrollIntoView both silently do
+// nothing, which is why Outline clicks sometimes didn't move the reader
+// (worse on closely-nested headings, since they're more often inside a
+// collapsed parent). Expanding the ancestor chain first — same rule as
+// Collapse unused — fixes that for both callers in one place.
+const READER_TOP_CLEARANCE = 56; // clears the fade/button strip, was landing under it
+
+function revealHeading(id) {
+  const reader = $('reader');
+  const el = document.getElementById(id);
+  if (!el || !reader) return;
+
+  let node = el;
+  while (node) {
+    const section = node.closest ? node.closest('.md-section') : null;
+    if (!section) break;
+    const row = section.previousElementSibling;
+    if (row && row.classList.contains('md-h-row')) readerFoldRow(row, false);
+    node = section.parentElement;
+  }
+  maybeRefreshOutlineAfterReaderFold();
+
+  const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - READER_TOP_CLEARANCE;
+  reader.scrollTo({ top, behavior: 'smooth' });
+  flashHeading(el.closest('.md-h-row'));
+}
+
+// Brief "you are here" tint on arrival — restarts cleanly if you jump to
+// the same heading twice in a row (remove + reflow before re-adding, or
+// the second click's animation silently no-ops since the class never left).
+function flashHeading(row) {
+  if (!row) return;
+  row.classList.remove('wb-jump-flash');
+  void row.offsetWidth;
+  row.classList.add('wb-jump-flash');
+  row.addEventListener('animationend', () => row.classList.remove('wb-jump-flash'), { once: true });
+}
+
 function scrollToAnchor(e, targetId) {
   if (e) e.preventDefault();
-  // Try supplied id, then slug variants
-  const el = document.getElementById(targetId)
-          || document.getElementById('h-' + targetId)
-          || document.querySelector(`[id="${targetId}"]`);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Try supplied id, then the 'h-' slug variant — same fallback as before
+  const id = document.getElementById(targetId) ? targetId : 'h-' + targetId;
+  revealHeading(id);
 }
 
 // ── Back/Forward navigation (session-only "previous note" history) ─
@@ -5119,11 +5187,7 @@ function updateOutlineLockIcon() {
 }
 
 function scrollToHeading(id) {
-  const reader = $('reader');
-  const el     = document.getElementById(id);
-  if (!el || !reader) return;
-  const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - 10;
-  reader.scrollTo({ top, behavior: 'smooth' });
+  revealHeading(id);
 }
 
 function setupOutlineObserver(headings) {
