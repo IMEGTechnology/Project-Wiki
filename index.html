@@ -258,12 +258,18 @@
        Own row so it stays put while #sb-tree scrolls beneath it. */
     #sb-toolbar {
       display: flex;
-      justify-content: flex-end;
-      gap: 2px;
-      padding: 4px 6px;
-      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 8px 7px 12px;
       flex-shrink: 0;
     }
+    #sb-toolbar .sbt-label {
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #sb-toolbar .sbt-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    #sb-toolbar .sbt-group.hidden { display: none; }
     #sb-toolbar .icon-btn { width: 24px; height: 24px; }
     #sb-toolbar .icon { width: 14px; height: 14px; }
 
@@ -499,15 +505,11 @@
        so it reads as app chrome, not a call-to-action. Sits left of Properties. */
     #reader-fold-pill {
       position: absolute; top: 8px; right: 88px; z-index: 6;
-      display: flex; align-items: center;
-      background: var(--badge-bg);
-      border: 1px solid var(--border-strong);
-      border-radius: 999px;
-      overflow: hidden;
+      display: flex; align-items: center; gap: 2px;
     }
-    #reader-fold-pill .icon-btn { width: 26px; height: 26px; border-radius: 0; }
+    #reader-fold-pill .icon-btn { width: 26px; height: 26px; }
     #reader-fold-pill .icon-btn:hover { background: var(--hover); }
-    #reader-fold-pill .rfp-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; }
+    #reader-fold-pill .rfp-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; margin-left: 6px; }
     /* Properties flyout (S13) */
     #props-panel {
       position: absolute; top: 44px; right: 16px; z-index: 20;
@@ -1045,14 +1047,34 @@
     #ot-toolbar {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 2px;
-      padding: 4px 6px;
-      border-bottom: 1px solid var(--border);
+      justify-content: space-between;
+      gap: 10px;
+      padding: 7px 8px 7px 12px;
     }
+    #ot-toolbar .ot-label { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
+    #ot-toolbar .ot-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    #ot-toolbar .ot-group.hidden { display: none; }
     #ot-toolbar .icon-btn { width: 24px; height: 24px; }
     #ot-toolbar .icon { width: 14px; height: 14px; }
     #ot-toolbar .ot-sep { width: 1px; height: 14px; background: var(--border-strong); margin: 0 3px; flex-shrink: 0; }
+    .rp-pane-header {
+      display: flex; align-items: center;
+      padding: 7px 8px 7px 12px;
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    /* Folder-link copy confirmation (S — folder link copy-to-clipboard) */
+    .wb-folder-link { cursor: pointer; }
+    .wb-copied-tip {
+      position: absolute; z-index: 50;
+      background: var(--text-primary); color: var(--bg-reader);
+      font-size: 12px; padding: 4px 8px; border-radius: var(--radius);
+      opacity: 0; transform: translateY(-4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      pointer-events: none;
+    }
+    .wb-copied-tip.show { opacity: 1; transform: translateY(0); }
     /* Neutral tone when locked (shared) — same "chrome, not a call-to-action"
        rule as the reader fold pill. No accent color. */
     #ot-lock-toggle.locked { background: var(--badge-bg); color: var(--text-primary); }
@@ -1266,15 +1288,18 @@
     <!-- Sidebar -->
     <nav id="sidebar" aria-label="Vault navigation">
       <div id="sb-toolbar">
-        <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="sidebarCollapseAll()">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
-        </button>
-        <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="sidebarCollapseUnused()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-        </button>
-        <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="sidebarExpandAll()">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
-        </button>
+        <span class="sbt-label">Vault Files</span>
+        <div class="sbt-group" id="sbt-group">
+          <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="sidebarCollapseAll()">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
+          </button>
+          <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="sidebarCollapseUnused()">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+          </button>
+          <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="sidebarExpandAll()">
+            <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
+          </button>
+        </div>
       </div>
       <div id="sb-tree">
         <div class="sb-msg">Loading vault…</div>
@@ -1297,14 +1322,13 @@
         <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="readerCollapseAll()">
           <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
         </button>
-        <div class="rfp-sep"></div>
         <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="readerCollapseUnused()">
           <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
         </button>
-        <div class="rfp-sep"></div>
         <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="readerExpandAll()">
           <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
         </button>
+        <div class="rfp-sep"></div>
       </div>
 
       <!-- Edit button (S9) — floats top-right of the reader -->
@@ -1390,17 +1414,20 @@
       <div class="rp-body">
         <div class="rp-pane active" id="rp-outline">
           <div id="ot-toolbar" style="display:none">
-            <button class="icon-btn" id="ot-lock-toggle" title="Fold state independent — click to share with reader" aria-label="Fold state independent — click to share with reader" onclick="toggleOutlineFoldMode()"></button>
-            <div class="ot-sep"></div>
-            <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="outlineCollapseAll()">
-              <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
-            </button>
-            <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="outlineCollapseUnused()">
-              <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-            </button>
-            <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="outlineExpandAll()">
-              <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
-            </button>
+            <span class="ot-label">Outline</span>
+            <div class="ot-group" id="ot-group">
+              <button class="icon-btn" id="ot-lock-toggle" title="Fold state independent — click to share with reader" aria-label="Fold state independent — click to share with reader" onclick="toggleOutlineFoldMode()"></button>
+              <div class="ot-sep"></div>
+              <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="outlineCollapseAll()">
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
+              </button>
+              <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="outlineCollapseUnused()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+              </button>
+              <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="outlineExpandAll()">
+                <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
+              </button>
+            </div>
           </div>
           <div id="ot-list"><div class="rp-empty">Open a file to see its outline.</div></div>
         </div>
@@ -1408,6 +1435,7 @@
         <div class="rp-pane"        id="rp-backlinks"><div class="rp-empty">Open a file to see backlinks.</div></div>
         <div class="rp-pane"        id="rp-review">   <div class="rp-empty">Open a file to see its changes.</div></div>
         <div class="rp-pane"        id="rp-search">
+          <div class="rp-pane-header">Search</div>
           <div class="search-box">
             <input type="text" id="search-input" placeholder="Search…" autocomplete="off" spellcheck="false" aria-label="Search">
             <button id="search-clear" title="Clear" aria-label="Clear search" style="display:none" onclick="clearSearch(true)">✕</button>
@@ -1415,7 +1443,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9a-5</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9b-1</button>
     </aside>
 
   </div>
@@ -2238,6 +2266,111 @@ function renderInline(text) {
     return `\x00C${idx}\x00`;
   });
 
+  // 1b. Protect links and images the same way, and do it before any bold/
+  // italic/strikethrough/highlight parsing runs. Those regexes used to run
+  // first and treated the WHOLE line as fair game, so a link target or
+  // filename containing an underscore, asterisk, ~~, or == got read as a
+  // formatting marker and silently eaten (this is what was corrupting
+  // folder-link paths — "File_Share" would lose the underscore and
+  // everything up to the next one). Order within this block is unchanged
+  // from before: images must resolve first, or the plain-link regex below
+  // mistakes `![alt](src)` for a link.
+  const linkSlots = [];
+  const slot = (html) => {
+    const idx = linkSlots.length;
+    linkSlots.push(html);
+    return `\x00L${idx}\x00`;
+  };
+
+  // Wiki image embed: ![[image.ext]] or ![[image.ext|width]] (Obsidian's
+  // pipe-size syntax — e.g. ![[Pasted image 20250715.png|1028]]). The size
+  // suffix must be split off before the extension check, or it never
+  // matches isImageExt() and falls through to the note-embed stub.
+  s = s.replace(/!\[\[([^\]]+)\]\]/g, (_, raw) => {
+    const [namePart, sizePart] = raw.split('|');
+    const name = namePart.trim();
+    const size = (sizePart || '').trim();
+    if (isImageExt(name)) {
+      const src = attachmentSrcFor(name);
+      const widthAttr = /^\d+$/.test(size) ? ` width="${size}"` : '';
+      return slot(`<img class="md-img" data-wb-asset="${escHtml(name)}" src="${src}" alt="${escHtml(name)}"${widthAttr} onerror="this.outerHTML='<span class=md-img-err>${ICON.imgErr} ${escHtml(name)}</span>'">`);
+    }
+    return slot(buildEmbedStub(name, true));
+  });
+
+  // Standard image: ![alt](url)
+  s = s.replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (_, alt, src) => {
+    return slot(`<img class="md-img" src="${escHtml(src)}" alt="${escHtml(alt)}">`);
+  });
+
+  // Wiki links: [[...]]
+  s = s.replace(/\[\[([^\]]+)\]\]/g, (_, inner) => {
+    inner = inner.trim();
+    let display, target, anchor = '';
+
+    if (inner.includes('|')) {
+      const [left, right] = inner.split('|', 2);
+      display = right.trim();
+      const [t, a] = left.trim().split('#');
+      target = t.trim();
+      anchor = a ? '#' + a.trim() : '';
+    } else {
+      const [t, a] = inner.split('#');
+      target = t.trim();
+      anchor = a !== undefined ? '#' + (a || '').trim() : '';
+      // Display text should never carry the raw "#" — that's link syntax,
+      // not something a reader should see. Same-page (no target) shows
+      // just the heading name; a target file still shows just its name,
+      // unchanged from before.
+      display = target || (a || '').trim();
+    }
+
+    // Same-page anchor
+    if (!target) {
+      const hid = headingId(anchor.replace('#', ''));
+      return slot(`<a class="md-ilink" href="${escHtml(anchor)}" onclick="scrollToAnchor(event,'${escHtml(hid)}')">${escHtml(display)}</a>`);
+    }
+
+    const key = target.toLowerCase().replace(/\.md$/,'');
+    const url = state.fileIndex[key];
+    if (url) {
+      const anchorAttr = anchor ? ` data-anchor="${escHtml(anchor)}"` : '';
+      return slot(`<a class="md-ilink" onclick="openFile('${url}','${escHtml(target)}')"${anchorAttr}>${escHtml(display)}</a>`);
+    }
+    // Unresolved — note may be in an unexpanded folder
+    return slot(`<span class="md-ilink-dead" title="Note not yet loaded or not found">${escHtml(display)}</span>`);
+  });
+
+  // Standard Markdown links: [text](url)
+  s = s.replace(/\[([^\]]+)\]\(([^)\n]+)\)/g, (_, text, href) => {
+    href = href.trim();
+    // .md link → internal nav
+    if (href.match(/\.md($|#)/i)) {
+      const [path, frag] = href.split('#');
+      const noteName = decodeURIComponent(path.replace(/\.md$/i,'').split('/').pop());
+      const url = state.fileIndex[noteName.toLowerCase()];
+      if (url) {
+        const anchorAttr = frag ? ` data-anchor="#${escHtml(frag)}"` : '';
+        return slot(`<a class="md-ilink" onclick="openFile('${url}','${escHtml(noteName)}')"${anchorAttr}>${escHtml(text)}</a>`);
+      }
+    }
+    // Same-page anchor
+    if (href.startsWith('#')) {
+      const hid = headingId(href.replace('#',''));
+      return slot(`<a class="md-ilink" href="${escHtml(href)}" onclick="scrollToAnchor(event,'${hid}')">${escHtml(text)}</a>`);
+    }
+    // Folder/file-share link (file:// UNC or drive path) — browsers can't
+    // open a native Explorer/Finder window from a page link, and Obsidian's
+    // own file:// syntax doesn't survive a plain click here, so this copies
+    // a cleaned path to the clipboard instead of attempting to navigate.
+    if (/^file:\/\//i.test(href)) {
+      const path = decodeFileLinkPath(href);
+      return slot(`<a class="md-ilink wb-folder-link" data-path="${escHtml(path)}" title="Copy folder path to clipboard">${escHtml(text)}</a>`);
+    }
+    // External
+    return slot(`<a class="md-ilink" href="${escHtml(href)}" target="_blank" rel="noopener">${escHtml(text)}</a>`);
+  });
+
   // 2. Bold + italic (must come before bold/italic alone)
   s = s.replace(/\*\*\*(.+?)\*\*\*/g,  '<strong><em>$1</em></strong>');
   s = s.replace(/___(.+?)___/g,         '<strong><em>$1</em></strong>');
@@ -2256,95 +2389,73 @@ function renderInline(text) {
   // 6. Highlight
   s = s.replace(/==(.+?)==/g, '<mark class="md-highlight">$1</mark>');
 
-  // 7. Wiki image embed: ![[image.ext]] or ![[image.ext|width]] (Obsidian's
-  // pipe-size syntax — e.g. ![[Pasted image 20250715.png|1028]]). The size
-  // suffix must be split off before the extension check, or it never
-  // matches isImageExt() and falls through to the note-embed stub.
-  s = s.replace(/!\[\[([^\]]+)\]\]/g, (_, raw) => {
-    const [namePart, sizePart] = raw.split('|');
-    const name = namePart.trim();
-    const size = (sizePart || '').trim();
-    if (isImageExt(name)) {
-      const src = attachmentSrcFor(name);
-      const widthAttr = /^\d+$/.test(size) ? ` width="${size}"` : '';
-      return `<img class="md-img" data-wb-asset="${escHtml(name)}" src="${src}" alt="${escHtml(name)}"${widthAttr} onerror="this.outerHTML='<span class=md-img-err>${ICON.imgErr} ${escHtml(name)}</span>'">`;
-    }
-    return buildEmbedStub(name, true);
-  });
-
-  // 8. Standard image: ![alt](url)
-  s = s.replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (_, alt, src) => {
-    return `<img class="md-img" src="${escHtml(src)}" alt="${escHtml(alt)}">`;
-  });
-
-  // 9. Wiki links: [[...]]
-  s = s.replace(/\[\[([^\]]+)\]\]/g, (_, inner) => {
-    inner = inner.trim();
-    let display, target, anchor = '';
-
-    if (inner.includes('|')) {
-      const [left, right] = inner.split('|', 2);
-      display = right.trim();
-      const [t, a] = left.trim().split('#');
-      target = t.trim();
-      anchor = a ? '#' + a.trim() : '';
-    } else {
-      const [t, a] = inner.split('#');
-      target = t.trim();
-      anchor = a !== undefined ? '#' + (a || '').trim() : '';
-      display = target || ('#' + (a || ''));
-    }
-
-    // Same-page anchor
-    if (!target) {
-      const hid = headingId(anchor.replace('#', ''));
-      return `<a class="md-ilink" href="${escHtml(anchor)}" onclick="scrollToAnchor(event,'${escHtml(hid)}')">${escHtml(display)}</a>`;
-    }
-
-    const key = target.toLowerCase().replace(/\.md$/,'');
-    const url = state.fileIndex[key];
-    if (url) {
-      const anchorAttr = anchor ? ` data-anchor="${escHtml(anchor)}"` : '';
-      return `<a class="md-ilink" onclick="openFile('${url}','${escHtml(target)}')"${anchorAttr}>${escHtml(display)}</a>`;
-    }
-    // Unresolved — note may be in an unexpanded folder
-    return `<span class="md-ilink-dead" title="Note not yet loaded or not found">${escHtml(display)}</span>`;
-  });
-
-  // 10. Standard Markdown links: [text](url)
-  s = s.replace(/\[([^\]]+)\]\(([^)\n]+)\)/g, (_, text, href) => {
-    href = href.trim();
-    // .md link → internal nav
-    if (href.match(/\.md($|#)/i)) {
-      const [path, frag] = href.split('#');
-      const noteName = decodeURIComponent(path.replace(/\.md$/i,'').split('/').pop());
-      const url = state.fileIndex[noteName.toLowerCase()];
-      if (url) {
-        const anchorAttr = frag ? ` data-anchor="#${escHtml(frag)}"` : '';
-        return `<a class="md-ilink" onclick="openFile('${url}','${escHtml(noteName)}')"${anchorAttr}>${escHtml(text)}</a>`;
-      }
-    }
-    // Same-page anchor
-    if (href.startsWith('#')) {
-      const hid = headingId(href.replace('#',''));
-      return `<a class="md-ilink" href="${escHtml(href)}" onclick="scrollToAnchor(event,'${hid}')">${escHtml(text)}</a>`;
-    }
-    // External
-    return `<a class="md-ilink" href="${escHtml(href)}" target="_blank" rel="noopener">${escHtml(text)}</a>`;
-  });
-
   // 11. #tags — only if preceded by whitespace or start-of-string, not inside other spans
   s = s.replace(/(^|[\s(,])#([\w/:-]+)/g, (_, pre, tag) => {
     return `${pre}<span class="md-tag">#${tag}</span>`;
   });
 
-  // 12. Restore code slots
-  codeSlots.forEach((code, idx) => {
-    s = s.replace(`\x00C${idx}\x00`, code);
-  });
+  // 12. Restore link/image slots, then code slots
+  linkSlots.forEach((html, idx) => { s = s.replace(`\x00L${idx}\x00`, html); });
+  codeSlots.forEach((code, idx) => { s = s.replace(`\x00C${idx}\x00`, code); });
 
   return s;
 }
+
+// Decode a file:// link back into a clean, paste-ready Windows path —
+// %5C%5C → \\, %20 → space, no leftover URI encoding. Handles both UNC
+// shares (\\server\share\...) and local drive paths (C:\...).
+function decodeFileLinkPath(href) {
+  let p = href.trim().replace(/^file:\/+/i, '');
+  try { p = decodeURIComponent(p); } catch (_) { /* leave as-is if malformed */ }
+  p = p.replace(/\//g, '\\');
+  if (/^[A-Za-z]:/.test(p.replace(/^\\+/, ''))) {
+    p = p.replace(/^\\+/, '');           // drive-letter path, no UNC prefix
+  } else {
+    p = '\\\\' + p.replace(/^\\+/, '');  // network share — exactly one \\ prefix
+  }
+  return p;
+}
+
+// Copy a folder path to the clipboard and show a brief confirmation next
+// to the link that was clicked. No navigation is attempted — browsers
+// can't open a native Explorer/Finder window from a page link either way.
+async function copyFolderPath(path, el) {
+  try {
+    await navigator.clipboard.writeText(path);
+  } catch (_) {
+    const ta = document.createElement('textarea');
+    ta.value = path;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (_) {}
+    document.body.removeChild(ta);
+  }
+  showCopiedTip(el);
+}
+
+function showCopiedTip(el) {
+  const tip = document.createElement('div');
+  tip.className = 'wb-copied-tip';
+  tip.textContent = 'Copied to clipboard';
+  document.body.appendChild(tip);
+  const r = el.getBoundingClientRect();
+  tip.style.left = (r.left + window.scrollX) + 'px';
+  tip.style.top  = (r.bottom + window.scrollY + 4) + 'px';
+  requestAnimationFrame(() => tip.classList.add('show'));
+  setTimeout(() => {
+    tip.classList.remove('show');
+    setTimeout(() => tip.remove(), 200);
+  }, 1300);
+}
+
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('.wb-folder-link');
+  if (!link) return;
+  e.preventDefault();
+  copyFolderPath(link.dataset.path || '', link);
+});
 
 // ── Embed stub builder ───────────────────────────────────────────
 function buildEmbedStub(name, inline) {
@@ -2934,9 +3045,31 @@ function getReaderMin() {
   return 600;
 }
 
+// Shared "does the label overlap the button group" check for headers that
+// pair a left-justified label with a right-justified icon group (Vault
+// Files, Outline). Always re-measures the group at full width first — a
+// hidden group reports zero width, and checking against that would let it
+// flip back on at the wrong breakpoint. FIT_BUFFER is the minimum breathing
+// room kept between label and buttons before the group disappears.
+const FIT_BUFFER = 28;
+function fitToolbarLabel(containerId, labelSel, groupId) {
+  const el = $(containerId);
+  const group = $(groupId);
+  if (!el || !group) return;
+  group.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    const label = el.querySelector(labelSel);
+    if (!label) return;
+    const need = label.scrollWidth + group.scrollWidth + FIT_BUFFER;
+    if (el.clientWidth < need) group.classList.add('hidden');
+  });
+}
+
 // onClose: called when panel snaps shut via drag or a plain click
 // onOpen:  called when a click on an already-closed handle reopens it
-function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max = 480) {
+// onResize: called on every drag-move tick, so header labels can re-check
+// whether their button group still fits (see fitToolbarLabel)
+function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max = 480, onResize) {
   const handle     = $(handleId);
   const panel      = $(panelId);
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
@@ -2993,6 +3126,7 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
 
       panel.style.width    = w + 'px';
       panel.style.minWidth = w + 'px';
+      if (onResize) onResize();
     }
 
     function onUp() {
@@ -3039,7 +3173,8 @@ makeResizable('rh-sidebar', 'sidebar', 'left', 'wb_sb_width', () => {
   state.sidebarOpen = true;
   setPanelOpen('sidebar', 'rh-sidebar', 'wb_sb_width', true);
   persist('wb_sidebar', true);
-});
+  fitToolbarLabel('sb-toolbar', '.sbt-label', 'sbt-group');
+}, undefined, () => fitToolbarLabel('sb-toolbar', '.sbt-label', 'sbt-group'));
 
 makeResizable('rh-right', 'right-panel', 'right', 'wb_rp_width', () => {
   state.rightPanelOpen = false;
@@ -3048,7 +3183,8 @@ makeResizable('rh-right', 'right-panel', 'right', 'wb_rp_width', () => {
   state.rightPanelOpen = true;
   setPanelOpen('right-panel', 'rh-right', 'wb_rp_width', true);
   persist('wb_right_panel', true);
-});
+  fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group');
+}, undefined, () => fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group'));
 
 // ── Panel open/close helpers ─────────────────────────────────────
 // Inline styles from dragging override CSS .closed rules — must clear them on close
@@ -3943,22 +4079,24 @@ async function approveNewFileFromOverview(idx) {
   }
 }
 
+const RP_HEADER_REVIEW = '<div class="rp-pane-header">Review changes</div>';
+
 async function renderReviewTab() {
   const pane = $('rp-review');
   const overview = renderReviewOverview();
 
   if (!state.activeUrl) {
-    pane.innerHTML = overview || '<div class="rp-empty">Open a file to see its changes.</div>';
+    pane.innerHTML = RP_HEADER_REVIEW + (overview || '<div class="rp-empty">Open a file to see its changes.</div>');
     return;
   }
   const changesUrl = changesUrlFor(state.activeUrl);
-  pane.innerHTML = overview + '<div class="rp-empty">Loading…</div>';
+  pane.innerHTML = RP_HEADER_REVIEW + overview + '<div class="rp-empty">Loading…</div>';
   const txt = await readVaultFileOrNull(changesUrl);
   const entries = txt ? parseChanges(txt) : [];
   pane._wbEntries = entries;
 
   if (!entries.length) {
-    pane.innerHTML = overview || '<div class="rp-empty">No recorded changes for this file.</div>';
+    pane.innerHTML = RP_HEADER_REVIEW + (overview || '<div class="rp-empty">No recorded changes for this file.</div>');
     return;
   }
   const open = entries.filter(e => e.reviewed === 'no').length;
@@ -3991,7 +4129,7 @@ async function renderReviewTab() {
     </div>`;
   });
   html += '</div>';
-  pane.innerHTML = html;
+  pane.innerHTML = RP_HEADER_REVIEW + html;
   // keep the selection in sync with an already-open diff strip
   if (diffEntryIdx >= 0) {
     const sel = pane.querySelector(`.comment-card[data-ci="${diffEntryIdx}"]`);
@@ -4732,6 +4870,9 @@ function loadPersistedState() {
       $('right-panel').style.minWidth = w;
     }
 
+    fitToolbarLabel('sb-toolbar', '.sbt-label', 'sbt-group');
+    fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group');
+
     const theme = localStorage.getItem('wb_theme');
     if (theme) applyTheme(JSON.parse(theme));
 
@@ -4830,6 +4971,7 @@ function renderOutlineTab() {
 
   if (toolbar) toolbar.style.display = 'flex';
   updateOutlineLockIcon();
+  fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group');
 
   const url    = state.activeUrl || null;
   const folded = getOutlineFolds(url);
@@ -5008,10 +5150,12 @@ function renderLinkGroup(label, items, kind) {
   return `<div class="rv-ov-label">${label}</div>${rows}`;
 }
 
+const RP_HEADER_LINKS = '<div class="rp-pane-header">Links</div>';
+
 function renderBacklinksTab() {
   const pane = $('rp-backlinks');
   if (!state.activeUrl) {
-    pane.innerHTML = '<div class="rp-empty">Open a file to see its links.</div>';
+    pane.innerHTML = RP_HEADER_LINKS + '<div class="rp-empty">Open a file to see its links.</div>';
     return;
   }
 
@@ -5040,7 +5184,7 @@ function renderBacklinksTab() {
   }
   html += `<div class="backlink-note">Backlinks only include files opened this session — WikiBase has no way to scan the whole vault for links without opening each file.</div>`;
 
-  pane.innerHTML = html;
+  pane.innerHTML = RP_HEADER_LINKS + html;
 }
 
 // ── Search tab (S6 — compiled this session) ─────────────────────
@@ -5221,17 +5365,19 @@ function serializeComments(comments) {
   ).join('');
 }
 
+const RP_HEADER_COMMENTS = '<div class="rp-pane-header">Comments</div>';
+
 async function renderCommentsTab() {
   const pane = $('rp-comments');
   if (!state.activeUrl) {
-    pane.innerHTML = '<div class="rp-empty">Open a file to see comments.</div>';
+    pane.innerHTML = RP_HEADER_COMMENTS + '<div class="rp-empty">Open a file to see comments.</div>';
     return;
   }
 
   const commentsUrl = commentsUrlFor(state.activeUrl);
   let comments = [];
 
-  pane.innerHTML = '<div class="rp-empty">Loading…</div>';
+  pane.innerHTML = RP_HEADER_COMMENTS + '<div class="rp-empty">Loading…</div>';
 
   const cText = await readVaultFileOrNull(commentsUrl);
   if (cText !== null) comments = parseComments(cText);
@@ -5278,7 +5424,7 @@ async function renderCommentsTab() {
     <button class="comment-submit" onclick="postComment()">Post</button>
   </div>`;
 
-  pane.innerHTML = html;
+  pane.innerHTML = RP_HEADER_COMMENTS + html;
 }
 
 // Shared list of rendered block selectors for text-match highlighting.
