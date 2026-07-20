@@ -506,6 +506,16 @@
       display: flex; align-items: center; gap: 2px;
     }
     #reader-nav-pill .icon-btn { background: var(--bg-reader); }
+    /* Fade strip behind the floating corner buttons — content used to
+       scroll straight up with a hard edge right under the button row.
+       This sits above the scroll area (below the buttons' z-index) and
+       fades the reader background from solid to transparent, so text
+       dissolves before it reaches the icons instead of clipping under them. */
+    #reader-fade {
+      position: absolute; top: 0; left: 0; right: 0; height: 48px;
+      background: linear-gradient(to bottom, var(--bg-reader) 0%, var(--bg-reader) 45%, transparent 100%);
+      pointer-events: none; z-index: 5;
+    }
     /* Fold controls (collapse all / collapse unused / expand all) for the
        reader's own headings. Neutral tone — deliberately not accent-colored
        so it reads as app chrome, not a call-to-action. Sits left of Properties. */
@@ -1363,6 +1373,7 @@
       </button>
       <!-- Properties flyout (S13) -->
       <div id="props-panel" role="dialog" aria-label="File properties" style="display:none"></div>
+      <div id="reader-fade" aria-hidden="true"></div>
       <main id="reader">
         <div class="reader-empty" id="reader-empty">Select a file to read</div>
         <div id="reader-content"></div>
@@ -1649,10 +1660,11 @@ const state = {
   helpOpen:     false, // true while help.md is showing — lets Outline render
                         // its headings even though activeUrl is deliberately null
   changelogOpen: false, // same idea as helpOpen, for the changelog view
-  backStack:    [],    // [{url,name}] — session-only "previous note" history, resets on reload
-  forwardStack: [],    // [{url,name}] — pages you've gone Back from; goes stale on any new nav
+  backStack:    [],    // [{url,name,scrollTop}] — session-only "previous note" history, resets on reload
+  forwardStack: [],    // [{url,name,scrollTop}] — pages you've gone Back from; goes stale on any new nav
   navBack:      false, // true only for the one openFile() call triggered by goBack()
   navForward:   false, // true only for the one openFile() call triggered by goForward()
+  navRestoreScroll: 0, // scrollTop to restore on that one openFile() call, from the popped stack entry
   editing:      false, // S9 — editor mode active
   editUrl:      null,  // S9 — file being edited
   editName:     null,  // S9 — its display name
@@ -2235,8 +2247,42 @@ function escHtml(s) {
     .replace(/"/g,'&quot;');
 }
 
+// Shared broken-image fallback. Both image renderers used to build this
+// markup as a string spliced into the onerror="..." attribute itself —
+// but ICON.imgErr is an SVG with its own double-quoted attributes
+// (viewBox="...", style="..."), and nested double quotes inside a
+// double-quoted HTML attribute close it early. That's what was splicing
+// raw fragments ("Pasted image x.png", trailing '">) into the page and
+// corrupting everything rendered after it. Building the fallback via DOM
+// methods in a real function sidesteps the whole class of bug — nothing
+// here is ever parsed as HTML attribute text.
+function wbImgError(el) {
+  const name = el.dataset.wbAsset || el.alt || '';
+  const span = document.createElement('span');
+  span.className = 'md-img-err';
+  span.innerHTML = ICON.imgErr;
+  span.appendChild(document.createTextNode(' ' + name));
+  el.replaceWith(span);
+}
+
 function headingId(text) {
   return 'h-' + text.toLowerCase().replace(/[^\w\s-]/g,'').trim().replace(/\s+/g,'-');
+}
+
+// De-dupes heading ids within one document render. Two headings with the
+// same text (e.g. "Overview" under two different parents) used to get the
+// identical DOM id — harmless for the anchor a reader lands on (first
+// match wins, same as a browser or Obsidian), but it broke anything that
+// matched BY id: the Outline highlighted both rows at once. seenIds is
+// scoped to a single parseMarkdown() call and threaded through the
+// recursive renderBlockTree/renderSingleBlock calls so blockquote/callout
+// headings dedupe against the rest of the document too. First occurrence
+// keeps the plain id; anchor links (#heading) still resolve to it.
+function uniqueHeadingId(text, seenIds) {
+  const base = headingId(text);
+  const count = (seenIds.get(base) || 0) + 1;
+  seenIds.set(base, count);
+  return count === 1 ? base : `${base}-${count}`;
 }
 
 // 13 Obsidian callout types -> 9 color families (locked S7, see CSS above)
@@ -2309,7 +2355,7 @@ function renderInline(text) {
     if (isImageExt(name)) {
       const src = attachmentSrcFor(name);
       const widthAttr = /^\d+$/.test(size) ? ` width="${size}"` : '';
-      return slot(`<img class="md-img" data-wb-asset="${escHtml(name)}" src="${src}" alt="${escHtml(name)}"${widthAttr} onerror="this.outerHTML='<span class=md-img-err>${ICON.imgErr} ${escHtml(name)}</span>'">`);
+      return slot(`<img class="md-img" data-wb-asset="${escHtml(name)}" src="${src}" alt="${escHtml(name)}"${widthAttr} onerror="wbImgError(this)">`);
     }
     return slot(buildEmbedStub(name, true));
   });
@@ -2507,7 +2553,7 @@ function parseMarkdown(md) {
     }
   }
 
-  return renderBlockTree(parseBlocks(lines.slice(start)));
+  return renderBlockTree(parseBlocks(lines.slice(start)), new Map());
 }
 
 // Block-level parser — used for the top-level document and recursively for
@@ -2648,7 +2694,8 @@ function parseBlocks(lines) {
 }
 
 // ── Block tree renderer (handles heading nesting) ─────────────────
-function renderBlockTree(blocks) {
+function renderBlockTree(blocks, seenIds) {
+  seenIds = seenIds || new Map();
   let html = '';
   let i = 0;
 
@@ -2663,8 +2710,8 @@ function renderBlockTree(blocks) {
         if (blocks[j].type === 'heading' && blocks[j].level <= level) break;
         j++;
       }
-      const sectionHtml = j > i + 1 ? renderBlockTree(blocks.slice(i + 1, j)) : '';
-      const hid = headingId(block.content);
+      const sectionHtml = j > i + 1 ? renderBlockTree(blocks.slice(i + 1, j), seenIds) : '';
+      const hid = uniqueHeadingId(block.content, seenIds);
       html += `<div class="md-h-block">
 <div class="md-h-row${level === 2 ? ' md-h-row-h2' : ''}" onclick="toggleFold(this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}">${renderInline(block.content)}</h${level}></div>
 <div class="md-section">${sectionHtml}</div>
@@ -2673,7 +2720,7 @@ function renderBlockTree(blocks) {
       continue;
     }
 
-    html += renderSingleBlock(block);
+    html += renderSingleBlock(block, seenIds);
     i++;
   }
 
@@ -2681,7 +2728,7 @@ function renderBlockTree(blocks) {
 }
 
 // ── Single block renderer ─────────────────────────────────────────
-function renderSingleBlock(block) {
+function renderSingleBlock(block, seenIds) {
   switch (block.type) {
 
     case 'hr':
@@ -2697,12 +2744,12 @@ function renderSingleBlock(block) {
     }
 
     case 'blockquote':
-      return `<blockquote class="md-blockquote">${renderBlockTree(block.body)}</blockquote>`;
+      return `<blockquote class="md-blockquote">${renderBlockTree(block.body, seenIds)}</blockquote>`;
 
     case 'callout': {
       const meta  = CALLOUT_META[block.cType] || { icon: '·', cls: 'note', label: block.cType };
       const title = block.customTitle || meta.label;
-      const body  = block.body.length ? `<div class="md-callout-body">${renderBlockTree(block.body)}</div>` : '';
+      const body  = block.body.length ? `<div class="md-callout-body">${renderBlockTree(block.body, seenIds)}</div>` : '';
       return `<div class="md-callout ${meta.cls}"><div class="md-callout-label">${meta.icon} ${escHtml(title)}</div>${body}</div>`;
     }
 
@@ -2752,7 +2799,7 @@ function renderSingleBlock(block) {
     case 'image': {
       const src = attachmentSrcFor(block.name);
       const widthAttr = /^\d+$/.test(block.size || '') ? ` width="${block.size}"` : '';
-      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}" src="${src}" alt="${escHtml(block.name)}"${widthAttr} onerror="this.parentNode.innerHTML='<div class=md-img-err>${ICON.imgErr} ${escHtml(block.name)}</div>'"></div>`;
+      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}" src="${src}" alt="${escHtml(block.name)}"${widthAttr} onerror="wbImgError(this)"></div>`;
     }
 
     case 'embed':
@@ -2978,6 +3025,7 @@ function goBack() {
   if (!state.backStack.length) return;
   const prev = state.backStack.pop();
   state.navBack = true;
+  state.navRestoreScroll = prev.scrollTop || 0;
   openFile(prev.url, prev.name);
 }
 
@@ -2985,6 +3033,7 @@ function goForward() {
   if (!state.forwardStack.length) return;
   const next = state.forwardStack.pop();
   state.navForward = true;
+  state.navRestoreScroll = next.scrollTop || 0;
   openFile(next.url, next.name);
 }
 
@@ -3008,17 +3057,24 @@ async function openFile(url, name) {
   // stack and the forward stack goes stale, since there's no longer a
   // single onward path to redo.
   if (state.activeUrl && state.activeUrl !== url) {
+    // Scroll position of the page being left, saved onto whichever stack
+    // it lands on — this is what lets Back/Forward return you to where
+    // you were reading, not just which file you were reading.
+    const leavingScroll = $('reader') ? $('reader').scrollTop : 0;
     if (state.navBack) {
-      state.forwardStack.push({ url: state.activeUrl, name: state.activeName });
+      state.forwardStack.push({ url: state.activeUrl, name: state.activeName, scrollTop: leavingScroll });
     } else if (state.navForward) {
-      state.backStack.push({ url: state.activeUrl, name: state.activeName });
+      state.backStack.push({ url: state.activeUrl, name: state.activeName, scrollTop: leavingScroll });
     } else {
-      state.backStack.push({ url: state.activeUrl, name: state.activeName });
+      state.backStack.push({ url: state.activeUrl, name: state.activeName, scrollTop: leavingScroll });
       state.forwardStack = [];
     }
   }
+  const isNavRestore    = state.navBack || state.navForward;
+  const restoreScrollTop = state.navRestoreScroll || 0;
   state.navBack = false;
   state.navForward = false;
+  state.navRestoreScroll = 0;
   updateBackButtons();
 
   state.activeUrl  = url;
@@ -3045,7 +3101,10 @@ async function openFile(url, name) {
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
     applyFoldState(url); // restore collapsed headings from last visit
-    $('reader').scrollTop = 0;
+    // Back/Forward lands you back where you were reading; any other
+    // navigation (sidebar, wiki link, search) starts at the top, same as
+    // opening a fresh file always has.
+    $('reader').scrollTop = isNavRestore ? restoreScrollTop : 0;
 
     // Settings → "Open last note" reads this back at next boot. Written on
     // success only, so a broken link never becomes "the file to reopen".
