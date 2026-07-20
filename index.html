@@ -110,12 +110,13 @@
     body[data-theme="dark"][data-headers="things"] { --heading-1: #5B9CF6; --heading-2: #FF8080; --heading-3: #5FD98A; --heading-4: #A0A0A5; }
     /* 8th identity — Obsidian Minimal theme's actual built-in accent
        palette (.theme-dark/.theme-light --color-red/orange/yellow/green/
-       blue in the real theme.css — same 8 hex values in both modes, not
-       redder/bluer per-mode like the other 7 identities here). Goes to
-       H5 (not just H4 like every other identity) so the rainbow reads
-       red→orange→yellow→green→blue the way Minimal's own colorful
-       headings feature does. */
-    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; }
+       blue/purple in the real theme.css — same 8 hex values in both
+       modes, not redder/bluer per-mode like the other 7 identities
+       here). Goes all the way to H6 so the rainbow reads red→orange→
+       yellow→green→blue→purple the way Minimal's own colorful headings
+       feature does — --color-purple is #9e86c8, confirmed from
+       kepano/obsidian-minimal's theme.css. */
+    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; --heading-6: #9e86c8; }
     body[data-theme="light"][data-headers="dark"]   { --heading-1: #64B5F6; --heading-2: #e8e5df; --heading-3: #d8d5cf; --heading-4: #c8c5bf; }
     body[data-theme="light"][data-headers="light"]  { --heading-1: #0b3d66; --heading-2: #14559c; --heading-3: #1a6ef5; --heading-4: #5b93d9; }
     body[data-theme="light"][data-headers="frost"]  { --heading-1: #0A5DC2; --heading-2: #007AFF; --heading-3: #34AADC; --heading-4: #6E7F96; }
@@ -123,7 +124,7 @@
     body[data-theme="light"][data-headers="mica"]   { --heading-1: #005A9E; --heading-2: #0078D4; --heading-3: #107C10; --heading-4: #5B5B5B; }
     body[data-theme="light"][data-headers="marble"] { --heading-1: #1E6FD9; --heading-2: #5E5CE6; --heading-3: #30B0C7; --heading-4: #8E8E93; }
     body[data-theme="light"][data-headers="things"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; }
-    body[data-theme="light"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; }
+    body[data-theme="light"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; --heading-6: #9e86c8; }
 
     /* Background-color palette per named theme identity — the second
        "slice" of each theme (Settings → Background color). Gated by
@@ -318,9 +319,10 @@
       color: var(--text-muted);
       font-size: 13px;
       white-space: nowrap;
+      border-right: 2px solid transparent;
     }
     .file-row:hover { color: var(--text-primary); }
-    .file-row.active { color: var(--accent); font-weight: 500; }
+    .file-row.active { color: var(--accent); font-weight: 500; background: var(--accent-bg); border-right-color: var(--accent); }
 
     .root-file {
       display: flex;
@@ -331,9 +333,10 @@
       color: var(--text-muted);
       font-size: 13px;
       white-space: nowrap;
+      border-right: 2px solid transparent;
     }
     .root-file:hover { color: var(--text-primary); }
-    .root-file.active { color: var(--accent); font-weight: 500; }
+    .root-file.active { color: var(--accent); font-weight: 500; background: var(--accent-bg); border-right-color: var(--accent); }
 
     .sb-divider { height: 1px; background: var(--border); margin: 4px 0; }
 
@@ -495,11 +498,14 @@
       position: absolute; top: 8px; right: 52px; z-index: 6;
       background: var(--bg-reader);
     }
-    /* Back button — mirrors Properties/Edit on the opposite corner, same size. */
-    #btn-back-reader {
+    /* Back/Forward pair — mirrors Properties/Edit on the opposite corner,
+       same size, grouped the same way the fold-pill icons are on the
+       right so they move together instead of needing separate math. */
+    #reader-nav-pill {
       position: absolute; top: 8px; left: 16px; z-index: 6;
-      background: var(--bg-reader);
+      display: flex; align-items: center; gap: 2px;
     }
+    #reader-nav-pill .icon-btn { background: var(--bg-reader); }
     /* Fold controls (collapse all / collapse unused / expand all) for the
        reader's own headings. Neutral tone — deliberately not accent-colored
        so it reads as app chrome, not a call-to-action. Sits left of Properties. */
@@ -757,10 +763,16 @@
       margin: 0;
     }
 
-    /* Table */
-    .md-table-wrap { overflow-x: auto; margin: 1rem 0; }
-    .md-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .md-table th { text-align: left; font-weight: 600; color: var(--text-primary); font-size: 12px; padding: 8px 12px; border-bottom: 2px solid var(--border-strong); background: var(--bg-sidebar); }
+    /* Table — width is auto (content-sized, Obsidian-style), capped at
+       100% of the reader column so it never overflows; overflow-x on
+       the wrap is just a safety net for a single unbreakable wide cell.
+       Left-justified by default (no centering). Spacing above/below is
+       PADDING on the wrap, not margin — margin here would collapse
+       against the previous paragraph's own margin-bottom and make the
+       top gap read as smaller than the bottom one. */
+    .md-table-wrap { overflow-x: auto; padding: 1rem 0; }
+    .md-table { width: auto; max-width: 100%; border-collapse: collapse; font-size: 14px; }
+    .md-table th { text-align: left; font-weight: 600; color: var(--text-primary); font-size: 14px; padding: 8px 12px; border-bottom: 2px solid var(--border-strong); background: var(--bg-sidebar); }
     .md-table td { color: var(--text-secondary); padding: 7px 12px; border-bottom: 1px solid var(--border); }
     .md-table tr:last-child td { border-bottom: none; }
     .md-table tr:hover td { background: var(--hover); }
@@ -1085,6 +1097,9 @@
     .rp-outline-row.rp-outline-h1 { padding-left: 4px; }
     .rp-outline-row.rp-outline-h2 { padding-left: 12px; }
     .rp-outline-row.rp-outline-h3 { padding-left: 20px; }
+    .rp-outline-row.rp-outline-h4 { padding-left: 28px; }
+    .rp-outline-row.rp-outline-h5 { padding-left: 36px; }
+    .rp-outline-row.rp-outline-h6 { padding-left: 44px; }
     .rp-outline-fold-btn, .rp-outline-fold-spacer {
       flex-shrink: 0; width: 18px; height: 18px;
       display: flex; align-items: center; justify-content: center;
@@ -1102,9 +1117,8 @@
       border-right: 2px solid transparent;
     }
     .rp-outline-item:hover { background: var(--hover); color: var(--text-primary); }
-    .rp-outline-item.active { color: var(--accent); border-right-color: var(--accent); }
+    .rp-outline-item.active { color: var(--accent); border-right-color: var(--accent); background: var(--accent-bg); }
     .rp-outline-row.rp-outline-h1 .rp-outline-item { font-weight: 500; }
-    .rp-outline-row.rp-outline-h3 .rp-outline-item { font-size: 11px; }
 
     /* Comments */
     .comment-list { padding: 6px; }
@@ -1223,11 +1237,6 @@
       </svg>
     </button>
 
-    <!-- Back (previous note) — session-only history, right of the sidebar toggle -->
-    <button class="icon-btn" id="btn-back-header" title="Back" aria-label="Back" onclick="goBack()" disabled>
-      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-    </button>
-
     <!-- New file/folder (S14) — next to the sidebar toggle -->
     <button class="icon-btn" id="btn-new" title="New file or folder" aria-label="New file or folder" onclick="openCreateModal(null)">
       <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1311,10 +1320,15 @@
 
     <!-- Reader -->
     <div id="reader-wrap">
-      <!-- Back (previous note) — mirrors Properties/Edit, opposite corner -->
-      <button class="icon-btn" id="btn-back-reader" title="Back" aria-label="Back" onclick="goBack()" disabled>
-        <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      </button>
+      <!-- Back / Forward (previous/next note) — mirrors Properties/Edit, opposite corner -->
+      <div id="reader-nav-pill">
+        <button class="icon-btn" id="btn-back-reader" title="Back" aria-label="Back" onclick="goBack()" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-forward-reader" title="Forward" aria-label="Forward" onclick="goForward()" disabled>
+          <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
 
       <!-- Fold controls for this file's headings — collapse all / collapse
            unused (keeps the current heading's ancestor chain open) / expand all -->
@@ -1443,7 +1457,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9b-1</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9c</button>
     </aside>
 
   </div>
@@ -1636,7 +1650,9 @@ const state = {
                         // its headings even though activeUrl is deliberately null
   changelogOpen: false, // same idea as helpOpen, for the changelog view
   backStack:    [],    // [{url,name}] — session-only "previous note" history, resets on reload
+  forwardStack: [],    // [{url,name}] — pages you've gone Back from; goes stale on any new nav
   navBack:      false, // true only for the one openFile() call triggered by goBack()
+  navForward:   false, // true only for the one openFile() call triggered by goForward()
   editing:      false, // S9 — editor mode active
   editUrl:      null,  // S9 — file being edited
   editName:     null,  // S9 — its display name
@@ -2394,9 +2410,19 @@ function renderInline(text) {
     return `${pre}<span class="md-tag">#${tag}</span>`;
   });
 
-  // 12. Restore link/image slots, then code slots
-  linkSlots.forEach((html, idx) => { s = s.replace(`\x00L${idx}\x00`, html); });
-  codeSlots.forEach((code, idx) => { s = s.replace(`\x00C${idx}\x00`, code); });
+  // 12. Restore link/image slots, then code slots. Replacement must be a
+  // FUNCTION, not the html string directly — String.replace() treats
+  // $&, $`, $', $$ in a string replacement as special patterns (insert
+  // the match / everything before / everything after / literal $) even
+  // when the search value is a plain string, not a regex. An image alt
+  // text, filename, or link title containing a lone "$" followed by one
+  // of those characters (e.g. a cost figure like "Budget $500 chart.png")
+  // would silently splice in fragments of the surrounding line — the
+  // image's name would render trailing stray characters and corrupt
+  // everything downstream in that block. A replacer function's return
+  // value is always inserted literally, no pattern parsing.
+  linkSlots.forEach((html, idx) => { s = s.replace(`\x00L${idx}\x00`, () => html); });
+  codeSlots.forEach((code, idx) => { s = s.replace(`\x00C${idx}\x00`, () => code); });
 
   return s;
 }
@@ -2882,7 +2908,7 @@ function maybeRefreshOutlineAfterReaderFold() {
   if (outlineFoldShared() && state.activeRPTab === 'outline') renderOutlineTab();
 }
 
-// Outline's own heading list (h1-h3, matching what renderOutlineTab shows)
+// Outline's own heading list (h1-h6, matching what renderOutlineTab shows)
 // with hasChildren computed by a single lookahead: true only if the next
 // heading is a deeper level, i.e. a real nested heading follows before an
 // equal-or-shallower one. Leaf headings (nothing below, or nothing deeper
@@ -2890,7 +2916,7 @@ function maybeRefreshOutlineAfterReaderFold() {
 function outlineHeadingsMeta() {
   const rc = $('reader-content');
   if (!rc) return [];
-  const headings = [...rc.querySelectorAll('h1.md-h, h2.md-h, h3.md-h')];
+  const headings = [...rc.querySelectorAll('h1.md-h, h2.md-h, h3.md-h, h4.md-h, h5.md-h, h6.md-h')];
   return headings.map((h, i) => {
     const level = parseInt(h.tagName[1]);
     const next  = headings[i + 1];
@@ -2947,7 +2973,7 @@ function scrollToAnchor(e, targetId) {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Back navigation (session-only "previous note" history) ────────
+// ── Back/Forward navigation (session-only "previous note" history) ─
 function goBack() {
   if (!state.backStack.length) return;
   const prev = state.backStack.pop();
@@ -2955,10 +2981,18 @@ function goBack() {
   openFile(prev.url, prev.name);
 }
 
+function goForward() {
+  if (!state.forwardStack.length) return;
+  const next = state.forwardStack.pop();
+  state.navForward = true;
+  openFile(next.url, next.name);
+}
+
 function updateBackButtons() {
-  const has = state.backStack.length > 0;
-  const a = $('btn-back-header'); if (a) a.disabled = !has;
-  const b = $('btn-back-reader'); if (b) b.disabled = !has;
+  const hasBack = state.backStack.length > 0;
+  const hasForward = state.forwardStack.length > 0;
+  const b = $('btn-back-reader');    if (b) b.disabled = !hasBack;
+  const f = $('btn-forward-reader'); if (f) f.disabled = !hasForward;
 }
 
 // ── Open file ────────────────────────────────────────────────────
@@ -2966,14 +3000,25 @@ async function openFile(url, name) {
   if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
   if (state.activeUrl !== url) closeDiffStrip(); // S14+ — diff belongs to the old file
 
-  // Back-navigation history (session-only, resets on reload). Every real
-  // switch away from a file pushes it, unless this switch IS a Back click
-  // (state.navBack), so repeated Back presses walk the stack instead of
-  // re-recording the page being left.
-  if (!state.navBack && state.activeUrl && state.activeUrl !== url) {
-    state.backStack.push({ url: state.activeUrl, name: state.activeName });
+  // Back/forward history (session-only, resets on reload) — same rules as
+  // a browser tab. A Back click moves the page being left onto the
+  // forward stack (so Forward can return to it); a Forward click moves it
+  // back onto the back stack. Any other navigation (sidebar click, wiki
+  // link, search result) is a genuine new page: it's recorded on the back
+  // stack and the forward stack goes stale, since there's no longer a
+  // single onward path to redo.
+  if (state.activeUrl && state.activeUrl !== url) {
+    if (state.navBack) {
+      state.forwardStack.push({ url: state.activeUrl, name: state.activeName });
+    } else if (state.navForward) {
+      state.backStack.push({ url: state.activeUrl, name: state.activeName });
+    } else {
+      state.backStack.push({ url: state.activeUrl, name: state.activeName });
+      state.forwardStack = [];
+    }
   }
   state.navBack = false;
+  state.navForward = false;
   updateBackButtons();
 
   state.activeUrl  = url;
