@@ -242,8 +242,9 @@
       min-width: var(--sb-width);
       background: var(--bg-sidebar);
       border-right: 1px solid var(--border);
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       transition: width 0.18s ease, min-width 0.18s ease, border-right-width 0.18s ease;
       flex-shrink: 0;
     }
@@ -253,7 +254,20 @@
       border-right-width: 0;
     }
 
-    #sb-tree { padding: 6px 0; }
+    /* Fold controls — collapse all / collapse unused / expand all.
+       Own row so it stays put while #sb-tree scrolls beneath it. */
+    #sb-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 2px;
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #sb-toolbar .icon-btn { width: 24px; height: 24px; }
+    #sb-toolbar .icon { width: 14px; height: 14px; }
+
+    #sb-tree { padding: 6px 0; overflow-y: auto; flex: 1; }
 
     .folder-row {
       display: flex;
@@ -475,6 +489,25 @@
       position: absolute; top: 8px; right: 52px; z-index: 6;
       background: var(--bg-reader);
     }
+    /* Back button — mirrors Properties/Edit on the opposite corner, same size. */
+    #btn-back-reader {
+      position: absolute; top: 8px; left: 16px; z-index: 6;
+      background: var(--bg-reader);
+    }
+    /* Fold controls (collapse all / collapse unused / expand all) for the
+       reader's own headings. Neutral tone — deliberately not accent-colored
+       so it reads as app chrome, not a call-to-action. Sits left of Properties. */
+    #reader-fold-pill {
+      position: absolute; top: 8px; right: 88px; z-index: 6;
+      display: flex; align-items: center;
+      background: var(--badge-bg);
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    #reader-fold-pill .icon-btn { width: 26px; height: 26px; border-radius: 0; }
+    #reader-fold-pill .icon-btn:hover { background: var(--hover); }
+    #reader-fold-pill .rfp-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; }
     /* Properties flyout (S13) */
     #props-panel {
       position: absolute; top: 44px; right: 16px; z-index: 20;
@@ -927,7 +960,13 @@
       color: var(--text-muted);
       opacity: 0.7;
       user-select: none;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      cursor: pointer;
+      width: 100%;
     }
+    #app-version:hover { opacity: 1; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 
     /* Tab bar */
     .rp-tabs {
@@ -999,11 +1038,41 @@
     #ed-ac .ac-item { padding: 5px 10px; cursor: pointer; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     #ed-ac .ac-item.sel { background: var(--accent-bg); color: var(--accent); }
 
-    /* Outline */
+    /* Outline toolbar — lock toggle (independent/shared fold state) + the
+       same collapse all/unused/expand all set as the sidebar and reader.
+       Mirrors #sb-toolbar's row treatment (own bar, not sticky — the whole
+       right panel scrolls as one block like every other tab). */
+    #ot-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+      padding: 4px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    #ot-toolbar .icon-btn { width: 24px; height: 24px; }
+    #ot-toolbar .icon { width: 14px; height: 14px; }
+    #ot-toolbar .ot-sep { width: 1px; height: 14px; background: var(--border-strong); margin: 0 3px; flex-shrink: 0; }
+    /* Neutral tone when locked (shared) — same "chrome, not a call-to-action"
+       rule as the reader fold pill. No accent color. */
+    #ot-lock-toggle.locked { background: var(--badge-bg); color: var(--text-primary); }
+
+    /* Outline list */
     .rp-outline-list { padding: 6px 0; }
+    .rp-outline-row { display: flex; align-items: center; }
+    .rp-outline-row.rp-outline-h1 { padding-left: 4px; }
+    .rp-outline-row.rp-outline-h2 { padding-left: 12px; }
+    .rp-outline-row.rp-outline-h3 { padding-left: 20px; }
+    .rp-outline-fold-btn, .rp-outline-fold-spacer {
+      flex-shrink: 0; width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .rp-outline-fold-btn { background: none; border: none; cursor: pointer; padding: 0; }
+    .rp-outline-fold-btn .md-fold-icon { margin-top: 0; }
+    .rp-outline-fold-btn.folded .md-fold-icon { transform: rotate(-90deg); }
     .rp-outline-item {
-      display: block; width: 100%;
-      padding: 4px 12px;
+      display: block; flex: 1; min-width: 0;
+      padding: 4px 12px 4px 4px;
       font-size: 12px; color: var(--text-secondary);
       cursor: pointer; text-align: left;
       background: none; border: none;
@@ -1012,9 +1081,8 @@
     }
     .rp-outline-item:hover { background: var(--hover); color: var(--text-primary); }
     .rp-outline-item.active { color: var(--accent); border-right-color: var(--accent); }
-    .rp-outline-h1 { padding-left: 12px; font-weight: 500; }
-    .rp-outline-h2 { padding-left: 20px; }
-    .rp-outline-h3 { padding-left: 28px; font-size: 11px; }
+    .rp-outline-row.rp-outline-h1 .rp-outline-item { font-weight: 500; }
+    .rp-outline-row.rp-outline-h3 .rp-outline-item { font-size: 11px; }
 
     /* Comments */
     .comment-list { padding: 6px; }
@@ -1133,6 +1201,11 @@
       </svg>
     </button>
 
+    <!-- Back (previous note) — session-only history, right of the sidebar toggle -->
+    <button class="icon-btn" id="btn-back-header" title="Back" aria-label="Back" onclick="goBack()" disabled>
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+
     <!-- New file/folder (S14) — next to the sidebar toggle -->
     <button class="icon-btn" id="btn-new" title="New file or folder" aria-label="New file or folder" onclick="openCreateModal(null)">
       <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1192,6 +1265,17 @@
 
     <!-- Sidebar -->
     <nav id="sidebar" aria-label="Vault navigation">
+      <div id="sb-toolbar">
+        <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="sidebarCollapseAll()">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
+        </button>
+        <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="sidebarCollapseUnused()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        </button>
+        <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="sidebarExpandAll()">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
+        </button>
+      </div>
       <div id="sb-tree">
         <div class="sb-msg">Loading vault…</div>
       </div>
@@ -1202,6 +1286,27 @@
 
     <!-- Reader -->
     <div id="reader-wrap">
+      <!-- Back (previous note) — mirrors Properties/Edit, opposite corner -->
+      <button class="icon-btn" id="btn-back-reader" title="Back" aria-label="Back" onclick="goBack()" disabled>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      </button>
+
+      <!-- Fold controls for this file's headings — collapse all / collapse
+           unused (keeps the current heading's ancestor chain open) / expand all -->
+      <div id="reader-fold-pill">
+        <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="readerCollapseAll()">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
+        </button>
+        <div class="rfp-sep"></div>
+        <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="readerCollapseUnused()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        </button>
+        <div class="rfp-sep"></div>
+        <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="readerExpandAll()">
+          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
+        </button>
+      </div>
+
       <!-- Edit button (S9) — floats top-right of the reader -->
       <button class="icon-btn" id="btn-edit" title="Edit this file" aria-label="Edit this file" style="display:none" onclick="enterEdit()">
         <svg class="icon" viewBox="0 0 24 24">
@@ -1283,7 +1388,22 @@
         </button>
       </div>
       <div class="rp-body">
-        <div class="rp-pane active" id="rp-outline">  <div class="rp-empty">Open a file to see its outline.</div></div>
+        <div class="rp-pane active" id="rp-outline">
+          <div id="ot-toolbar" style="display:none">
+            <button class="icon-btn" id="ot-lock-toggle" title="Fold state independent — click to share with reader" aria-label="Fold state independent — click to share with reader" onclick="toggleOutlineFoldMode()"></button>
+            <div class="ot-sep"></div>
+            <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="outlineCollapseAll()">
+              <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
+            </button>
+            <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="outlineCollapseUnused()">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+            </button>
+            <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="outlineExpandAll()">
+              <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
+            </button>
+          </div>
+          <div id="ot-list"><div class="rp-empty">Open a file to see its outline.</div></div>
+        </div>
         <div class="rp-pane"        id="rp-comments"> <div class="rp-empty">Open a file to see comments.</div></div>
         <div class="rp-pane"        id="rp-backlinks"><div class="rp-empty">Open a file to see backlinks.</div></div>
         <div class="rp-pane"        id="rp-review">   <div class="rp-empty">Open a file to see its changes.</div></div>
@@ -1295,7 +1415,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <div id="app-version">v0.9a-2</div>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9a-5</button>
     </aside>
 
   </div>
@@ -1423,7 +1543,7 @@
         </div>
         <div class="s-sublabel">Editing</div>
         <div class="toggle-row">
-          Enable editing (New / Move / Edit)
+          Enable editing
           <label class="toggle">
             <input type="checkbox" id="tgl-editing">
             <div class="toggle-track"></div>
@@ -1486,6 +1606,9 @@ const state = {
   activeName:   null,  // display name of the open file (S9 — editor re-open)
   helpOpen:     false, // true while help.md is showing — lets Outline render
                         // its headings even though activeUrl is deliberately null
+  changelogOpen: false, // same idea as helpOpen, for the changelog view
+  backStack:    [],    // [{url,name}] — session-only "previous note" history, resets on reload
+  navBack:      false, // true only for the one openFile() call triggered by goBack()
   editing:      false, // S9 — editor mode active
   editUrl:      null,  // S9 — file being edited
   editName:     null,  // S9 — its display name
@@ -1506,6 +1629,12 @@ const state = {
   activeRPTab:     'outline',
   backlinksMap:    {},  // { [targetKey]: [{name, url}] } — populated as files are opened
   outlineObserver: null,// IntersectionObserver for active heading highlight
+  outlineFoldMode: 'independent', // 'independent' | 'shared' — Outline's own
+                        // fold-chevron state vs. sharing the reader's wb_folds
+  outlineSessionFolds: new Set(), // folded heading ids for help.md/changelog —
+                        // no stable url to key a localStorage entry to, so
+                        // these are session-only (mirrors the reader's own
+                        // persistFoldState, which silently skips saving too)
   reviewData:      null,// cached inbox data (array of {name, url, commentsUrl, comments})
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
   openLastNote:    true,  // Settings "Open last note" — default on
@@ -1901,6 +2030,10 @@ const ICON = {
   foldChevron:`<svg class="md-fold-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`,
   embedFile:  `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   imgErr:     `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="4" y1="4" x2="20" y2="20"/></svg>`,
+  // Outline fold-mode toggle (S ③b) — unlocked = independent (default),
+  // locked = shared with the reader's own wb_folds:<url> store.
+  lockOpen:   `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`,
+  lockClosed: `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
 };
 
 // ── Render sidebar ───────────────────────────────────────────────
@@ -1999,6 +2132,32 @@ async function toggleFolder(folderId) {
     try { await loadFolderFiles(folder); }
     catch (e) { console.error('Failed loading folder:', folder.name, e); }
   }
+  renderSidebar();
+}
+
+// ── Sidebar fold controls (collapse all / collapse unused / expand all) ──
+// "Collapse unused" closes every folder except the ancestor chain down to
+// the currently open file — it doesn't hide the tree to that file.
+function sidebarCollapseAll() {
+  state.openFolders = {};
+  renderSidebar();
+}
+
+function sidebarCollapseUnused() {
+  const keep = {};
+  const folderId = state.activeUrl ? state.fileFolder[state.activeUrl] : null;
+  if (folderId) {
+    let acc = '';
+    folderId.split('/').forEach(seg => { acc = acc ? `${acc}/${seg}` : seg; keep[acc] = true; });
+  }
+  state.openFolders = keep;
+  renderSidebar();
+}
+
+async function sidebarExpandAll() {
+  collectFolders().forEach(({ folder }) => { state.openFolders[folder.id] = true; });
+  renderSidebar();
+  await preloadOpenFolders(); // load files for any folder that wasn't already loaded
   renderSidebar();
 }
 
@@ -2474,6 +2633,7 @@ function toggleFold(row) {
   const folded = row.classList.toggle('folded');
   section.classList.toggle('folded', folded);
   persistFoldState(row, folded);
+  maybeRefreshOutlineAfterReaderFold();
 }
 
 // Per-file collapsed-heading memory (Obsidian-style). Keyed by file URL,
@@ -2509,6 +2669,163 @@ function applyFoldState(url) {
   });
 }
 
+// ── Reader fold controls (collapse all / collapse unused / expand all) ──
+// Mirrors the sidebar's fold controls, but over this file's own heading
+// sections instead of the folder tree.
+function readerFoldRow(row, folded) {
+  const section = row.nextElementSibling;
+  if (row.classList.contains('folded') === folded) return;
+  row.classList.toggle('folded', folded);
+  if (section) section.classList.toggle('folded', folded);
+  persistFoldState(row, folded);
+}
+
+function readerCollapseAll() {
+  document.querySelectorAll('#reader-content .md-h-row').forEach(row => readerFoldRow(row, true));
+  maybeRefreshOutlineAfterReaderFold();
+}
+
+function readerExpandAll() {
+  document.querySelectorAll('#reader-content .md-h-row').forEach(row => readerFoldRow(row, false));
+  maybeRefreshOutlineAfterReaderFold();
+}
+
+// Keeps open only the current heading and its ancestor chain — the same
+// "don't hide the path to where you are" rule as the sidebar and the
+// Outline (outlineCollapseUnused, below — shares isSelfOrAncestorHeading).
+// "Current heading" is whichever one the Outline has marked active; falls
+// back to the first heading if none is active yet (e.g. a short file that
+// never triggered the scroll-spy observer).
+function readerCollapseUnused() {
+  const activeItem = document.querySelector('.rp-outline-item.active') || document.querySelector('.rp-outline-item');
+  const activeId = activeItem && activeItem.dataset.hid;
+  const activeEl = activeId ? document.getElementById(activeId) : null;
+
+  document.querySelectorAll('#reader-content .md-h-row').forEach(row => {
+    const h = row.querySelector('.md-h');
+    readerFoldRow(row, !isSelfOrAncestorHeading(h, activeEl));
+  });
+  maybeRefreshOutlineAfterReaderFold();
+}
+
+// ── Outline fold state (chevrons + collapse-all/unused/expand-all) ──────
+// Independent by default: its own per-file store, wb_outline_folds:<url>,
+// separate from the reader's wb_folds:<url> (S20 fold memory) — folding a
+// heading in the Outline doesn't hide reader content, and vice versa. The
+// lock toggle in the Outline toolbar switches to Shared: same heading ids,
+// same storage key as the reader, so a fold either place folds both.
+function outlineFoldShared() { return state.outlineFoldMode === 'shared'; }
+
+function outlineFoldKey(url) { return 'wb_outline_folds:' + url; }
+
+// Folded heading ids for whatever's open, as a Set. Help/changelog have no
+// stable url — folds there are session-only (state.outlineSessionFolds),
+// same reasoning as persistFoldState silently skipping the save above.
+function getOutlineFolds(url) {
+  if (!url) return state.outlineSessionFolds;
+  const key = outlineFoldShared() ? foldStateKey(url) : outlineFoldKey(url);
+  let ids = [];
+  try { ids = JSON.parse(localStorage.getItem(key)) || []; } catch (e) { ids = []; }
+  return new Set(ids);
+}
+
+function saveOutlineFolds(url, idsSet) {
+  if (!url) { state.outlineSessionFolds = idsSet; return; }
+  const key = outlineFoldShared() ? foldStateKey(url) : outlineFoldKey(url);
+  const ids = [...idsSet];
+  if (ids.length) localStorage.setItem(key, JSON.stringify(ids));
+  else localStorage.removeItem(key);
+}
+
+// Keeps the reader's own row/section classes in sync when a fold happens
+// through the Outline while Shared mode is on (storage alone won't repaint
+// the already-rendered reader DOM).
+function mirrorFoldToReader(hid, folded) {
+  const h = document.getElementById(hid);
+  const row = h && h.closest('.md-h-row');
+  const section = row && row.nextElementSibling;
+  if (row) row.classList.toggle('folded', folded);
+  if (section) section.classList.toggle('folded', folded);
+}
+
+function toggleOutlineHeading(hid) {
+  const url = state.activeUrl || null;
+  const ids = getOutlineFolds(url);
+  const folded = !ids.has(hid);
+  folded ? ids.add(hid) : ids.delete(hid);
+  saveOutlineFolds(url, ids);
+  if (outlineFoldShared()) mirrorFoldToReader(hid, folded);
+  renderOutlineTab();
+}
+
+function toggleOutlineFoldMode() {
+  state.outlineFoldMode = outlineFoldShared() ? 'independent' : 'shared';
+  persist('wb_outline_fold_mode', state.outlineFoldMode);
+  renderOutlineTab();
+}
+
+// Refreshes the Outline after a fold happens through the reader's own
+// controls (heading click, or its collapse-all/unused/expand-all pill) —
+// only matters in Shared mode, and only if the Outline tab is visible.
+function maybeRefreshOutlineAfterReaderFold() {
+  if (outlineFoldShared() && state.activeRPTab === 'outline') renderOutlineTab();
+}
+
+// Outline's own heading list (h1-h3, matching what renderOutlineTab shows)
+// with hasChildren computed by a single lookahead: true only if the next
+// heading is a deeper level, i.e. a real nested heading follows before an
+// equal-or-shallower one. Leaf headings (nothing below, or nothing deeper
+// following) get hasChildren: false — no chevron.
+function outlineHeadingsMeta() {
+  const rc = $('reader-content');
+  if (!rc) return [];
+  const headings = [...rc.querySelectorAll('h1.md-h, h2.md-h, h3.md-h')];
+  return headings.map((h, i) => {
+    const level = parseInt(h.tagName[1]);
+    const next  = headings[i + 1];
+    return { el: h, id: h.id, level, text: h.textContent.trim(), hasChildren: !!(next && parseInt(next.tagName[1]) > level) };
+  });
+}
+
+// True if `h` is `activeEl` itself, or an ancestor of it (its .md-section
+// contains activeEl) — shared by readerCollapseUnused and
+// outlineCollapseUnused so "keep the path to where you are open" stays
+// one implementation instead of two.
+function isSelfOrAncestorHeading(h, activeEl) {
+  if (!h || !activeEl) return false;
+  if (h === activeEl) return true;
+  const row = h.closest ? h.closest('.md-h-row') : null;
+  const section = row && row.nextElementSibling;
+  return !!(section && section.contains(activeEl));
+}
+
+function outlineCollapseAll() {
+  if (outlineFoldShared()) { readerCollapseAll(); return; }
+  const ids = new Set(outlineHeadingsMeta().filter(m => m.hasChildren).map(m => m.id));
+  saveOutlineFolds(state.activeUrl || null, ids);
+  renderOutlineTab();
+}
+
+function outlineExpandAll() {
+  if (outlineFoldShared()) { readerExpandAll(); return; }
+  saveOutlineFolds(state.activeUrl || null, new Set());
+  renderOutlineTab();
+}
+
+function outlineCollapseUnused() {
+  if (outlineFoldShared()) { readerCollapseUnused(); return; }
+  const activeItem = document.querySelector('.rp-outline-item.active') || document.querySelector('.rp-outline-item');
+  const activeId = activeItem && activeItem.dataset.hid;
+  const activeEl = activeId ? document.getElementById(activeId) : null;
+
+  const ids = new Set();
+  outlineHeadingsMeta().forEach(m => {
+    if (m.hasChildren && !isSelfOrAncestorHeading(m.el, activeEl)) ids.add(m.id);
+  });
+  saveOutlineFolds(state.activeUrl || null, ids);
+  renderOutlineTab();
+}
+
 // ── Same-page anchor scroll ───────────────────────────────────────
 function scrollToAnchor(e, targetId) {
   if (e) e.preventDefault();
@@ -2519,13 +2836,39 @@ function scrollToAnchor(e, targetId) {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ── Back navigation (session-only "previous note" history) ────────
+function goBack() {
+  if (!state.backStack.length) return;
+  const prev = state.backStack.pop();
+  state.navBack = true;
+  openFile(prev.url, prev.name);
+}
+
+function updateBackButtons() {
+  const has = state.backStack.length > 0;
+  const a = $('btn-back-header'); if (a) a.disabled = !has;
+  const b = $('btn-back-reader'); if (b) b.disabled = !has;
+}
+
 // ── Open file ────────────────────────────────────────────────────
 async function openFile(url, name) {
   if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
   if (state.activeUrl !== url) closeDiffStrip(); // S14+ — diff belongs to the old file
+
+  // Back-navigation history (session-only, resets on reload). Every real
+  // switch away from a file pushes it, unless this switch IS a Back click
+  // (state.navBack), so repeated Back presses walk the stack instead of
+  // re-recording the page being left.
+  if (!state.navBack && state.activeUrl && state.activeUrl !== url) {
+    state.backStack.push({ url: state.activeUrl, name: state.activeName });
+  }
+  state.navBack = false;
+  updateBackButtons();
+
   state.activeUrl  = url;
   state.activeName = name;
   state.helpOpen   = false;
+  state.changelogOpen = false;
 
   const bc = $('breadcrumb');
   if (bc) bc.textContent = '/ ' + name;
@@ -2756,6 +3099,7 @@ async function openHelp() {
   state.activeUrl  = null; // deselect any active sidebar file
   state.activeName = null;
   state.helpOpen   = true; // lets Outline read help.md's own headings below
+  state.changelogOpen = false;
   renderSidebar();
   updateEditBtn();
 
@@ -2787,6 +3131,49 @@ async function openHelp() {
   // Comments/backlinks/review don't apply to help — they'll correctly show
   // their "open a file" empty state since activeUrl is null. Outline is the
   // one tab that should still work here, reading help.md's own headings.
+  refreshRightPanel();
+}
+
+// ── Changelog ────────────────────────────────────────────────────
+// Same lifecycle as Help (state flag + refreshRightPanel), so Outline
+// doesn't keep showing a stale file's headings — the bug fixed for Help
+// in v0.9a-3 applies here too. project-wikibase-changelog.md lives at the
+// app level, same as help.md, and ships in the deploy zip alongside it.
+async function openChangelog() {
+  if (!guardLeaveEdit()) return;
+  const empty = $('reader-empty');
+  const rc    = $('reader-content');
+
+  state.activeUrl  = null;
+  state.activeName = null;
+  state.helpOpen   = false;
+  state.changelogOpen = true;
+  renderSidebar();
+  updateEditBtn();
+
+  const bc = $('breadcrumb');
+  if (bc) bc.textContent = '/ Changelog';
+
+  empty.style.display = 'none';
+  rc.style.display    = 'block';
+  rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:32px">Loading changelog…</p>';
+
+  try {
+    const res = await fetch('./project-wikibase-changelog.md');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    rc.innerHTML = parseMarkdown(text);
+    rc.scrollTop = 0;
+  } catch (e) {
+    const localLog = LOCAL.on ? await localReadText('local:/project-wikibase-changelog.md') : null;
+    if (localLog !== null) {
+      rc.innerHTML = parseMarkdown(localLog);
+      rc.scrollTop = 0;
+    } else {
+      rc.innerHTML = `<p class="md-p" style="color:var(--text-muted);padding-top:32px">Changelog not found. Add <code class="md-code">project-wikibase-changelog.md</code> to the app folder${LOCAL.on ? ' (or copy it into your local test vault)' : ''}.</p>`;
+    }
+  }
+
   refreshRightPanel();
 }
 
@@ -2851,18 +3238,20 @@ function canEdit() {
 
 // Settings "Enable editing" toggle, off by default. Gates New/Move/Edit
 // on top of (not instead of) the existing canEdit() permission list —
-// both must allow it. Buttons stay visible but disabled/grayed when this
-// is false, rather than hidden, per S16.
+// both must allow it.
 function editingAllowed() {
   return state.editingEnabled && canEdit();
 }
 
-// Keeps the New/Move toolbar buttons in sync with the editing toggle.
-// Called on boot and whenever the setting changes.
+// Keeps the New/Move header icons in sync with the editing toggle. Fully
+// hidden when not allowed (not just grayed) so the header stays clean when
+// editing's off; shown at full weight, same as every other header icon,
+// when it's on — changed from the S16 gray-out per Jayson's 2026-07-19
+// review. Called on boot and whenever the setting changes.
 function refreshEditControls() {
   const allowed = editingAllowed();
-  $('btn-new').disabled  = !allowed;
-  $('btn-move').disabled = !allowed;
+  $('btn-new').style.display  = allowed ? '' : 'none';
+  $('btn-move').style.display = allowed ? '' : 'none';
   updateEditBtn();
 }
 
@@ -4386,6 +4775,9 @@ function loadPersistedState() {
 
     const diffH = localStorage.getItem('wb_diff_h');
     if (diffH) $('diff-strip').style.height = JSON.parse(diffH) + 'px';
+
+    const outlineMode = localStorage.getItem('wb_outline_fold_mode');
+    if (outlineMode) state.outlineFoldMode = JSON.parse(outlineMode);
   } catch (_) {}
 }
 
@@ -4415,30 +4807,69 @@ function refreshRightPanel() {
 }
 
 // ── Outline tab ──────────────────────────────────────────────────
+// Chevron per heading only when it has a nested heading below it
+// (outlineHeadingsMeta.hasChildren) — folding one hides its descendant
+// Outline rows (single hideLevel walk, below) without touching the reader
+// unless fold state is Shared (see outlineFoldShared / mirrorFoldToReader).
 function renderOutlineTab() {
-  const pane = $('rp-outline');
-  if (!state.activeUrl && !state.helpOpen) {
+  const toolbar = $('ot-toolbar');
+  const pane    = $('ot-list');
+
+  if (!state.activeUrl && !state.helpOpen && !state.changelogOpen) {
+    if (toolbar) toolbar.style.display = 'none';
     pane.innerHTML = '<div class="rp-empty">Open a file to see its outline.</div>';
     return;
   }
 
-  const rc       = $('reader-content');
-  const headings = [...rc.querySelectorAll('h1.md-h, h2.md-h, h3.md-h')];
-
-  if (!headings.length) {
+  const meta = outlineHeadingsMeta();
+  if (!meta.length) {
+    if (toolbar) toolbar.style.display = 'none';
     pane.innerHTML = '<div class="rp-empty">No headings in this file.</div>';
     return;
   }
 
-  const items = headings.map(h => {
-    const level = parseInt(h.tagName[1]);
-    const text  = h.textContent.trim();
-    const id    = h.id;
-    return `<button class="rp-outline-item rp-outline-h${level}" data-hid="${escHtml(id)}" onclick="scrollToHeading('${escHtml(id)}')">${escHtml(text)}</button>`;
-  }).join('');
+  if (toolbar) toolbar.style.display = 'flex';
+  updateOutlineLockIcon();
 
-  pane.innerHTML = `<div class="rp-outline-list">${items}</div>`;
-  setupOutlineObserver(headings);
+  const url    = state.activeUrl || null;
+  const folded = getOutlineFolds(url);
+
+  let html = '';
+  let hideLevel = null;         // while set, skip items nested deeper than this
+  const visibleEls = [];
+
+  meta.forEach(m => {
+    if (hideLevel !== null) {
+      if (m.level > hideLevel) return;   // still inside a folded ancestor
+      hideLevel = null;                  // popped back out to a sibling/uncle
+    }
+
+    const isFolded = m.hasChildren && folded.has(m.id);
+    if (isFolded) hideLevel = m.level;
+
+    const chevron = m.hasChildren
+      ? `<button class="rp-outline-fold-btn${isFolded ? ' folded' : ''}" data-hid="${escHtml(m.id)}" title="${isFolded ? 'Expand' : 'Collapse'}" aria-label="${isFolded ? 'Expand' : 'Collapse'}" onclick="event.stopPropagation();toggleOutlineHeading('${escHtml(m.id)}')">${ICON.foldChevron}</button>`
+      : `<span class="rp-outline-fold-spacer"></span>`;
+
+    html += `<div class="rp-outline-row rp-outline-h${m.level}">${chevron}<button class="rp-outline-item" data-hid="${escHtml(m.id)}" onclick="scrollToHeading('${escHtml(m.id)}')">${escHtml(m.text)}</button></div>`;
+    visibleEls.push(m.el);
+  });
+
+  pane.innerHTML = `<div class="rp-outline-list">${html}</div>`;
+  setupOutlineObserver(visibleEls);
+}
+
+function updateOutlineLockIcon() {
+  const btn = $('ot-lock-toggle');
+  if (!btn) return;
+  const shared = outlineFoldShared();
+  btn.innerHTML = shared ? ICON.lockClosed : ICON.lockOpen;
+  btn.classList.toggle('locked', shared);
+  const label = shared
+    ? 'Fold state shared with reader — click to make independent'
+    : 'Fold state independent — click to share with reader';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
 }
 
 function scrollToHeading(id) {
@@ -5145,7 +5576,8 @@ async function bootVault() {
     await preloadOpenFolders();
 
     renderSidebar();
-    refreshEditControls(); // New/Move/Edit grayed unless Settings → Enable editing
+    refreshEditControls(); // New/Move hidden unless Settings → Enable editing
+    updateBackButtons();   // disabled at boot — nothing in history yet
     scanBadges(); // S14 — async, fills comment + review badges
     vaultReady = true; // enables the focus-regain refresh below
 
