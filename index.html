@@ -1605,7 +1605,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9i-1</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9i-2</button>
     </aside>
 
   </div>
@@ -3160,6 +3160,13 @@ function renderListItem(n, ordinal) {
   } else if (n.kind === 'ol') {
     markerEl = `<span class="md-li-marker md-li-num">${ordinal}.</span>`;
     textEl   = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
+  } else if (n.kind === 'plain') {
+    // Marker-less row (see the EXPERIMENTAL note above) — no bullet
+    // glyph, the empty span just holds the column so text still lines
+    // up with markered siblings/ancestors. The guide line carries the
+    // hierarchy instead of a marker.
+    markerEl = `<span class="md-li-marker"></span>`;
+    textEl   = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
   } else {
     markerEl = `<span class="md-li-marker md-li-bullet">•</span>`;
     textEl   = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
@@ -3258,10 +3265,24 @@ function renderSingleBlock(block, seenIds) {
     }
 
     case 'list': {
-      // Parse each line into a marker item (kind/content/depth). A
-      // marker-less indented line (tab-indented continuation, e.g. a
-      // wrapped note under a bullet) attaches onto the previous item
-      // as continuation text instead of being silently dropped.
+      // Parse each line into a marker item (kind/content/depth).
+      //
+      // EXPERIMENTAL (2026-07-21, revertible — see help.md "Tab trees
+      // under a bullet" and project-wikibase-changelog.md): a
+      // marker-less indented line now becomes its OWN tree row (kind
+      // 'plain', no bullet/number) instead of attaching as continuation
+      // text onto the item above. One real "-"/"1."/"- [ ]" on the
+      // block's first line is enough to trigger list parsing at all;
+      // everything tab-indented under it, marker or not, becomes a row.
+      // Trade-off, on purpose: a wrapped description that used to stay
+      // attached to the item above it now renders as its own row
+      // instead — there's no marker-based way to tell "more text for
+      // the row above" from "a new row" once there's no marker at all,
+      // and Jayson chose "every line is its own row" over the old
+      // silent-merge behavior so tab-only folder trees (no markers
+      // below the first line) render correctly. If this turns out to
+      // be the wrong trade-off, the old behavior was: push onto
+      // `items[items.length - 1].cont` instead of `items` directly.
       const items = [];
       block.lines.forEach(l => {
         const tM = l.match(/^(\s*)[-*+] \[([ xX])\] (.*)/);
@@ -3270,7 +3291,8 @@ function renderSingleBlock(block, seenIds) {
         if (tM) { items.push({ kind: 'task', done: tM[2].toLowerCase() === 'x', content: tM[3], depth: listIndentDepth(tM[1]), cont: [] }); return; }
         if (uM) { items.push({ kind: 'ul',   content: uM[2], depth: listIndentDepth(uM[1]), cont: [] }); return; }
         if (oM) { items.push({ kind: 'ol',   content: oM[2], depth: listIndentDepth(oM[1]), cont: [] }); return; }
-        if (items.length) items[items.length - 1].cont.push(l.trim());
+        const wsMatch = l.match(/^([\t ]*)(.*)$/);
+        items.push({ kind: 'plain', content: wsMatch[2], depth: listIndentDepth(wsMatch[1]), cont: [] });
       });
 
       if (!items.length) return '';

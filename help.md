@@ -158,6 +158,25 @@ That subfolder name is hidden from the nav tree automatically, same as `zSystem`
 - [x] Completed task
 ```
 
+Nesting works with real tabs or 2-space indents, matching Obsidian's own rule — no distinction between bullet, numbered, and checkbox lists.
+
+#### Tab trees under a bullet — EXPERIMENTAL, added 2026-07-21
+
+One real `-` (or `1.`, or `- [ ]`) on the **first line** is enough to make WikiBase treat everything tab-indented below it as a list, even if none of those lines have their own marker:
+
+```md
+- Project Directory/
+	BidPhase
+		00_Support Documents
+	Construction
+```
+
+This renders as a full nested tree — fold arrows, guide lines, everything — using just the one marker at the top to trigger it. Useful for folder-tree style notes (file-directory diagrams, org charts) that were never meant to be a "real" list, just indented text.
+
+**Trade-off, on purpose:** once inside a list this way, every line is always its own row — never merged as wrapped continuation text of the row above, even if that's what you meant. There's no marker to say "this describes the line above" vs. "this is a new line," so WikiBase always picks "new line." If you want two sentences to read together under one row, write them as a single line and let it wrap — don't press Enter between them.
+
+This is a deliberate, revertible change (was: a marker-less indented line merged into the item above's text instead of becoming its own row) — flagged here so it isn't forgotten if it needs to be undone. See `renderSingleBlock`'s `'list'` case in `index.html` for the one-line revert.
+
 ### Horizontal rule
 
 `---`, `***`, or `___` on its own line.
@@ -202,7 +221,13 @@ Comments are only visible when editing the raw file. They never render in WikiBa
 
 ### HTML
 
-A handful of plain HTML tags render for cases Markdown can't cover: `<u>underline</u>`, `<s>strikethrough</s>`, `<span style="...">custom styling</span>`.
+HTML typed into a note does not render. It displays as literal text, so `<u>underline</u>` shows the tags rather than underlining the word.
+
+This is deliberate. Rendering author-supplied HTML would let anything pasted into a note run as code in every reader's browser, so WikiBase treats note content as text and nothing else. Obsidian is more permissive here, which means a note using raw HTML will look different in the two apps.
+
+Markdown covers nearly everything you would reach for HTML to do. The one real gap is underline, which Markdown has no syntax for. Use `**bold**` or `==highlight==` instead.
+
+Links pointing at anything other than a normal web, mail, file share, or Obsidian address are shown as plain text rather than clickable links, for the same reason.
 
 ### Properties (frontmatter)
 

@@ -6,6 +6,19 @@
 
 ---
 
+## v0.9i-2 — 2026-07-21
+
+**Changed:** `index.html`, `help.md`
+
+EXPERIMENTAL, revertible — see help.md "Tab trees under a bullet."
+
+- **A tab-indented tree with no list markers below the first line now renders correctly**, as long as that first line has a real marker (`-`, `1.`, or `- [ ]`). Traced from a real note (a folder-directory diagram, tabs + a manually-typed folder emoji, no dashes anywhere) that was rendering as one flattened paragraph. Root cause, confirmed against actual Obsidian screenshots: Obsidian's Reading view *also* can't render this without a marker — it drops the indentation and shows flat lines. The tree look Jayson wanted only exists in Obsidian's Edit/Live Preview pane (raw source with editor indent-guides, not rendered markdown). Decision: match the Edit-mode visual anyway, since that's the useful one, not Reading view's flattened output.
+- Mechanic: one real marker on the block's first line triggers list parsing, same as always. Every line below it that's tab/2-space indented — marker or not — now becomes its own row in the tree (fold arrows, guide line, no bullet glyph for the marker-less rows). This **replaces** the previous behavior where a marker-less indented line merged into the item above as wrapped continuation text.
+- **Trade-off, accepted on purpose:** there's no way to distinguish "this line continues the row above" from "this is a new row" once there's no marker — so every line is now always its own row. A genuinely wrapped multi-sentence description under one row has to be written as a single line and left to wrap, not split across Enters.
+- Three simulated samples confirmed before building: the tree-vs-flat comparison against real Obsidian screenshots, the bullet-vs-tab-list explainer (why the marker is the only signal available), and the final one-bullet-triggers-tree behavior itself.
+
+---
+
 ## v0.9i-1 — 2026-07-21
 
 **Changed:** `index.html`
