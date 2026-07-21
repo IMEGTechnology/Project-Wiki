@@ -502,22 +502,40 @@
        same size, grouped the same way the fold-pill icons are on the
        right so they move together instead of needing separate math. */
     #reader-nav-pill {
-      position: absolute; top: 8px; left: 16px; z-index: 6;
-      display: flex; align-items: center; gap: 2px;
+      /* right:185px leaves clearance for the fold-pill/props/edit cluster
+         on the opposite corner (fold-pill alone runs ~89px wide starting
+         at right:88 — see #reader-fold-pill below) so the filename can
+         flex-grow into all the space between, instead of a small fixed box. */
+      position: absolute; top: 8px; left: 16px; right: 185px; z-index: 6;
+      display: flex; align-items: center; gap: 6px;
     }
-    #reader-nav-pill .icon-btn { background: var(--bg-reader); }
+    #reader-nav-pill .icon-btn { background: var(--bg-reader); flex-shrink: 0; }
+    .reader-nav-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; }
+    .reader-filename {
+      flex: 1; min-width: 0;
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      background: var(--bg-reader); border-radius: var(--radius);
+      padding: 2px 6px; margin: -2px -6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
     /* Fade strip behind the floating corner buttons — content used to
        scroll straight up with a hard edge right under the button row.
        This sits above the scroll area (below the buttons' z-index) and
        fades the reader background from solid to transparent, so text
        dissolves before it reaches the icons instead of clipping under them. */
     #reader-fade {
-      position: absolute; top: 0; left: 0; right: 0; height: 72px;
-      /* Solid through 60% (~43px) — clears the button row (top:8px,
-         ~28px tall) with room to spare instead of fading through it —
-         then tapers over the remaining ~29px. */
-      background: linear-gradient(to bottom, var(--bg-reader) 0%, var(--bg-reader) 60%, transparent 100%);
+      position: absolute; top: 0; left: 0; right: 0; height: 48px;
+      /* Solid through 79% (~38px) — still clears the button row (top:8px,
+         28px tall, bottom edge ~36px) with a couple px to spare — then
+         tapers over the remaining ~10px. Shorter overall than the old
+         72px version; the jump-landing offset (READER_TOP_CLEARANCE,
+         56px) already lands past this, so a heading landing there is
+         fully opaque, not mid-taper. Opacity is also suppressed at the
+         very top of a file — see updateReaderFadeVisibility() — so the
+         first heading never fades when there's nothing above it to hide. */
+      background: linear-gradient(to bottom, var(--bg-reader) 0%, var(--bg-reader) 79%, transparent 100%);
       pointer-events: none; z-index: 5;
+      transition: opacity 0.15s ease;
     }
     /* Fold controls (collapse all / collapse unused / expand all) for the
        reader's own headings. Neutral tone — deliberately not accent-colored
@@ -610,14 +628,11 @@
       padding: 2px 6px;
     }
     .md-h-row:hover { background: var(--hover); }
-    /* "You are here" cue after an Outline click or anchor jump — same
-       tint as the hover state, fading out on its own so it doesn't linger
-       like a permanent selection marker. */
-    .md-h-row.wb-jump-flash { animation: wbJumpFlash 1.4s ease-out; }
-    @keyframes wbJumpFlash {
-      0%   { background: var(--hover); }
-      100% { background: transparent; }
-    }
+    /* "You are here" cue after an Outline click or anchor jump — same tint
+       as the hover state. Stays on (no auto-fade) until the reader is
+       actually scrolled — see clearJumpHighlight() — so it doesn't
+       disappear before you've had a chance to read it. */
+    .md-h-row.wb-jump-flash { background: var(--hover); transition: background 0.4s ease-out; }
 
     .md-fold-icon {
       flex-shrink: 0;
@@ -767,7 +782,7 @@
     .md-ul li, .md-ol li { margin-bottom: 3px; }
     .md-task-list { list-style: none; padding-left: 0; margin: 0.6rem 0; }
     .md-task-item { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px; color: var(--text-secondary); font-size: 14px; }
-    .md-task-item input { margin-top: 3px; accent-color: var(--accent); cursor: default; pointer-events: none; flex-shrink: 0; }
+    .md-task-item input { margin-top: 3px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
     .md-task-done { color: var(--text-muted); text-decoration: line-through; }
 
     /* Code block */
@@ -1349,6 +1364,8 @@
         <button class="icon-btn" id="btn-forward-reader" title="Forward" aria-label="Forward" onclick="goForward()" disabled>
           <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
         </button>
+        <div class="reader-nav-sep"></div>
+        <span id="reader-filename" class="reader-filename"></span>
       </div>
 
       <!-- Fold controls for this file's headings — collapse all / collapse
@@ -1479,7 +1496,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9c</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9g</button>
     </aside>
 
   </div>
@@ -1696,6 +1713,9 @@ const state = {
   activeRPTab:     'outline',
   backlinksMap:    {},  // { [targetKey]: [{name, url}] } — populated as files are opened
   outlineObserver: null,// IntersectionObserver for active heading highlight
+  jumpPinnedId:    null, // heading id "pinned" active by an Outline click / anchor jump —
+                        // suspends the scroll-spy observer until a genuine user scroll
+                        // happens after the jump settles (see revealHeading/clearJumpHighlight)
   outlineFoldMode: 'independent', // 'independent' | 'shared' — Outline's own
                         // fold-chevron state vs. sharing the reader's wb_folds
   outlineSessionFolds: new Set(), // folded heading ids for help.md/changelog —
@@ -2570,7 +2590,15 @@ function buildEmbedStub(name, inline) {
 }
 
 // ── Block parser ─────────────────────────────────────────────────
+// Sequential position of each task checkbox in document reading order —
+// reset per render, incremented in the 'list' case below. Lets a click
+// on checkbox N later re-find "the Nth task line" in the raw text without
+// needing per-line ids baked into the rendered HTML. Mirrors the de-dupe
+// approach already used for heading ids (uniqueHeadingId).
+let mdTaskCounter = 0;
+
 function parseMarkdown(md) {
+  mdTaskCounter = 0;
   const lines = md.split('\n');
   let start = 0;
 
@@ -2812,7 +2840,8 @@ function renderSingleBlock(block, seenIds) {
       if (items.some(it => it.kind === 'task')) {
         const liHtml = items.map(it => {
           if (it.kind === 'task') {
-            return `<li class="md-task-item"><input type="checkbox"${it.done ? ' checked' : ''} disabled><span class="${it.done ? 'md-task-done' : ''}">${renderInline(it.content)}</span></li>`;
+            const taskIdx = mdTaskCounter++;
+            return `<li class="md-task-item"><input type="checkbox"${it.done ? ' checked' : ''} onchange="toggleTaskCheckbox(this, ${taskIdx})"><span class="${it.done ? 'md-task-done' : ''}">${renderInline(it.content)}</span></li>`;
           }
           return `<li class="md-task-item"><span>${renderInline(it.content)}</span></li>`;
         }).join('');
@@ -3049,6 +3078,33 @@ function outlineCollapseUnused() {
 // collapsed parent). Expanding the ancestor chain first — same rule as
 // Collapse unused — fixes that for both callers in one place.
 const READER_TOP_CLEARANCE = 56; // clears the fade/button strip, was landing under it
+let readerJumpSuppressUntil = 0; // performance.now() cutoff — scroll events before this are
+                                  // the jump's own smooth-scroll settling, not a real user scroll
+
+// Suppress the top fade when there's nothing above the scroll position to
+// hide — otherwise the very first heading in a file reads as dimmed even
+// though nothing is scrolled behind it (the fade is a fixed decorative
+// overlay, not scroll-aware on its own).
+function updateReaderFadeVisibility() {
+  const reader = $('reader');
+  const fade = $('reader-fade');
+  if (!reader || !fade) return;
+  fade.style.opacity = reader.scrollTop <= 2 ? '0' : '1';
+}
+
+// Bound once at boot. Covers two things that both hinge on "did the reader
+// just scroll": the fade's visibility, and releasing a pinned jump
+// highlight (pinJumpHighlight/clearJumpHighlight) once the user actually
+// scrolls away from wherever an Outline click or anchor jump landed.
+function initReaderScrollHandling() {
+  const reader = $('reader');
+  if (!reader) return;
+  reader.addEventListener('scroll', () => {
+    updateReaderFadeVisibility();
+    if (state.jumpPinnedId && performance.now() >= readerJumpSuppressUntil) clearJumpHighlight();
+  });
+  updateReaderFadeVisibility();
+}
 
 function revealHeading(id) {
   const reader = $('reader');
@@ -3066,19 +3122,41 @@ function revealHeading(id) {
   maybeRefreshOutlineAfterReaderFold();
 
   const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - READER_TOP_CLEARANCE;
+
+  // Pin the outline + reader highlight to this heading *before* the observer
+  // gets a chance to recompute — otherwise, if another heading sits close
+  // enough to also fall inside the scroll-spy's zone once we land, its
+  // callback can fire after this one and silently overwrite the highlight
+  // onto that neighbor instead (the "selects the next one instead" bug).
+  // Pinning holds the highlight on the clicked heading until a real user
+  // scroll happens (see clearJumpHighlight / readerJumpSuppressUntil).
+  pinJumpHighlight(id);
+  readerJumpSuppressUntil = performance.now() + 700; // rough smooth-scroll settle window
   reader.scrollTo({ top, behavior: 'smooth' });
-  flashHeading(el.closest('.md-h-row'));
 }
 
-// Brief "you are here" tint on arrival — restarts cleanly if you jump to
-// the same heading twice in a row (remove + reflow before re-adding, or
-// the second click's animation silently no-ops since the class never left).
-function flashHeading(row) {
-  if (!row) return;
-  row.classList.remove('wb-jump-flash');
-  void row.offsetWidth;
-  row.classList.add('wb-jump-flash');
-  row.addEventListener('animationend', () => row.classList.remove('wb-jump-flash'), { once: true });
+// Pins both halves of the "you are here" cue — the reader row tint and the
+// Outline's active item — to one heading id, and tells the scroll-spy
+// observer (setupOutlineObserver) to stand down until clearJumpHighlight()
+// runs. Replaces the old self-fading flashHeading(); this version holds
+// until the user actually scrolls, so it doesn't disappear before there's
+// been a chance to read it.
+function pinJumpHighlight(id) {
+  clearJumpHighlight();
+  state.jumpPinnedId = id;
+  const el = document.getElementById(id);
+  const row = el && el.closest('.md-h-row');
+  if (row) row.classList.add('wb-jump-flash');
+  document.querySelectorAll('.rp-outline-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.hid === id);
+  });
+}
+
+function clearJumpHighlight() {
+  if (!state.jumpPinnedId) return;
+  const prevRow = document.querySelector('.md-h-row.wb-jump-flash');
+  if (prevRow) prevRow.classList.remove('wb-jump-flash');
+  state.jumpPinnedId = null;
 }
 
 function scrollToAnchor(e, targetId) {
@@ -3103,6 +3181,18 @@ function goForward() {
   state.navForward = true;
   state.navRestoreScroll = next.scrollTop || 0;
   openFile(next.url, next.name);
+}
+
+// Sets both title displays at once: the top app-header breadcrumb (keeps
+// the full name/label, unchanged) and the new reader-panel filename (S —
+// reader header bar), which drops a trailing .md since the app already
+// makes clear every vault file is Markdown. Used for real files and for
+// the fixed-label views (Help/Changelog/Review changes/Comment Inbox).
+function setReaderTitle(label) {
+  const bc = $('breadcrumb');
+  if (bc) bc.textContent = '/ ' + label;
+  const fn = $('reader-filename');
+  if (fn) fn.textContent = label.replace(/\.md$/i, '');
 }
 
 function updateBackButtons() {
@@ -3150,8 +3240,7 @@ async function openFile(url, name) {
   state.helpOpen   = false;
   state.changelogOpen = false;
 
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ ' + name;
+  setReaderTitle(name);
 
   const empty = $('reader-empty');
   const rc    = $('reader-content');
@@ -3411,8 +3500,7 @@ async function openHelp() {
   renderSidebar();
   updateEditBtn();
 
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ Help';
+  setReaderTitle('Help');
 
   empty.style.display = 'none';
   rc.style.display    = 'block';
@@ -3459,8 +3547,7 @@ async function openChangelog() {
   renderSidebar();
   updateEditBtn();
 
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ Changelog';
+  setReaderTitle('Changelog');
 
   empty.style.display = 'none';
   rc.style.display    = 'block';
@@ -3549,6 +3636,59 @@ function canEdit() {
 // both must allow it.
 function editingAllowed() {
   return state.editingEnabled && canEdit();
+}
+
+// Task checkboxes are clickable straight from the reader — no need to open
+// the full editor for a status tick. Gated by the same editingAllowed()
+// check as New/Move/Edit (Jayson's call: reuse the existing gate rather
+// than a separate permission path). Writes the file directly and silently
+// — no WBCH change-log entry, no Needs Review flip — same "silent apply"
+// precedent as the Properties flyout, since this isn't a content edit that
+// needs review, just a status tick.
+//
+// Finds "the Nth task checkbox line" by scanning the raw text with the same
+// regex/frontmatter-skip rule used at render time (mdTaskCounter assigns
+// checkboxes their index in that same order), rather than matching on
+// rendered text — which inline formatting or duplicate labels could make
+// ambiguous.
+function taskCheckboxLines(text) {
+  const lines = text.split('\n');
+  let start = 0;
+  if (lines[0] === '---') {
+    for (let k = 1; k < lines.length; k++) {
+      if (lines[k].trim() === '---') { start = k + 1; break; }
+    }
+  }
+  const re = /^(\s*)[-*+] \[([ xX])\] (.*)/;
+  const idxs = [];
+  for (let k = start; k < lines.length; k++) if (re.test(lines[k])) idxs.push(k);
+  return { lines, idxs };
+}
+
+async function toggleTaskCheckbox(inputEl, taskIdx) {
+  const wantChecked = inputEl.checked;
+  if (!editingAllowed() || !state.activeUrl) { inputEl.checked = !wantChecked; return; }
+
+  const rc = $('reader-content');
+  const text = rc.dataset.wbText || '';
+  const { lines, idxs } = taskCheckboxLines(text);
+  const lineNo = idxs[taskIdx];
+  if (lineNo === undefined) { inputEl.checked = !wantChecked; return; } // file changed under us — bail safely
+
+  lines[lineNo] = lines[lineNo].replace(/\[([ xX])\]/, wantChecked ? '[x]' : '[ ]');
+  const newText = lines.join('\n');
+
+  const label = inputEl.nextElementSibling;
+  if (label) label.classList.toggle('md-task-done', wantChecked);
+
+  try {
+    await spWriteFile(state.activeUrl, newText);
+    rc.dataset.wbText = newText;
+  } catch (e) {
+    inputEl.checked = !wantChecked;
+    if (label) label.classList.toggle('md-task-done', !wantChecked);
+    alert('Could not save checkbox: ' + e.message);
+  }
 }
 
 // Keeps the New/Move header icons in sync with the editing toggle. Fully
@@ -4029,8 +4169,7 @@ async function openChangesView() {
   state.activeName = null;
   renderSidebar();
   updateEditBtn();
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ Review changes';
+  setReaderTitle('Review changes');
   empty.style.display = 'none';
   rc.style.display    = 'block';
   rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault…</p>';
@@ -5171,6 +5310,14 @@ function renderOutlineTab() {
 
   pane.innerHTML = `<div class="rp-outline-list">${html}</div>`;
   setupOutlineObserver(visibleEls);
+  // Rebuilding the list wipes the .active class off the fresh buttons —
+  // reapply it if a jump's highlight is still pinned (e.g. a fold happened
+  // while an Outline click's highlight hadn't been released yet).
+  if (state.jumpPinnedId) {
+    document.querySelectorAll('.rp-outline-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.hid === state.jumpPinnedId);
+    });
+  }
 }
 
 function updateOutlineLockIcon() {
@@ -5194,6 +5341,7 @@ function setupOutlineObserver(headings) {
   if (state.outlineObserver) state.outlineObserver.disconnect();
 
   state.outlineObserver = new IntersectionObserver(entries => {
+    if (state.jumpPinnedId) return; // an Outline click/anchor jump owns the highlight right now
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const id = entry.target.id;
@@ -5716,8 +5864,7 @@ async function openReviewView() {
   renderSidebar();
   updateEditBtn();
 
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ Comment Inbox';
+  setReaderTitle('Comment Inbox');
 
   empty.style.display = 'none';
   rc.style.display    = 'block';
@@ -6005,6 +6152,7 @@ document.addEventListener('visibilitychange', async () => {
 });
 
 boot();
+initReaderScrollHandling();
 
 // ── S11 PWA: service worker registration ────────────────────────
 // App-shell cache only (sw.js) — vault files and SharePoint API are
