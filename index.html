@@ -835,8 +835,15 @@
     .md-callout.quote           { background: var(--co-gray-bg);   border-color: var(--co-gray-bd); }
     .md-callout.quote .md-callout-label    { color: var(--co-gray-txt); }
 
-    /* Lists */
-    .md-ul, .md-ol { padding-left: 1.5rem; margin: 0.6rem 0; color: var(--text-secondary); }
+    /* Lists. list-style is off — the bullet/number marker is rendered
+       explicitly per item now (.md-li-marker) so the fold chevron can
+       sit before it, instead of the browser placing a native marker in
+       a separate gutter. padding-left is small breathing room from the
+       edge, not a reserved marker gutter — it used to be 1.5rem sized
+       for a native marker that no longer renders there, which was
+       silently double-indenting (and double-marking, native + custom)
+       every item. */
+    .md-ul, .md-ol { padding-left: 0.25rem; margin: 0.6rem 0; color: var(--text-secondary); list-style: none; }
     .md-ul li, .md-ol li { margin-bottom: 3px; }
     .md-task-list { list-style: none; padding-left: 0; margin: 0.6rem 0; }
     .md-task-item { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px; color: var(--text-secondary); font-size: 14px; }
@@ -872,6 +879,12 @@
     .md-li-fold-btn:hover { background: var(--hover); }
     .md-li-fold-btn .md-fold-icon { width: 11px; height: 11px; }
     .md-li-spacer { width: 18px; flex-shrink: 0; }
+    /* Explicit marker, rendered outside (after) the chevron — bullet
+       dot for ul, "N." for ol. Checkbox items use the existing
+       .md-task-item input styling instead, no separate marker span. */
+    .md-li-marker { flex-shrink: 0; color: var(--text-secondary); }
+    .md-li-bullet { width: 12px; text-align: center; margin-top: 1px; font-size: 1.05em; line-height: 1.4; }
+    .md-li-num { min-width: 18px; text-align: right; margin-top: 1px; font-variant-numeric: tabular-nums; }
     .md-li-text { flex: 1; }
     .md-li-cont { display: block; color: var(--text-muted); font-size: 0.93em; margin-top: 2px; }
     .md-li.folded > .md-li-row .md-fold-icon { transform: rotate(-90deg); }
@@ -1592,7 +1605,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9i</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9i-1</button>
     </aside>
 
   </div>
@@ -3007,16 +3020,19 @@ function parseBlocks(lines) {
       continue;
     }
 
-    // List (ul, ol, task). Continuation check recognizes a tab OR 2+
-    // spaces of indentation — tab-only continuation lines (no marker)
-    // used to fail this (space-only regex) and fall out of the list
-    // block as their own paragraph.
+    // List (ul, ol, task). Continuation check recognizes 1+ tabs, or
+    // 2+ spaces, of indentation — a marker-less continuation line
+    // otherwise falls out of the list block as its own paragraph.
+    // (Earlier version of this check only matched exactly ONE leading
+    // tab — `/^(\t| {2,})\S/` — so a continuation line under a
+    // depth-2+ tab-indented item, needing 2+ tabs, still broke out.)
     if (trimmed.match(/^[-*+] /) || trimmed.match(/^\d+\. /)) {
       const listLines = [];
       while (i < lines.length) {
         const t = lines[i].trimStart();
         const isMarker = t.match(/^[-*+] /) || t.match(/^\d+\. /);
-        const isContinuation = listLines.length && /^(\t| {2,})\S/.test(lines[i]);
+        const wsMatch = lines[i].match(/^([\t ]+)\S/);
+        const isContinuation = listLines.length && wsMatch && (wsMatch[1].includes('\t') || wsMatch[1].length >= 2);
         if (isMarker || isContinuation) {
           listLines.push(lines[i]);
           i++;
@@ -3105,41 +3121,54 @@ function listIndentDepth(ws) {
 // list if any item in it is a checkbox, otherwise ol/ul follows the
 // first item's marker. Applied per level (not once for the whole
 // block) so mixed nesting, e.g. a checkbox under a bullet, still
-// renders each level with its own correct list type.
+// renders each level with its own correct list type. `list-style` is
+// off — the bullet/number is rendered explicitly per item (see
+// renderListItem) so it can sit in a fixed position relative to the
+// fold chevron instead of wherever the browser's native marker lands.
 function renderListLevel(nodes, isRoot) {
   const hasTask = nodes.some(n => n.kind === 'task');
   const isOl    = !hasTask && nodes[0].kind === 'ol';
   const tag     = isOl ? 'ol' : 'ul';
   const cls     = hasTask ? 'md-task-list' : (isOl ? 'md-ol' : 'md-ul');
   const nestCls = isRoot ? '' : ' md-list-nested';
-  return `<${tag} class="${cls}${nestCls}">${nodes.map(n => renderListItem(n)).join('')}</${tag}>`;
+  // Ordinal counts only the 'ol'-kind items in this level, not raw
+  // array position — a level with an interspersed bullet or checkbox
+  // (rare, but possible) shouldn't skip numbers.
+  let olCounter = 0;
+  const itemsHtml = nodes.map(n => renderListItem(n, n.kind === 'ol' ? ++olCounter : null)).join('');
+  return `<${tag} class="${cls}${nestCls}">${itemsHtml}</${tag}>`;
 }
 
-function renderListItem(n) {
+// Row layout, left to right: fold chevron (or a spacer, same width, on
+// leaf items so text still lines up) — OUTSIDE everything else — then
+// the item's own marker (bullet / number / checkbox), then the text.
+// Native list markers are off (see renderListLevel), so the bullet/
+// number here is the only marker rendered; that's what makes the
+// chevron sit outside it instead of between it and the text.
+function renderListItem(n, ordinal) {
   const hasKids  = n.children.length > 0;
-  // Only the chevron is a click target — the row/text carry no handler
-  // and no cursor, so clicking or double-clicking the text does nothing
-  // (see .md-li-row's user-select:none, below, for why it also can't
-  // highlight). Click folds just this item's direct children, same
-  // pattern as heading fold; double-click folds its whole subtree, all
-  // levels down — available at ANY depth with children, not just top.
   const foldEl = hasKids
     ? `<span class="md-li-fold-btn" onclick="liChevronClick(event, this)" ondblclick="liChevronDblClick(event, this)">${ICON.foldChevron}</span>`
     : '<span class="md-li-spacer"></span>';
   const contHtml = n.cont.length ? `<span class="md-li-cont">${renderInline(n.cont.join(' '))}</span>` : '';
 
-  let rowInner;
+  let markerEl, textEl;
   if (n.kind === 'task') {
     const taskIdx = mdTaskCounter++;
-    rowInner = `<input type="checkbox"${n.done ? ' checked' : ''} onchange="toggleTaskCheckbox(this, ${taskIdx})"><span class="md-li-text${n.done ? ' md-task-done' : ''}">${renderInline(n.content)}${contHtml}</span>`;
+    markerEl = `<input type="checkbox"${n.done ? ' checked' : ''} onchange="toggleTaskCheckbox(this, ${taskIdx})">`;
+    textEl   = `<span class="md-li-text${n.done ? ' md-task-done' : ''}">${renderInline(n.content)}${contHtml}</span>`;
+  } else if (n.kind === 'ol') {
+    markerEl = `<span class="md-li-marker md-li-num">${ordinal}.</span>`;
+    textEl   = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
   } else {
-    rowInner = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
+    markerEl = `<span class="md-li-marker md-li-bullet">•</span>`;
+    textEl   = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
   }
 
   const rowCls = n.kind === 'task' ? 'md-li-row md-task-item' : 'md-li-row';
   const liCls  = hasKids ? 'md-li md-li-parent' : 'md-li';
   return `<li class="${liCls}">
-<div class="${rowCls}">${foldEl}${rowInner}</div>
+<div class="${rowCls}">${foldEl}${markerEl}${textEl}</div>
 ${hasKids ? `<div class="md-li-section">${renderListLevel(n.children, false)}</div>` : ''}
 </li>`;
 }

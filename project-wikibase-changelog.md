@@ -6,6 +6,19 @@
 
 ---
 
+## v0.9i-1 — 2026-07-21
+
+**Changed:** `index.html`
+
+Follow-up fixes from Jayson's testing pass on v0.9i, three items.
+
+- **Continuation-line grouping fix had a gap:** the regex only matched exactly one leading tab (`/^(\t| {2,})\S/`), so a marker-less continuation line nested two or more tabs deep still failed the check, broke the list block early, and rendered as a stray paragraph — "shows properly in Obsidian" but not here, for tab-indented lists specifically. Replaced with a check that accepts any run of tabs (1+) or 2+ spaces.
+- **Native list markers were still showing, doubled up with the new fold chevron.** `.md-ul`/`.md-ol` never had `list-style: none` set, so the browser's own bullet/number rendered in its usual gutter *in addition to* the new chevron column — visually offset, and `padding-left: 1.5rem` (sized to reserve room for that native marker) on top of the chevron's own width meant every line had noticeably less room for text, so lines wrapped far more than before ("really long on the page"). Fixed by rendering the bullet/number explicitly per item instead of relying on native markers, turning `list-style` off, and shrinking the now-redundant `padding-left` down to a small edge margin.
+- **Chevron reordered to sit outside the marker, not between it and the text** — direct result of the fix above: row order is now chevron → bullet/number/checkbox → text, left to right, with nothing else competing for that first position.
+- Incidental fix while rewriting the marker: ordinal numbers were computed from raw array position within a list level rather than counting only the `ol`-kind items in it, so a level with, say, a checkbox mixed in ahead of numbered items would skip numbers. Now counts only the numbered items.
+
+---
+
 ## v0.9i — 2026-07-21
 
 **Changed:** `index.html`
