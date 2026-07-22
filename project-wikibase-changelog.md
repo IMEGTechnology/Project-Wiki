@@ -2,11 +2,31 @@
 
 *One entry per shipped deploy zip. Newest at top. Not a substitute for the session log — this is the short version, for tracking what actually went out the door.*
 
-*Note: v0.8c / v0.8d / v0.8e-1 below are reconstructed from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward is tracked in full going forward.*
+*Versioning (locked 2026-07-22): `MAJOR.MINOR.PATCH`. MAJOR stays `0` for the whole beta — moves to `1` at full release. MINOR bumps when a session ships new user-facing capability; PATCH bumps when a session only fixes or polishes what's already shipped. MINOR always resets PATCH to `0`. Everything below `0.12.0` was originally shipped under an older `vX.Y[-N]` tag — those are noted per entry for traceability against already-shipped deploy zips. Everything from `0.12.1` onward is native to this scheme.*
+
+*Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
 ---
 
-## v0.9i-2 — 2026-07-21
+## 0.13.0 — 2026-07-22
+
+**Changed:** `index.html`
+
+- Right panel now stacks tools instead of one-at-a-time tabs (Outline, Comments, Links, Review, Search). Click a tool icon to add it to the stack or remove it; any number can be open together, stacked top to bottom in click order, each scrolling independently with a drag handle between adjacent panes to resize their share of the space. Double-click a tool icon to open it alone, closing everything else in the stack — reuses the double-click convention already established for resize-handle collapse (v0.5.0) and list subtree-fold (v0.11.0), not a new gesture.
+- ⌘K/Ctrl+K adds Search to the stack alongside whatever's already open instead of replacing it; a second Escape (once the search field is already empty) removes just Search from the stack. Turning off Settings → review tools now removes Review from the stack rather than assuming it was the only thing open.
+- Which tools are open persists per browser (`wb_rp_open`), same as every other panel preference. The height split between open panes is session-only and resets to even on reload — no drag-ratio storage added for this, kept to the one new key.
+
+---
+
+## 0.12.1 — 2026-07-22
+
+**Changed:** `index.html`
+
+- List-item fold state now persists, matching heading fold memory. Folding a list item (or its whole subtree via double-click) previously only toggled a CSS class with nothing saved — closing and reopening the file, or reloading, lost every list fold. Now stored in `wb_li_folds:<url>`, keyed by each item's position-path in the tree (list items have no natural id the way headings do).
+
+---
+
+## 0.12.0 — 2026-07-21 *(was v0.9i-2)*
 
 **Changed:** `index.html`, `help.md`
 
@@ -19,7 +39,7 @@ EXPERIMENTAL, revertible — see help.md "Tab trees under a bullet."
 
 ---
 
-## v0.9i-1 — 2026-07-21
+## 0.11.1 — 2026-07-21 *(was v0.9i-1)*
 
 **Changed:** `index.html`
 
@@ -32,7 +52,7 @@ Follow-up fixes from Jayson's testing pass on v0.9i, three items.
 
 ---
 
-## v0.9i — 2026-07-21
+## 0.11.0 — 2026-07-21 *(was v0.9i)*
 
 **Changed:** `index.html`
 
@@ -46,7 +66,7 @@ Reader panel (S3) — nested list rendering, plus a related same-file link fix.
 
 ---
 
-## v0.9h — 2026-07-21
+## 0.10.1 — 2026-07-21 *(was v0.9h)*
 
 **Changed:** `index.html`, `help.md`
 
@@ -63,7 +83,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9g — 2026-07-21
+## 0.10.0 — 2026-07-21 *(was v0.9g)*
 
 **Changed:** `index.html`
 
@@ -75,7 +95,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9f — 2026-07-20
+## 0.9.3 — 2026-07-20 *(was v0.9f)*
 
 **Changed:** `index.html`
 
@@ -86,7 +106,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9e — 2026-07-20
+## 0.9.2 — 2026-07-20 *(was v0.9e)*
 
 **Changed:** `index.html`
 
@@ -94,7 +114,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9d — 2026-07-20
+## 0.9.1 — 2026-07-20 *(was v0.9d)*
 
 **Changed:** `index.html`
 
@@ -105,7 +125,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9c — 2026-07-20
+## 0.9.0 — 2026-07-20 *(was v0.9c)*
 
 **Changed:** `index.html`
 
@@ -118,7 +138,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9b-1 — 2026-07-20
+## 0.8.1 — 2026-07-20 *(was v0.9b-1)*
 
 **Changed:** `index.html`
 
@@ -126,7 +146,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9b — 2026-07-20
+## 0.8.0 — 2026-07-20 *(was v0.9b)*
 
 **Changed:** `index.html`
 
@@ -139,7 +159,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9a-5 — 2026-07-19
+## 0.7.0 — 2026-07-19 *(was v0.9a-5)*
 
 **Changed:** `index.html`
 
@@ -149,7 +169,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9a-4 — 2026-07-19
+## 0.6.0 — 2026-07-19 *(was v0.9a-4)*
 
 **Changed:** `index.html`
 
@@ -163,7 +183,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9a-3 — 2026-07-16
+## 0.5.0 — 2026-07-16 *(was v0.9a-3)*
 
 **Changed:** `index.html`
 
@@ -177,7 +197,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9a-2 — 2026-07-16
+## 0.4.0 — 2026-07-16 *(was v0.9a-2)*
 
 **Changed:** `index.html`
 
@@ -186,7 +206,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9a-1 — 2026-07-16
+## 0.3.1 — 2026-07-16 *(was v0.9a-1)*
 
 **Changed:** `index.html`
 
@@ -196,7 +216,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.9a — 2026-07-16
+## 0.3.0 — 2026-07-16 *(was v0.9a)*
 
 **Changed:** `index.html`
 
@@ -208,7 +228,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.8e-1 — 2026-07-16 *(reconstructed, partial)*
+## 0.2.0 — 2026-07-16 *(was v0.8e-1, reconstructed, partial)*
 
 **Changed:** `index.html`
 
@@ -217,7 +237,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.8d — 2026-07-16 *(reconstructed, partial)*
+## 0.1.1 — 2026-07-16 *(was v0.8d, reconstructed, partial)*
 
 **Changed:** `index.html`
 
@@ -225,7 +245,7 @@ Security pass. No new features. Four findings from an audit of the reader, all c
 
 ---
 
-## v0.8c — 2026-07-16 *(reconstructed, partial)*
+## 0.1.0 — 2026-07-16 *(was v0.8c, reconstructed, partial)*
 
 **Changed:** `index.html`
 
