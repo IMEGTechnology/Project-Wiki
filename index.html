@@ -946,6 +946,57 @@
     .md-embed-stub-sub  { font-size: 11px; color: var(--text-muted); }
     .md-embed-stub-open { font-size: 12px; color: var(--accent); border: 1px solid var(--accent); border-radius: var(--radius); padding: 2px 8px; white-space: nowrap; }
 
+    /* === User badge + dropdown (S15) ========================== */
+    /* Rightmost header control — identity initials. Settings now opens
+       from here (see .ud-item onclick) instead of its own header gear. */
+    #user-badge {
+      background: var(--accent-bg);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 50%;
+    }
+    #user-badge:hover { background: var(--accent-bg); opacity: 0.85; }
+    #user-dropdown {
+      position: absolute;
+      top: 48px;
+      right: 8px;
+      width: 200px;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 10px 12px;
+      z-index: 200;
+      display: none;
+    }
+    #user-dropdown.open { display: block; }
+    .ud-name  { font-size: 13px; font-weight: 500; color: var(--text-primary); margin: 0; }
+    .ud-email { font-size: 11.5px; color: var(--text-secondary); margin: 0 0 8px; }
+    .ud-actions { border-top: 1px solid var(--border); padding-top: 6px; display: flex; flex-direction: column; }
+    .ud-item {
+      display: flex; align-items: center; gap: 8px;
+      border: none; background: transparent; cursor: pointer;
+      font-size: 12.5px; font-family: inherit; color: var(--text-primary);
+      padding: 6px 4px; border-radius: var(--radius); text-align: left;
+    }
+    .ud-item:hover { background: var(--hover); }
+    .ud-item .icon { width: 15px; height: 15px; }
+
+    /* === Identity modal (S15) — first run / new-device prompt === */
+    #identity-overlay {
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #identity-modal {
+      width: 320px; padding: 16px; border-radius: 10px;
+      background: var(--bg-reader); border: 1px solid var(--border-strong);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .id-sub { font-size: 12px; color: var(--text-secondary); margin: 2px 0 14px; }
+    .id-note { font-size: 11px; color: var(--co-green-txt); margin: 8px 0 0; display: none; }
+    .id-note.show { display: block; }
+
     /* === Settings panel ====================================== */
     #settings-panel {
       position: absolute;
@@ -1083,6 +1134,39 @@
     }
     .resize-handle:hover,
     .resize-handle.dragging { background: var(--accent); opacity: 0.5; }
+
+    /* Collapse/expand affordance (S15) — hidden by default, appears on
+       proximity hover (the existing ::after hit area already extends the
+       hover zone to 16px, so plain :hover is "close enough"), and stays
+       on permanently once the panel is collapsed so there's always a
+       visible way back in. Anchored to the handle's own edge (not
+       centered on the 4px line) so it never overflows past the viewport
+       edge and gets clipped by #body's overflow:hidden when the
+       neighboring panel is at width:0 — see rh-sidebar/rh-right below. */
+    .rh-affordance {
+      position: absolute;
+      top: 14px;
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius);
+      background: var(--bg-reader);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+      pointer-events: none; /* pure indicator — clicks still go to the handle underneath */
+    }
+    .rh-affordance .icon { width: 12px; height: 12px; }
+    .resize-handle:hover .rh-affordance,
+    .resize-handle.handle-closed .rh-affordance { opacity: 1; }
+    #rh-sidebar .rh-affordance { left: 0; }
+    #rh-right   .rh-affordance { right: 0; }
+    #rh-sidebar .rh-affordance .icon { transform: rotate(90deg); }
+    #rh-sidebar.handle-closed .rh-affordance .icon { transform: rotate(-90deg); }
+    #rh-right .rh-affordance .icon { transform: rotate(-90deg); }
+    #rh-right.handle-closed .rh-affordance .icon { transform: rotate(90deg); }
 
     /* === Reader panel ======================================== */
     /* Responsive minimum width — panels can never squeeze reader below these values */
@@ -1421,14 +1505,6 @@
       <svg class="icon ic-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
     </button>
 
-    <!-- Settings gear -->
-    <button class="icon-btn" id="btn-settings" title="Settings" aria-label="Settings">
-      <svg class="icon" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </button>
-
     <!-- Update available (S11+) — hidden until the service worker reports a
          newer app shell is active. PWAs (and some browsers) don't reliably
          pick up a new version on an already-open tab/installed app, so this
@@ -1445,6 +1521,29 @@
         <line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
+
+    <!-- User badge (S15) — rightmost. Settings now lives in this dropdown
+         instead of its own header gear; identity (name/email) drives the
+         initials shown here. Hidden until identity is set (see updateUserBadge). -->
+    <button class="icon-btn" id="user-badge" title="Account" aria-label="Account" style="display:none" onclick="toggleUserDropdown(event)"></button>
+
+    <div id="user-dropdown" onclick="event.stopPropagation()">
+      <p class="ud-name" id="ud-name"></p>
+      <p class="ud-email" id="ud-email"></p>
+      <div class="ud-actions">
+        <button class="ud-item" onclick="openSettingsFromBadge()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </button>
+        <button class="ud-item" onclick="switchUser()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Switch user
+        </button>
+      </div>
+    </div>
   </header>
 
   <!-- ── Body ───────────────────────────────────────────── -->
@@ -1472,7 +1571,9 @@
     </nav>
 
     <!-- Sidebar resize handle -->
-    <div class="resize-handle" id="rh-sidebar" title="Drag to resize"></div>
+    <div class="resize-handle" id="rh-sidebar" title="Drag to resize">
+      <span class="rh-affordance" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </div>
 
     <!-- Reader -->
     <div id="reader-wrap">
@@ -1550,7 +1651,9 @@
     </div>
 
     <!-- Right panel resize handle -->
-    <div class="resize-handle" id="rh-right" title="Drag to resize"></div>
+    <div class="resize-handle" id="rh-right" title="Drag to resize">
+      <span class="rh-affordance" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+    </div>
 
     <!-- Right panel (Sections 4 + 5) -->
     <aside id="right-panel" aria-label="Right panel">
@@ -1619,9 +1722,29 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.13.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.14.0</button>
     </aside>
 
+  </div>
+
+  <!-- ── Identity modal (S15) — first run / new-device prompt ──── -->
+  <div id="identity-overlay" style="display:none">
+    <div id="identity-modal" role="dialog" aria-label="Account setup" onclick="event.stopPropagation()">
+      <div class="cm-title">Welcome to the wiki</div>
+      <p class="id-sub">Enter your name and email so comments and favorites are yours.</p>
+      <div class="pp-row">
+        <div class="pp-label">Name</div>
+        <input type="text" id="id-name" class="pp-input" placeholder="Jane Smith" autocomplete="name">
+      </div>
+      <div class="pp-row">
+        <div class="pp-label">Email</div>
+        <input type="email" id="id-email" class="pp-input" placeholder="name@company.com" autocomplete="email">
+      </div>
+      <p class="id-note" id="id-note">Recognized — this email already has a profile in the vault. Your saved name and favorites were restored.</p>
+      <div class="cm-actions">
+        <button class="ed-btn ed-save" id="id-continue-btn" onclick="submitIdentity()">Continue</button>
+      </div>
+    </div>
   </div>
 
   <!-- ── Create file/folder modal (S14 extras) ──────────── -->
@@ -1855,6 +1978,8 @@ const state = {
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
   openLastNote:    true,  // Settings "Open last note" — default on
   unauditedFiles:  [],    // files with no WikiBase "status" frontmatter key (S12 file audit)
+  user:            null,  // S15 — {name, email, favorites: []} once identity is set;
+                          // null before the first-run prompt is answered
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -3937,6 +4062,7 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
           panel.style.width    = '';
           panel.style.minWidth = '';
           panel.classList.add('closed');
+          handle.classList.add('handle-closed');
           onClose();
         } else {
           lastPlainClick = now;
@@ -3946,6 +4072,7 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
         panel.style.width    = '';
         panel.style.minWidth = '';
         panel.classList.add('closed');
+        handle.classList.add('handle-closed');
         onClose();
       } else {
         persist(storageKey, panel.offsetWidth);
@@ -3987,6 +4114,7 @@ makeResizable('rh-right', 'right-panel', 'right', 'wb_rp_width', () => {
 // so there's always a way back in without hunting for the header toggle button.
 function setPanelOpen(panelId, handleId, storageKey, open) {
   const panel = $(panelId);
+  $(handleId).classList.toggle('handle-closed', !open); // keeps the handle's collapse affordance in sync
   if (open) {
     panel.classList.remove('closed');
     // Restore dragged width if one was saved
@@ -4106,29 +4234,150 @@ async function openChangelog() {
 }
 
 $('btn-help').addEventListener('click', () => {
-  // Close settings if open
+  // Close settings and the user dropdown if either is open
   if (state.settingsOpen) {
     state.settingsOpen = false;
     $('settings-panel').classList.remove('open');
   }
+  closeUserDropdown();
   openHelp();
 });
 
 // ── Settings ─────────────────────────────────────────────────────
-$('btn-settings').addEventListener('click', e => {
-  e.stopPropagation();
-  state.settingsOpen = !state.settingsOpen;
-  $('settings-panel').classList.toggle('open', state.settingsOpen);
-});
+// Settings now opens from the user badge dropdown (S15) rather than its
+// own header gear — see .ud-item onclick="openSettingsFromBadge()".
+function openSettingsFromBadge() {
+  closeUserDropdown();
+  state.settingsOpen = true;
+  $('settings-panel').classList.add('open');
+}
 
 document.addEventListener('click', () => {
   if (state.settingsOpen) {
     state.settingsOpen = false;
     $('settings-panel').classList.remove('open');
   }
+  closeUserDropdown();
 });
 
 $('settings-panel').addEventListener('click', e => e.stopPropagation());
+
+// ── User identity (S15) ───────────────────────────────────────────
+// One-time name+email capture so comments/favorites are attributable to a
+// person. The record lives in the vault itself at zSystem/Users/<email>.json
+// (same hidden sidecar convention as .comments.md/.changes.md, just at
+// vault root) — so entering the same email on a different PC recognizes
+// the returning user via the vault's own OneDrive sync. wb_user_email in
+// localStorage is only a local pointer to which file is "me" on this device.
+function userFileUrl(email) {
+  // Unlike changesUrlFor/commentsUrlFor, this isn't derived from an existing
+  // file's own (already-absolute, in SharePoint mode) url — it's built from
+  // scratch, so the vault-root prefix has to be added explicitly here.
+  // Local FSA mode has no site path; LOCAL.root already IS the vault root.
+  return LOCAL.on ? `zSystem/Users/${email}.json` : `${CONFIG.vaultRelPath}/zSystem/Users/${email}.json`;
+}
+
+async function ensureUserSystemDir() {
+  if (LOCAL.on) return; // localWriteFile creates intermediate dirs itself
+  try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* already exists */ }
+  try { await spCreateFolder(`${CONFIG.vaultRelPath}/zSystem`, 'Users'); } catch (e) { /* already exists */ }
+}
+
+async function checkIdentity() {
+  const savedEmail = localStorage.getItem('wb_user_email');
+  if (savedEmail) {
+    const email = JSON.parse(savedEmail);
+    const text = await readVaultFileOrNull(userFileUrl(email));
+    if (text) {
+      try {
+        state.user = JSON.parse(text);
+        updateUserBadge();
+        return;
+      } catch (e) { /* corrupt file — fall through to the prompt below */ }
+    }
+    // Local pointer survived but the vault file didn't (new PC before the
+    // vault synced, or the file was removed) — re-prompt, pre-filled.
+    openIdentityModal(email);
+    return;
+  }
+  openIdentityModal('');
+}
+
+function openIdentityModal(prefillEmail) {
+  $('id-name').value  = '';
+  $('id-email').value = prefillEmail || '';
+  $('id-note').classList.remove('show');
+  $('identity-overlay').style.display = 'flex';
+}
+
+function closeIdentityModal() {
+  $('identity-overlay').style.display = 'none';
+}
+
+async function submitIdentity() {
+  // Second click, after the "recognized" note is already showing — just close.
+  if ($('id-note').classList.contains('show')) { closeIdentityModal(); return; }
+
+  const name  = $('id-name').value.trim();
+  const email = $('id-email').value.trim().toLowerCase();
+  if (!name || !email || !email.includes('@')) return; // inputs are required; no inline validation UI yet
+
+  const url = userFileUrl(email);
+  let record = null;
+  const existing = await readVaultFileOrNull(url);
+  if (existing) {
+    try { record = JSON.parse(existing); } catch (e) { record = null; }
+  }
+
+  if (record) {
+    // Recognized returning user — the vault file wins over whatever name
+    // was just typed. Show the confirmation and wait for a second click
+    // to close, same as the Session 26 "new PC" simulation.
+    state.user = record;
+    persist('wb_user_email', email);
+    updateUserBadge();
+    $('id-note').classList.add('show');
+    return;
+  }
+
+  record = { name, email, favorites: [] };
+  await ensureUserSystemDir();
+  await spWriteFile(url, JSON.stringify(record, null, 2));
+  state.user = record;
+  persist('wb_user_email', email);
+  updateUserBadge();
+  closeIdentityModal();
+}
+
+function updateUserBadge() {
+  if (!state.user) return;
+  const initials = state.user.name.trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  $('user-badge').textContent = initials;
+  $('user-badge').style.display = 'flex';
+  $('ud-name').textContent  = state.user.name;
+  $('ud-email').textContent = state.user.email;
+}
+
+function toggleUserDropdown(e) {
+  e.stopPropagation();
+  if (state.settingsOpen) {
+    state.settingsOpen = false;
+    $('settings-panel').classList.remove('open');
+  }
+  $('user-dropdown').classList.toggle('open');
+}
+
+function closeUserDropdown() {
+  $('user-dropdown').classList.remove('open');
+}
+
+function switchUser() {
+  closeUserDropdown();
+  localStorage.removeItem('wb_user_email');
+  state.user = null;
+  $('user-badge').style.display = 'none';
+  openIdentityModal('');
+}
 
 $('tgl-strip').addEventListener('change', e => {
   state.stripPfx = e.target.checked;
@@ -5692,6 +5941,7 @@ function loadPersistedState() {
       state.sidebarOpen = JSON.parse(sidebar);
       if (!state.sidebarOpen) {
         $('sidebar').classList.add('closed');
+        $('rh-sidebar').classList.add('handle-closed');
       }
     }
 
@@ -5700,6 +5950,7 @@ function loadPersistedState() {
       state.rightPanelOpen = JSON.parse(rightPanel);
       if (!state.rightPanelOpen) {
         $('right-panel').classList.add('closed');
+        $('rh-right').classList.add('handle-closed');
       }
     }
 
@@ -6734,6 +6985,7 @@ async function bootVault() {
     refreshEditControls(); // New/Move hidden unless Settings → Enable editing
     updateBackButtons();   // disabled at boot — nothing in history yet
     scanBadges(); // S14 — async, fills comment + review badges
+    checkIdentity(); // S15 — async, shows the first-run/new-device prompt if needed
     vaultReady = true; // enables the focus-regain refresh below
 
     if (last) openFile(last.url, last.name);

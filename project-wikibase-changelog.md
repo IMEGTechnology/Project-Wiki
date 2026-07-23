@@ -8,6 +8,16 @@
 
 ---
 
+## 0.14.0 — 2026-07-23
+
+**Changed:** `index.html`
+
+- Per-user identity (S15): first-run prompt asks for name and email, then remembers you. The record lives in the vault itself at `zSystem/Users/<email>.json` — same hidden sidecar folder already used for comments/change-log files, just at vault root — so entering the same email on a different PC gets recognized as the returning user (record wins over whatever name is typed) instead of creating a duplicate profile. `wb_user_email` in localStorage is only a pointer to which file is "me" on this device.
+- Header badge replaces the old Settings gear. The user's initials now sit rightmost in the header (order left to right: theme, help, badge); clicking it opens a small dropdown with name/email, a Settings entry (opens the same settings panel as before, just relocated), and Switch user (clears local identity and re-prompts). Favorites entry point intentionally deferred to next session.
+- Sidebar and right-panel resize handles now show a small collapse/expand icon on hover, and leave it on permanently once the panel is collapsed — previously the only visual cue was the handle line itself turning accent-colored on hover, with no indicator at all when a panel was already closed.
+
+---
+
 ## 0.13.0 — 2026-07-22
 
 **Changed:** `index.html`
