@@ -8,6 +8,44 @@
 
 ---
 
+## 0.14.4 — 2026-07-23
+
+**Changed:** `index.html`
+
+- Resize-handle flare color bug, root-caused properly this time: it was rendering a solid `color-mix()`-computed tone, and `color-mix()` isn't supported everywhere this file can render (SharePoint/Teams embeds can use an older WebView). An unsupported color function makes the whole CSS variable invalid, and SVG `fill` falls back to its default — solid black — which is exactly the black flashing that kept getting reported as a "fade." Replaced every `color-mix()` call with pre-computed hex values, hardcoded per theme and per background variant (16 combinations total), so there's no runtime color function that can fail.
+- Second, separate cause of the same black flash: the flare's icon shape never had a default `fill` set for the moments it's not actively hovered/collapsed — only the active-state rules set a color. During the brief opacity fade-out on mouseleave, with no state class matching, it fell through to that same SVG black default. Added a real base fill so the icon always has a valid color, faded or not.
+- Removed the "lights up anywhere in the open sidebar/right-panel" hover trigger — turned out to be unwanted once a panel is already open and visible; the flare now only brightens on a direct hover of the handle itself, and stays on permanently when a panel is collapsed (unchanged).
+- Removed the redundant sidebar/right-panel toggle buttons from the header — the resize-handle flare has done this job since v0.14.0, so the header's duplicate icons were unnecessary. The flare now calls the toggle logic directly instead of proxying through the header button's click.
+- Icon glyph inside the flare shrunk twice this round, roughly 40% smaller overall than the v0.14.3 size, plus the color transition on the flare's fill and the handle line's background was removed entirely (snap instantly on state change, no easing) since animating between the two tones kept reading as a distracting flash rather than a smooth fade.
+
+---
+
+## 0.14.3 — 2026-07-23
+
+**Changed:** `index.html`
+
+- Resize-handle collapse control redesigned: replaced the floating rounded-square icon box with a shape that flares directly out of the drag line itself — a rounded-top tab tapering smoothly back into the 4px line, rather than a separate element sitting near it. Left edge of the flare is flush with the line (no centering math, so no edge-clipping risk either). Icon is the same rect-and-line shape as the header's own sidebar/right-panel buttons, with one small addition — the sidebar icon shades its left segment, the right-panel icon shades its right segment, so it's unambiguous which panel each controls. Same interaction rules as before: lit on hovering the line or anywhere in that panel, hidden otherwise, permanently on once collapsed, and the whole flare shape (not just the icon glyph) is the click target.
+- Reader corner-control alignment (Back/Forward/filename, fold-pill/Properties/Edit): added `scrollbar-gutter: stable` to the reader's scroll container. The corner-control wrapper sits outside that scrolling box while the document text centers inside it — without a stable gutter, the two can compute their centering against very slightly different widths (whether a scrollbar happens to be showing) and drift apart, most noticeably around a panel collapse.
+
+---
+
+## 0.14.2 — 2026-07-23
+
+**Changed:** `index.html`
+
+- Resize-handle collapse icon: moved up to line up with the reader's own nav-pill/fold-pill row (top:8px, was 14px), color reverted to the app's standard muted icon tone (the higher-contrast version from v0.14.1 looked odd in practice), and it now lights up from anywhere in the sidebar or right-panel — not just the thin 4px handle line itself. Still shows permanently once a panel is collapsed, unchanged.
+
+---
+
+## 0.14.1 — 2026-07-23
+
+**Changed:** `index.html`
+
+- Resize-handle collapse icon, three fixes from testing v0.14.0: it's now actually clickable (a direct shortcut to the same toggle as the header button, not just a passive indicator), bigger (26px, up from 20px), and reuses the exact panel-toggle icon already used on the header's sidebar/right-panel buttons instead of the chevron from the mockup — higher-contrast color (`--text-primary`) so it reads clearly against the handle line. Position unchanged from v0.14.0 (kept near the top, not lowered).
+- Reader corner controls (Back/Forward/filename on the left; fold-pill/Properties/Edit on the right) now align with the document's own left/right text margin instead of the raw reader panel edge. New shared `#reader-corner-align` wrapper mirrors `#reader-content`'s own max-width/margin/padding, so the alignment holds automatically at any window width or sidebar/right-panel state — no JS resize handling needed.
+
+---
+
 ## 0.14.0 — 2026-07-23
 
 **Changed:** `index.html`

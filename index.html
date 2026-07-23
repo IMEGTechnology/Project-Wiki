@@ -86,6 +86,14 @@
       --text-muted:    #6b6966;
       --border:        rgba(255,255,255,0.07);
       --border-strong: rgba(255,255,255,0.13);
+      /* Solid (non-translucent) handle tones — see .resize-handle comment
+         below for why these exist instead of reusing --border-strong.
+         Hardcoded per data-bg variant further down (not color-mix() —
+         see the comment there for why); these are just the pre-"dark"-
+         variant default, in case data-bg hasn't been set yet. */
+      --handle-active: #3a3a38;
+      --handle-hover:  #2c2c2a;
+      --handle-rest:   #2c2c2a;
       --accent:        #5b9cf6;
       --accent-bg:     rgba(91,156,246,0.12);
       --badge-bg:      rgba(255,255,255,0.08);
@@ -124,6 +132,9 @@
       --text-muted:    #999893;
       --border:        rgba(0,0,0,0.08);
       --border-strong: rgba(0,0,0,0.14);
+      --handle-active: #d3d3d1;
+      --handle-hover:  #e1e1e0;
+      --handle-rest:   #e1e1e0;
       --accent:        #1a6ef5;
       --accent-bg:     #e8f0fe;
       --badge-bg:      #e4e3e0;
@@ -192,24 +203,37 @@
        named flavors here (graphite vs airy neutral), not literally
        "the app's own dark/light" — their home-row values match the
        base theme exactly; their off-row values are new neutral variants. */
-    body[data-theme="dark"][data-bg="dark"]    { --bg-app: #1c1c1a; --bg-sidebar: #212120; --bg-reader: #252523; --bg-header: #212120; }
-    body[data-theme="dark"][data-bg="light"]   { --bg-app: #201f1c; --bg-sidebar: #262521; --bg-reader: #2b2a26; --bg-header: #262521; }
-    body[data-theme="dark"][data-bg="frost"]   { --bg-app: #0d1117; --bg-sidebar: #131a24; --bg-reader: #171f2b; --bg-header: #131a24; }
-    body[data-theme="dark"][data-bg="clay"]    { --bg-app: #1c1b1f; --bg-sidebar: #211f26; --bg-reader: #26232b; --bg-header: #211f26; }
-    body[data-theme="dark"][data-bg="mica"]    { --bg-app: #202020; --bg-sidebar: #2c2c2c; --bg-reader: #323232; --bg-header: #2c2c2c; }
-    body[data-theme="dark"][data-bg="marble"]  { --bg-app: #1e1e1e; --bg-sidebar: #262626; --bg-reader: #2c2c2c; --bg-header: #262626; }
-    body[data-theme="dark"][data-bg="things"]  { --bg-app: #17181c; --bg-sidebar: #1e1f24; --bg-reader: #24252b; --bg-header: #1e1f24; }
+    /* --handle-rest/--handle-hover/--handle-active: solid tones for the
+       resize-handle line + flare (see .resize-handle below), pre-computed
+       per bg variant instead of via color-mix(). color-mix() isn't
+       supported everywhere this file may render (SharePoint/Teams embeds
+       can use an older WebView), and an unsupported color-mix() makes the
+       whole var() invalid — which falls back to fill's UA default of
+       solid black. That's what was flashing: not a transition artifact,
+       but the icon and tab genuinely rendering black because the color
+       never resolved. Hardcoded hex has no such dependency. rest and
+       hover intentionally share one value (see rh-flare comment above);
+       active is the brighter ambient tone.
+       --handle-rest/hover = --bg-app blended toward white 7% (dark) / black 8% (light)
+       --handle-active     = --bg-app blended toward white 13% (dark) / black 14% (light) */
+    body[data-theme="dark"][data-bg="dark"]    { --bg-app: #1c1c1a; --bg-sidebar: #212120; --bg-reader: #252523; --bg-header: #212120; --handle-rest: #2c2c2a; --handle-hover: #2c2c2a; --handle-active: #3a3a38; }
+    body[data-theme="dark"][data-bg="light"]   { --bg-app: #201f1c; --bg-sidebar: #262521; --bg-reader: #2b2a26; --bg-header: #262521; --handle-rest: #302f2c; --handle-hover: #302f2c; --handle-active: #3d3c3a; }
+    body[data-theme="dark"][data-bg="frost"]   { --bg-app: #0d1117; --bg-sidebar: #131a24; --bg-reader: #171f2b; --bg-header: #131a24; --handle-rest: #1e2227; --handle-hover: #1e2227; --handle-active: #2c3035; }
+    body[data-theme="dark"][data-bg="clay"]    { --bg-app: #1c1b1f; --bg-sidebar: #211f26; --bg-reader: #26232b; --bg-header: #211f26; --handle-rest: #2c2b2f; --handle-hover: #2c2b2f; --handle-active: #39393c; }
+    body[data-theme="dark"][data-bg="mica"]    { --bg-app: #202020; --bg-sidebar: #2c2c2c; --bg-reader: #323232; --bg-header: #2c2c2c; --handle-rest: #303030; --handle-hover: #303030; --handle-active: #3d3d3d; }
+    body[data-theme="dark"][data-bg="marble"]  { --bg-app: #1e1e1e; --bg-sidebar: #262626; --bg-reader: #2c2c2c; --bg-header: #262626; --handle-rest: #2e2e2e; --handle-hover: #2e2e2e; --handle-active: #3b3b3b; }
+    body[data-theme="dark"][data-bg="things"]  { --bg-app: #17181c; --bg-sidebar: #1e1f24; --bg-reader: #24252b; --bg-header: #1e1f24; --handle-rest: #27282c; --handle-hover: #27282c; --handle-active: #35363a; }
     /* 8th identity — Minimal's own neutral base-color scale (no tint,
        just steps of gray), matching its "distraction-free" look. */
-    body[data-theme="dark"][data-bg="minimal"] { --bg-app: #1e1e1e; --bg-sidebar: #212121; --bg-reader: #242424; --bg-header: #212121; }
-    body[data-theme="light"][data-bg="dark"]   { --bg-app: #e8e8e8; --bg-sidebar: #dedede; --bg-reader: #f5f5f5; --bg-header: #dedede; }
-    body[data-theme="light"][data-bg="light"]  { --bg-app: #f5f5f3; --bg-sidebar: #f0efec; --bg-reader: #ffffff; --bg-header: #f0efec; }
-    body[data-theme="light"][data-bg="frost"]  { --bg-app: #eef4fb; --bg-sidebar: #e4edf8; --bg-reader: #ffffff; --bg-header: #e4edf8; }
-    body[data-theme="light"][data-bg="clay"]   { --bg-app: #f7f2fa; --bg-sidebar: #efe6f3; --bg-reader: #fffbfe; --bg-header: #efe6f3; }
-    body[data-theme="light"][data-bg="mica"]   { --bg-app: #f3f3f3; --bg-sidebar: #e9e9e9; --bg-reader: #ffffff; --bg-header: #e9e9e9; }
-    body[data-theme="light"][data-bg="marble"] { --bg-app: #ececec; --bg-sidebar: #e4e4e4; --bg-reader: #ffffff; --bg-header: #e4e4e4; }
-    body[data-theme="light"][data-bg="things"] { --bg-app: #fbfbfa; --bg-sidebar: #f4f3f1; --bg-reader: #ffffff; --bg-header: #f4f3f1; }
-    body[data-theme="light"][data-bg="minimal"] { --bg-app: #fafafa; --bg-sidebar: #f6f6f6; --bg-reader: #ffffff; --bg-header: #f6f6f6; }
+    body[data-theme="dark"][data-bg="minimal"] { --bg-app: #1e1e1e; --bg-sidebar: #212121; --bg-reader: #242424; --bg-header: #212121; --handle-rest: #2e2e2e; --handle-hover: #2e2e2e; --handle-active: #3b3b3b; }
+    body[data-theme="light"][data-bg="dark"]   { --bg-app: #e8e8e8; --bg-sidebar: #dedede; --bg-reader: #f5f5f5; --bg-header: #dedede; --handle-rest: #d5d5d5; --handle-hover: #d5d5d5; --handle-active: #c8c8c8; }
+    body[data-theme="light"][data-bg="light"]  { --bg-app: #f5f5f3; --bg-sidebar: #f0efec; --bg-reader: #ffffff; --bg-header: #f0efec; --handle-rest: #e1e1e0; --handle-hover: #e1e1e0; --handle-active: #d3d3d1; }
+    body[data-theme="light"][data-bg="frost"]  { --bg-app: #eef4fb; --bg-sidebar: #e4edf8; --bg-reader: #ffffff; --bg-header: #e4edf8; --handle-rest: #dbe0e7; --handle-hover: #dbe0e7; --handle-active: #cdd2d8; }
+    body[data-theme="light"][data-bg="clay"]   { --bg-app: #f7f2fa; --bg-sidebar: #efe6f3; --bg-reader: #fffbfe; --bg-header: #efe6f3; --handle-rest: #e3dfe6; --handle-hover: #e3dfe6; --handle-active: #d4d0d7; }
+    body[data-theme="light"][data-bg="mica"]   { --bg-app: #f3f3f3; --bg-sidebar: #e9e9e9; --bg-reader: #ffffff; --bg-header: #e9e9e9; --handle-rest: #e0e0e0; --handle-hover: #e0e0e0; --handle-active: #d1d1d1; }
+    body[data-theme="light"][data-bg="marble"] { --bg-app: #ececec; --bg-sidebar: #e4e4e4; --bg-reader: #ffffff; --bg-header: #e4e4e4; --handle-rest: #d9d9d9; --handle-hover: #d9d9d9; --handle-active: #cbcbcb; }
+    body[data-theme="light"][data-bg="things"] { --bg-app: #fbfbfa; --bg-sidebar: #f4f3f1; --bg-reader: #ffffff; --bg-header: #f4f3f1; --handle-rest: #e7e7e6; --handle-hover: #e7e7e6; --handle-active: #d8d8d7; }
+    body[data-theme="light"][data-bg="minimal"] { --bg-app: #fafafa; --bg-sidebar: #f6f6f6; --bg-reader: #ffffff; --bg-header: #f6f6f6; --handle-rest: #e6e6e6; --handle-hover: #e6e6e6; --handle-active: #d7d7d7; }
 
     html, body {
       height: 100%;
@@ -548,23 +572,45 @@
       min-width: 0;
       background: var(--bg-reader);
     }
+    /* Shared positioning context for every corner control (nav pill, fold
+       pill, Edit, Properties) — same max-width/margin as #reader-content,
+       so this wrapper's own edges land at the same x-position as
+       #reader-content's padding-box edges, at any window width or
+       sidebar/right-panel state. NOTE: no padding here on purpose —
+       absolutely positioned children ignore an ancestor's padding for
+       their own offset math (right:0 lands flush with the padding EDGE,
+       not inset by it), so the 48px content-inset has to be baked into
+       each child's own right/left value below instead (matching
+       #reader-content's own padding: 40px 48px 80px). Getting this wrong
+       once already put every corner control flush with the raw edge —
+       zero clearance from the neighboring resize-handle's own flare
+       reach, which is why Edit/Properties looked "trimmed": the flare
+       sits above them in stacking order at that same zero-clearance
+       spot. Transparent middle lets clicks reach the reader underneath;
+       only the controls themselves (children) re-enable pointer events. */
+    #reader-corner-align {
+      position: absolute; top: 0; left: 0; right: 0;
+      max-width: 1290px; margin: 0 auto;
+      pointer-events: none;
+    }
+    #reader-corner-align > * { pointer-events: auto; }
     #btn-edit {
-      position: absolute; top: 8px; right: 16px; z-index: 6;
+      position: absolute; top: 8px; right: 48px; z-index: 6;
       background: var(--bg-reader);
     }
     #btn-props {
-      position: absolute; top: 8px; right: 52px; z-index: 6;
+      position: absolute; top: 8px; right: 84px; z-index: 6;
       background: var(--bg-reader);
     }
     /* Back/Forward pair — mirrors Properties/Edit on the opposite corner,
        same size, grouped the same way the fold-pill icons are on the
        right so they move together instead of needing separate math. */
     #reader-nav-pill {
-      /* right:185px leaves clearance for the fold-pill/props/edit cluster
+      /* right:218px leaves clearance for the fold-pill/props/edit cluster
          on the opposite corner (fold-pill alone runs ~89px wide starting
-         at right:88 — see #reader-fold-pill below) so the filename can
+         at right:120 — see #reader-fold-pill below) so the filename can
          flex-grow into all the space between, instead of a small fixed box. */
-      position: absolute; top: 8px; left: 16px; right: 185px; z-index: 6;
+      position: absolute; top: 8px; left: 48px; right: 218px; z-index: 6;
       display: flex; align-items: center; gap: 6px;
     }
     #reader-nav-pill .icon-btn { background: var(--bg-reader); flex-shrink: 0; }
@@ -599,7 +645,7 @@
        reader's own headings. Neutral tone — deliberately not accent-colored
        so it reads as app chrome, not a call-to-action. Sits left of Properties. */
     #reader-fold-pill {
-      position: absolute; top: 8px; right: 88px; z-index: 6;
+      position: absolute; top: 8px; right: 120px; z-index: 6;
       display: flex; align-items: center; gap: 2px;
     }
     #reader-fold-pill .icon-btn { width: 26px; height: 26px; }
@@ -607,7 +653,7 @@
     #reader-fold-pill .rfp-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; margin-left: 6px; }
     /* Properties flyout (S13) */
     #props-panel {
-      position: absolute; top: 44px; right: 16px; z-index: 20;
+      position: absolute; top: 44px; right: 48px; z-index: 20;
       width: 270px; max-height: 70%; overflow-y: auto;
       padding: 12px 14px; border-radius: 10px;
       background: var(--bg-reader); border: 1px solid var(--border-strong);
@@ -633,6 +679,9 @@
       flex: 1;
       background: var(--bg-reader);
       overflow-y: auto;
+      scrollbar-gutter: stable; /* reserves the scrollbar's width always, scrollbar or not — otherwise #reader-content
+                                    (inside this scrolling box) and #reader-corner-align (outside it, a plain sibling)
+                                    can center against two slightly different widths and drift apart */
       padding: 0;
       min-height: 0;
     }
@@ -1122,51 +1171,82 @@
       width: 4px;
       flex-shrink: 0;
       cursor: col-resize;
-      background: var(--border); /* subtle always-visible line */
+      background: var(--handle-rest);
       position: relative;
       z-index: 10;
-      transition: background 0.15s, opacity 0.15s;
+      /* No transition on background/fill — color swaps snap instantly.
+         Animating between the two tones kept producing a visible
+         flash/fade that read as distracting rather than smooth. */
+      transition: opacity 0.15s;
     }
     .resize-handle::after {
       content: '';
       position: absolute;
       inset: 0 -6px; /* 16px total hit area — easy to grab even when panel is wide */
     }
+    /* Muted gray on hover/drag (not accent-blue). Two solid tones, not one —
+       --border-strong (translucent) was the original bug: the same
+       see-through tint composites lighter over the reader panel's
+       background than it does over the page's own background, so the
+       line and the flare tab never matched even with identical CSS.
+       --handle-active/--handle-hover are solid, hardcoded per bg variant
+       (see the data-bg blocks above) instead of computed against
+       --bg-app, so they render identically regardless of what's actually
+       behind them, with no runtime color function to fall back badly if
+       unsupported.
+       - handle-closed (collapsed — must stay on permanently) uses
+         --handle-active, the brighter "something's here" ambient cue —
+         it's the only way to know the panel's still there once its own
+         width is 0, so it stays the more visible tone.
+       - :hover (mouse directly on the 4px line/flare) and .dragging use
+         --handle-hover — while the panel is open there's already a
+         visible panel to show you where the handle is, so direct-hover
+         gets the quieter tone; no separate "hovering anywhere in the
+         open panel" trigger anymore, that read as an unnecessary
+         brightening the user didn't want once expanded. Same trigger
+         list as the flare's own fill rules below, the two must always
+         move together. */
+    .resize-handle.handle-closed { background: var(--handle-active); opacity: 1; }
     .resize-handle:hover,
-    .resize-handle.dragging { background: var(--accent); opacity: 0.5; }
+    .resize-handle.dragging { background: var(--handle-hover); opacity: 1; }
 
-    /* Collapse/expand affordance (S15) — hidden by default, appears on
-       proximity hover (the existing ::after hit area already extends the
-       hover zone to 16px, so plain :hover is "close enough"), and stays
-       on permanently once the panel is collapsed so there's always a
-       visible way back in. Anchored to the handle's own edge (not
-       centered on the 4px line) so it never overflows past the viewport
-       edge and gets clipped by #body's overflow:hidden when the
-       neighboring panel is at width:0 — see rh-sidebar/rh-right below. */
-    .rh-affordance {
+    /* Collapse/expand affordance (S15, redesigned same session per
+       feedback) — a shape that flares out of the drag line itself into a
+       rounded-top tab holding the icon, tapering back into the line at
+       the bottom, rather than a separate floating box. Hidden by default
+       (opacity 0), appears on direct hover of the handle line (:hover) or
+       permanently once collapsed (.handle-closed) — do not drop
+       .handle-closed from the opacity rule. The flare's own left edge
+       sits flush with the handle line (no centering math needed — the
+       shape only bulges outward, toward the reader), so unlike the old
+       boxed version it never has an edge-clipping concern. Icon color
+       uses --text-secondary (a real foreground token, not a background
+       cutout) so it always contrasts against the fill regardless of
+       which of the two tones below is active.
+       Base fill below (--handle-rest, before the :hover/.dragging/
+       .handle-closed overrides) matters even though the flare is
+       invisible at rest — without SOME explicit fill here, the brief
+       opacity fade-out on mouseleave has nothing to fall back to but
+       SVG's own UA default, solid black, which is exactly the black
+       flash that was reported. Always keep a real fill value set. */
+    .rh-flare {
       position: absolute;
-      top: 14px;
-      width: 20px;
-      height: 20px;
-      border-radius: var(--radius);
-      background: var(--bg-reader);
-      border: 1px solid var(--border-strong);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      top: 0;
+      width: 24px;
+      height: 64px;
       opacity: 0;
       transition: opacity 0.15s;
-      pointer-events: none; /* pure indicator — clicks still go to the handle underneath */
+      cursor: pointer;
     }
-    .rh-affordance .icon { width: 12px; height: 12px; }
-    .resize-handle:hover .rh-affordance,
-    .resize-handle.handle-closed .rh-affordance { opacity: 1; }
-    #rh-sidebar .rh-affordance { left: 0; }
-    #rh-right   .rh-affordance { right: 0; }
-    #rh-sidebar .rh-affordance .icon { transform: rotate(90deg); }
-    #rh-sidebar.handle-closed .rh-affordance .icon { transform: rotate(-90deg); }
-    #rh-right .rh-affordance .icon { transform: rotate(-90deg); }
-    #rh-right.handle-closed .rh-affordance .icon { transform: rotate(90deg); }
+    .rh-flare .flare-shape { fill: var(--handle-rest); }
+    .resize-handle.handle-closed .rh-flare .flare-shape { fill: var(--handle-active); }
+    .resize-handle:hover .rh-flare .flare-shape,
+    .resize-handle.dragging .rh-flare .flare-shape { fill: var(--handle-hover); }
+    .resize-handle:hover .rh-flare,
+    .resize-handle.dragging .rh-flare,
+    .resize-handle.handle-closed .rh-flare { opacity: 1; }
+    #rh-sidebar .rh-flare { left: 0; }
+    #rh-right   .rh-flare { right: 0; transform: scaleX(-1); }
 
     /* === Reader panel ======================================== */
     /* Responsive minimum width — panels can never squeeze reader below these values */
@@ -1470,14 +1550,8 @@
 
   <!-- ── Header ─────────────────────────────────────────── -->
   <header id="header">
-    <button class="icon-btn" id="btn-sidebar" title="Toggle sidebar" aria-label="Toggle sidebar">
-      <svg class="icon" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <line x1="9" y1="3" x2="9" y2="21"/>
-      </svg>
-    </button>
-
-    <!-- New file/folder (S14) — next to the sidebar toggle -->
+    <!-- New file/folder (S14) — sidebar toggle removed (S15), redundant
+         with the resize-handle flare, which now does the same job. -->
     <button class="icon-btn" id="btn-new" title="New file or folder" aria-label="New file or folder" onclick="openCreateModal(null)">
       <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
@@ -1491,13 +1565,8 @@
       WikiBase <span></span>
     </div>
 
-    <!-- Right panel toggle (left of settings) -->
-    <button class="icon-btn" id="btn-right-panel" title="Toggle right panel" aria-label="Toggle right panel">
-      <svg class="icon" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <line x1="15" y1="3" x2="15" y2="21"/>
-      </svg>
-    </button>
+    <!-- Right panel toggle removed (S15) — same reason, the resize-handle
+         flare on rh-right covers it now. -->
 
     <!-- Dark/Light toggle (S7) — quick-access, direct header control -->
     <button class="icon-btn theme-toggle-btn" id="btn-theme" title="Toggle Dark/Light" aria-label="Toggle Dark/Light">
@@ -1572,11 +1641,22 @@
 
     <!-- Sidebar resize handle -->
     <div class="resize-handle" id="rh-sidebar" title="Drag to resize">
-      <span class="rh-affordance" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+      <svg class="rh-flare" viewBox="0 0 24 64" title="Toggle sidebar" aria-label="Toggle sidebar" onmousedown="event.stopPropagation()" onclick="if(event.detail>1)return; toggleSidebar()">
+        <path class="flare-shape" d="M0,64 L0,12 Q0,6 6,6 L18,6 Q24,6 24,12 L24,34 C24,48 8,48 4,60 L4,64 Z"/>
+        <rect x="7.2" y="12.2" width="3.2" height="9.6" fill="var(--text-secondary)"/>
+        <rect x="7.2" y="12.2" width="9.6" height="9.6" rx="1" fill="none" stroke="var(--text-secondary)" stroke-width="1.05"/>
+        <line x1="10.4" y1="12.2" x2="10.4" y2="21.8" stroke="var(--text-secondary)" stroke-width="1.05"/>
+      </svg>
     </div>
 
     <!-- Reader -->
     <div id="reader-wrap">
+      <!-- Corner controls (nav pill, fold pill, Edit, Properties) share this
+           wrapper so they align to the document's own left/right text edge
+           instead of the raw panel edge — same max-width/margin/padding as
+           #reader-content, so it tracks automatically at any window width
+           or sidebar/right-panel state with no JS needed. -->
+      <div id="reader-corner-align">
       <!-- Back / Forward (previous/next note) — mirrors Properties/Edit, opposite corner -->
       <div id="reader-nav-pill">
         <button class="icon-btn" id="btn-back-reader" title="Back" aria-label="Back" onclick="goBack()" disabled>
@@ -1622,6 +1702,7 @@
       </button>
       <!-- Properties flyout (S13) -->
       <div id="props-panel" role="dialog" aria-label="File properties" style="display:none"></div>
+      </div><!-- /#reader-corner-align -->
       <div id="reader-fade" aria-hidden="true"></div>
       <main id="reader">
         <div class="reader-empty" id="reader-empty">Select a file to read</div>
@@ -1652,7 +1733,14 @@
 
     <!-- Right panel resize handle -->
     <div class="resize-handle" id="rh-right" title="Drag to resize">
-      <span class="rh-affordance" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+      <svg class="rh-flare" viewBox="0 0 24 64" title="Toggle right panel" aria-label="Toggle right panel" onmousedown="event.stopPropagation()" onclick="if(event.detail>1)return; toggleRightPanel()">
+        <path class="flare-shape" d="M0,64 L0,12 Q0,6 6,6 L18,6 Q24,6 24,12 L24,34 C24,48 8,48 4,60 L4,64 Z"/>
+        <g transform="scale(-1,1) translate(-24,0)">
+          <rect x="13.6" y="12.2" width="3.2" height="9.6" fill="var(--text-secondary)"/>
+          <rect x="7.2" y="12.2" width="9.6" height="9.6" rx="1" fill="none" stroke="var(--text-secondary)" stroke-width="1.05"/>
+          <line x1="13.6" y1="12.2" x2="13.6" y2="21.8" stroke="var(--text-secondary)" stroke-width="1.05"/>
+        </g>
+      </svg>
     </div>
 
     <!-- Right panel (Sections 4 + 5) -->
@@ -1722,7 +1810,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.14.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.14.4</button>
     </aside>
 
   </div>
@@ -4107,6 +4195,7 @@ makeResizable('rh-right', 'right-panel', 'right', 'wb_rp_width', () => {
   fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group');
 }, undefined, () => fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group'));
 
+
 // ── Panel open/close helpers ─────────────────────────────────────
 // Inline styles from dragging override CSS .closed rules — must clear them on close
 // and restore saved width on open. The resize handle itself is never hidden —
@@ -4133,18 +4222,21 @@ function setPanelOpen(panelId, handleId, storageKey, open) {
 }
 
 // ── Sidebar toggle ───────────────────────────────────────────────
-$('btn-sidebar').addEventListener('click', () => {
+// Called directly by the resize-handle flare (rh-sidebar) — the header
+// button that used to own this click was removed (S15) as redundant.
+function toggleSidebar() {
   state.sidebarOpen = !state.sidebarOpen;
   setPanelOpen('sidebar', 'rh-sidebar', 'wb_sb_width', state.sidebarOpen);
   persist('wb_sidebar', state.sidebarOpen);
-});
+}
 
 // ── Right panel toggle ───────────────────────────────────────────
-$('btn-right-panel').addEventListener('click', () => {
+// Called directly by the resize-handle flare (rh-right) — same as above.
+function toggleRightPanel() {
   state.rightPanelOpen = !state.rightPanelOpen;
   setPanelOpen('right-panel', 'rh-right', 'wb_rp_width', state.rightPanelOpen);
   persist('wb_right_panel', state.rightPanelOpen);
-});
+}
 
 // ── Help ─────────────────────────────────────────────────────────
 // help.md lives at the app level (same folder as index.html), not inside the vault.
