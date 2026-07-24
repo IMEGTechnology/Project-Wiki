@@ -8,6 +8,18 @@
 
 ---
 
+## 0.15.0 — 2026-07-24
+
+**Changed:** `index.html`
+
+- New Bookmarks tab in the right panel, between Outline and Comments. Bookmark ribbon icon added to every heading row in the Outline (always visible, not hover-gated) — click toggles a bookmark on that file+heading pair (no content stored), with a brief confirmation tip (reusing the existing folder-link-copy tip style) when one's added or removed.
+- Bookmarks tab has two sections: Favorites (flat, user-ordered, empty by default) and Bookmarks (grouped by file, heading order fixed to document order — only the file itself can be reordered or filed into a group). Hovering a bookmark row reveals a star to promote it into Favorites (stays in both places); hovering a Favorites row reveals a pencil to rename it — the only place a favorite can be renamed.
+- Organize mode: a sliders toggle in each section header (off by default) gates drag-and-drop reordering, grip handles, and a drop zone to pull an item out of a group. A folder-plus icon in each header creates a single-level named group (no nesting) — available regardless of organize mode, since creating an empty group can't cause an accidental reorder.
+- Clicking a bookmark or favorite jumps the reader straight to that file and heading — same underlying open-file-and-jump mechanism as clicking directly in the Outline (not a separate code path), so Outline (if also open in the right-panel stack) follows along and highlights the same heading. If the target heading was collapsed, its own subtree unfolds too (`expandHeadingSubtree`), on top of the existing ancestor-chain unfold `revealHeading` already did.
+- Storage: personal per-user, saved into the same vault-file identity record used for the header badge (S15) — the `favorites: []` stub from that session was unused until now; replaced with a richer shape (`bookmarks: {files, top, groups}`, `favorites: {items, top, groups}`), with a migration path (`normalizeUserBookmarkData`) for any record still on the old empty-array shape.
+
+---
+
 ## 0.14.4 — 2026-07-23
 
 **Changed:** `index.html`

@@ -1440,6 +1440,87 @@
     .rp-outline-item.active { color: var(--accent); border-right-color: var(--accent); background: var(--accent-bg); }
     .rp-outline-row.rp-outline-h1 .rp-outline-item { font-weight: 500; }
 
+    /* Outline bookmark toggle — right-justified, always visible (not
+       hover-gated, per S30 spec). */
+    .rp-outline-bm-btn {
+      flex-shrink: 0; width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; padding: 0;
+      color: var(--text-muted); border-radius: var(--radius);
+    }
+    .rp-outline-bm-btn:hover { background: var(--hover); color: var(--text-primary); }
+    .rp-outline-bm-btn.bm-on { color: var(--accent); }
+    .rp-outline-bm-btn svg { width: 14px; height: 14px; }
+
+    /* Bookmarks tab (S30) — Favorites (flat, user-ordered, empty by
+       default) + Bookmarks (grouped by file; headings inside a file stay
+       in document order — only the file itself is reorderable/groupable).
+       Personal per-user, saved into the identity record (S15). */
+    .bm-sec-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 8px 4px 12px; gap: 6px;
+    }
+    .bm-sec-title {
+      font-size: 12px; font-weight: 500; color: var(--text-primary);
+      display: flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .bm-count {
+      font-size: 10px; color: var(--text-secondary); background: var(--badge-bg);
+      padding: 1px 6px; border-radius: 8px; flex-shrink: 0;
+    }
+    .bm-hd-icons { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .bm-hd-btn {
+      width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; padding: 0; border-radius: 4px;
+      color: var(--text-muted);
+    }
+    .bm-hd-btn svg { width: 12px; height: 12px; }
+    .bm-hd-btn:hover { color: var(--text-primary); background: var(--hover); }
+    .bm-hd-btn.on { background: var(--badge-bg); color: var(--text-primary); }
+    .bm-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 10px 5px 16px; position: relative; cursor: pointer;
+    }
+    .bm-row:hover { background: var(--hover); }
+    .bm-row .bm-action {
+      opacity: 0; transition: opacity 0.12s; flex-shrink: 0;
+      background: none; border: none; cursor: pointer; padding: 2px; display: flex;
+      color: var(--text-muted);
+    }
+    .bm-row .bm-action svg { width: 13px; height: 13px; }
+    .bm-row:hover .bm-action { opacity: 1; }
+    .bm-row .bm-action.bm-fav-on { opacity: 1; color: var(--accent); }
+    .bm-label {
+      flex: 1; min-width: 0; font-size: 12px; color: var(--text-primary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .bm-sub { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+    .bm-group-hd {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 10px 7px 8px; cursor: pointer;
+    }
+    .bm-group-hd:hover { background: var(--hover); }
+    .bm-group-hd .bm-action { opacity: 0; }
+    .bm-group-hd:hover .bm-action { opacity: 1; }
+    .bm-group-name {
+      flex: 1; min-width: 0; font-size: 12px; color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .bm-rename-input, .bm-newgroup-input {
+      flex: 1; min-width: 0; background: var(--bg-reader); border: 1px solid var(--accent);
+      border-radius: 4px; color: var(--text-primary); font-size: 12px; padding: 2px 6px;
+    }
+    .bm-grip {
+      display: flex; flex-direction: column; flex-wrap: wrap;
+      width: 8px; height: 12px; gap: 1px; flex-shrink: 0; cursor: grab;
+    }
+    .bm-grip span { width: 3px; height: 3px; border-radius: 50%; background: var(--text-muted); }
+    .bm-drop-ungroup {
+      margin: 6px 10px 8px; padding: 6px; border: 1px dashed var(--border-strong);
+      border-radius: var(--radius); text-align: center; font-size: 10px; color: var(--text-muted);
+    }
+
     /* Comments */
     .comment-list { padding: 6px; }
     .comment-card {
@@ -1749,6 +1830,10 @@
         <button class="rp-tab active" data-tab="outline" title="Outline — click to toggle, double-click to view alone" aria-label="Outline" onclick="rpTabClick('outline')" ondblclick="rpTabDblClick('outline')">
           <svg class="rp-tab-ic" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         </button>
+        <button class="rp-tab" data-tab="bookmarks" title="Bookmarks — click to toggle, double-click to view alone" aria-label="Bookmarks" onclick="rpTabClick('bookmarks')" ondblclick="rpTabDblClick('bookmarks')">
+          <svg class="rp-tab-ic" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span class="tab-count" id="bm-tab-count" style="display:none">0</span>
+        </button>
         <button class="rp-tab" data-tab="comments" title="Comments — click to toggle, double-click to view alone" aria-label="Comments" onclick="rpTabClick('comments')" ondblclick="rpTabDblClick('comments')">
           <svg class="rp-tab-ic" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           <span class="tab-count" id="cmt-tab-count" style="display:none">0</span>
@@ -1795,6 +1880,7 @@
           </div>
           <div id="ot-list"><div class="rp-empty">Open a file to see its outline.</div></div>
         </div>
+        <div class="rp-pane"        id="rp-bookmarks"><div class="rp-empty">Your bookmarks and favorites.</div></div>
         <div class="rp-pane"        id="rp-comments"> <div class="rp-empty">Open a file to see comments.</div></div>
         <div class="rp-pane"        id="rp-backlinks"><div class="rp-empty">Open a file to see backlinks.</div></div>
         <div class="rp-pane"        id="rp-review">   <div class="rp-empty">Open a file to see its changes.</div></div>
@@ -1810,7 +1896,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.14.4</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.15.0</button>
     </aside>
 
   </div>
@@ -2066,8 +2152,17 @@ const state = {
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
   openLastNote:    true,  // Settings "Open last note" — default on
   unauditedFiles:  [],    // files with no WikiBase "status" frontmatter key (S12 file audit)
-  user:            null,  // S15 — {name, email, favorites: []} once identity is set;
-                          // null before the first-run prompt is answered
+  user:            null,  // S15 — {name, email, bookmarks, favorites} once identity is
+                          // set (S30 normalizeUserBookmarkData fills in the bookmarks/
+                          // favorites shape); null before the first-run prompt is answered
+  // Bookmarks tab (S30) — organize mode + collapse/edit UI state. Session
+  // only; the actual bookmark/favorite data lives on state.user (persisted
+  // to the vault) and is never reset here.
+  bmOrganizeMode:   false,
+  bmCollapsedFiles: {},
+  bmCollapsedGroups:{},
+  bmEditingKey:     null,
+  bmNewGroupDraft:  null,
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -2467,6 +2562,14 @@ const ICON = {
   // locked = shared with the reader's own wb_folds:<url> store.
   lockOpen:   `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`,
   lockClosed: `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  // Bookmarks tab (S30)
+  bookmark:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  bookmarkFilled: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+  folderPlus:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`,
+  sliders:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>`,
+  star:           `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  starFilled:     `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.3"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  pencil:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>`,
 };
 
 // ── Render sidebar ───────────────────────────────────────────────
@@ -3109,6 +3212,50 @@ function wbDelegatedClick(e) {
     scrollToHeading(outJump.dataset.wbOutjump);
     return;
   }
+  // Bookmarks tab (S30) — order matters here: the more specific/nested
+  // targets (grip, favorite star, rename, delete-group) are checked
+  // before the row/header they sit inside (jump, collapse), since a
+  // single click can only match the first branch that fires.
+  const bmGrip = e.target.closest('[data-wb-bmgrip]');
+  if (bmGrip) { e.preventDefault(); return; }
+  const favToggle = e.target.closest('[data-wb-favtoggle]');
+  if (favToggle) {
+    e.preventDefault();
+    toggleFavoriteBm(favToggle.dataset.wbFavtoggle, favToggle.dataset.wbFavtoggleid, favToggle.dataset.wbFavtoggletext);
+    return;
+  }
+  const favRename = e.target.closest('[data-wb-favrename]');
+  if (favRename) { e.preventDefault(); startRenameFav(favRename.dataset.wbFavrename); return; }
+  const bmDelGroup = e.target.closest('[data-wb-bmdeletegroup]');
+  if (bmDelGroup) {
+    e.preventDefault();
+    deleteGroupBm(bmDelGroup.dataset.wbBmdeletegroup, bmDelGroup.dataset.wbBmdeletegroupid);
+    return;
+  }
+  const bmNewGroup = e.target.closest('[data-wb-bmnewgroup]');
+  if (bmNewGroup) { e.preventDefault(); startNewGroupBm(bmNewGroup.dataset.wbBmnewgroup); return; }
+  const bmOrganize = e.target.closest('[data-wb-bmorganizetoggle]');
+  if (bmOrganize) { e.preventDefault(); toggleOrganizeMode(); return; }
+  const bmToggle = e.target.closest('[data-wb-bmtoggle]');
+  if (bmToggle) {
+    e.preventDefault();
+    toggleBookmarkHeading(bmToggle.dataset.wbBmtoggle, bmToggle.dataset.wbBmtext);
+    return;
+  }
+  const bmCollapseGroup = e.target.closest('[data-wb-bmcollapsegroup]');
+  if (bmCollapseGroup) {
+    e.preventDefault();
+    toggleCollapseGroupBm(bmCollapseGroup.dataset.wbBmcollapsegroup, bmCollapseGroup.dataset.wbBmcollapsegroupid);
+    return;
+  }
+  const bmCollapseFile = e.target.closest('[data-wb-bmcollapsefile]');
+  if (bmCollapseFile) { e.preventDefault(); toggleCollapseFileBm(bmCollapseFile.dataset.wbBmcollapsefile); return; }
+  const bmJump = e.target.closest('[data-wb-bmjump]');
+  if (bmJump) {
+    e.preventDefault();
+    jumpToBookmark(bmJump.dataset.wbBmjump, bmJump.dataset.wbBmjumpid);
+    return;
+  }
   const closeCmt = e.target.closest('[data-wb-closecmt]');
   if (closeCmt) {
     e.preventDefault();
@@ -3501,8 +3648,17 @@ function renderSingleBlock(block, seenIds) {
     }
 
     case 'table': {
-      // Filter out separator rows
-      const rows = block.lines.filter(l => l.trim() && !l.match(/^\|?[\s\-:|]+\|/));
+      // Filter out separator rows. A real separator row is dashes (with
+      // optional leading/trailing colon for alignment) in EVERY cell —
+      // checked cell-by-cell, not just "line starts with those chars".
+      // The old line-level regex (/^\|?[\s\-:|]+\|/) matched any data row
+      // whose first cell happened to be blank, whitespace, or a bare "-",
+      // silently dropping real rows in wider tables where that's common.
+      const isSeparatorRow = l => {
+        const parts = l.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+        return parts.length > 0 && parts.every(c => /^:?-+:?$/.test(c));
+      };
+      const rows = block.lines.filter(l => l.trim() && !isSeparatorRow(l));
       if (!rows.length) return '';
       const [headerRow, ...bodyRows] = rows;
       const cells = row => row.replace(/^\||\|$/g,'').split('|').map(c => c.trim());
@@ -4383,7 +4539,9 @@ async function checkIdentity() {
     if (text) {
       try {
         state.user = JSON.parse(text);
+        normalizeUserBookmarkData();
         updateUserBadge();
+        updateBookmarkTabBadge();
         return;
       } catch (e) { /* corrupt file — fall through to the prompt below */ }
     }
@@ -4426,18 +4584,21 @@ async function submitIdentity() {
     // was just typed. Show the confirmation and wait for a second click
     // to close, same as the Session 26 "new PC" simulation.
     state.user = record;
+    normalizeUserBookmarkData();
     persist('wb_user_email', email);
     updateUserBadge();
+    updateBookmarkTabBadge();
     $('id-note').classList.add('show');
     return;
   }
 
-  record = { name, email, favorites: [] };
+  record = { name, email, bookmarks: { files: {}, top: [], groups: {} }, favorites: { items: {}, top: [], groups: {} } };
   await ensureUserSystemDir();
   await spWriteFile(url, JSON.stringify(record, null, 2));
   state.user = record;
   persist('wb_user_email', email);
   updateUserBadge();
+  updateBookmarkTabBadge();
   closeIdentityModal();
 }
 
@@ -4468,6 +4629,8 @@ function switchUser() {
   localStorage.removeItem('wb_user_email');
   state.user = null;
   $('user-badge').style.display = 'none';
+  updateBookmarkTabBadge();
+  if (state.openRPTabs.includes('bookmarks')) renderBookmarksTab();
   openIdentityModal('');
 }
 
@@ -6135,10 +6298,10 @@ function loadPersistedState() {
 // its own scroll and a drag handle to resize against its neighbor.
 // Double-click a tool icon solos it, same disambiguation delay already
 // used for list-item fold vs subtree-fold (liChevronClick/DblClick).
-const RP_TABS = ['outline', 'comments', 'backlinks', 'review', 'search'];
+const RP_TABS = ['outline', 'bookmarks', 'comments', 'backlinks', 'review', 'search'];
 
 function rpRenderFns() {
-  return { outline: renderOutlineTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null };
+  return { outline: renderOutlineTab, bookmarks: renderBookmarksTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null };
 }
 
 let rpClickTimers = {};
@@ -6324,7 +6487,11 @@ function renderOutlineTab() {
     // move to data-attributes anyway so that no dynamic value anywhere is
     // interpolated into executable attribute text, which is the property
     // that has to hold for dropping 'unsafe-inline' from the CSP later.
-    html += `<div class="rp-outline-row rp-outline-h${m.level}">${chevron}<button class="rp-outline-item" data-hid="${escHtml(m.id)}" data-wb-outjump="${escHtml(m.id)}">${escHtml(m.text)}</button></div>`;
+    const bmOn = isBookmarked(state.activeUrl, m.id);
+    const bmBtn = state.activeUrl
+      ? `<button class="rp-outline-bm-btn${bmOn ? ' bm-on' : ''}" data-wb-bmtoggle="${escHtml(m.id)}" data-wb-bmtext="${escHtml(m.text)}" title="${bmOn ? 'Remove bookmark' : 'Add bookmark'}" aria-label="${bmOn ? 'Remove bookmark' : 'Add bookmark'}">${bmOn ? ICON.bookmarkFilled : ICON.bookmark}</button>`
+      : '';
+    html += `<div class="rp-outline-row rp-outline-h${m.level}">${chevron}<button class="rp-outline-item" data-hid="${escHtml(m.id)}" data-wb-outjump="${escHtml(m.id)}">${escHtml(m.text)}</button>${bmBtn}</div>`;
     visibleEls.push(m.el);
   });
 
@@ -6378,6 +6545,400 @@ function setupOutlineObserver(headings) {
 
   headings.forEach(h => state.outlineObserver.observe(h));
 }
+
+// ── Bookmarks tab (S30) ──────────────────────────────────────────
+// Personal per-user: file+heading pairs, no content stored — saved into
+// the same per-user identity record used for the header badge (S15),
+// which already had an unused `favorites: []` stub. Two sections:
+// Favorites (flat, user-ordered, empty by default) and Bookmarks
+// (grouped by file; headings inside a file always stay in document
+// order — only the file itself can be reordered or filed into a group).
+// Single-level groups, manual order only (no alphabetical/date sort) —
+// see Session 30 for the interview that landed on this scope.
+
+// Migrates an older/blank record (S15's favorites: [] stub, or no
+// bookmarks field at all) to the real shape below. Safe and cheap to
+// call redundantly — runs every time state.user is (re)assigned.
+function normalizeUserBookmarkData() {
+  if (!state.user) return;
+  if (!state.user.bookmarks || Array.isArray(state.user.bookmarks)) {
+    state.user.bookmarks = { files: {}, top: [], groups: {} };
+  }
+  if (!state.user.favorites || Array.isArray(state.user.favorites)) {
+    state.user.favorites = { items: {}, top: [], groups: {} };
+  }
+}
+
+// Fire-and-forget, same tradeoff already made for comment/change sidecar
+// writes — a failed save surfaces in the console, not as a blocked click.
+async function saveUserRecord() {
+  if (!state.user) return;
+  try {
+    await spWriteFile(userFileUrl(state.user.email), JSON.stringify(state.user, null, 2));
+  } catch (e) {
+    console.error('WikiBase: failed to save bookmarks/favorites', e);
+  }
+}
+
+function isBookmarked(file, id) {
+  if (!state.user || !file) return false;
+  const f = state.user.bookmarks.files[file];
+  return !!(f && f.items.some(h => h.id === id));
+}
+
+function isFavorited(file, id) {
+  if (!state.user) return false;
+  return !!state.user.favorites.items[file + '::' + id];
+}
+
+function totalBookmarksCount() {
+  if (!state.user) return 0;
+  return Object.values(state.user.bookmarks.files).reduce((n, f) => n + f.items.length, 0);
+}
+
+function updateBookmarkTabBadge() {
+  const badge = $('bm-tab-count');
+  if (!badge) return;
+  const n = totalBookmarksCount();
+  badge.textContent = n;
+  badge.style.display = n > 0 ? '' : 'none';
+}
+
+// Generic single-level group/order helpers shared by Favorites and
+// Bookmarks — section is 'bm' or 'fav'. A token is {k, id}: k is 'f'
+// (bookmark file), 'i' (favorite item) or 'g' (group). Groups never
+// nest — a group's own .order array only ever holds file/item ids.
+function bmSectionData(section) {
+  return section === 'fav' ? state.user.favorites : state.user.bookmarks;
+}
+function locateToken(section, k, id) {
+  const data = bmSectionData(section);
+  const ti = data.top.findIndex(t => t.k === k && t.id === id);
+  if (ti !== -1) return { where: 'top', index: ti };
+  for (const gid in data.groups) {
+    const gi = data.groups[gid].order.indexOf(id);
+    if (gi !== -1) return { where: 'group', gid, index: gi };
+  }
+  return null;
+}
+function removeToken(section, k, id) {
+  const data = bmSectionData(section);
+  const loc = locateToken(section, k, id);
+  if (!loc) return;
+  if (loc.where === 'top') data.top.splice(loc.index, 1);
+  else data.groups[loc.gid].order.splice(loc.index, 1);
+}
+function insertBeforeTarget(section, k, id, targetK, targetId) {
+  const data = bmSectionData(section);
+  if (targetK === 'g' && k !== 'g') { data.groups[targetId].order.push(id); return; }
+  const tloc = locateToken(section, targetK, targetId);
+  if (!tloc) { data.top.push({ k, id }); return; }
+  if (tloc.where === 'top') data.top.splice(tloc.index, 0, { k, id });
+  else if (k === 'g') data.top.push({ k: 'g', id });
+  else data.groups[tloc.gid].order.splice(tloc.index, 0, id);
+}
+
+function toggleOrganizeMode() {
+  state.bmOrganizeMode = !state.bmOrganizeMode;
+  renderBookmarksTab();
+}
+function toggleCollapseFileBm(file) {
+  state.bmCollapsedFiles[file] = !state.bmCollapsedFiles[file];
+  renderBookmarksTab();
+}
+function toggleCollapseGroupBm(section, gid) {
+  const key = section + ':' + gid;
+  state.bmCollapsedGroups[key] = !state.bmCollapsedGroups[key];
+  renderBookmarksTab();
+}
+function startNewGroupBm(section) {
+  state.bmNewGroupDraft = section;
+  renderBookmarksTab();
+}
+function commitNewGroupBm(section, name) {
+  name = (name || '').trim();
+  if (name) {
+    const gid = 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    bmSectionData(section).groups[gid] = { name, order: [] };
+    bmSectionData(section).top.push({ k: 'g', id: gid });
+    saveUserRecord();
+  }
+  state.bmNewGroupDraft = null;
+  renderBookmarksTab();
+}
+function deleteGroupBm(section, gid) {
+  const data = bmSectionData(section);
+  const g = data.groups[gid];
+  if (!g) return;
+  g.order.forEach(id => data.top.push({ k: section === 'fav' ? 'i' : 'f', id }));
+  delete data.groups[gid];
+  const ti = data.top.findIndex(t => t.k === 'g' && t.id === gid);
+  if (ti !== -1) data.top.splice(ti, 1);
+  saveUserRecord();
+  renderBookmarksTab();
+}
+
+// Toggle a bookmark on the currently open file's heading — file is
+// always state.activeUrl, never taken from the click target.
+function toggleBookmarkHeading(id, text) {
+  if (!state.user || !state.activeUrl) return;
+  const file = state.activeUrl;
+  const bm = state.user.bookmarks;
+  let f = bm.files[file];
+  if (f && f.items.some(h => h.id === id)) {
+    f.items = f.items.filter(h => h.id !== id);
+    if (!f.items.length) { delete bm.files[file]; removeToken('bm', 'f', file); }
+    const fid = file + '::' + id; // a removed bookmark can't stay favorited either
+    if (state.user.favorites.items[fid]) { delete state.user.favorites.items[fid]; removeToken('fav', 'i', fid); }
+  } else {
+    if (!f) { f = bm.files[file] = { name: state.activeName || file, items: [] }; bm.top.push({ k: 'f', id: file }); }
+    f.items.push({ id, text });
+  }
+  saveUserRecord();
+  updateBookmarkTabBadge();
+  renderOutlineTab();
+  if (state.openRPTabs.includes('bookmarks')) renderBookmarksTab();
+}
+
+function toggleFavoriteBm(file, id, text) {
+  if (!state.user) return;
+  const fid = file + '::' + id;
+  const fav = state.user.favorites;
+  if (fav.items[fid]) {
+    delete fav.items[fid];
+    removeToken('fav', 'i', fid);
+  } else {
+    const fileRec = state.user.bookmarks.files[file];
+    fav.items[fid] = { file, fileName: (fileRec && fileRec.name) || file, id, text, custom: null };
+    fav.top.unshift({ k: 'i', id: fid });
+  }
+  saveUserRecord();
+  renderBookmarksTab();
+}
+
+function startRenameFav(fid) {
+  state.bmEditingKey = fid;
+  renderBookmarksTab();
+}
+function commitRenameFav(fid, val) {
+  const f = state.user.favorites.items[fid];
+  if (f) { f.custom = (val || '').trim() || null; saveUserRecord(); }
+  state.bmEditingKey = null;
+  renderBookmarksTab();
+}
+
+// Unfolds the target heading's own subtree (its own fold state, plus
+// every nested heading below it). revealHeading (S20/S24) already
+// unfolds the ANCESTOR chain above a heading plus the scroll + pinned
+// highlight — this covers the other half asked for in Session 30: a
+// bookmark on a collapsed heading should open that heading's own
+// content, not just scroll to its still-collapsed title.
+function expandHeadingSubtree(id) {
+  const h = document.getElementById(id);
+  if (!h) return;
+  const row = h.closest('.md-h-row');
+  if (row) readerFoldRow(row, false);
+  const section = row && row.nextElementSibling;
+  if (section) section.querySelectorAll('.md-h-row').forEach(r => readerFoldRow(r, false));
+  maybeRefreshOutlineAfterReaderFold();
+}
+
+// Same navigation a click inside the Outline already does (openFile +
+// revealHeading) — one code path, so Outline (if also open in the right-
+// panel stack) always follows along and highlights the same heading,
+// whichever surface triggered the jump.
+async function jumpToBookmark(file, id) {
+  if (state.activeUrl !== file) {
+    const name = file.split('/').pop().replace(/\.md$/i, '');
+    await openFile(file, name);
+  }
+  expandHeadingSubtree(id);
+  revealHeading(id);
+}
+
+function renderBmSectionIcons(section) {
+  const on = state.bmOrganizeMode;
+  return `<div class="bm-hd-icons">
+    <button class="bm-hd-btn" data-wb-bmnewgroup="${section}" title="New group" aria-label="New group">${ICON.folderPlus}</button>
+    <button class="bm-hd-btn${on ? ' on' : ''}" data-wb-bmorganizetoggle="1" title="${on ? 'Turn off organize mode' : 'Turn on organize mode'}" aria-label="Toggle organize mode">${ICON.sliders}</button>
+  </div>`;
+}
+
+function renderFavRowBm(fid, indent) {
+  const f = state.user.favorites.items[fid];
+  if (!f) return '';
+  if (state.bmEditingKey === fid) {
+    return `<div class="bm-row" style="padding-left:${indent}px;cursor:default">
+      <input class="bm-rename-input" id="bm-rename-input" data-fav-id="${escHtml(fid)}" value="${escHtml(f.custom || f.text)}">
+    </div>`;
+  }
+  const drag = state.bmOrganizeMode
+    ? ` draggable="true" data-wb-drag="1" data-wb-drag-k="i" data-wb-drag-id="${escHtml(fid)}" data-wb-drag-section="fav" data-wb-drop="1" data-wb-drop-section="fav" data-wb-drop-k="i" data-wb-drop-id="${escHtml(fid)}"`
+    : '';
+  const grip = state.bmOrganizeMode
+    ? `<span class="bm-grip" data-wb-bmgrip="1"><span></span><span></span><span></span><span></span><span></span><span></span></span>`
+    : '';
+  return `<div class="bm-row" style="padding-left:${indent}px"${drag} data-wb-bmjump="${escHtml(f.file)}" data-wb-bmjumpid="${escHtml(f.id)}">
+    ${grip}
+    <span class="bm-label">${escHtml(f.custom || f.text)}</span>
+    <span class="bm-sub">${escHtml((f.fileName || f.file).replace(/\.md$/i, ''))}</span>
+    <button class="bm-action" data-wb-favrename="${escHtml(fid)}" title="Rename" aria-label="Rename">${ICON.pencil}</button>
+  </div>`;
+}
+
+function renderBmFileBlock(file, indent) {
+  const f = state.user.bookmarks.files[file];
+  if (!f) return '';
+  const isCollapsed = !!state.bmCollapsedFiles[file];
+  const drag = state.bmOrganizeMode
+    ? ` draggable="true" data-wb-drag="1" data-wb-drag-k="f" data-wb-drag-id="${escHtml(file)}" data-wb-drag-section="bm" data-wb-drop="1" data-wb-drop-section="bm" data-wb-drop-k="f" data-wb-drop-id="${escHtml(file)}"`
+    : '';
+  const grip = state.bmOrganizeMode
+    ? `<span class="bm-grip" data-wb-bmgrip="1"><span></span><span></span><span></span><span></span><span></span><span></span></span>`
+    : '';
+  let html = `<div class="bm-group-hd" style="padding-left:${indent}px"${drag} data-wb-bmcollapsefile="${escHtml(file)}">
+    ${grip}
+    <span style="display:flex;transform:rotate(${isCollapsed ? '-90deg' : '0deg'})">${ICON.foldChevron}</span>
+    <span class="bm-group-name">${escHtml((f.name || file).replace(/\.md$/i, ''))}</span>
+    <span class="bm-count">${f.items.length}</span>
+  </div>`;
+  if (!isCollapsed) {
+    f.items.forEach(h => {
+      const fav = isFavorited(file, h.id);
+      html += `<div class="bm-row" style="padding-left:${indent + 22}px" data-wb-bmjump="${escHtml(file)}" data-wb-bmjumpid="${escHtml(h.id)}">
+        <span class="bm-label">${escHtml(h.text)}</span>
+        <button class="bm-action${fav ? ' bm-fav-on' : ''}" data-wb-favtoggle="${escHtml(file)}" data-wb-favtoggleid="${escHtml(h.id)}" data-wb-favtoggletext="${escHtml(h.text)}" title="${fav ? 'Remove from favorites' : 'Add to favorites'}" aria-label="${fav ? 'Remove from favorites' : 'Add to favorites'}">${fav ? ICON.starFilled : ICON.star}</button>
+      </div>`;
+    });
+  }
+  return html;
+}
+
+function renderGroupBlockBm(section, gid, indent) {
+  const data = bmSectionData(section);
+  const g = data.groups[gid];
+  if (!g) return '';
+  const key = section + ':' + gid;
+  const isCollapsed = !!state.bmCollapsedGroups[key];
+  const drag = state.bmOrganizeMode
+    ? ` draggable="true" data-wb-drag="1" data-wb-drag-k="g" data-wb-drag-id="${escHtml(gid)}" data-wb-drag-section="${section}" data-wb-drop="1" data-wb-drop-section="${section}" data-wb-drop-k="g" data-wb-drop-id="${escHtml(gid)}"`
+    : '';
+  const grip = state.bmOrganizeMode
+    ? `<span class="bm-grip" data-wb-bmgrip="1"><span></span><span></span><span></span><span></span><span></span><span></span></span>`
+    : '';
+  const delBtn = state.bmOrganizeMode
+    ? `<button class="bm-action" data-wb-bmdeletegroup="${section}" data-wb-bmdeletegroupid="${escHtml(gid)}" title="Delete group" aria-label="Delete group">&times;</button>`
+    : '';
+  let html = `<div class="bm-group-hd" style="padding-left:${indent}px"${drag} data-wb-bmcollapsegroup="${section}" data-wb-bmcollapsegroupid="${escHtml(gid)}">
+    ${grip}
+    <span style="display:flex;transform:rotate(${isCollapsed ? '-90deg' : '0deg'})">${ICON.foldChevron}</span>
+    <span class="bm-group-name">${escHtml(g.name)}</span>
+    <span class="bm-count">${g.order.length}</span>
+    ${delBtn}
+  </div>`;
+  if (!isCollapsed) {
+    g.order.forEach(id => {
+      html += section === 'fav' ? renderFavRowBm(id, indent + 22) : renderBmFileBlock(id, indent + 16);
+    });
+  }
+  return html;
+}
+
+function renderBmSection(section, title) {
+  const data = bmSectionData(section);
+  const count = section === 'fav' ? Object.keys(state.user.favorites.items).length : totalBookmarksCount();
+  let html = `<div class="bm-sec-hd"><span class="bm-sec-title">${title}${count ? ` <span class="bm-count">${count}</span>` : ''}</span>${renderBmSectionIcons(section)}</div>`;
+  if (state.bmNewGroupDraft === section) {
+    html += `<div class="bm-row" style="padding-left:12px;cursor:default"><input class="bm-newgroup-input" id="bm-newgroup-input" data-section="${section}" placeholder="Group name"></div>`;
+  }
+  if (!data.top.length) {
+    html += `<div class="rp-empty" style="padding:6px 14px 14px;text-align:left">${section === 'fav' ? 'No favorites yet. Star a bookmark below to pin it here.' : 'No bookmarks yet.'}</div>`;
+    return html;
+  }
+  data.top.forEach(tok => {
+    if (tok.k === 'g') html += renderGroupBlockBm(section, tok.id, 8);
+    else if (section === 'fav') html += renderFavRowBm(tok.id, 16);
+    else html += renderBmFileBlock(tok.id, 8);
+  });
+  if (state.bmOrganizeMode) {
+    html += `<div class="bm-drop-ungroup" data-wb-drop="1" data-wb-dropungroup="${section}">Drag here to remove from a group</div>`;
+  }
+  return html;
+}
+
+function renderBookmarksTab() {
+  const pane = $('rp-bookmarks');
+  if (!state.user) {
+    pane.innerHTML = '<div class="rp-empty">Sign in to see your bookmarks.</div>';
+    return;
+  }
+  pane.innerHTML = renderBmSection('fav', 'Favorites') + `<div style="border-top:1px solid var(--border)">${renderBmSection('bm', 'Bookmarks')}</div>`;
+  attachBmInlineInputs();
+}
+
+function attachBmInlineInputs() {
+  const rn = $('bm-rename-input');
+  if (rn) {
+    rn.focus();
+    rn.select();
+    rn.addEventListener('keydown', e => {
+      if (e.key === 'Enter') rn.blur();
+      if (e.key === 'Escape') { state.bmEditingKey = null; renderBookmarksTab(); }
+    });
+    rn.addEventListener('blur', () => commitRenameFav(rn.dataset.favId, rn.value));
+  }
+  const ng = $('bm-newgroup-input');
+  if (ng) {
+    ng.focus();
+    ng.addEventListener('keydown', e => {
+      if (e.key === 'Enter') commitNewGroupBm(ng.dataset.section, ng.value);
+      if (e.key === 'Escape') { state.bmNewGroupDraft = null; renderBookmarksTab(); }
+    });
+    ng.addEventListener('blur', () => commitNewGroupBm(ng.dataset.section, ng.value));
+  }
+}
+
+// Drag and drop (organize mode only) — one small delegated set, same
+// "data lives in data-attributes, never in an inline handler string"
+// rule as wbDelegatedClick (S12-sec).
+document.addEventListener('dragstart', e => {
+  const el = e.target.closest('[data-wb-drag]');
+  if (!el) return;
+  e.dataTransfer.setData('text/plain', JSON.stringify({
+    k: el.dataset.wbDragK, id: el.dataset.wbDragId, section: el.dataset.wbDragSection,
+  }));
+  e.dataTransfer.effectAllowed = 'move';
+});
+document.addEventListener('dragover', e => {
+  if (e.target.closest('[data-wb-drop]')) e.preventDefault();
+});
+document.addEventListener('drop', e => {
+  const raw = e.dataTransfer.getData('text/plain');
+  if (!raw) return;
+  let d; try { d = JSON.parse(raw); } catch (err) { return; }
+  const ungroupZone = e.target.closest('[data-wb-dropungroup]');
+  if (ungroupZone) {
+    e.preventDefault();
+    if (d.k === 'g') return;
+    const section = ungroupZone.dataset.wbDropungroup;
+    removeToken(section, d.k, d.id);
+    bmSectionData(section).top.push({ k: d.k, id: d.id });
+    saveUserRecord();
+    renderBookmarksTab();
+    return;
+  }
+  const dropEl = e.target.closest('[data-wb-drop]');
+  if (!dropEl) return;
+  e.preventDefault();
+  const section = dropEl.dataset.wbDropSection;
+  const targetK  = dropEl.dataset.wbDropK;
+  const targetId = dropEl.dataset.wbDropId;
+  if (d.k === targetK && d.id === targetId) return;
+  removeToken(section, d.k, d.id);
+  insertBeforeTarget(section, d.k, d.id, targetK, targetId);
+  saveUserRecord();
+  renderBookmarksTab();
+});
 
 // ── Links tab ────────────────────────────────────────────────────
 // Two different things live here, both under the same "Links" tab:
