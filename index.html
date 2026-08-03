@@ -88,9 +88,8 @@
       --border-strong: rgba(255,255,255,0.13);
       /* Solid (non-translucent) handle tones — see .resize-handle comment
          below for why these exist instead of reusing --border-strong.
-         Hardcoded per data-bg variant further down (not color-mix() —
-         see the comment there for why); these are just the pre-"dark"-
-         variant default, in case data-bg hasn't been set yet. */
+         Real values come from the active preset (S32) and are written
+         inline by applyThemePrefs(); these are only the pre-JS fallback. */
       --handle-active: #3a3a38;
       --handle-hover:  #2c2c2a;
       --handle-rest:   #2c2c2a;
@@ -162,78 +161,54 @@
       --co-gray-bg:  #f1f1ef; --co-gray-bd:  #57534e; --co-gray-txt:  #44403c;
     }
 
-    /* === Header color palettes — 5 options x 2 themes, independent of Dark/Light === */
-    /* Header-color palette per named theme identity — 7 names x 2 base
-       modes (dark/light toggle still applies) = 14 rules. Renamed from
-       the old ad-hoc 5 (jewel/colorblind/mono-blue/amber/gray-accent) to
-       match the 7 planned theme identities, so this dropdown becomes the
-       first "slice" of each theme. Backgrounds are the second slice
-       (below). Text/borders/accent/tags stay on the Dark/Light toggle
-       until the themes are built out fully in a later session. */
-    body[data-theme="dark"][data-headers="dark"]   { --heading-1: #64B5F6; --heading-2: #e8e5df; --heading-3: #d8d5cf; --heading-4: #c8c5bf; }
-    body[data-theme="dark"][data-headers="light"]  { --heading-1: #8ec5ff; --heading-2: #6fa8f2; --heading-3: #5b93d9; --heading-4: #4a7cb8; }
-    body[data-theme="dark"][data-headers="frost"]  { --heading-1: #5AC8FA; --heading-2: #0A84FF; --heading-3: #64D2FF; --heading-4: #98A2B3; }
-    body[data-theme="dark"][data-headers="clay"]   { --heading-1: #D0BCFF; --heading-2: #EFB8C8; --heading-3: #A6D388; --heading-4: #CCC2DC; }
-    body[data-theme="dark"][data-headers="mica"]   { --heading-1: #60CDFF; --heading-2: #3AA0F3; --heading-3: #6CCB5F; --heading-4: #C5C5C5; }
-    body[data-theme="dark"][data-headers="marble"] { --heading-1: #409CFF; --heading-2: #7D7AFF; --heading-3: #6AC4DC; --heading-4: #98989D; }
-    body[data-theme="dark"][data-headers="things"] { --heading-1: #5B9CF6; --heading-2: #FF8080; --heading-3: #5FD98A; --heading-4: #A0A0A5; }
-    /* 8th identity — Obsidian Minimal theme's actual built-in accent
-       palette (.theme-dark/.theme-light --color-red/orange/yellow/green/
-       blue/purple in the real theme.css — same 8 hex values in both
-       modes, not redder/bluer per-mode like the other 7 identities
-       here). Goes all the way to H6 so the rainbow reads red→orange→
-       yellow→green→blue→purple the way Minimal's own colorful headings
-       feature does — --color-purple is #9e86c8, confirmed from
-       kepano/obsidian-minimal's theme.css. */
-    body[data-theme="dark"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; --heading-6: #9e86c8; }
-    body[data-theme="light"][data-headers="dark"]   { --heading-1: #64B5F6; --heading-2: #e8e5df; --heading-3: #d8d5cf; --heading-4: #c8c5bf; }
-    body[data-theme="light"][data-headers="light"]  { --heading-1: #0b3d66; --heading-2: #14559c; --heading-3: #1a6ef5; --heading-4: #5b93d9; }
-    body[data-theme="light"][data-headers="frost"]  { --heading-1: #0A5DC2; --heading-2: #007AFF; --heading-3: #34AADC; --heading-4: #6E7F96; }
-    body[data-theme="light"][data-headers="clay"]   { --heading-1: #6750A4; --heading-2: #7D5260; --heading-3: #386A20; --heading-4: #625B71; }
-    body[data-theme="light"][data-headers="mica"]   { --heading-1: #005A9E; --heading-2: #0078D4; --heading-3: #107C10; --heading-4: #5B5B5B; }
-    body[data-theme="light"][data-headers="marble"] { --heading-1: #1E6FD9; --heading-2: #5E5CE6; --heading-3: #30B0C7; --heading-4: #8E8E93; }
-    body[data-theme="light"][data-headers="things"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; }
-    body[data-theme="light"][data-headers="minimal"] { --heading-1: #d04255; --heading-2: #d5763f; --heading-3: #e5b567; --heading-4: #a8c373; --heading-5: #6c99bb; --heading-6: #9e86c8; }
+    /* === Theme presets (S32, pass 1) ===========================
+       The 32 hand-written rules that used to live here —
+       body[data-theme][data-headers] x8 and body[data-theme][data-bg] x8
+       — are gone. They let any header palette pair with any background
+       (64 combinations, most of them mismatched), left --accent
+       unthemeable, and gave 7 of the 8 palettes no H5/H6 of their own.
 
-    /* Background-color palette per named theme identity — the second
-       "slice" of each theme (Settings → Background color). Gated by
-       data-theme, same as header colors, so a light-flavored background
-       never lands under dark-mode text/borders/accent (or vice versa).
-       7 names x 2 modes = 14 rules. "Dark"/"Light" are just two more
-       named flavors here (graphite vs airy neutral), not literally
-       "the app's own dark/light" — their home-row values match the
-       base theme exactly; their off-row values are new neutral variants. */
-    /* --handle-rest/--handle-hover/--handle-active: solid tones for the
-       resize-handle line + flare (see .resize-handle below), pre-computed
-       per bg variant instead of via color-mix(). color-mix() isn't
-       supported everywhere this file may render (SharePoint/Teams embeds
-       can use an older WebView), and an unsupported color-mix() makes the
-       whole var() invalid — which falls back to fill's UA default of
-       solid black. That's what was flashing: not a transition artifact,
-       but the icon and tab genuinely rendering black because the color
-       never resolved. Hardcoded hex has no such dependency. rest and
-       hover intentionally share one value (see rh-flare comment above);
-       active is the brighter ambient tone.
-       --handle-rest/hover = --bg-app blended toward white 7% (dark) / black 8% (light)
-       --handle-active     = --bg-app blended toward white 13% (dark) / black 14% (light) */
-    body[data-theme="dark"][data-bg="dark"]    { --bg-app: #1c1c1a; --bg-sidebar: #212120; --bg-reader: #252523; --bg-header: #212120; --handle-rest: #2c2c2a; --handle-hover: #2c2c2a; --handle-active: #3a3a38; }
-    body[data-theme="dark"][data-bg="light"]   { --bg-app: #201f1c; --bg-sidebar: #262521; --bg-reader: #2b2a26; --bg-header: #262521; --handle-rest: #302f2c; --handle-hover: #302f2c; --handle-active: #3d3c3a; }
-    body[data-theme="dark"][data-bg="frost"]   { --bg-app: #0d1117; --bg-sidebar: #131a24; --bg-reader: #171f2b; --bg-header: #131a24; --handle-rest: #1e2227; --handle-hover: #1e2227; --handle-active: #2c3035; }
-    body[data-theme="dark"][data-bg="clay"]    { --bg-app: #1c1b1f; --bg-sidebar: #211f26; --bg-reader: #26232b; --bg-header: #211f26; --handle-rest: #2c2b2f; --handle-hover: #2c2b2f; --handle-active: #39393c; }
-    body[data-theme="dark"][data-bg="mica"]    { --bg-app: #202020; --bg-sidebar: #2c2c2c; --bg-reader: #323232; --bg-header: #2c2c2c; --handle-rest: #303030; --handle-hover: #303030; --handle-active: #3d3d3d; }
-    body[data-theme="dark"][data-bg="marble"]  { --bg-app: #1e1e1e; --bg-sidebar: #262626; --bg-reader: #2c2c2c; --bg-header: #262626; --handle-rest: #2e2e2e; --handle-hover: #2e2e2e; --handle-active: #3b3b3b; }
-    body[data-theme="dark"][data-bg="things"]  { --bg-app: #17181c; --bg-sidebar: #1e1f24; --bg-reader: #24252b; --bg-header: #1e1f24; --handle-rest: #27282c; --handle-hover: #27282c; --handle-active: #35363a; }
-    /* 8th identity — Minimal's own neutral base-color scale (no tint,
-       just steps of gray), matching its "distraction-free" look. */
-    body[data-theme="dark"][data-bg="minimal"] { --bg-app: #1e1e1e; --bg-sidebar: #212121; --bg-reader: #242424; --bg-header: #212121; --handle-rest: #2e2e2e; --handle-hover: #2e2e2e; --handle-active: #3b3b3b; }
-    body[data-theme="light"][data-bg="dark"]   { --bg-app: #e8e8e8; --bg-sidebar: #dedede; --bg-reader: #f5f5f5; --bg-header: #dedede; --handle-rest: #d5d5d5; --handle-hover: #d5d5d5; --handle-active: #c8c8c8; }
-    body[data-theme="light"][data-bg="light"]  { --bg-app: #f5f5f3; --bg-sidebar: #f0efec; --bg-reader: #ffffff; --bg-header: #f0efec; --handle-rest: #e1e1e0; --handle-hover: #e1e1e0; --handle-active: #d3d3d1; }
-    body[data-theme="light"][data-bg="frost"]  { --bg-app: #eef4fb; --bg-sidebar: #e4edf8; --bg-reader: #ffffff; --bg-header: #e4edf8; --handle-rest: #dbe0e7; --handle-hover: #dbe0e7; --handle-active: #cdd2d8; }
-    body[data-theme="light"][data-bg="clay"]   { --bg-app: #f7f2fa; --bg-sidebar: #efe6f3; --bg-reader: #fffbfe; --bg-header: #efe6f3; --handle-rest: #e3dfe6; --handle-hover: #e3dfe6; --handle-active: #d4d0d7; }
-    body[data-theme="light"][data-bg="mica"]   { --bg-app: #f3f3f3; --bg-sidebar: #e9e9e9; --bg-reader: #ffffff; --bg-header: #e9e9e9; --handle-rest: #e0e0e0; --handle-hover: #e0e0e0; --handle-active: #d1d1d1; }
-    body[data-theme="light"][data-bg="marble"] { --bg-app: #ececec; --bg-sidebar: #e4e4e4; --bg-reader: #ffffff; --bg-header: #e4e4e4; --handle-rest: #d9d9d9; --handle-hover: #d9d9d9; --handle-active: #cbcbcb; }
-    body[data-theme="light"][data-bg="things"] { --bg-app: #fbfbfa; --bg-sidebar: #f4f3f1; --bg-reader: #ffffff; --bg-header: #f4f3f1; --handle-rest: #e7e7e6; --handle-hover: #e7e7e6; --handle-active: #d8d8d7; }
-    body[data-theme="light"][data-bg="minimal"] { --bg-app: #fafafa; --bg-sidebar: #f6f6f6; --bg-reader: #ffffff; --bg-header: #f6f6f6; --handle-rest: #e6e6e6; --handle-hover: #e6e6e6; --handle-active: #d7d7d7; }
+       Presets now live in ONE place: the PRESETS table in JS (search
+       for "const PRESETS"). applyThemePrefs() resolves the active
+       preset + mode + any user overrides and writes the result as
+       inline custom properties on <body>. Inline props win over the
+       stylesheet, so every var(--heading-1) / var(--bg-sidebar) /
+       var(--accent) elsewhere in this file keeps working untouched —
+       no CSS rewrite, and nothing to keep in sync in two places.
+
+       The two rules below stay as the pre-JS fallback (Things, the
+       shipped default) so nothing renders unstyled if localStorage is
+       empty or the script hasn't run yet.
+
+       Carried over deliberately from v0.14.4: no color-mix() anywhere.
+       It isn't supported in every WebView this file can render in, and
+       an invalid var() falls back to solid black. Derived tints are
+       computed hex->rgba in JS instead; handle tones stay solid
+       pre-computed hex, now stored per preset in the PRESETS table. */
+    body[data-theme="dark"]  { --heading-1: #5B9CF6; --heading-2: #FF8080; --heading-3: #5FD98A; --heading-4: #A0A0A5; --heading-5: #F5C26B; --heading-6: #8A8A8F; }
+    body[data-theme="light"] { --heading-1: #2D6CDF; --heading-2: #F2555A; --heading-3: #34A853; --heading-4: #8E8E93; --heading-5: #C98A20; --heading-6: #77777C; }
+
+    /* === Reading + heading scale (S32, pass 1) =================
+       Every value the Theme panel's Reading and Headings sections can
+       change. Defaults here match what the app shipped with before the
+       panel existed, so an untouched install looks identical. */
+    body {
+      --read-width:  1290px;  /* Narrow 820 / Normal 1290 / Wide 1600 */
+      --body-size:   15px;    /* Small 14 / Medium 15 / Large 17 */
+      --body-lead:   1.75;    /* Tight 1.5 / Normal 1.75 / Relaxed 2 */
+      --head-scale:  1;       /* Compact 0.85 / Normal 1 / Large 1.15 */
+      --body-font:   -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      /* Density (S32 pass 2) — vertical padding on the nav and outline
+         rows. Two values because folder rows and file rows never had the
+         same padding; keeping the 1px difference preserves the existing
+         look at Normal. */
+      --row-pad:      4px;
+      --row-pad-file: 3px;
+    }
+    body[data-density="compact"] { --row-pad: 2px; --row-pad-file: 1px; }
+    body[data-density="roomy"]   { --row-pad: 7px; --row-pad-file: 6px; }
+
+
 
     html, body {
       height: 100%;
@@ -362,7 +337,7 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
+      padding: var(--row-pad) 10px;
       cursor: pointer;
       color: var(--text-secondary);
       font-size: 13px;
@@ -373,11 +348,44 @@
     .folder-row:hover { background: var(--hover); color: var(--text-primary); }
 
     /* AnuPpuccin-style rainbow nav (S7) — folder icon itself shows open/closed
-       state and carries the per-folder color, no separate chevron. */
-    .folder-icon { width: 14px; height: 14px; flex-shrink: 0; color: var(--this-rb, var(--text-muted)); }
+       state and carries the per-folder color, no separate chevron.
+
+       S32 pass 2: --nav-icon-color is set on <body> by applyThemePrefs()
+       for the Accent / Single / Muted folder-colour modes and cleared for
+       Rainbow, so the per-folder --this-rb (set inline on each .folder-block)
+       only wins when Rainbow is actually selected. No !important needed. */
+    .folder-icon { width: 14px; height: 14px; flex-shrink: 0; color: var(--nav-icon-color, var(--this-rb, var(--text-muted))); }
     .folder-icon .ic-open  { display: none; }
     .folder-row.open .folder-icon .ic-closed { display: none; }
     .folder-row.open .folder-icon .ic-open   { display: inline-flex; }
+    .file-icon { width: 14px; height: 14px; flex-shrink: 0; display: inline-flex; align-items: center; }
+
+    /* Icon style (S32 pass 2). Default 'folder' needs no rules — it's the
+       markup's own default with the alternates hidden. */
+    .folder-icon .ic-chev, .folder-icon .ic-dot, .file-icon .ic-dot { display: none; }
+    .folder-icon .ic-chev, .folder-icon .ic-dot { width: 14px; height: 14px; }
+    .file-icon .ic-dot { width: 14px; height: 14px; }
+
+    body[data-navicons="chevron"] .folder-icon .ic-closed,
+    body[data-navicons="chevron"] .folder-row.open .folder-icon .ic-open,
+    body[data-navicons="dot"] .folder-icon .ic-closed,
+    body[data-navicons="dot"] .folder-row.open .folder-icon .ic-open,
+    body[data-navicons="dot"] .file-icon .ic-file,
+    body[data-navicons="none"] .folder-icon,
+    body[data-navicons="none"] .file-icon { display: none; }
+
+    body[data-navicons="chevron"] .folder-icon .ic-chev { display: inline-flex; transition: transform 0.15s; }
+    body[data-navicons="chevron"] .folder-row.open .folder-icon .ic-chev { transform: rotate(90deg); }
+    /* A chevron on a leaf file would be a lie — nothing unfolds. The
+       indent and the file-list guide line carry it instead. */
+    body[data-navicons="chevron"] .file-icon { display: none; }
+    body[data-navicons="dot"] .folder-icon .ic-dot,
+    body[data-navicons="dot"] .file-icon .ic-dot { display: inline-flex; }
+
+    /* File icons are muted by default and only pick up the folder colour
+       when the "Colour file icons too" toggle is on. */
+    .file-icon { color: var(--text-muted); }
+    body.nav-file-color .file-icon { color: var(--nav-icon-color, var(--this-rb, var(--text-muted))); }
     .folder-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 
     .badge {
@@ -396,7 +404,7 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 3px 10px 3px 0;
+      padding: var(--row-pad-file) 10px var(--row-pad-file) 0;
       cursor: pointer;
       color: var(--text-muted);
       font-size: 13px;
@@ -406,11 +414,24 @@
     .file-row:hover { color: var(--text-primary); }
     .file-row.active { color: var(--accent); font-weight: 500; background: var(--accent-bg); border-right-color: var(--accent); }
 
+    /* Active row indicator (S32 pass 2) — the shipped look is both a
+       right-edge bar and a tint. These two rules subtract one or the
+       other; the accent text colour stays in every mode, since that's
+       what actually says "this is the open file". One selector list
+       covers the sidebar, root files and the Outline so the three can't
+       drift apart. */
+    body[data-activerow="bar"] .file-row.active,
+    body[data-activerow="bar"] .root-file.active,
+    body[data-activerow="bar"] .rp-outline-item.active { background: none; }
+    body[data-activerow="tint"] .file-row.active,
+    body[data-activerow="tint"] .root-file.active,
+    body[data-activerow="tint"] .rp-outline-item.active { border-right-color: transparent; }
+
     .root-file {
       display: flex;
       align-items: center;
       gap: 5px;
-      padding: 4px 10px;
+      padding: var(--row-pad) 10px;
       cursor: pointer;
       color: var(--text-muted);
       font-size: 13px;
@@ -590,7 +611,7 @@
        only the controls themselves (children) re-enable pointer events. */
     #reader-corner-align {
       position: absolute; top: 0; left: 0; right: 0;
-      max-width: 1290px; margin: 0 auto;
+      max-width: var(--read-width); margin: 0 auto;
       pointer-events: none;
     }
     #reader-corner-align > * { pointer-events: auto; }
@@ -714,12 +735,32 @@
 
     #reader-content {
       display: none;
-      max-width: 1290px; /* ~50% wider than the original 860px */
+      /* Reading width, size, spacing and font are all Theme-panel
+         controls now (S32) — see the --read-width/--body-* block near
+         the top. #reader-corner-align must use the SAME --read-width or
+         the floating corner controls stop lining up with the text
+         margin (the v0.14.1 alignment fix). */
+      max-width: var(--read-width);
       margin: 0 auto;
       padding: 40px 48px 80px;
-      font-size: 15px;
-      line-height: 1.75;
+      font-size: var(--body-size);
+      line-height: var(--body-lead);
+      font-family: var(--body-font);
     }
+
+    /* Inline title (S32) — the note's own name rendered at the top of the
+       document, Obsidian-style. Off by default; the reader header bar
+       keeps showing the filename either way, so this is purely additive. */
+    #reader-inline-title {
+      display: none;
+      font-size: calc(32px * var(--head-scale));
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+      margin: 0 0 1.4rem;
+      font-family: var(--body-font);
+    }
+    body.inline-title-on #reader-inline-title { display: block; }
 
     /* Heading blocks */
     .md-h-block { margin: 0; }
@@ -757,27 +798,50 @@
     .md-h-row.folded .md-fold-icon { transform: rotate(-90deg); }
     .md-section.folded { display: none; }
 
-    /* Heading sizes */
-    h1.md-h { font-size: 28px; font-weight: 600; color: var(--heading-1); line-height: 1.5; margin: 0; }
-    h2.md-h { font-size: 22px; font-weight: 600; color: var(--heading-2); line-height: 1.5; margin: 0; }
-    /* H2's underline lives on the row wrapper, not the h2 itself — the row
-       is a flex container spanning the full reading width, the h2 element
-       inside it only sizes to its own text. Putting the border on the h2
-       made the underline stop at the text (and it used generic gray). */
-    .md-h-row-h2 {
-      border-bottom: 2px solid var(--heading-2);
-      padding-bottom: 5px;
-      margin-bottom: 6px;
-      /* Zero just the bottom corners so the underline runs flat edge to
-         edge — the row still keeps its top-rounded hover/fold highlight. */
+    /* Heading sizes — base values unchanged; --head-scale (Theme panel →
+       Headings → Heading scale) multiplies all six at once, which is why
+       there are no per-level size controls. */
+    h1.md-h { font-size: calc(28px * var(--head-scale)); font-weight: 600; color: var(--heading-1); line-height: 1.5; margin: 0; font-family: var(--body-font); }
+    h2.md-h { font-size: calc(22px * var(--head-scale)); font-weight: 600; color: var(--heading-2); line-height: 1.5; margin: 0; font-family: var(--body-font); }
+    h3.md-h { font-size: calc(19px * var(--head-scale)); font-weight: 600; color: var(--heading-3); line-height: 1.5; margin: 0; font-family: var(--body-font); }
+    h4.md-h { font-size: calc(17px * var(--head-scale)); font-weight: 600; color: var(--heading-4); line-height: 1.5; margin: 0; font-family: var(--body-font); }
+    h5.md-h { font-size: calc(14px * var(--head-scale)); font-weight: 600; color: var(--heading-5); margin: 0; font-family: var(--body-font); }
+    h6.md-h { font-size: calc(14px * var(--head-scale)); font-weight: 600; color: var(--heading-6); margin: 0; font-family: var(--body-font); }
+
+    /* Capitals, per level (S32). H5 used to force uppercase in its own
+       rule with no way to turn it off; it's a per-level opt-in now, with
+       H5 shipping on so an untouched install is unchanged. Letter-spacing
+       rides along because tracked-out capitals are the point — plain
+       uppercase with normal spacing reads cramped at these sizes. */
+    body.h1-caps-on h1.md-h,
+    body.h2-caps-on h2.md-h,
+    body.h3-caps-on h3.md-h,
+    body.h4-caps-on h4.md-h,
+    body.h5-caps-on h5.md-h,
+    body.h6-caps-on h6.md-h { text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Heading underlines (S32) — was H2-only, now available on every
+       level. The border lives on the ROW wrapper, not the hN itself: the
+       row is a flex container spanning the full reading width, while the
+       hN inside only sizes to its own text, so a border on the heading
+       would stop at the end of the words. Each level draws in its own
+       --heading-N colour rather than a generic gray.
+
+       Opt-IN per level (body.hN-underline-on) rather than the old
+       opt-out. H2 ships on — see the class on <body> — so an untouched
+       install looks exactly as it did before this panel existed. */
+    .md-h-row[class*="md-h-row-h"] {
+      /* Zero just the bottom corners so an underline runs flat edge to
+         edge — the row keeps its top-rounded hover/fold highlight. */
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
     }
-    body.h2-underline-off .md-h-row-h2 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-    h3.md-h { font-size: 19px; font-weight: 600; color: var(--heading-3); line-height: 1.5; margin: 0; }
-    h4.md-h { font-size: 17px; font-weight: 600; color: var(--heading-4); line-height: 1.5; margin: 0; }
-    h5.md-h { font-size: 14px; font-weight: 600; color: var(--heading-5); text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
-    h6.md-h { font-size: 14px; font-weight: 600; color: var(--heading-6); margin: 0; }
+    body.h1-underline-on .md-h-row-h1 { border-bottom: 2px solid var(--heading-1); padding-bottom: 5px; margin-bottom: 6px; }
+    body.h2-underline-on .md-h-row-h2 { border-bottom: 2px solid var(--heading-2); padding-bottom: 5px; margin-bottom: 6px; }
+    body.h3-underline-on .md-h-row-h3 { border-bottom: 1px solid var(--heading-3); padding-bottom: 4px; margin-bottom: 5px; }
+    body.h4-underline-on .md-h-row-h4 { border-bottom: 1px solid var(--heading-4); padding-bottom: 4px; margin-bottom: 5px; }
+    body.h5-underline-on .md-h-row-h5 { border-bottom: 1px solid var(--heading-5); padding-bottom: 3px; margin-bottom: 4px; }
+    body.h6-underline-on .md-h-row-h6 { border-bottom: 1px solid var(--heading-6); padding-bottom: 3px; margin-bottom: 4px; }
 
     /* Heading section spacing */
     .md-h-block { margin-top: 1.15rem; }
@@ -1045,6 +1109,201 @@
     .id-sub { font-size: 12px; color: var(--text-secondary); margin: 2px 0 14px; }
     .id-note { font-size: 11px; color: var(--co-green-txt); margin: 8px 0 0; display: none; }
     .id-note.show { display: block; }
+
+    /* === Theme panel (S32, pass 1) ===========================
+       Same open/close mechanism as #settings-panel below (hidden by
+       default, .open shows it, anchored top-right under the badge), so
+       there's one popup pattern in this file, not two. Wider than
+       Settings because of the preset grid and the six heading rows.
+
+       Sections are an accordion, one open at a time — that's what keeps
+       the panel roughly one screen tall no matter how many sections
+       exist, and it's the fix for the "too cluttered" problem an
+       all-sections-visible version had. */
+    #theme-panel {
+      position: absolute;
+      top: 48px;
+      right: 8px;
+      width: 320px;
+      max-height: calc(100vh - 72px);
+      overflow-y: auto;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      z-index: 200;
+      display: none;
+    }
+    #theme-panel.open { display: block; }
+
+    .tp-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 8px 10px 14px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg-sidebar); z-index: 2;
+    }
+    .tp-title { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+    .tp-sec-head {
+      display: flex; align-items: center; gap: 7px;
+      padding: 11px 14px;
+      font-size: 12px; color: var(--text-primary);
+      cursor: pointer; user-select: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .tp-sec-head:hover { background: var(--hover); }
+    .tp-sec-name { flex: 1; }
+    .tp-chev {
+      width: 13px; height: 13px; flex-shrink: 0;
+      color: var(--text-muted);
+      transition: transform 0.15s;
+    }
+    .tp-sec-head.open .tp-chev { transform: rotate(90deg); }
+    .tp-sec-body { padding: 2px 14px 16px; border-bottom: 1px solid var(--border); }
+
+    .tp-reset {
+      background: none; border: none; padding: 0;
+      font-size: 11px; font-family: inherit; color: var(--text-muted);
+      cursor: pointer;
+    }
+    .tp-reset:hover { color: var(--accent); }
+    .tp-badge {
+      font-size: 9.5px; font-weight: 600;
+      background: var(--accent); color: var(--bg-reader);
+      border-radius: 9px; padding: 1px 7px;
+    }
+    .tp-lb { font-size: 11px; color: var(--text-secondary); margin: 14px 0 6px; }
+    .tp-lb:first-child { margin-top: 12px; }
+    .tp-note { font-size: 10.5px; color: var(--text-muted); margin: 8px 0 2px; }
+
+    /* Segmented control — one row of mutually exclusive choices. Used
+       for every enum in the panel so they all read the same way. */
+    .tp-seg { display: flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; }
+    .tp-seg-btn {
+      flex: 1; border: none; border-radius: 0; padding: 6px 2px;
+      font-size: 11px; font-family: inherit;
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+    }
+    .tp-seg-btn:hover { background: var(--hover); color: var(--text-primary); }
+    /* White label on the accent fill: the accent is a mid-tone in both
+       modes, so plain white is the readable pairing either way. */
+    .tp-seg-btn.on { background: var(--accent); color: #fff; }
+
+    .tp-presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .tp-preset {
+      background: none; border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 6px 0 5px;
+      cursor: pointer; font-family: inherit; text-align: center;
+    }
+    .tp-preset:hover { border-color: var(--border-strong); }
+    .tp-preset.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    /* Two-tone chip: the preset's reader background with its own H1
+       colour sitting on it — enough to tell the eight apart at a glance
+       without eight full previews. */
+    .tp-preset-sw {
+      display: block; width: 15px; height: 15px; margin: 0 auto 4px;
+      border: 1px solid; border-radius: 4px; position: relative; overflow: hidden;
+    }
+    .tp-preset-sw span { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; }
+    .tp-preset-name { display: block; font-size: 9.5px; color: var(--text-secondary); }
+    .tp-preset.on .tp-preset-name { color: var(--text-primary); }
+
+    .tp-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tp-sw {
+      width: 20px; height: 20px; border-radius: 50%;
+      cursor: pointer; display: inline-block;
+      border: 1px solid var(--border-strong);
+    }
+    .tp-sw.on { outline: 2px solid var(--text-primary); outline-offset: 2px; }
+
+    /* Heading rows — level, colour, hex, underline, one line each. */
+    .tp-hrow { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+    .tp-hhead {
+      font-size: 10px; color: var(--text-muted);
+      padding: 0 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 2px;
+    }
+    .tp-hlvl { width: 22px; font-size: 11px; color: var(--text-secondary); flex-shrink: 0; }
+    .tp-hcol { flex: 1; }
+    /* Caps and Underline sit as two right-aligned toggle columns. Caps is
+       the smaller, secondary switch of the pair — it changes the shape of
+       the text, the underline changes the block. Fixed widths so the six
+       rows and the header labels line up in one column each. */
+    .tp-hcap { width: 34px; flex-shrink: 0; display: flex; justify-content: flex-end; }
+    .tp-hund { width: 54px; flex-shrink: 0; display: flex; justify-content: flex-end; }
+    .tp-hhead .tp-hcap, .tp-hhead .tp-hund { display: block; text-align: right; }
+    .tp-color {
+      width: 26px; height: 22px; padding: 0; flex-shrink: 0;
+      border: 1px solid var(--border-strong); border-radius: 4px;
+      background: none; cursor: pointer;
+    }
+    .tp-hex {
+      flex: 1; font-size: 10px; color: var(--text-muted);
+      font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+    }
+    .tp-copy {
+      display: block; width: 100%; margin: 10px 0 2px;
+      background: none; border: 1px solid var(--border-strong);
+      border-radius: var(--radius); padding: 6px;
+      font-size: 11px; font-family: inherit; color: var(--text-secondary); cursor: pointer;
+    }
+    .tp-copy:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Toggle — same dimensions as .toggle in Settings, but built as a
+       span rather than a checkbox+label because these are rendered from
+       a template string and read through the delegated click handler. */
+    .tp-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 0; font-size: 11.5px; color: var(--text-primary);
+    }
+    .tp-toggle {
+      position: relative; width: 30px; height: 17px; flex-shrink: 0;
+      border-radius: 9px; background: var(--border-strong);
+      cursor: pointer; transition: background 0.15s;
+    }
+    .tp-toggle.on { background: var(--accent); }
+    .tp-toggle-thumb {
+      position: absolute; top: 2px; left: 2px;
+      width: 13px; height: 13px; background: #fff; border-radius: 50%;
+      pointer-events: none; transition: left 0.15s;
+    }
+    .tp-toggle.on .tp-toggle-thumb { left: 15px; }
+    /* Secondary size, used for the Caps switch so the pair reads as
+       primary + secondary rather than two equal controls. */
+    .tp-toggle-sm { width: 24px; height: 14px; border-radius: 7px; }
+    .tp-toggle-sm .tp-toggle-thumb { width: 10px; height: 10px; }
+    .tp-toggle-sm.on .tp-toggle-thumb { left: 12px; }
+
+    .tp-select { margin-top: 0; }
+
+    /* Share section */
+    .tp-share {
+      width: 100%; margin-top: 10px; height: 62px; resize: vertical;
+      padding: 6px 8px; font-size: 10px; line-height: 1.4;
+      font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+      word-break: break-all;
+      background: var(--bg-app); color: var(--text-secondary);
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+    }
+    .tp-share:focus { outline: none; border-color: var(--accent); }
+    .tp-share-btns { display: flex; gap: 6px; margin-top: 6px; }
+    .tp-btn {
+      flex: 1; background: none; border: 1px solid var(--border-strong);
+      border-radius: var(--radius); padding: 6px;
+      font-size: 11px; font-family: inherit; color: var(--text-secondary); cursor: pointer;
+    }
+    .tp-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .tp-btn-wide { width: 100%; margin-top: 6px; }
+    .tp-msg { margin-top: 8px; font-size: 10.5px; color: var(--co-green-txt); }
+    .tp-msg.err { color: var(--co-red-txt); }
+
+    .tp-foot {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 14px; font-size: 10px; color: var(--text-muted);
+    }
+    #tp-reset-all {
+      background: none; border: none; padding: 0;
+      font-size: 10px; font-family: inherit; color: var(--text-muted); cursor: pointer;
+    }
+    #tp-reset-all:hover { color: var(--accent); }
 
     /* === Settings panel ====================================== */
     #settings-panel {
@@ -1429,7 +1688,7 @@
     .rp-outline-fold-btn.folded .md-fold-icon { transform: rotate(-90deg); }
     .rp-outline-item {
       display: block; flex: 1; min-width: 0;
-      padding: 4px 12px 4px 4px;
+      padding: var(--row-pad) 12px var(--row-pad) 4px;
       font-size: 12px; color: var(--text-secondary);
       cursor: pointer; text-align: left;
       background: none; border: none;
@@ -1626,7 +1885,12 @@
     .icon-sm { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
   </style>
 </head>
-<body data-theme="dark" data-headers="things" data-bg="dark">
+<!-- data-headers/data-bg are gone (S32): one preset now drives headings,
+     backgrounds and accent together, applied as inline custom properties
+     by applyThemePrefs(). h2-underline-on and h5-caps-on are the shipped
+     defaults so the pre-JS render matches what every existing install
+     already looks like. -->
+<body data-theme="dark" class="h2-underline-on h5-caps-on">
 <div id="app">
 
   <!-- ── Header ─────────────────────────────────────────── -->
@@ -1681,6 +1945,16 @@
       <p class="ud-name" id="ud-name"></p>
       <p class="ud-email" id="ud-email"></p>
       <div class="ud-actions">
+        <!-- Theme (S32) — sits above Settings; Settings keeps Navigation
+             and Advanced only, the Theme block moved out of it entirely. -->
+        <button class="ud-item" onclick="openThemePanel()">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/>
+            <circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/>
+            <path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2-4 2.5 2.5 0 0 1 2-4h2a4 4 0 0 0 4-4 10 10 0 0 0-10-8Z"/>
+          </svg>
+          Theme
+        </button>
         <button class="ud-item" onclick="openSettingsFromBadge()">
           <svg class="icon" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3"/>
@@ -1896,7 +2170,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.15.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.19.0</button>
     </aside>
 
   </div>
@@ -1956,47 +2230,24 @@
   </div>
 
   <!-- ── Settings panel ─────────────────────────────────── -->
-  <div id="settings-panel" role="dialog" aria-label="Settings">
-
-    <div class="s-section">
-      <div class="s-label">Theme</div>
-      <div class="s-inline-row">
-        <div class="s-inline-col">
-          <div class="s-sublabel">Header colors</div>
-          <select class="s-select" id="sel-headers">
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="frost">Frost</option>
-            <option value="clay">Clay</option>
-            <option value="mica">Mica</option>
-            <option value="marble">Marble</option>
-            <option value="things" selected>Things</option>
-            <option value="minimal">Minimal</option>
-          </select>
-        </div>
-        <div class="s-inline-col">
-          <div class="s-sublabel">Background color</div>
-          <select class="s-select" id="sel-bgcolor">
-            <option value="dark" selected>Dark</option>
-            <option value="light">Light</option>
-            <option value="frost">Frost</option>
-            <option value="clay">Clay</option>
-            <option value="mica">Mica</option>
-            <option value="marble">Marble</option>
-            <option value="things">Things</option>
-            <option value="minimal">Minimal</option>
-          </select>
-        </div>
-      </div>
-      <div class="toggle-row">
-        H2 underline
-        <label class="toggle">
-          <input type="checkbox" id="tgl-h2underline" checked>
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
-      </div>
+  <!-- Theme panel (S32, pass 1) — anchored popup, not a modal, so the
+       reader stays visible and every change shows live behind it. Body
+       is rendered by renderThemePanel(); only the shell is static. -->
+  <div id="theme-panel" role="dialog" aria-label="Theme">
+    <div class="tp-head">
+      <span class="tp-title">Theme</span>
+      <button class="icon-btn" id="tp-close" title="Close" aria-label="Close">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
+    <div id="tp-body"></div>
+    <div class="tp-foot">
+      <span>Saves as you change it</span>
+      <button type="button" id="tp-reset-all">Reset all</button>
+    </div>
+  </div>
+
+  <div id="settings-panel" role="dialog" aria-label="Settings">
 
     <div class="s-section">
       <div class="s-label">Navigation</div>
@@ -2095,6 +2346,13 @@ const state = {
   sidebarOpen:      true,
   rightPanelOpen:   true,
   settingsOpen:     false,
+  // Theme (S32) — themePrefs is the whole wb_theme_v2 record; see
+  // defaultThemePrefs(). themeSection is which accordion section is
+  // open in the panel (one at a time, or null for all collapsed).
+  themePrefs:       null,
+  themePanelOpen:   false,
+  themeSection:     'appearance',
+  themeShareMsg:    null,  // transient {text, error} under the Share section
   openFolders:  {},    // { [folderId]: bool } — id = path like "01_Projects/Sub"
   folderFiles:  {},    // { [folderId]: [{name, url, modified}] }
   folderKids:   {},    // { [folderId]: [{id, name, url}] } — nested subfolders (S14+)
@@ -2123,10 +2381,9 @@ const state = {
   cmtOpenCount: 0,     // S14 — vault-wide open comments (badges)
   stripPfx:     false,
   showBadges:   true,
-  theme:        'dark',   // S7 — 'dark' | 'light', drives body[data-theme]
-  headers:      'things', // Header colors — one of 7 theme identities, drives body[data-headers]
-  bgColor:      'dark',   // Background color — one of 8 theme identities, drives body[data-bg]
-  h2Underline:  true,     // Settings "H2 underline" toggle — drives body.h2-underline-off
+  // theme/headers/bgColor/h2Underline removed in S32 — all four are
+  // fields on state.themePrefs now (mode, preset, underlines[1]). The
+  // resolved dark/light value lives on body[data-theme] as before.
   fileIndex:    {},    // { [lc-name-without-ext]: serverRelativeUrl } — for link resolution
   fileFolder:   {},    // { [url]: folderId|null } — populated alongside fileIndex, used to
                         // expand the right folder chain when restoring the last-opened file
@@ -2553,8 +2810,16 @@ function findFolder(id, list = vaultFolders) {
 // ── SVG icon snippets ────────────────────────────────────────────
 const ICON = {
   // S7 rainbow nav: folder icon itself swaps closed/open (colored via --this-rb), no chevron.
-  folder:     `<span class="folder-icon"><svg class="ic-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg><svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2H8a1 1 0 0 0-.95.68L4 17V7Z"/><path d="m4 17 2.1-6.3a1 1 0 0 1 .95-.7H20a1 1 0 0 1 .96 1.28l-1.7 5.7A2 2 0 0 1 17.34 18H6a2 2 0 0 1-2-2v-.8"/></svg></span>`,
-  file:       `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  // S32 pass 2: two alternate glyphs ride along in the same span (chevron,
+  // dot). Which one shows is pure CSS off body[data-navicons] — the nav is
+  // built by string concatenation, so carrying all three costs one render
+  // path instead of branching the renderer on a preference.
+  folder:     `<span class="folder-icon"><svg class="ic-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg><svg class="ic-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2H8a1 1 0 0 0-.95.68L4 17V7Z"/><path d="m4 17 2.1-6.3a1 1 0 0 1 .95-.7H20a1 1 0 0 1 .96 1.28l-1.7 5.7A2 2 0 0 1 17.34 18H6a2 2 0 0 1-2-2v-.8"/></svg><svg class="ic-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg><svg class="ic-dot" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="4"/></svg></span>`,
+  // Wrapped in .file-icon (S32 pass 2) so the nav's icon-style and
+  // colour options can reach it. The dot alternate rides along the same
+  // way the folder glyph's do. Used in the sidebar, backlinks and review
+  // lists — all of them pick up the setting for free.
+  file:       `<span class="file-icon"><svg class="icon-sm ic-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><svg class="ic-dot" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="3"/></svg></span>`,
   foldChevron:`<svg class="md-fold-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`,
   embedFile:  `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   imgErr:     `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="4" y1="4" x2="20" y2="20"/></svg>`,
@@ -3040,6 +3305,15 @@ function renderInline(text) {
       const path = decodeFileLinkPath(unescHtml(href));
       return slot(`<a class="md-ilink wb-folder-link" data-path="${escHtml(path)}" title="Copy folder path to clipboard">${text}</a>`);
     }
+    // App-level help doc (S33) — load into the reader instead of navigating
+    // away. Must sit BEFORE the external branch, or [Help](help.md) becomes
+    // an external link and opens raw markdown in a new tab. Checked against
+    // the HELP_DOCS allowlist, not a pattern, so this can only ever match
+    // the two real app files. data-wb-* rather than an inline onclick, per
+    // the S12 hardening rule — no interpolated value in a handler string.
+    if (Object.prototype.hasOwnProperty.call(HELP_DOCS, href)) {
+      return slot(`<a class="md-ilink" data-wb-helpdoc="${escHtml(href)}">${text}</a>`);
+    }
     // External. safeUrl() drops javascript:, data:text/html, vbscript: and
     // any other scheme not on the allowlist; a blocked link degrades to its
     // own label as plain text, so the reader still sees the words but has
@@ -3168,6 +3442,16 @@ function wbDelegatedClick(e) {
   const folderRow = e.target.closest('[data-wb-folder]');
   if (folderRow) {
     toggleFolder(folderRow.dataset.wbFolder);
+    return;
+  }
+  // Cross-link between the two app-level help pages (S33). Checked before
+  // the generic anchor/opener branches below since a help link carries
+  // neither data-wb-open nor data-wb-anchor and would otherwise fall
+  // through to nothing.
+  const helpDoc = e.target.closest('[data-wb-helpdoc]');
+  if (helpDoc) {
+    e.preventDefault();
+    openHelpDoc(helpDoc.dataset.wbHelpdoc);
     return;
   }
   const opener = e.target.closest('[data-wb-open]');
@@ -3475,7 +3759,7 @@ function renderBlockTree(blocks, seenIds) {
       const sectionHtml = j > i + 1 ? renderBlockTree(blocks.slice(i + 1, j), seenIds) : '';
       const hid = uniqueHeadingId(block.content, seenIds);
       html += `<div class="md-h-block">
-<div class="md-h-row${level === 2 ? ' md-h-row-h2' : ''}" onclick="toggleFold(this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}">${renderInline(block.content)}</h${level}></div>
+<div class="md-h-row md-h-row-h${level}" onclick="toggleFold(this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}" onclick="selectReaderHeading(event, this)">${renderInline(block.content)}</h${level}></div>
 <div class="md-section">${sectionHtml}</div>
 </div>`;
       i = j;
@@ -4060,6 +4344,22 @@ function clearJumpHighlight() {
   state.jumpPinnedId = null;
 }
 
+// Click a heading's own text (not its fold chevron) to select it — mirrors
+// the same heading as the Outline's active item and highlights the row,
+// reusing the exact pin used for an Outline-click jump (pinJumpHighlight/
+// clearJumpHighlight, held until a real scroll happens — no scroll fires
+// here since we're already at this heading, so it holds until the user
+// scrolls away). Gives Collapse Unused a reliable "current heading" from an
+// explicit click instead of only whatever the scroll-spy last landed on.
+// stopPropagation so this doesn't also bubble into the row's own fold
+// click — chevron folds, text selects, same split the Outline already uses
+// between its fold-chevron and jump buttons.
+function selectReaderHeading(e, hEl) {
+  e.stopPropagation();
+  if (!hEl || !hEl.id) return;
+  pinJumpHighlight(hEl.id);
+}
+
 function scrollToAnchor(e, targetId) {
   if (e) e.preventDefault();
   // Try supplied id, then the 'h-' slug variant — same fallback as before
@@ -4155,7 +4455,7 @@ async function openFile(url, name) {
 
   try {
     const text = await readVaultFile(url);
-    rc.innerHTML = parseMarkdown(text);
+    rc.innerHTML = inlineTitleHTML(name) + parseMarkdown(text);
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
     applyFoldState(url); // restore collapsed headings from last visit
@@ -4395,41 +4695,60 @@ function toggleRightPanel() {
 }
 
 // ── Help ─────────────────────────────────────────────────────────
-// help.md lives at the app level (same folder as index.html), not inside the vault.
-// It never appears in the nav tree. Fetched as a plain relative URL.
-async function openHelp() {
+// The help docs live at the app level (same folder as index.html), not
+// inside the vault. They never appear in the nav tree. Fetched as plain
+// relative URLs, which is also why any image in them must use standard
+// ![alt](help-assets/x.svg) markdown — the ![[x.png]] form resolves
+// against the CURRENT NOTE's attachments folder, and there is no current
+// note while help is open (activeUrl is null).
+//
+// S33: split into two pages — help.md (interface) and help-edit.md
+// (editing + markdown), cross-linked. HELP_DOCS is the allowlist; a link
+// is only treated as a help doc if it's a key here, so a note in the
+// vault called "help-something.md" can never hijack the reader.
+const HELP_DOCS = {
+  'help.md':      'Help',
+  'help-edit.md': 'Help — Editing and Markdown',
+};
+
+function openHelp() { return openHelpDoc('help.md'); }
+
+async function openHelpDoc(file) {
+  if (!HELP_DOCS[file]) return;
   if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
   const empty = $('reader-empty');
   const rc    = $('reader-content');
 
   state.activeUrl  = null; // deselect any active sidebar file
   state.activeName = null;
-  state.helpOpen   = true; // lets Outline read help.md's own headings below
+  state.helpOpen   = true; // lets Outline read the help doc's own headings below
   state.changelogOpen = false;
   renderSidebar();
   updateEditBtn();
 
-  setReaderTitle('Help');
+  setReaderTitle(HELP_DOCS[file]);
 
   empty.style.display = 'none';
   rc.style.display    = 'block';
   rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:32px">Loading help…</p>';
 
   try {
-    const res = await fetch('./help.md');
+    const res = await fetch('./' + file);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
     rc.innerHTML = parseMarkdown(text);
     rc.scrollTop = 0;
   } catch (e) {
     // Local test mode: fetch('./help.md') fails on file:// — fall back to
-    // a help.md copied into the picked vault folder, if present.
-    const localHelp = LOCAL.on ? await localReadText('local:/help.md') : null;
+    // a copy in the picked vault folder, if present. Note that images in
+    // the doc still resolve against index.html's own location either way,
+    // so help-assets/ has to sit beside index.html on disk for local tests.
+    const localHelp = LOCAL.on ? await localReadText('local:/' + file) : null;
     if (localHelp !== null) {
       rc.innerHTML = parseMarkdown(localHelp);
       rc.scrollTop = 0;
     } else {
-      rc.innerHTML = `<p class="md-p" style="color:var(--text-muted);padding-top:32px">Help file not found. Add <code class="md-code">help.md</code> to the app folder${LOCAL.on ? ' (or copy it into your local test vault)' : ''}.</p>`;
+      rc.innerHTML = `<p class="md-p" style="color:var(--text-muted);padding-top:32px">Help file not found. Add <code class="md-code">${escHtml(file)}</code> to the app folder${LOCAL.on ? ' (or copy it into your local test vault)' : ''}.</p>`;
     }
   }
 
@@ -4482,11 +4801,12 @@ async function openChangelog() {
 }
 
 $('btn-help').addEventListener('click', () => {
-  // Close settings and the user dropdown if either is open
+  // Close settings, the theme panel and the user dropdown if any is open
   if (state.settingsOpen) {
     state.settingsOpen = false;
     $('settings-panel').classList.remove('open');
   }
+  closeThemePanel();
   closeUserDropdown();
   openHelp();
 });
@@ -4496,6 +4816,7 @@ $('btn-help').addEventListener('click', () => {
 // own header gear — see .ud-item onclick="openSettingsFromBadge()".
 function openSettingsFromBadge() {
   closeUserDropdown();
+  closeThemePanel(); // only one anchored popup at a time — they share a corner
   state.settingsOpen = true;
   $('settings-panel').classList.add('open');
 }
@@ -4505,6 +4826,7 @@ document.addEventListener('click', () => {
     state.settingsOpen = false;
     $('settings-panel').classList.remove('open');
   }
+  if (state.themePanelOpen) closeThemePanel();
   closeUserDropdown();
 });
 
@@ -4617,6 +4939,7 @@ function toggleUserDropdown(e) {
     state.settingsOpen = false;
     $('settings-panel').classList.remove('open');
   }
+  closeThemePanel();
   $('user-dropdown').classList.toggle('open');
 }
 
@@ -6103,28 +6426,297 @@ document.addEventListener('click', e => {
   }
 });
 
-function applyTheme(theme) {
-  document.body.setAttribute('data-theme', theme);
-  state.theme = theme;
+// ══ Theme engine (S32, pass 1) ═══════════════════════════════════
+// One preset = one matched set of backgrounds, six heading colours and
+// an accent, defined separately for dark and light. This replaces the
+// old Header colors x Background color pair of dropdowns, which allowed
+// any palette to pair with any background (64 combinations, most of
+// them mismatched) and left --accent unthemeable entirely.
+//
+// Nothing in here uses color-mix(), oklch(), relative colour syntax or
+// any other newer CSS colour function — see the long comment at the top
+// of the stylesheet. An unsupported colour function makes the whole
+// var() invalid, which is how the v0.14.4 "black flare" bug happened.
+// Tints are computed hex -> rgba in JS instead, which resolves
+// everywhere including older embedded WebViews.
+//
+//   bg: [app, sidebar, reader, header]
+//   hd: [handle rest/hover, handle active] — solid pre-computed tones
+//       for the resize-handle line and flare
+//   ac: accent
+//   h:  six heading colours, H1..H6
+//
+// H5 and H6 are real values for every preset now. They used to fall
+// back to --text-secondary in 7 of the 8, which was invisible until the
+// panel let you actually see all six levels at once.
+const PRESETS = {
+  default: { label: 'Default',
+    dark:  { bg: ['#1c1c1a','#212120','#252523','#212120'], hd: ['#2c2c2a','#3a3a38'], ac: '#5b9cf6', h: ['#64B5F6','#e8e5df','#d8d5cf','#c8c5bf','#a8a5a0','#8f8c88'] },
+    light: { bg: ['#f5f5f3','#f0efec','#ffffff','#f0efec'], hd: ['#e1e1e0','#d3d3d1'], ac: '#1a6ef5', h: ['#2563EB','#1f2328','#3a4046','#565d64','#6e757c','#868d94'] } },
+  // Renamed from "light" — the old name collided with the Dark/Light
+  // mode names and read as "the light theme", which it never was. It's
+  // the warm-graphite / cool-neutral blue-ramp identity.
+  ocean: { label: 'Ocean',
+    dark:  { bg: ['#201f1c','#262521','#2b2a26','#262521'], hd: ['#302f2c','#3d3c3a'], ac: '#6fa8f2', h: ['#8ec5ff','#6fa8f2','#5b93d9','#4a7cb8','#7f9bbd','#9aa8b5'] },
+    light: { bg: ['#e8e8e8','#dedede','#f5f5f5','#dedede'], hd: ['#d5d5d5','#c8c8c8'], ac: '#14559c', h: ['#0b3d66','#14559c','#1a6ef5','#5b93d9','#6f8fb0','#8496a8'] } },
+  frost: { label: 'Frost',
+    dark:  { bg: ['#0d1117','#131a24','#171f2b','#131a24'], hd: ['#1e2227','#2c3035'], ac: '#0A84FF', h: ['#5AC8FA','#0A84FF','#64D2FF','#98A2B3','#66D4CF','#A0AEC0'] },
+    light: { bg: ['#eef4fb','#e4edf8','#ffffff','#e4edf8'], hd: ['#dbe0e7','#cdd2d8'], ac: '#007AFF', h: ['#0A5DC2','#007AFF','#34AADC','#6E7F96','#00A396','#8A94A6'] } },
+  clay: { label: 'Clay',
+    dark:  { bg: ['#1c1b1f','#211f26','#26232b','#211f26'], hd: ['#2c2b2f','#39393c'], ac: '#D0BCFF', h: ['#D0BCFF','#EFB8C8','#A6D388','#CCC2DC','#F2B8B5','#9A93A8'] },
+    light: { bg: ['#f7f2fa','#efe6f3','#fffbfe','#efe6f3'], hd: ['#e3dfe6','#d4d0d7'], ac: '#6750A4', h: ['#6750A4','#7D5260','#386A20','#625B71','#B3261E','#79747E'] } },
+  mica: { label: 'Mica',
+    dark:  { bg: ['#202020','#2c2c2c','#323232','#2c2c2c'], hd: ['#303030','#3d3d3d'], ac: '#60CDFF', h: ['#60CDFF','#3AA0F3','#6CCB5F','#C5C5C5','#FFB900','#9E9E9E'] },
+    light: { bg: ['#f3f3f3','#e9e9e9','#ffffff','#e9e9e9'], hd: ['#e0e0e0','#d1d1d1'], ac: '#0078D4', h: ['#005A9E','#0078D4','#107C10','#5B5B5B','#8A6A00','#767676'] } },
+  marble: { label: 'Marble',
+    dark:  { bg: ['#1e1e1e','#262626','#2c2c2c','#262626'], hd: ['#2e2e2e','#3b3b3b'], ac: '#409CFF', h: ['#409CFF','#7D7AFF','#6AC4DC','#98989D','#FF9F0A','#86868B'] },
+    light: { bg: ['#ececec','#e4e4e4','#ffffff','#e4e4e4'], hd: ['#d9d9d9','#cbcbcb'], ac: '#1E6FD9', h: ['#1E6FD9','#5E5CE6','#30B0C7','#8E8E93','#C76E00','#6E6E73'] } },
+  things: { label: 'Things',
+    dark:  { bg: ['#17181c','#1e1f24','#24252b','#1e1f24'], hd: ['#27282c','#35363a'], ac: '#5B9CF6', h: ['#5B9CF6','#FF8080','#5FD98A','#A0A0A5','#F5C26B','#8A8A8F'] },
+    light: { bg: ['#fbfbfa','#f4f3f1','#ffffff','#f4f3f1'], hd: ['#e7e7e6','#d8d8d7'], ac: '#2D6CDF', h: ['#2D6CDF','#F2555A','#34A853','#8E8E93','#C98A20','#77777C'] } },
+  // Obsidian Minimal's own built-in accent palette (--color-red/orange/
+  // yellow/green/blue/purple from the real theme.css) — the same six hex
+  // values in both modes, unlike the other seven identities. This is the
+  // one preset that always had all six levels.
+  minimal: { label: 'Minimal',
+    dark:  { bg: ['#1e1e1e','#212121','#242424','#212121'], hd: ['#2e2e2e','#3b3b3b'], ac: '#6c99bb', h: ['#d04255','#d5763f','#e5b567','#a8c373','#6c99bb','#9e86c8'] },
+    light: { bg: ['#fafafa','#f6f6f6','#ffffff','#f6f6f6'], hd: ['#e6e6e6','#d7d7d7'], ac: '#4a7c9b', h: ['#d04255','#d5763f','#e5b567','#a8c373','#6c99bb','#9e86c8'] } },
+};
+
+// Accent alternates offered next to the preset's own accent (which is
+// always the first chip). Tuned per mode — a light-mode accent needs
+// more depth to stay legible on a near-white surface.
+const ACCENTS = {
+  dark:  ['#5FD98A','#D0BCFF','#EF9F27','#F0997B','#F2555A','#98989D'],
+  light: ['#2E7D32','#5E4FC4','#B26A00','#C2410C','#C0392B','#6E6E73'],
+};
+
+const READ_WIDTHS = { narrow: '820px', normal: '1290px', wide: '1600px' };
+const BODY_SIZES  = { s: '14px', m: '15px', l: '17px' };
+const BODY_LEADS  = { tight: '1.5', normal: '1.75', relaxed: '2' };
+const HEAD_SCALES = { compact: '0.85', normal: '1', large: '1.15' };
+const BODY_FONTS  = {
+  sans:  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  serif: "Georgia, 'Iowan Old Style', 'Times New Roman', serif",
+  mono:  "'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace",
+};
+
+// Defaults reproduce exactly what the app shipped with before the panel
+// existed: Things headings, H2 underlined, everything else untouched.
+function defaultThemePrefs() {
+  return {
+    mode: 'dark', preset: 'things',
+    accent:   { dark: null, light: null },  // null = use the preset's own
+    headings: { dark: null, light: null },  // null = use the preset's own
+    underlines: [false, true, false, false, false, false],
+    // H5 shipped as forced uppercase, so it starts on and every other
+    // level starts off — an untouched install looks unchanged.
+    caps: [false, false, false, false, true, false],
+    width: 'normal', size: 'm', lead: 'normal', font: 'sans', scale: 'normal',
+    inlineTitle: false,
+    // Pass 2 — every default reproduces the look that shipped before
+    // these controls existed.
+    navIcons: 'folder',   // folder | chevron | dot | none
+    navColor: 'rainbow',  // rainbow | accent | single | muted
+    navSingle: 4,         // index into RAINBOW[mode], only used when navColor='single'
+    navFileColor: false,  // colour file icons too
+    chrome: 'contrast',   // contrast | match | flat
+    borders: 'hairline',  // none | hairline | strong
+    activeRow: 'both',    // bar | tint | both
+    density: 'normal',    // compact | normal | roomy
+  };
 }
 
-function applyHeaders(headers) {
-  document.body.setAttribute('data-headers', headers);
-  state.headers = headers;
+// Border tones per mode. "None" only clears --border (the decorative
+// hairline). --border-strong stays put in every mode because functional
+// UI leans on it — the toggle track, resize handles, input outlines —
+// and zeroing it makes those disappear rather than look minimal.
+const BORDER_TONES = {
+  dark:  { none: ['rgba(255,255,255,0)',    'rgba(255,255,255,0.13)'],
+           hairline: ['rgba(255,255,255,0.07)', 'rgba(255,255,255,0.13)'],
+           strong:   ['rgba(255,255,255,0.16)', 'rgba(255,255,255,0.26)'] },
+  light: { none: ['rgba(0,0,0,0)',          'rgba(0,0,0,0.14)'],
+           hairline: ['rgba(0,0,0,0.08)',       'rgba(0,0,0,0.14)'],
+           strong:   ['rgba(0,0,0,0.18)',       'rgba(0,0,0,0.30)'] },
+};
+
+// The AnuPpuccin rainbow hues, mirrored from the CSS --rb-0..5 so the
+// Single-colour picker can offer the same six the nav already cycles.
+const RAINBOW = {
+  dark:  ['#f38ba8','#fab387','#f9e2af','#a6e3a1','#74c7ec','#cba6f7'],
+  light: ['#d20f39','#fe640b','#df8e1d','#40a02b','#209fb5','#8839ef'],
+};
+
+// Only used for the accent tint and tag chip background. Kept as a plain
+// rgba() string for the reason spelled out at the top of this block.
+function hexToRgba(hex, alpha) {
+  const h = String(hex).replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  if (!isFinite(n)) return 'rgba(91,156,246,' + alpha + ')';
+  return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
 }
 
-// Background color (Settings) — independent of the Dark/Light toggle,
-// same pattern as Header colors. First step toward full themes: this
-// slice + Header colors are built now, text/borders/accent/tags join
-// them later once the 7 identities are fleshed out.
-function applyBgColor(bg) {
-  document.body.setAttribute('data-bg', bg);
-  state.bgColor = bg;
+// 'system' resolves against the OS setting; everything downstream only
+// ever sees 'dark' or 'light'.
+function resolvedMode() {
+  if (state.themePrefs.mode !== 'system') return state.themePrefs.mode;
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
 }
 
-function applyH2Underline(on) {
-  document.body.classList.toggle('h2-underline-off', !on);
-  state.h2Underline = on;
+// The one function that touches the DOM. Everything else just edits
+// state.themePrefs and calls this.
+function applyThemePrefs() {
+  const p    = state.themePrefs;
+  const mode = resolvedMode();
+  const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+  const s    = document.body.style;
+
+  document.body.setAttribute('data-theme', mode);
+
+  const heads  = (p.headings && p.headings[mode]) || set.h;
+  const accent = (p.accent && p.accent[mode]) || set.ac;
+
+  // Chrome tone (pass 2) — the preset always defines four surfaces;
+  // this decides how many distinct ones actually get used.
+  //   contrast: as the preset intends (app / sidebar / reader / header)
+  //   match:    sidebar and header adopt the reader surface
+  //   flat:     one surface everywhere
+  const sidebar = p.chrome === 'match' ? set.bg[2] : (p.chrome === 'flat' ? set.bg[0] : set.bg[1]);
+  const header  = p.chrome === 'match' ? set.bg[2] : (p.chrome === 'flat' ? set.bg[0] : set.bg[3]);
+  const reader  = p.chrome === 'flat'  ? set.bg[0] : set.bg[2];
+
+  s.setProperty('--bg-app',     set.bg[0]);
+  s.setProperty('--bg-sidebar', sidebar);
+  s.setProperty('--bg-reader',  reader);
+  s.setProperty('--bg-header',  header);
+  s.setProperty('--handle-rest',   set.hd[0]);
+  s.setProperty('--handle-hover',  set.hd[0]);
+  s.setProperty('--handle-active', set.hd[1]);
+
+  const bt = (BORDER_TONES[mode][p.borders] || BORDER_TONES[mode].hairline);
+  s.setProperty('--border',        bt[0]);
+  s.setProperty('--border-strong', bt[1]);
+
+  s.setProperty('--accent', accent);
+  s.setProperty('--accent-bg', hexToRgba(accent, mode === 'dark' ? 0.12 : 0.10));
+  // Tags followed the accent by coincidence before (both were hardcoded
+  // to the same blue). Now they follow it on purpose, so a green accent
+  // doesn't leave blue tag chips behind.
+  s.setProperty('--tag-color', accent);
+  s.setProperty('--tag-bg', hexToRgba(accent, mode === 'dark' ? 0.14 : 0.12));
+
+  for (let i = 0; i < 6; i++) s.setProperty('--heading-' + (i + 1), heads[i]);
+
+  s.setProperty('--read-width', READ_WIDTHS[p.width] || READ_WIDTHS.normal);
+  s.setProperty('--body-size',  BODY_SIZES[p.size]   || BODY_SIZES.m);
+  s.setProperty('--body-lead',  BODY_LEADS[p.lead]   || BODY_LEADS.normal);
+  s.setProperty('--head-scale', HEAD_SCALES[p.scale] || HEAD_SCALES.normal);
+  s.setProperty('--body-font',  BODY_FONTS[p.font]   || BODY_FONTS.sans);
+
+  for (let i = 1; i <= 6; i++) {
+    document.body.classList.toggle('h' + i + '-underline-on', !!p.underlines[i - 1]);
+    document.body.classList.toggle('h' + i + '-caps-on',      !!p.caps[i - 1]);
+  }
+  document.body.classList.toggle('inline-title-on', !!p.inlineTitle);
+
+  // Nav icon colour. Rainbow is the absence of an override — clearing
+  // the property lets each folder's own inline --this-rb come through.
+  if (p.navColor === 'rainbow') s.removeProperty('--nav-icon-color');
+  else if (p.navColor === 'accent') s.setProperty('--nav-icon-color', accent);
+  else if (p.navColor === 'single') s.setProperty('--nav-icon-color', RAINBOW[mode][p.navSingle] || RAINBOW[mode][4]);
+  else s.setProperty('--nav-icon-color', 'var(--text-muted)');
+  document.body.classList.toggle('nav-file-color', !!p.navFileColor);
+
+  document.body.setAttribute('data-navicons', p.navIcons);
+  document.body.setAttribute('data-activerow', p.activeRow);
+  document.body.setAttribute('data-density',   p.density);
+}
+
+// Write-through: every control in the panel calls this, so there is no
+// Save button and nothing to lose by closing the panel.
+function saveThemePrefs() {
+  persist('wb_theme_v2', state.themePrefs);
+  applyThemePrefs();
+  renderThemePanel();
+}
+
+// One-time migration off the old keys. The old wb_theme/wb_headers/
+// wb_bgcolor/wb_h2underline entries are deliberately left in place, NOT
+// removed — reverting to the previous index.html restores the old look
+// with no data loss, which is the whole rollback plan for this pass.
+//
+// Known behaviour change, flagged in the changelog: if someone had a
+// header palette and a background from two different identities, the
+// background now follows the palette. That mismatch is exactly what
+// this pass set out to remove.
+function migrateThemePrefs() {
+  const p   = defaultThemePrefs();
+  const old = k => { try { const v = localStorage.getItem(k); return v === null ? null : JSON.parse(v); } catch (_) { return null; } };
+
+  const oldTheme = old('wb_theme');
+  if (oldTheme === 'dark' || oldTheme === 'light') p.mode = oldTheme;
+
+  // Header palette wins as the preset — it's the more visible half of
+  // the old pair. "dark"/"light" are the two that got renamed.
+  const oldHeaders = old('wb_headers');
+  const RENAME = { dark: 'default', light: 'ocean' };
+  const mapped = RENAME[oldHeaders] || oldHeaders;
+  if (mapped && PRESETS[mapped]) p.preset = mapped;
+
+  const oldH2 = old('wb_h2underline');
+  if (oldH2 !== null) p.underlines[1] = !!oldH2;
+
+  return p;
+}
+
+function loadThemePrefs() {
+  let p = null, raw = null;
+  try {
+    raw = localStorage.getItem('wb_theme_v2');
+    if (raw) p = JSON.parse(raw);
+  } catch (_) {}
+
+  // "Never chosen anything here" — no v2 record AND nothing from the old
+  // pre-S32 keys either. Only such a device adopts the vault default.
+  // Checked here rather than in loadVaultDefaultTheme() because the
+  // migration below writes a v2 record immediately, which would make the
+  // check look false by the time the vault is ready.
+  state.themeIsFresh = !raw && !localStorage.getItem('wb_theme') && !localStorage.getItem('wb_headers');
+
+  if (!p || typeof p !== 'object') {
+    p = migrateThemePrefs();
+    state.themePrefs = p;
+    persist('wb_theme_v2', p);
+  } else {
+    // Fill any key added after this record was written, so an older
+    // stored object never leaves a control undefined.
+    state.themePrefs = Object.assign(defaultThemePrefs(), p);
+    const q = state.themePrefs;
+    if (!Array.isArray(q.underlines) || q.underlines.length !== 6) q.underlines = defaultThemePrefs().underlines;
+    // caps[] replaced the single h5caps boolean — carry an older record's
+    // choice across rather than silently re-uppercasing its H5s.
+    // NB: test `p` (what was actually stored), not `q` — Object.assign has
+    // already filled q.caps from the defaults, so checking q would make
+    // this branch unreachable and quietly drop the old h5caps value.
+    if (!Array.isArray(p.caps) || p.caps.length !== 6) {
+      q.caps = defaultThemePrefs().caps;
+      if (typeof p.h5caps === 'boolean') q.caps[4] = p.h5caps;
+    }
+    delete q.h5caps;
+  }
+  applyThemePrefs();
+}
+
+// Seed before boot so nothing can dereference a null record if a control
+// is touched between script eval and loadPersistedState().
+if (!state.themePrefs) state.themePrefs = defaultThemePrefs();
+
+// Follow the OS live while mode is 'system'.
+if (window.matchMedia) {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const onSystemChange = () => { if (state.themePrefs && state.themePrefs.mode === 'system') { applyThemePrefs(); renderThemePanel(); } };
+  if (mq.addEventListener) mq.addEventListener('change', onSystemChange);
+  else if (mq.addListener) mq.addListener(onSystemChange);
 }
 
 // Advanced Settings — collapsed by default, remembers open/closed.
@@ -6137,25 +6729,477 @@ function toggleAdvancedSettings(forceOpen) {
   persist('wb_adv_open', open);
 }
 
+// Header sun/moon button — unchanged behaviour, now writing the same
+// mode value the Theme panel reads. From 'system' it flips to whichever
+// mode is the opposite of what the OS is currently giving you.
 $('btn-theme').addEventListener('click', () => {
-  const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-  persist('wb_theme', next);
+  state.themePrefs.mode = resolvedMode() === 'dark' ? 'light' : 'dark';
+  saveThemePrefs();
 });
 
-$('sel-headers').addEventListener('change', e => {
-  applyHeaders(e.target.value);
-  persist('wb_headers', e.target.value);
+// ── Theme panel (S32, pass 1) ────────────────────────────────────
+// Anchored popup, not a modal: the reader stays visible behind it so
+// every change is visible as it's made. Opens from the user badge
+// dropdown. Closes on X, Esc, or a click outside — the same three the
+// dropdown itself already uses. No Save button; see saveThemePrefs().
+// Section order in the panel. 'share' has no Reset — it doesn't hold any
+// state of its own, it only reads and writes the rest.
+const THEME_SECTIONS = ['appearance', 'reading', 'headings', 'navigation', 'interface', 'share'];
+const THEME_NO_RESET = ['share'];
+
+// Rendered as a title-cased word, so this is the display name of the
+// note's own file. Always emitted; CSS decides whether it shows.
+function inlineTitleHTML(name) {
+  const label = String(name || '').replace(/\.md$/i, '');
+  return '<div id="reader-inline-title">' + escHtml(label) + '</div>';
+}
+
+function openThemePanel() {
+  closeUserDropdown();
+  if (state.settingsOpen) {
+    state.settingsOpen = false;
+    $('settings-panel').classList.remove('open');
+  }
+  state.themePanelOpen = true;
+  $('theme-panel').classList.add('open');
+  renderThemePanel();
+}
+
+function closeThemePanel() {
+  state.themePanelOpen = false;
+  $('theme-panel').classList.remove('open');
+}
+
+function toggleThemeSection(name) {
+  state.themeSection = state.themeSection === name ? null : name;
+  state.themeShareMsg = null; // a stale "Theme applied." on re-entry is noise
+  renderThemePanel();
+}
+
+// navigator.clipboard needs a secure context, which file:// and some
+// embedded WebViews are not — fall back to selecting the text so the
+// user can still copy it by hand rather than getting a dead button.
+function copyThemeString() {
+  const ta = $('tp-share-str');
+  if (!ta) return;
+  ta.value = exportThemeString();
+  ta.select();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(ta.value)
+      .then(() => setThemeShareMsg('Copied.'))
+      .catch(() => setThemeShareMsg('Select the text above and copy it.', true));
+  } else {
+    setThemeShareMsg('Select the text above and copy it.', true);
+  }
+}
+
+// Reset just the section you're looking at, or everything. Both go
+// through the same write-through save as any other control.
+function resetThemeSection(name) {
+  const d = defaultThemePrefs();
+  const p = state.themePrefs;
+  if (name === 'appearance') { p.preset = d.preset; p.accent = { dark: null, light: null }; }
+  if (name === 'reading')    { p.width = d.width; p.size = d.size; p.lead = d.lead; p.font = d.font; }
+  if (name === 'headings')   { p.headings = { dark: null, light: null }; p.underlines = d.underlines.slice(); p.caps = d.caps.slice(); p.scale = d.scale; p.inlineTitle = d.inlineTitle; }
+  if (name === 'navigation') { p.navIcons = d.navIcons; p.navColor = d.navColor; p.navSingle = d.navSingle; p.navFileColor = d.navFileColor; }
+  if (name === 'interface')  { p.chrome = d.chrome; p.borders = d.borders; p.activeRow = d.activeRow; p.density = d.density; }
+  saveThemePrefs();
+}
+
+// ── Theme sharing (S32, pass 2) ──────────────────────────────────
+// Mode is deliberately NOT shared. Dark vs light is a personal call
+// (and can be 'system'), while the preset, colours, reading settings
+// and chrome are the team's look. Sharing mode would mean one person's
+// export forces everyone else's screen to their preference.
+const SHAREABLE = ['preset','accent','headings','underlines','caps','width','size','lead','font','scale',
+                   'inlineTitle','navIcons','navColor','navSingle','navFileColor','chrome','borders','activeRow','density'];
+const THEME_STR_PREFIX = 'WBTHEME1:';
+
+function shareableTheme() {
+  const p = state.themePrefs, out = {};
+  SHAREABLE.forEach(k => { if (p[k] !== undefined) out[k] = p[k]; });
+  return out;
+}
+
+// Base64 keeps it one selectable blob that survives a paste into chat or
+// email without a line break turning into a syntax error.
+function exportThemeString() {
+  try { return THEME_STR_PREFIX + btoa(unescape(encodeURIComponent(JSON.stringify(shareableTheme())))); }
+  catch (_) { return ''; }
+}
+
+function parseThemeString(str) {
+  const s = String(str || '').trim();
+  if (!s.startsWith(THEME_STR_PREFIX)) return null;
+  try {
+    const obj = JSON.parse(decodeURIComponent(escape(atob(s.slice(THEME_STR_PREFIX.length)))));
+    return (obj && typeof obj === 'object') ? obj : null;
+  } catch (_) { return null; }
+}
+
+// Applies only the keys this build knows about, so a string written by a
+// newer version can't inject arbitrary state, and one written by an older
+// version simply leaves the newer controls at their defaults.
+function applySharedTheme(obj) {
+  if (!obj) return false;
+  const d = defaultThemePrefs();
+  SHAREABLE.forEach(k => { if (obj[k] !== undefined) state.themePrefs[k] = obj[k]; });
+  if (!Array.isArray(state.themePrefs.underlines) || state.themePrefs.underlines.length !== 6) state.themePrefs.underlines = d.underlines;
+  if (!Array.isArray(state.themePrefs.caps)       || state.themePrefs.caps.length !== 6)       state.themePrefs.caps       = d.caps;
+  if (!PRESETS[state.themePrefs.preset]) state.themePrefs.preset = d.preset;
+  saveThemePrefs();
+  return true;
+}
+
+function importThemeString(str) {
+  const obj = parseThemeString(str);
+  if (!obj) { setThemeShareMsg('That doesn\'t look like a WikiBase theme string.', true); return false; }
+  applySharedTheme(obj);
+  setThemeShareMsg('Theme applied.');
+  return true;
+}
+
+function setThemeShareMsg(msg, isError) {
+  state.themeShareMsg = { text: msg, error: !!isError };
+  renderThemePanel();
+}
+
+// Vault-level default. Same hidden sidecar convention as the identity
+// records and .comments.md/.changes.md — one file at vault root, read
+// only by someone who has no theme of their own yet.
+function vaultThemeUrl() {
+  return LOCAL.on ? 'zSystem/theme.json' : `${CONFIG.vaultRelPath}/zSystem/theme.json`;
+}
+
+async function setVaultDefaultTheme() {
+  try {
+    if (!LOCAL.on) { try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* exists */ } }
+    await spWriteFile(vaultThemeUrl(), JSON.stringify(shareableTheme(), null, 2));
+    setThemeShareMsg('Saved as the vault default.');
+  } catch (e) {
+    console.error('WikiBase: failed to write vault theme', e);
+    setThemeShareMsg('Could not write to the vault. Check your permissions.', true);
+  }
+}
+
+// Boot path: only consulted when this device has no wb_theme_v2 record
+// at all, so it sets the starting look for a new person without ever
+// overwriting a choice someone has already made.
+async function loadVaultDefaultTheme() {
+  if (!state.themeIsFresh) return;
+  try {
+    const txt = await readVaultFileOrNull(vaultThemeUrl());
+    if (!txt) return;
+    const obj = JSON.parse(txt);
+    if (obj && typeof obj === 'object') applySharedTheme(obj);
+  } catch (_) { /* a malformed vault theme must never block boot */ }
+}
+
+function resetAllTheme() {
+  const mode = state.themePrefs.mode; // deliberately kept — Reset is about
+  state.themePrefs = defaultThemePrefs(); // the look, not dark vs light
+  state.themePrefs.mode = mode;
+  saveThemePrefs();
+}
+
+function setThemePref(key, value) {
+  state.themePrefs[key] = value;
+  saveThemePrefs();
+}
+
+function setThemeMode(mode) {
+  state.themePrefs.mode = mode;
+  saveThemePrefs();
+}
+
+function setThemePreset(preset) {
+  const p = state.themePrefs;
+  p.preset = preset;
+  // Picking a named preset drops any custom heading colours — that's
+  // what makes the preset chips a real reset path out of Custom.
+  p.headings = { dark: null, light: null };
+  p.accent   = { dark: null, light: null };
+  saveThemePrefs();
+}
+
+// null = follow the preset's own accent (the first chip).
+function setThemeAccent(hex) {
+  state.themePrefs.accent[resolvedMode()] = hex;
+  saveThemePrefs();
+}
+
+// Editing any heading colour seeds the whole six-value set from the
+// current preset first, so nobody starts from black, then switches the
+// preset chip to Custom.
+function setHeadingColor(idx, hex) {
+  const p    = state.themePrefs;
+  const mode = resolvedMode();
+  if (!p.headings[mode]) {
+    const src = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+    p.headings[mode] = src.h.slice();
+  }
+  p.headings[mode][idx] = hex;
+  saveThemePrefs();
+}
+
+function toggleHeadingUnderline(idx) {
+  state.themePrefs.underlines[idx] = !state.themePrefs.underlines[idx];
+  saveThemePrefs();
+}
+
+function toggleHeadingCaps(idx) {
+  state.themePrefs.caps[idx] = !state.themePrefs.caps[idx];
+  saveThemePrefs();
+}
+
+// Dark and light hold separate heading sets on purpose — a colour that
+// reads well on near-black often fails on white. This is the shortcut
+// for when you only care about one look.
+function copyHeadingsToOtherMode() {
+  const p    = state.themePrefs;
+  const from = resolvedMode();
+  const to   = from === 'dark' ? 'light' : 'dark';
+  const src  = p.headings[from] || (PRESETS[p.preset] || PRESETS.things)[from].h;
+  p.headings[to] = src.slice();
+  saveThemePrefs();
+}
+
+function isCustomHeadings() {
+  const h = state.themePrefs.headings;
+  return !!(h && h[resolvedMode()]);
+}
+
+function themeSegHTML(key, opts) {
+  const cur = state.themePrefs[key];
+  return '<div class="tp-seg">' + opts.map(o =>
+    `<button type="button" class="tp-seg-btn${o[0] === cur ? ' on' : ''}" data-wb-tset="${key}" data-wb-tval="${o[0]}">${escHtml(o[1])}</button>`
+  ).join('') + '</div>';
+}
+
+function themeToggleHTML(label, key) {
+  const on = !!state.themePrefs[key];
+  return `<div class="tp-toggle-row">${escHtml(label)}
+    <span class="tp-toggle${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" data-wb-ttoggle="${key}"><span class="tp-toggle-thumb"></span></span>
+  </div>`;
+}
+
+function themeSectionHeadHTML(name, label, extra) {
+  const open = state.themeSection === name;
+  return `<div class="tp-sec-head${open ? ' open' : ''}" data-wb-tsec="${name}">
+    <svg class="tp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+    <span class="tp-sec-name">${escHtml(label)}</span>
+    ${extra || ''}
+    ${open && THEME_NO_RESET.indexOf(name) === -1 ? `<button type="button" class="tp-reset" data-wb-treset="${name}">Reset</button>` : ''}
+  </div>`;
+}
+
+function renderThemePanel() {
+  const body = $('tp-body');
+  if (!body) return;
+  const p    = state.themePrefs;
+  const mode = resolvedMode();
+  const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+  const heads  = (p.headings && p.headings[mode]) || set.h;
+  const accent = (p.accent && p.accent[mode]) || set.ac;
+  let html = '';
+
+  // ── Appearance ──
+  html += themeSectionHeadHTML('appearance', 'Appearance');
+  if (state.themeSection === 'appearance') {
+    html += '<div class="tp-sec-body">';
+    html += '<div class="tp-lb">Mode</div><div class="tp-seg">' +
+      [['dark', 'Dark'], ['light', 'Light'], ['system', 'System']].map(o =>
+        `<button type="button" class="tp-seg-btn${o[0] === p.mode ? ' on' : ''}" data-wb-tmode="${o[0]}">${o[1]}</button>`
+      ).join('') + '</div>';
+    if (p.mode === 'system') html += `<div class="tp-note">Following your computer, currently ${mode}</div>`;
+
+    html += '<div class="tp-lb">Preset</div><div class="tp-presets">';
+    for (const key in PRESETS) {
+      const sw = PRESETS[key][mode];
+      html += `<button type="button" class="tp-preset${key === p.preset ? ' on' : ''}" data-wb-tpreset="${key}" title="${escHtml(PRESETS[key].label)}">
+        <span class="tp-preset-sw" style="background:${sw.bg[2]};border-color:${sw.hd[1]}"><span style="background:${sw.h[0]}"></span></span>
+        <span class="tp-preset-name">${escHtml(PRESETS[key].label)}</span></button>`;
+    }
+    html += '</div>';
+
+    html += '<div class="tp-lb">Accent</div><div class="tp-swatches">';
+    html += `<span class="tp-sw${p.accent[mode] ? '' : ' on'}" style="background:${set.ac}" role="button" tabindex="0" title="Preset accent" data-wb-taccent=""></span>`;
+    ACCENTS[mode].forEach(c => {
+      html += `<span class="tp-sw${p.accent[mode] === c ? ' on' : ''}" style="background:${c}" role="button" tabindex="0" title="${c}" data-wb-taccent="${c}"></span>`;
+    });
+    html += '</div></div>';
+  }
+
+  // ── Reading ──
+  html += themeSectionHeadHTML('reading', 'Reading');
+  if (state.themeSection === 'reading') {
+    html += '<div class="tp-sec-body">';
+    html += '<div class="tp-lb">Width</div>'   + themeSegHTML('width', [['narrow','Narrow'],['normal','Normal'],['wide','Wide']]);
+    html += '<div class="tp-lb">Text size</div>' + themeSegHTML('size',  [['s','Small'],['m','Medium'],['l','Large']]);
+    html += '<div class="tp-lb">Line spacing</div>' + themeSegHTML('lead', [['tight','Tight'],['normal','Normal'],['relaxed','Relaxed']]);
+    html += '<div class="tp-lb">Body font</div>' +
+      `<select class="s-select tp-select" data-wb-tselect="font">
+        <option value="sans"${p.font === 'sans' ? ' selected' : ''}>System sans</option>
+        <option value="serif"${p.font === 'serif' ? ' selected' : ''}>Serif</option>
+        <option value="mono"${p.font === 'mono' ? ' selected' : ''}>Monospace</option>
+      </select>`;
+    html += '</div>';
+  }
+
+  // ── Headings ──
+  const badge = isCustomHeadings() ? '<span class="tp-badge">Custom</span>' : '';
+  html += themeSectionHeadHTML('headings', 'Headings', badge);
+  if (state.themeSection === 'headings') {
+    html += '<div class="tp-sec-body">';
+    html += `<div class="tp-note">Editing ${mode} mode</div>`;
+    html += '<div class="tp-hrow tp-hhead"><span class="tp-hlvl">Level</span><span class="tp-hcol">Color</span><span class="tp-hcap">Caps</span><span class="tp-hund">Underline</span></div>';
+    for (let i = 0; i < 6; i++) {
+      const un = !!p.underlines[i];
+      const cp = !!p.caps[i];
+      html += `<div class="tp-hrow">
+        <span class="tp-hlvl">H${i + 1}</span>
+        <input type="color" class="tp-color" value="${heads[i]}" aria-label="H${i + 1} color" data-wb-thead="${i}">
+        <code class="tp-hex">${escHtml(String(heads[i]).toUpperCase())}</code>
+        <span class="tp-hcap"><span class="tp-toggle tp-toggle-sm${cp ? ' on' : ''}" role="switch" aria-checked="${cp}" aria-label="H${i + 1} capitals" tabindex="0" data-wb-tcaps="${i}"><span class="tp-toggle-thumb"></span></span></span>
+        <span class="tp-hund"><span class="tp-toggle${un ? ' on' : ''}" role="switch" aria-checked="${un}" aria-label="H${i + 1} underline" tabindex="0" data-wb-tund="${i}"><span class="tp-toggle-thumb"></span></span></span>
+      </div>`;
+    }
+    html += `<button type="button" class="tp-copy" data-wb-tcopy="1">Copy these to ${mode === 'dark' ? 'light' : 'dark'} mode</button>`;
+    html += '<div class="tp-lb">Heading scale</div>' + themeSegHTML('scale', [['compact','Compact'],['normal','Normal'],['large','Large']]);
+    html += themeToggleHTML('Show inline title', 'inlineTitle');
+    html += '</div>';
+  }
+
+  // ── Navigation icons ──
+  html += themeSectionHeadHTML('navigation', 'Navigation icons');
+  if (state.themeSection === 'navigation') {
+    html += '<div class="tp-sec-body">';
+    html += '<div class="tp-lb">Icon style</div>' +
+      `<select class="s-select tp-select" data-wb-tselect="navIcons">
+        <option value="folder"${p.navIcons === 'folder' ? ' selected' : ''}>Folder and file</option>
+        <option value="chevron"${p.navIcons === 'chevron' ? ' selected' : ''}>Chevron</option>
+        <option value="dot"${p.navIcons === 'dot' ? ' selected' : ''}>Dot</option>
+        <option value="none"${p.navIcons === 'none' ? ' selected' : ''}>None</option>
+      </select>`;
+    html += '<div class="tp-lb">Folder color</div>' +
+      `<select class="s-select tp-select" data-wb-tselect="navColor">
+        <option value="rainbow"${p.navColor === 'rainbow' ? ' selected' : ''}>Rainbow by position</option>
+        <option value="accent"${p.navColor === 'accent' ? ' selected' : ''}>Accent</option>
+        <option value="single"${p.navColor === 'single' ? ' selected' : ''}>Single color</option>
+        <option value="muted"${p.navColor === 'muted' ? ' selected' : ''}>Muted</option>
+      </select>`;
+    if (p.navColor === 'single') {
+      html += '<div class="tp-lb">Color</div><div class="tp-swatches">';
+      RAINBOW[mode].forEach((c, i) => {
+        html += `<span class="tp-sw${p.navSingle === i ? ' on' : ''}" style="background:${c}" role="button" tabindex="0" title="${c}" data-wb-tsingle="${i}"></span>`;
+      });
+      html += '</div>';
+    }
+    if (p.navIcons === 'none' || p.navIcons === 'chevron') {
+      html += `<div class="tp-note">File icons are hidden in this style.</div>`;
+    } else {
+      html += themeToggleHTML('Color file icons too', 'navFileColor');
+    }
+    html += '</div>';
+  }
+
+  // ── Interface ──
+  html += themeSectionHeadHTML('interface', 'Interface');
+  if (state.themeSection === 'interface') {
+    html += '<div class="tp-sec-body">';
+    html += '<div class="tp-lb">Chrome tone</div>' +
+      `<select class="s-select tp-select" data-wb-tselect="chrome">
+        <option value="contrast"${p.chrome === 'contrast' ? ' selected' : ''}>Contrast</option>
+        <option value="match"${p.chrome === 'match' ? ' selected' : ''}>Match reader</option>
+        <option value="flat"${p.chrome === 'flat' ? ' selected' : ''}>Flat</option>
+      </select>`;
+    html += '<div class="tp-lb">Borders</div>'    + themeSegHTML('borders',   [['none','None'],['hairline','Hairline'],['strong','Strong']]);
+    html += '<div class="tp-lb">Active row</div>' + themeSegHTML('activeRow', [['bar','Bar'],['tint','Tint'],['both','Both']]);
+    html += '<div class="tp-lb">Density</div>'    + themeSegHTML('density',   [['compact','Compact'],['normal','Normal'],['roomy','Roomy']]);
+    html += '</div>';
+  }
+
+  // ── Share ──
+  html += themeSectionHeadHTML('share', 'Share');
+  if (state.themeSection === 'share') {
+    html += '<div class="tp-sec-body">';
+    html += '<div class="tp-note">Mode stays personal — dark or light never travels with a shared theme.</div>';
+    html += `<textarea class="tp-share" id="tp-share-str" spellcheck="false" aria-label="Theme string">${escHtml(exportThemeString())}</textarea>`;
+    html += '<div class="tp-share-btns">';
+    html += '<button type="button" class="tp-btn" data-wb-tcopystr="1">Copy</button>';
+    html += '<button type="button" class="tp-btn" data-wb-timport="1">Apply pasted</button>';
+    html += '</div>';
+    html += '<button type="button" class="tp-btn tp-btn-wide" data-wb-tvault="1">Set as vault default</button>';
+    html += '<div class="tp-note">Saved to zSystem/theme.json. Anyone opening the wiki for the first time starts with it; nobody\'s existing theme is touched.</div>';
+    if (state.themeShareMsg) {
+      html += `<div class="tp-msg${state.themeShareMsg.error ? ' err' : ''}">${escHtml(state.themeShareMsg.text)}</div>`;
+    }
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+// Delegated, same rule as every other interaction in this file since the
+// v0.10.1 hardening pass: data in data-* attributes, never interpolated
+// into an inline handler string.
+$('theme-panel').addEventListener('click', e => {
+  e.stopPropagation();
+  const t = e.target;
+  const close = t.closest('#tp-close');           if (close) { closeThemePanel(); return; }
+  const all   = t.closest('#tp-reset-all');       if (all)   { resetAllTheme(); return; }
+  // Reset sits INSIDE the section header, so it has to be tested before
+  // the header itself or clicking it would just collapse the section.
+  const reset = t.closest('[data-wb-treset]');    if (reset) { resetThemeSection(reset.dataset.wbTreset); return; }
+  const sec   = t.closest('[data-wb-tsec]');      if (sec)   { toggleThemeSection(sec.dataset.wbTsec); return; }
+  const mode  = t.closest('[data-wb-tmode]');     if (mode)  { setThemeMode(mode.dataset.wbTmode); return; }
+  const pre   = t.closest('[data-wb-tpreset]');   if (pre)   { setThemePreset(pre.dataset.wbTpreset); return; }
+  const acc   = t.closest('[data-wb-taccent]');   if (acc)   { setThemeAccent(acc.dataset.wbTaccent || null); return; }
+  const seg   = t.closest('[data-wb-tset]');      if (seg)   { setThemePref(seg.dataset.wbTset, seg.dataset.wbTval); return; }
+  const tgl   = t.closest('[data-wb-ttoggle]');   if (tgl)   { setThemePref(tgl.dataset.wbTtoggle, !state.themePrefs[tgl.dataset.wbTtoggle]); return; }
+  const sgl   = t.closest('[data-wb-tsingle]');   if (sgl)   { setThemePref('navSingle', +sgl.dataset.wbTsingle); return; }
+  const cpy2  = t.closest('[data-wb-tcopystr]');  if (cpy2)  { copyThemeString(); return; }
+  const imp   = t.closest('[data-wb-timport]');   if (imp)   { const ta = $('tp-share-str'); importThemeString(ta ? ta.value : ''); return; }
+  const vlt   = t.closest('[data-wb-tvault]');    if (vlt)   { setVaultDefaultTheme(); return; }
+  const cps   = t.closest('[data-wb-tcaps]');     if (cps)   { toggleHeadingCaps(+cps.dataset.wbTcaps); return; }
+  const und   = t.closest('[data-wb-tund]');      if (und)   { toggleHeadingUnderline(+und.dataset.wbTund); return; }
+  const cpy   = t.closest('[data-wb-tcopy]');     if (cpy)   { copyHeadingsToOtherMode(); return; }
 });
 
-$('sel-bgcolor').addEventListener('change', e => {
-  applyBgColor(e.target.value);
-  persist('wb_bgcolor', e.target.value);
+// Colour inputs fire 'input' while dragging — live preview as you drag,
+// which is the whole point of an anchored panel over a modal. The panel
+// deliberately does NOT re-render on every input event (that would tear
+// the open colour picker down mid-drag); it applies and saves only.
+$('theme-panel').addEventListener('input', e => {
+  const c = e.target.closest('[data-wb-thead]');
+  if (c) {
+    setHeadingColorLive(+c.dataset.wbThead, c.value);
+    return;
+  }
+  const sel = e.target.closest('[data-wb-tselect]');
+  if (sel) setThemePref(sel.dataset.wbTselect, sel.value);
+});
+$('theme-panel').addEventListener('change', e => {
+  const c = e.target.closest('[data-wb-thead]');
+  if (c) setHeadingColor(+c.dataset.wbThead, c.value); // final value — full re-render
 });
 
-$('tgl-h2underline').addEventListener('change', e => {
-  applyH2Underline(e.target.checked);
-  persist('wb_h2underline', e.target.checked);
+// Same as setHeadingColor but without the panel re-render, so the native
+// colour picker stays open while dragging.
+function setHeadingColorLive(idx, hex) {
+  const p    = state.themePrefs;
+  const mode = resolvedMode();
+  if (!p.headings[mode]) {
+    const src = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+    p.headings[mode] = src.h.slice();
+  }
+  p.headings[mode][idx] = hex;
+  persist('wb_theme_v2', p);
+  applyThemePrefs();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.themePanelOpen) closeThemePanel();
 });
 
 $('tgl-last-note').addEventListener('change', e => {
@@ -6238,30 +7282,12 @@ function loadPersistedState() {
     fitToolbarLabel('sb-toolbar', '.sbt-label', 'sbt-group');
     fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group');
 
-    const theme = localStorage.getItem('wb_theme');
-    if (theme) applyTheme(JSON.parse(theme));
-
-    const headers = localStorage.getItem('wb_headers');
-    if (headers) {
-      const h = JSON.parse(headers);
-      applyHeaders(h);
-      const sel = $('sel-headers');
-      if (sel) sel.value = h;
-    }
-
-    const bgColor = localStorage.getItem('wb_bgcolor');
-    if (bgColor) {
-      const b = JSON.parse(bgColor);
-      applyBgColor(b);
-      const selBg = $('sel-bgcolor');
-      if (selBg) selBg.value = b;
-    }
-
-    const h2u = localStorage.getItem('wb_h2underline');
-    if (h2u !== null) {
-      applyH2Underline(JSON.parse(h2u));
-      $('tgl-h2underline').checked = state.h2Underline;
-    }
+    // Theme (S32) — one record, wb_theme_v2, covering mode, preset,
+    // accent, heading colours, underlines and every reading control.
+    // Migrates itself off the old wb_theme/wb_headers/wb_bgcolor/
+    // wb_h2underline keys on first run; those keys are left in place so
+    // reverting this file restores the previous look untouched.
+    loadThemePrefs();
 
     const advOpen = localStorage.getItem('wb_adv_open');
     if (advOpen !== null) toggleAdvancedSettings(JSON.parse(advOpen));
@@ -7639,6 +8665,10 @@ async function bootVault() {
     updateBackButtons();   // disabled at boot — nothing in history yet
     scanBadges(); // S14 — async, fills comment + review badges
     checkIdentity(); // S15 — async, shows the first-run/new-device prompt if needed
+    // S32 pass 2 — adopts zSystem/theme.json, but only on a device that
+    // has never had a theme of its own. Fire-and-forget: a missing or
+    // malformed vault theme must never hold up or break boot.
+    loadVaultDefaultTheme();
     vaultReady = true; // enables the focus-regain refresh below
 
     if (last) openFile(last.url, last.name);
@@ -7738,7 +8768,7 @@ document.addEventListener('visibilitychange', async () => {
       const text = await readVaultFile(state.activeUrl);
       const rc = $('reader-content');
       if (rc && rc.dataset.wbText !== text) {
-        rc.innerHTML = parseMarkdown(text);
+        rc.innerHTML = inlineTitleHTML(state.activeName) + parseMarkdown(text);
         rc.dataset.wbText = text;
         hydrateLocalImages(rc);
         applyFoldState(state.activeUrl); // re-rendered content — restore collapsed headings

@@ -8,6 +8,70 @@
 
 ---
 
+## 0.19.0 — 2026-08-03
+
+**Changed:** `index.html`, `help.md`
+**Added:** `help-edit.md`, `help-assets/` (8 SVG figures)
+
+*Help was rewritten and split in two. It had drifted badly — the version on disk was written at 0.12.0 and still described the right panel as four icons with a pinned Comments strip, Settings as a header gear, and Themes as five header-colour palettes. None of that had been true for six versions.*
+
+- **Two help pages, cross-linked.** **Help** covers using the wiki — installing, panels, the sidebar, reading, search, bookmarks, themes, comments, troubleshooting. **Help — Editing and Markdown** covers changing things — enabling editing, creating and moving files, the editor, properties, review, and the full Markdown reference. The **?** button still opens the first one; the two link to each other in the reader.
+- **`openHelp()` generalised to `openHelpDoc(file)`**, driven by a new `HELP_DOCS` map that is both the title lookup and the **allowlist**. A link is only pulled into the reader if its href is a literal key in that map — not a pattern match — so a vault note named `help-notes.md`, a `../help.md`, or an external URL ending in `help.md` all fall through to normal link handling. `openHelp()` is kept as a thin wrapper, so every existing call site is untouched.
+- **Help links no longer navigate away.** A `[text](help-edit.md)` link used to fall through to the external branch of `renderInline()` and open raw Markdown in a new tab. It now emits `data-wb-helpdoc` and is handled in `wbDelegatedClick` — a `data-wb-*` attribute rather than an inline `onclick`, per the S12 hardening rule.
+- **Eight figures**, hand-drawn SVG rather than screenshots: the screen, the header bar, panel edges, the sidebar, the reader's corner controls, right-panel stacking, bookmarking, and the Theme panel. Drawn from `PRESETS.things.dark` and the real icon paths in this file, so they match a default install. About 50 KB for the set, versus roughly 2 MB of PNGs, and they are edited rather than recaptured when the UI moves.
+- **Figures live in `help-assets/` beside `index.html`, referenced as `![alt](help-assets/x.svg)`** — deliberately *not* in the vault. Help is fetched with `fetch('./help.md')`, so its relative paths resolve against the app, never the vault; and the `![[x.png]]` form resolves against the *current note's* attachments folder, which does not exist while help is open (`activeUrl` is null). Being app-side also keeps documentation out of everyone's OneDrive and invisible to the nav tree for free.
+- Help and its images stay **network-only** — `sw.js` is unchanged, and `isShell()` never matched help. No cache to go stale, no offline help, same as before.
+- Corrected three things the old page had simply wrong, beyond staleness: Comments was described as having "This file / Vault" tabs and a **+** button (neither exists — the tab is per-file, the vault-wide view is the separate Comment Inbox); **New (+)** creates at the vault root only, with per-folder creation on the folder row's own hover **+**; and **Reject** in review reverts the file rather than only flagging it.
+- Verified with a 34-check jsdom suite (`supporting/tests/help-split.test.js`) covering both docs loading, the cross-link round trip, the allowlist against four near-miss hrefs, all eight figures resolving to files that exist on disk, Outline populating separately for each doc, and the missing-file fallback. The existing 136-check theme suite re-run clean against the modified file.
+
+---
+
+## 0.18.0 — 2026-08-02
+
+**Changed:** `index.html`
+
+*Theme panel, pass 2 of 2. The feature is complete — the three "Soon" rows are real sections now.*
+
+- **Navigation icons.** Icon style: Folder and file (current) / Chevron / Dot / None. Folder colour: Rainbow by position (current) / Accent / Single colour / Muted, with a six-swatch picker when Single is chosen, matched per mode to the palette the rainbow already cycles. New "Colour file icons too" toggle, off by default — file icons stayed muted before and still do unless you ask. The chevron and dot glyphs ride along inside the same icon markup and are swapped by CSS off `body[data-navicons]`, so the string-building sidebar renderer didn't need to branch on a preference. Files get no chevron in Chevron style on purpose: nothing unfolds under a leaf, so the indent and guide line carry it instead.
+- **Interface.** Chrome tone: Contrast (current) / Match reader (sidebar and header adopt the reader surface) / Flat (one surface everywhere). Borders: None / Hairline (current) / Strong. Active row indicator: Bar / Tint / Both (current). Density: Compact / Normal / Roomy, driving the nav, root file and Outline row padding from one pair of variables. **Borders → None only clears the decorative `--border`**; `--border-strong` is deliberately kept, because toggle tracks, resize handles and input outlines lean on it and zeroing it makes them vanish rather than look minimal.
+- **Share.** Export the theme as a single `WBTHEME1:` string to paste to a teammate, and Apply pasted to take one. **Mode is deliberately not shared** — dark vs light is personal (and can be System), so an export never forces someone else's screen to your preference. Import applies only the keys this build knows about, so a string from a newer version can't inject arbitrary state and one from an older version just leaves newer controls at their defaults; an unknown preset falls back to the default rather than rendering nothing.
+- **Set as vault default** writes `zSystem/theme.json`, reusing the existing hidden sidecar convention (same place as the identity records and `.comments.md`/`.changes.md`) rather than inventing a new one. It's read at boot **only on a device that has never had a theme of its own** — no v2 record and nothing from the pre-S32 keys either — so it gives a new person the team's look on first load and never overwrites a choice anyone has already made. A missing or malformed vault theme is swallowed and can't hold up or break boot.
+- Copy falls back to selecting the string when `navigator.clipboard` is unavailable (file:// and some embedded WebViews are not secure contexts), rather than leaving a dead button.
+- Test suite grown to 136 checks, adding icon modes, chrome tones, border tones, the fresh-device gate, share round-trip, the unknown-key and unknown-preset guards, and the pass-2 reset paths.
+
+---
+
+## 0.17.0 — 2026-08-02
+
+**Changed:** `index.html`
+
+*Theme panel, pass 1 of 2. Pass 2 (navigation icons, interface chrome, theme sharing) is listed in the panel as "Soon" but not built.*
+
+- **New Theme panel**, opened from the user badge dropdown above Settings. Anchored popup rather than a modal, so the reader stays visible and every change shows live behind it. Closes on the X, Esc, or a click outside. No Save button — every control writes to storage the moment it's changed. Reset per section, Reset all in the footer. Sections are an accordion, one open at a time, which is what keeps the panel one screen tall as more sections land.
+- **Presets replace the old Header colors × Background color pair of dropdowns.** Those two lists let any palette pair with any background — 64 combinations, most of them mismatched — and left the accent unthemeable. One preset now sets backgrounds, all six heading colours and the accent together, with separate dark and light definitions, and Mode (Dark / Light / **System**, new) is an independent switch. The Theme block is gone from Settings, which keeps Navigation and Advanced.
+- **Two presets renamed:** `Dark` → **Default** and `Light` → **Ocean**. The old names collided with the Dark/Light mode names and read as "the light theme", which neither of them ever was.
+- **H5 and H6 have real colours in all eight presets.** Seven of the eight previously fell back to secondary grey, which was invisible until the panel showed all six levels side by side.
+- **Accent is user-selectable** for the first time: the preset's own accent plus six alternates, tuned separately per mode. Tag chips now follow the accent on purpose (they matched it by coincidence before, both hardcoded to the same blue), so a green accent no longer leaves blue tags behind.
+- **Per-level heading colour and underline, H1 through H6.** Underlines were H2-only; each level now draws in its own heading colour. Custom heading colours are stored separately for dark and light, since a colour that reads on near-black often fails on white — editing any colour seeds the full six from the current preset and flips the badge to Custom, with a one-click "Copy these to <other> mode". Picking a named preset again clears the override.
+- **New reading controls:** width (Narrow / Normal / Wide), text size, line spacing, body font (system sans / serif / monospace), and a single Heading scale (Compact / Normal / Large) instead of six per-level size fields.
+- **Per-level capitals, H1 through H6**, as a smaller secondary toggle to the left of each underline switch. H5 was hardcoded to uppercase with no way to turn it off; it's a per-level opt-in now, shipping on for H5 and off everywhere else so an untouched install is unchanged. Letter-spacing rides along with the transform — tracked-out capitals are the point, plain uppercase at normal spacing reads cramped.
+- **Inline title** (off by default): the note's own name rendered as a large heading at the top of the document, Obsidian-style. The reader header bar keeps showing the filename either way.
+- **Under the hood:** the 32 hand-written `body[data-theme][data-headers]` / `[data-bg]` CSS rules are replaced by one `PRESETS` table in JS; `applyThemePrefs()` writes the resolved values as inline custom properties on `<body>`, so every existing `var(--heading-1)` / `var(--accent)` / `var(--bg-sidebar)` in the file keeps working with no CSS rewrite. No `color-mix()` or other newer colour function anywhere — the v0.14.4 lesson holds; the accent tint is computed hex→rgba in JS.
+- **Storage:** one new `wb_theme_v2` record, migrated once from `wb_theme` / `wb_headers` / `wb_bgcolor` / `wb_h2underline`. The old keys are deliberately left in place, so reverting this file restores the previous look with no data loss.
+- **Known behaviour change:** if you had a header palette and a background from two different identities, the background now follows the palette. Removing that mismatch is the point of the pass.
+- Verified with an 81-check jsdom suite (`supporting/tests/theme.test.js`) covering preset completeness, migration, panel render, write-through, per-mode custom isolation, per-level caps and underlines, reset paths and the banned-colour-function rule.
+
+---
+
+## 0.16.0 — 2026-07-30
+
+**Changed:** `index.html`
+
+- Clicking a heading's own text in the reader (not its fold chevron) now selects it: mirrors it as the Outline's active item and highlights the row, reusing the exact pin already used for an Outline-click jump (`pinJumpHighlight`/`clearJumpHighlight`) — holds until you scroll away, same as before. Clicking the chevron still only folds/unfolds, unaffected — the two are now separate click targets, the same split the Outline panel already uses between its own fold-chevron and jump buttons.
+- Gives Collapse Unused a reliable "current heading" from an explicit click, instead of only whatever the scroll-spy last happened to land on — no changes needed to Collapse Unused itself, it already reads the Outline's active item.
+
+---
+
 ## 0.15.0 — 2026-07-24
 
 **Changed:** `index.html`

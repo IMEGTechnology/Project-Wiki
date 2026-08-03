@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <style>
+      .acc { fill:#5B9CF6; font-size:12px; font-weight:600; }
+      .dim { fill:#8A8A8F; font-size:11px; }
+      .t   { fill:#C9C9CE; font-size:12.5px; }
+      .lead{ stroke:#5B9CF6; stroke-width:1; fill:none; }
+      .ico { stroke:#A0A0A5; stroke-width:1.4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    </style>
+  </defs>
+  <rect width="1000" height="400" fill="#17181c"/>
+
+  <text x="40" y="34" fill="#5B9CF6" font-size="15" font-weight="700">The reader's own controls</text>
+  <text x="40" y="54" class="dim" font-size="11.5">They float in the two top corners and line up with the note's own text margin, not the panel edge.</text>
+
+  <!-- reader -->
+  <rect x="150" y="78" width="700" height="230" rx="6" fill="#24252b" stroke="#35363a"/>
+
+  <!-- left corner -->
+  <g class="ico" transform="translate(214,100)"><path d="M12 5H2"/><path d="M7 10L2 5l5-5"/></g>
+  <g class="ico" transform="translate(244,100)"><path d="M2 5h10"/><path d="M7 0l5 5-5 5"/></g>
+  <line x1="272" y1="96" x2="272" y2="112" stroke="#3f4046"/>
+  <text x="286" y="110" fill="#C9C9CE" font-size="12.5">site-a-scope.md</text>
+
+  <!-- right corner -->
+  <g class="ico" transform="translate(628,101)"><polyline points="0,8 5,3 10,8"/><polyline points="0,3 5,-2 10,3"/></g>
+  <g class="ico" transform="translate(654,101)"><path d="M0 1.6A1.6 1.6 0 0 1 1.6 0h3.2L6.4 1.6h5A1.6 1.6 0 0 1 13 3.2v5A1.6 1.6 0 0 1 11.4 9.8H1.6A1.6 1.6 0 0 1 0 8.2Z"/><line x1="4" y1="5.6" x2="9" y2="5.6"/></g>
+  <g class="ico" transform="translate(682,101)"><polyline points="0,0 5,5 10,0"/><polyline points="0,5 5,10 10,5"/></g>
+  <line x1="710" y1="96" x2="710" y2="112" stroke="#3f4046"/>
+  <g class="ico" transform="translate(726,99)"><line x1="0" y1="12" x2="0" y2="7"/><line x1="0" y1="5" x2="0" y2="0"/><line x1="6" y1="12" x2="6" y2="6"/><line x1="6" y1="4" x2="6" y2="0"/><line x1="12" y1="12" x2="12" y2="8"/><line x1="12" y1="6" x2="12" y2="0"/><line x1="-2.5" y1="7" x2="2.5" y2="7"/><line x1="3.5" y1="4" x2="8.5" y2="4"/><line x1="9.5" y1="8" x2="14.5" y2="8"/></g>
+  <g class="ico" transform="translate(764,99)"><path d="M9 0a1.6 1.6 0 1 1 2.3 2.3L3.6 10 0 11.2 1.2 7.6Z"/><path d="M7.6 1.4l2.3 2.3"/></g>
+
+  <!-- fade + body -->
+  <rect x="151" y="120" width="698" height="16" fill="#24252b"/>
+  <g>
+    <text x="214" y="164" fill="#5B9CF6" font-size="19" font-weight="700">Site A — Scope</text>
+    <g class="ico" transform="translate(196,152)" stroke-width="1.3" stroke="#6E6E73"><polyline points="0,0 5,5 10,0"/></g>
+    <rect x="214" y="178" width="380" height="7" rx="3.5" fill="#3a3b40"/>
+    <rect x="214" y="196" width="340" height="7" rx="3.5" fill="#3a3b40"/>
+
+    <text x="214" y="234" fill="#FF8080" font-size="15" font-weight="700">Deliverables</text>
+    <g class="ico" transform="translate(198,224)" stroke-width="1.3" stroke="#6E6E73"><polyline points="0,0 4,4 0,8"/></g>
+    <rect x="196" y="220" width="410" height="22" fill="#5B9CF6" opacity=".07"/>
+
+    <text x="214" y="272" fill="#5FD98A" font-size="13.5" font-weight="700">Programme</text>
+    <g class="ico" transform="translate(198,262)" stroke-width="1.3" stroke="#6E6E73"><polyline points="0,0 5,5 10,0"/></g>
+    <rect x="214" y="286" width="300" height="7" rx="3.5" fill="#3a3b40"/>
+  </g>
+
+  <!-- leaders -->
+  <g class="lead">
+    <path d="M232 90 L232 68 L300 68"/>
+    <path d="M652 90 L652 68 L580 68"/>
+    <path d="M732 90 L732 46 L580 46"/>
+    <path d="M770 90 L770 30 L580 30"/>
+    <path d="M201 156 L120 156"/>
+    <path d="M320 234 L320 336 L400 336"/>
+  </g>
+
+  <text x="306" y="72" class="acc">Back · Forward · the file you are on</text>
+  <text x="574" y="72" class="acc" text-anchor="end">Collapse all · Collapse unused · Expand all</text>
+  <text x="574" y="50" class="acc" text-anchor="end">Properties</text>
+  <text x="574" y="34" class="acc" text-anchor="end">Edit</text>
+
+  <text x="114" y="152" class="acc" text-anchor="end">Chevron</text>
+  <text x="114" y="168" class="dim" text-anchor="end">folds that section</text>
+
+  <text x="406" y="340" class="acc">Click the heading text, not the chevron</text>
+  <text x="406" y="356" class="dim">It selects the heading instead of folding it: the row highlights, the Outline follows,</text>
+  <text x="406" y="370" class="dim">and it holds until you scroll. That is how Collapse unused knows where you are.</text>
+
+  <text x="40" y="340" class="dim">Back and Forward restore your</text>
+  <text x="40" y="354" class="dim">scroll position, not just the file.</text>
+  <text x="40" y="368" class="dim">Session-only — they reset when</text>
+  <text x="40" y="382" class="dim">you reload.</text>
+</svg>

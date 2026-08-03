@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" width="1000" height="420" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <style>
+      .acc { fill:#5B9CF6; font-size:12px; font-weight:600; }
+      .dim { fill:#8A8A8F; font-size:11px; }
+      .t   { fill:#C9C9CE; font-size:11.5px; }
+      .cap { fill:#C9C9CE; font-size:12.5px; font-weight:600; }
+      .lead{ stroke:#5B9CF6; stroke-width:1; fill:none; }
+      .ico { stroke:#A0A0A5; stroke-width:1.35; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    </style>
+  </defs>
+  <rect width="1000" height="420" fill="#17181c"/>
+
+  <text x="40" y="34" fill="#5B9CF6" font-size="15" font-weight="700">The right panel stacks</text>
+  <text x="40" y="54" class="dim" font-size="11.5">Tools do not replace each other. Click a tab to add it to the stack or take it out; double-click to show one alone.</text>
+
+  <!-- === panel A: one open === -->
+  <g transform="translate(40,80)">
+    <rect x="0" y="0" width="230" height="280" rx="6" fill="#1e1f24" stroke="#35363a"/>
+    <!-- tabs -->
+    <g class="ico" transform="translate(20,16)" stroke="#5B9CF6"><line x1="4" y1="0" x2="13" y2="0"/><line x1="4" y1="5" x2="13" y2="5"/><line x1="4" y1="10" x2="13" y2="10"/><line x1="0" y1="0" x2="0.5" y2="0"/><line x1="0" y1="5" x2="0.5" y2="5"/><line x1="0" y1="10" x2="0.5" y2="10"/></g>
+    <rect x="16" y="34" width="22" height="2" fill="#5B9CF6"/>
+    <g class="ico" transform="translate(58,15)"><path d="M11 13l-5.5-4L0 13V1a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/></g>
+    <g class="ico" transform="translate(96,16)"><path d="M13 9a1 1 0 0 1-1 1H4l-3 3V1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z"/></g>
+    <g class="ico" transform="translate(136,17)"><path d="M4 6a3 3 0 0 0 4.6.3l1.8-1.8A3 3 0 0 0 6 .3L5 1.3"/><path d="M6 4.5A3 3 0 0 0 1.4 4.2L-0.4 6A3 3 0 0 0 4 10.4L5 9.4"/></g>
+    <g class="ico" transform="translate(180,16)"><circle cx="5" cy="5" r="4.8"/><line x1="11.5" y1="11.5" x2="8.6" y2="8.6"/></g>
+    <line x1="0" y1="44" x2="230" y2="44" stroke="#35363a"/>
+
+    <text x="18" y="62" class="cap" font-size="11">Outline</text>
+    <line x1="0" y1="72" x2="230" y2="72" stroke="#35363a"/>
+    <rect x="0" y="78" width="228" height="20" fill="#5B9CF6" opacity=".10"/>
+    <rect x="228" y="78" width="2" height="20" fill="#5B9CF6"/>
+    <text x="30" y="92" fill="#5B9CF6" font-size="11.5">Site A — Scope</text>
+    <text x="44" y="116" class="t" fill="#8A8A8F">Deliverables</text>
+    <text x="44" y="138" class="t" fill="#8A8A8F">Programme</text>
+    <text x="58" y="160" class="t" fill="#8A8A8F">Milestones</text>
+    <text x="44" y="182" class="t" fill="#8A8A8F">Risks</text>
+    <text x="44" y="204" class="t" fill="#8A8A8F">Close-out</text>
+
+    <text x="0" y="308" class="cap">One click</text>
+    <text x="0" y="326" class="dim">Outline on its own.</text>
+  </g>
+
+  <!-- === panel B: two open === -->
+  <g transform="translate(320,80)">
+    <rect x="0" y="0" width="230" height="280" rx="6" fill="#1e1f24" stroke="#35363a"/>
+    <g class="ico" transform="translate(20,16)" stroke="#5B9CF6"><line x1="4" y1="0" x2="13" y2="0"/><line x1="4" y1="5" x2="13" y2="5"/><line x1="4" y1="10" x2="13" y2="10"/><line x1="0" y1="0" x2="0.5" y2="0"/><line x1="0" y1="5" x2="0.5" y2="5"/><line x1="0" y1="10" x2="0.5" y2="10"/></g>
+    <rect x="16" y="34" width="22" height="2" fill="#5B9CF6"/>
+    <g class="ico" transform="translate(58,15)" stroke="#5B9CF6"><path d="M11 13l-5.5-4L0 13V1a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/></g>
+    <rect x="54" y="34" width="22" height="2" fill="#5B9CF6"/>
+    <g class="ico" transform="translate(96,16)"><path d="M13 9a1 1 0 0 1-1 1H4l-3 3V1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z"/></g>
+    <g class="ico" transform="translate(136,17)"><path d="M4 6a3 3 0 0 0 4.6.3l1.8-1.8A3 3 0 0 0 6 .3L5 1.3"/><path d="M6 4.5A3 3 0 0 0 1.4 4.2L-0.4 6A3 3 0 0 0 4 10.4L5 9.4"/></g>
+    <g class="ico" transform="translate(180,16)"><circle cx="5" cy="5" r="4.8"/><line x1="11.5" y1="11.5" x2="8.6" y2="8.6"/></g>
+    <line x1="0" y1="44" x2="230" y2="44" stroke="#35363a"/>
+
+    <text x="18" y="62" class="cap" font-size="11">Outline</text>
+    <line x1="0" y1="72" x2="230" y2="72" stroke="#35363a"/>
+    <rect x="0" y="78" width="228" height="20" fill="#5B9CF6" opacity=".10"/>
+    <rect x="228" y="78" width="2" height="20" fill="#5B9CF6"/>
+    <text x="30" y="92" fill="#5B9CF6" font-size="11.5">Site A — Scope</text>
+    <text x="44" y="114" class="t" fill="#8A8A8F">Deliverables</text>
+    <text x="44" y="134" class="t" fill="#8A8A8F">Programme</text>
+
+    <!-- split handle -->
+    <rect x="0" y="146" width="230" height="6" fill="#24252b"/>
+    <rect x="98" y="148" width="34" height="2" rx="1" fill="#5B9CF6"/>
+
+    <text x="18" y="170" class="cap" font-size="11">Bookmarks</text>
+    <line x1="0" y1="180" x2="230" y2="180" stroke="#35363a"/>
+    <text x="18" y="198" class="dim" font-size="9.5" font-weight="700">FAVORITES</text>
+    <text x="30" y="216" class="t" fill="#8A8A8F">Standard details</text>
+    <text x="18" y="240" class="dim" font-size="9.5" font-weight="700">BOOKMARKS</text>
+    <text x="30" y="258" class="t" fill="#8A8A8F">site-a-scope.md</text>
+
+    <text x="0" y="308" class="cap">Click a second tab</text>
+    <text x="0" y="326" class="dim">Both open, stacked in the order</text>
+    <text x="0" y="342" class="dim">you clicked. Drag the handle</text>
+    <text x="0" y="358" class="dim">between them to change the split.</text>
+  </g>
+
+  <!-- === panel C: solo === -->
+  <g transform="translate(600,80)">
+    <rect x="0" y="0" width="230" height="280" rx="6" fill="#1e1f24" stroke="#35363a"/>
+    <g class="ico" transform="translate(20,16)"><line x1="4" y1="0" x2="13" y2="0"/><line x1="4" y1="5" x2="13" y2="5"/><line x1="4" y1="10" x2="13" y2="10"/><line x1="0" y1="0" x2="0.5" y2="0"/><line x1="0" y1="5" x2="0.5" y2="5"/><line x1="0" y1="10" x2="0.5" y2="10"/></g>
+    <g class="ico" transform="translate(58,15)"><path d="M11 13l-5.5-4L0 13V1a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/></g>
+    <g class="ico" transform="translate(96,16)"><path d="M13 9a1 1 0 0 1-1 1H4l-3 3V1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z"/></g>
+    <g class="ico" transform="translate(136,17)"><path d="M4 6a3 3 0 0 0 4.6.3l1.8-1.8A3 3 0 0 0 6 .3L5 1.3"/><path d="M6 4.5A3 3 0 0 0 1.4 4.2L-0.4 6A3 3 0 0 0 4 10.4L5 9.4"/></g>
+    <g class="ico" transform="translate(180,16)" stroke="#5B9CF6"><circle cx="5" cy="5" r="4.8"/><line x1="11.5" y1="11.5" x2="8.6" y2="8.6"/></g>
+    <rect x="176" y="34" width="22" height="2" fill="#5B9CF6"/>
+    <circle cx="190" cy="12" r="10" fill="none" stroke="#5B9CF6" stroke-width="1"/>
+    <text x="206" y="8" class="acc" font-size="10">×2</text>
+    <line x1="0" y1="44" x2="230" y2="44" stroke="#35363a"/>
+
+    <text x="18" y="62" class="cap" font-size="11">Search</text>
+    <line x1="0" y1="72" x2="230" y2="72" stroke="#35363a"/>
+    <rect x="16" y="82" width="198" height="24" rx="4" fill="#17181c" stroke="#5B9CF6"/>
+    <text x="26" y="98" class="t" fill="#8A8A8F">retention</text>
+    <text x="18" y="126" class="dim" font-size="9.5" font-weight="700">SITE-A-SCOPE.MD</text>
+    <rect x="18" y="134" width="180" height="6" rx="3" fill="#3a3b40"/>
+    <rect x="18" y="148" width="150" height="6" rx="3" fill="#3a3b40"/>
+    <text x="18" y="176" class="dim" font-size="9.5" font-weight="700">TEAM WIKI</text>
+    <rect x="18" y="184" width="164" height="6" rx="3" fill="#3a3b40"/>
+    <rect x="18" y="198" width="190" height="6" rx="3" fill="#3a3b40"/>
+    <rect x="18" y="212" width="140" height="6" rx="3" fill="#3a3b40"/>
+
+    <text x="0" y="308" class="cap">Double-click a tab</text>
+    <text x="0" y="326" class="dim">Shows that one alone and closes</text>
+    <text x="0" y="342" class="dim">the rest. ⌘K / Ctrl+K does the</text>
+    <text x="0" y="358" class="dim">same for Search from anywhere.</text>
+  </g>
+
+  <text x="40" y="400" class="dim">Which tools you keep open is remembered between visits. The height split between them is not — it resets to an even share on reload.</text>
+  <text x="866" y="100" class="acc">Outline</text>
+  <text x="866" y="120" class="acc">Bookmarks</text>
+  <text x="866" y="140" class="acc">Comments</text>
+  <text x="866" y="160" class="acc">Links</text>
+  <text x="866" y="180" class="acc">Search</text>
+  <text x="866" y="206" class="dim">A sixth, Review,</text>
+  <text x="866" y="220" class="dim">appears only if you</text>
+  <text x="866" y="234" class="dim">turn review tools on.</text>
+</svg>

@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" width="1000" height="420" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <style>
+      .acc { fill:#5B9CF6; font-size:12px; font-weight:600; }
+      .dim { fill:#8A8A8F; font-size:11px; }
+      .t   { fill:#C9C9CE; font-size:11.5px; }
+      .cap { fill:#C9C9CE; font-size:12.5px; font-weight:600; }
+      .lb  { fill:#6E6E73; font-size:9.5px; font-weight:700; letter-spacing:.5px; }
+      .lead{ stroke:#5B9CF6; stroke-width:1; fill:none; }
+      .ico { stroke:#A0A0A5; stroke-width:1.35; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    </style>
+  </defs>
+  <rect width="1000" height="420" fill="#17181c"/>
+
+  <text x="40" y="34" fill="#5B9CF6" font-size="15" font-weight="700">Bookmarks start in the Outline</text>
+  <text x="40" y="54" class="dim" font-size="11.5">A bookmark saves a file and a heading, not a copy of the text. Click it later and you land back on that exact section.</text>
+
+  <!-- step 1: outline with ribbon -->
+  <g transform="translate(40,80)">
+    <rect x="0" y="0" width="250" height="180" rx="6" fill="#1e1f24" stroke="#35363a"/>
+    <text x="16" y="24" class="cap" font-size="11">Outline</text>
+    <line x1="0" y1="34" x2="250" y2="34" stroke="#35363a"/>
+    <rect x="0" y="40" width="248" height="22" fill="#5B9CF6" opacity=".10"/>
+    <rect x="248" y="40" width="2" height="22" fill="#5B9CF6"/>
+    <text x="30" y="55" fill="#5B9CF6" font-size="11.5">Site A — Scope</text>
+    <g class="ico" transform="translate(222,44)" stroke-width="1.25"><path d="M9 12l-4.5-3.2L0 12V1a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1z"/></g>
+
+    <text x="44" y="82" class="t" fill="#8A8A8F">Deliverables</text>
+    <g class="ico" transform="translate(222,71)" stroke-width="1.25" stroke="#5B9CF6" fill="#5B9CF6"><path d="M9 12l-4.5-3.2L0 12V1a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1z"/></g>
+
+    <text x="44" y="110" class="t" fill="#8A8A8F">Programme</text>
+    <g class="ico" transform="translate(222,99)" stroke-width="1.25"><path d="M9 12l-4.5-3.2L0 12V1a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1z"/></g>
+
+    <text x="58" y="138" class="t" fill="#8A8A8F">Milestones</text>
+    <g class="ico" transform="translate(222,127)" stroke-width="1.25"><path d="M9 12l-4.5-3.2L0 12V1a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1z"/></g>
+
+    <text x="44" y="166" class="t" fill="#8A8A8F">Risks</text>
+    <g class="ico" transform="translate(222,155)" stroke-width="1.25"><path d="M9 12l-4.5-3.2L0 12V1a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1z"/></g>
+
+    <text x="0" y="206" class="cap">1 · Click the ribbon</text>
+    <text x="0" y="224" class="dim">On any heading row. Filled means</text>
+    <text x="0" y="240" class="dim">bookmarked; click again to remove.</text>
+  </g>
+
+  <!-- arrow -->
+  <g stroke="#5B9CF6" stroke-width="1.4" fill="none" stroke-linecap="round">
+    <path d="M306 170 h34 M334 164 l6 6 -6 6"/>
+  </g>
+
+  <!-- step 2: bookmarks tab -->
+  <g transform="translate(360,80)">
+    <rect x="0" y="0" width="270" height="270" rx="6" fill="#1e1f24" stroke="#35363a"/>
+    <text x="16" y="24" class="cap" font-size="11">Bookmarks</text>
+    <line x1="0" y1="34" x2="270" y2="34" stroke="#35363a"/>
+
+    <text x="16" y="54" class="lb">FAVORITES</text>
+    <g class="ico" transform="translate(222,45)" stroke-width="1.2"><path d="M0 2A1 1 0 0 1 1 1h3l1 1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1Z"/><line x1="5.5" y1="4" x2="5.5" y2="7"/><line x1="4" y1="5.5" x2="7" y2="5.5"/></g>
+    <g class="ico" transform="translate(244,45)" stroke-width="1.2"><line x1="0" y1="2" x2="10" y2="2"/><line x1="0" y1="8" x2="10" y2="8"/><circle cx="7" cy="2" r="1.6"/><circle cx="3" cy="8" r="1.6"/></g>
+
+    <rect x="8" y="62" width="254" height="22" rx="4" fill="#24252b"/>
+    <g class="ico" transform="translate(20,68)" stroke-width="1.2" stroke="#F5C26B" fill="#F5C26B"><path d="M5 0l1.5 3.2 3.5.5-2.5 2.4.6 3.4L5 7.9 1.9 9.5l.6-3.4L0 3.7l3.5-.5z"/></g>
+    <text x="42" y="77" class="t">Standard details</text>
+    <g class="ico" transform="translate(240,68)" stroke-width="1.2" stroke="#5B9CF6"><path d="M7 0a1.2 1.2 0 1 1 1.7 1.7L2.8 7.6 0 8.6l1-2.8Z"/></g>
+
+    <rect x="8" y="88" width="254" height="22" rx="4" fill="#24252b"/>
+    <g class="ico" transform="translate(20,94)" stroke-width="1.2" stroke="#F5C26B" fill="#F5C26B"><path d="M5 0l1.5 3.2 3.5.5-2.5 2.4.6 3.4L5 7.9 1.9 9.5l.6-3.4L0 3.7l3.5-.5z"/></g>
+    <text x="42" y="103" class="t">Submittal process</text>
+
+    <text x="16" y="136" class="lb">BOOKMARKS</text>
+    <g class="ico" transform="translate(222,127)" stroke-width="1.2"><path d="M0 2A1 1 0 0 1 1 1h3l1 1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1Z"/><line x1="5.5" y1="4" x2="5.5" y2="7"/><line x1="4" y1="5.5" x2="7" y2="5.5"/></g>
+    <g class="ico" transform="translate(244,127)" stroke-width="1.2" stroke="#5B9CF6"><line x1="0" y1="2" x2="10" y2="2"/><line x1="0" y1="8" x2="10" y2="8"/><circle cx="7" cy="2" r="1.6"/><circle cx="3" cy="8" r="1.6"/></g>
+
+    <text x="24" y="160" class="dim" font-size="10.5" font-weight="700">site-a-scope.md</text>
+    <rect x="8" y="168" width="254" height="22" rx="4" fill="#24252b"/>
+    <g class="ico" transform="translate(14,173)" stroke-width="1.1" stroke="#5B9CF6"><line x1="0" y1="0" x2="6" y2="0"/><line x1="0" y1="4" x2="6" y2="4"/><line x1="0" y1="8" x2="6" y2="8"/></g>
+    <text x="42" y="183" class="t">Deliverables</text>
+    <g class="ico" transform="translate(238,173)" stroke-width="1.2" stroke="#F5C26B"><path d="M5 0l1.5 3.2 3.5.5-2.5 2.4.6 3.4L5 7.9 1.9 9.5l.6-3.4L0 3.7l3.5-.5z"/></g>
+
+    <rect x="8" y="194" width="254" height="22" rx="4" fill="#24252b"/>
+    <g class="ico" transform="translate(14,199)" stroke-width="1.1" stroke="#5B9CF6"><line x1="0" y1="0" x2="6" y2="0"/><line x1="0" y1="4" x2="6" y2="4"/><line x1="0" y1="8" x2="6" y2="8"/></g>
+    <text x="42" y="209" class="t">Risks</text>
+
+    <text x="24" y="238" class="dim" font-size="10.5" font-weight="700">programme.md</text>
+    <rect x="8" y="246" width="254" height="18" rx="4" fill="#24252b"/>
+    <text x="42" y="259" class="t">Milestones</text>
+
+    <text x="0" y="296" class="cap">2 · It lands in Bookmarks</text>
+    <text x="0" y="314" class="dim">Grouped by file, headings in</text>
+    <text x="0" y="330" class="dim">document order.</text>
+  </g>
+
+  <!-- callouts -->
+  <g class="lead">
+    <path d="M624 128 L700 128"/>
+    <path d="M624 208 L700 208"/>
+    <path d="M370 212 L340 212 L340 300"/>
+  </g>
+
+  <text x="708" y="106" class="acc">Folder + · Sliders</text>
+  <text x="708" y="124" class="dim">Folder + makes a named group, one level, no</text>
+  <text x="708" y="138" class="dim">nesting. Always available.</text>
+  <text x="708" y="158" class="dim">Sliders turns organise mode on — off by default.</text>
+  <text x="708" y="172" class="dim">While on, grip handles appear and you can drag</text>
+  <text x="708" y="186" class="dim">rows to reorder them or move them into a group.</text>
+
+  <text x="708" y="212" class="acc">Hover a row</text>
+  <text x="708" y="230" class="dim">A star appears on a bookmark — promotes it to</text>
+  <text x="708" y="244" class="dim">Favorites, and it stays in both places.</text>
+  <text x="708" y="264" class="dim">A pencil appears on a favorite — renames it.</text>
+  <text x="708" y="278" class="dim">Favorites are the only place renaming works.</text>
+
+  <text x="708" y="318" class="acc">Clicking any of them</text>
+  <text x="708" y="336" class="dim">Opens that file, scrolls to that heading, unfolds</text>
+  <text x="708" y="350" class="dim">whatever was hiding it, and unfolds the section.</text>
+
+  <text x="40" y="386" class="dim">Bookmarks are yours, stored against your email in the vault — so they follow you to another PC rather than living in one browser.</text>
+  <text x="40" y="404" class="dim">The organise toggle is off by default on purpose: with it off, there is nothing to drag out of place by accident.</text>
+</svg>

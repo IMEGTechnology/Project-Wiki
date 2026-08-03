@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 580" width="1000" height="580" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <style>
+      .lbl { fill:#8A8A8F; font-size:12px; }
+      .cal { fill:#5B9CF6; font-size:12px; font-weight:600; }
+      .txt { fill:#C9C9CE; font-size:12px; }
+      .dim { fill:#6E6E73; font-size:11px; }
+      .lead { stroke:#5B9CF6; stroke-width:1; fill:none; }
+      .ico { stroke:#A0A0A5; stroke-width:1.4; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="580" fill="#17181c"/>
+
+  <!-- app frame -->
+  <rect x="40" y="70" width="800" height="420" rx="8" fill="#17181c" stroke="#35363a"/>
+
+  <!-- header -->
+  <rect x="40" y="70" width="800" height="34" rx="8" fill="#27282c"/>
+  <rect x="40" y="94" width="800" height="10" fill="#27282c"/>
+  <line x1="40" y1="104" x2="840" y2="104" stroke="#35363a"/>
+  <!-- header icons -->
+  <g class="ico" transform="translate(56,80)"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></g>
+  <g class="ico" transform="translate(80,80)"><path d="M1 3.5a1.5 1.5 0 0 1 1.5-1.5h3l1.5 1.5h6a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1-1.5 1.5H2.5A1.5 1.5 0 0 1 1 10Z"/></g>
+  <text x="112" y="91" class="txt" font-weight="600">WikiBase</text>
+  <text x="176" y="91" class="dim">— Team Wiki</text>
+  <g class="ico" transform="translate(700,80)"><circle cx="7" cy="7" r="3"/><path d="M7 1v1.5M7 11.5V13M2 2l1 1M11 11l1 1M1 7h1.5M11.5 7H13M2 12l1-1M11 3l1-1"/></g>
+  <g class="ico" transform="translate(730,80)"><circle cx="7" cy="7" r="6"/><path d="M5 5.5a2 2 0 0 1 3.9.6c0 1.3-2 1.9-2 1.9"/><line x1="7" y1="11" x2="7.01" y2="11" stroke-width="2"/></g>
+  <circle cx="769" cy="87" r="9" fill="#5B9CF6" opacity="0.18" stroke="#5B9CF6"/>
+  <text x="769" y="91" text-anchor="middle" fill="#5B9CF6" font-size="9" font-weight="700">JS</text>
+
+  <!-- sidebar -->
+  <rect x="40" y="104" width="160" height="386" fill="#1e1f24"/>
+  <text x="54" y="126" class="txt" font-weight="700" font-size="11">Vault Files</text>
+  <g class="ico" transform="translate(146,118)" stroke-width="1.2"><polyline points="0,7 4,3 8,7"/><polyline points="0,3 4,-1 8,3"/></g>
+  <g class="ico" transform="translate(162,118)" stroke-width="1.2"><path d="M0 1.5A1.5 1.5 0 0 1 1.5 0h3L6 1.5h5A1.5 1.5 0 0 1 12.5 3v5A1.5 1.5 0 0 1 11 9.5H1.5A1.5 1.5 0 0 1 0 8Z"/></g>
+  <g class="ico" transform="translate(180,118)" stroke-width="1.2"><polyline points="0,0 4,4 8,0"/><polyline points="0,4 4,8 8,4"/></g>
+
+  <g>
+    <rect x="48" y="140" width="10" height="9" rx="2" fill="#FF8080" opacity="0.85"/>
+    <text x="66" y="149" class="txt">00_Identity</text>
+    <rect x="48" y="162" width="10" height="9" rx="2" fill="#F5C26B" opacity="0.85"/>
+    <text x="66" y="171" class="txt">01_Projects</text>
+    <rect x="60" y="184" width="10" height="9" rx="2" fill="#5FD98A" opacity="0.85"/>
+    <text x="78" y="193" class="txt">Site A</text>
+    <rect x="72" y="206" width="8" height="9" rx="1.5" fill="none" stroke="#6E6E73"/>
+    <text x="88" y="215" class="txt" fill="#8A8A8F">Notes.md</text>
+    <rect x="60" y="228" width="10" height="9" rx="2" fill="#5B9CF6" opacity="0.85"/>
+    <text x="78" y="237" class="txt">Site B</text>
+    <rect x="48" y="250" width="10" height="9" rx="2" fill="#A0A0A5" opacity="0.85"/>
+    <text x="66" y="259" class="txt">02_Admin</text>
+  </g>
+
+  <!-- left handle + flare -->
+  <rect x="200" y="104" width="4" height="386" fill="#35363a"/>
+  <path d="M200,150 L200,124 Q200,120 204,120 L212,120 Q216,120 216,124 L216,138 C216,148 206,148 204,156 Z" fill="#2f3036" stroke="#4a4b50" stroke-width="0.8"/>
+  <rect x="204.6" y="125" width="2.4" height="7" fill="#A0A0A5"/>
+  <rect x="204.6" y="125" width="7.2" height="7" rx="1" fill="none" stroke="#A0A0A5" stroke-width="0.9"/>
+
+  <!-- reader -->
+  <rect x="204" y="104" width="440" height="386" fill="#24252b"/>
+  <!-- reader corner controls -->
+  <g class="ico" transform="translate(232,124)" stroke-width="1.2"><path d="M10 4H2"/><path d="M6 8L2 4l4-4"/></g>
+  <g class="ico" transform="translate(254,124)" stroke-width="1.2"><path d="M2 4h8"/><path d="M6 0l4 4-4 4"/></g>
+  <line x1="274" y1="120" x2="274" y2="132" stroke="#35363a"/>
+  <text x="284" y="132" class="dim">site-a-scope.md</text>
+  <g class="ico" transform="translate(534,124)" stroke-width="1.2"><polyline points="0,6 4,2 8,6"/><polyline points="0,2 4,-2 8,2"/></g>
+  <g class="ico" transform="translate(552,124)" stroke-width="1.2"><path d="M0 1A1 1 0 0 1 1 0h3l1 1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1Z"/></g>
+  <g class="ico" transform="translate(572,124)" stroke-width="1.2"><polyline points="0,0 4,4 8,0"/><polyline points="0,4 4,8 8,4"/></g>
+  <line x1="590" y1="120" x2="590" y2="132" stroke="#35363a"/>
+  <g class="ico" transform="translate(600,122)" stroke-width="1.2"><line x1="0" y1="10" x2="0" y2="6"/><line x1="0" y1="4" x2="0" y2="0"/><line x1="5" y1="10" x2="5" y2="5"/><line x1="5" y1="3" x2="5" y2="0"/><line x1="10" y1="10" x2="10" y2="7"/><line x1="10" y1="5" x2="10" y2="0"/><line x1="-2" y1="6" x2="2" y2="6"/><line x1="3" y1="3" x2="7" y2="3"/><line x1="8" y1="7" x2="12" y2="7"/></g>
+  <g class="ico" transform="translate(622,122)" stroke-width="1.2"><path d="M8 0a1.4 1.4 0 1 1 2 2L3.2 8.8 0 10l1-3Z"/></g>
+
+  <!-- reader body -->
+  <text x="252" y="184" fill="#5B9CF6" font-size="19" font-weight="700">Site A — Scope</text>
+  <rect x="252" y="200" width="344" height="1.5" fill="#5B9CF6" opacity="0.25"/>
+  <text x="252" y="228" class="txt" font-size="12.5">Body text of the note renders here, in a column</text>
+  <text x="252" y="248" class="txt" font-size="12.5">with its own left and right margins. The corner</text>
+  <text x="252" y="268" class="txt" font-size="12.5">controls line up with that same text edge.</text>
+  <text x="252" y="304" fill="#FF8080" font-size="15" font-weight="700">Deliverables</text>
+  <text x="252" y="330" class="txt" font-size="12.5">• Survey and site plan</text>
+  <text x="252" y="350" class="txt" font-size="12.5">• Permit set</text>
+  <text x="252" y="370" class="txt" font-size="12.5">• Close-out package</text>
+  <rect x="252" y="392" width="344" height="46" rx="5" fill="#5B9CF6" opacity="0.08"/>
+  <rect x="252" y="392" width="2.5" height="46" fill="#5B9CF6"/>
+  <text x="266" y="410" fill="#5B9CF6" font-size="11" font-weight="700">📝 Note</text>
+  <text x="266" y="428" class="txt" font-size="11.5">Callouts render in theme-matched colours.</text>
+
+  <!-- right handle + flare -->
+  <rect x="644" y="104" width="4" height="386" fill="#35363a"/>
+  <path d="M648,150 L648,124 Q648,120 644,120 L636,120 Q632,120 632,124 L632,138 C632,148 642,148 644,156 Z" fill="#2f3036" stroke="#4a4b50" stroke-width="0.8"/>
+  <rect x="641" y="125" width="2.4" height="7" fill="#A0A0A5"/>
+  <rect x="636.6" y="125" width="7.2" height="7" rx="1" fill="none" stroke="#A0A0A5" stroke-width="0.9"/>
+
+  <!-- right panel -->
+  <rect x="648" y="104" width="192" height="386" fill="#1e1f24"/>
+  <g class="ico" transform="translate(662,118)" stroke-width="1.3"><line x1="4" y1="0" x2="12" y2="0"/><line x1="4" y1="4" x2="12" y2="4"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="0" y1="0" x2="0.5" y2="0"/><line x1="0" y1="4" x2="0.5" y2="4"/><line x1="0" y1="8" x2="0.5" y2="8"/></g>
+  <rect x="658" y="134" width="20" height="2" fill="#5B9CF6"/>
+  <g class="ico" transform="translate(692,117)" stroke-width="1.3"><path d="M10 12l-5-3.5L0 12V1a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1z"/></g>
+  <g class="ico" transform="translate(722,118)" stroke-width="1.3"><path d="M12 8a1 1 0 0 1-1 1H4l-3 3V1a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/></g>
+  <g class="ico" transform="translate(752,119)" stroke-width="1.3"><path d="M4 6a3 3 0 0 0 4.5.3l1.8-1.8A3 3 0 0 0 6 .3L5 1.3"/><path d="M6 4.5A3 3 0 0 0 1.5 4.2L-0.3 6A3 3 0 0 0 4 10.3L5 9.3"/></g>
+  <g class="ico" transform="translate(782,118)" stroke-width="1.3"><circle cx="5" cy="5" r="4.5"/><line x1="11" y1="11" x2="8.5" y2="8.5"/></g>
+
+  <text x="662" y="160" class="txt" font-weight="700" font-size="11">Outline</text>
+  <line x1="656" y1="170" x2="832" y2="170" stroke="#35363a"/>
+  <rect x="652" y="178" width="184" height="20" fill="#5B9CF6" opacity="0.10"/>
+  <rect x="834" y="178" width="2" height="20" fill="#5B9CF6"/>
+  <text x="676" y="192" fill="#5B9CF6" font-size="11.5">Site A — Scope</text>
+  <text x="690" y="214" class="lbl" font-size="11.5">Deliverables</text>
+  <text x="690" y="236" class="lbl" font-size="11.5">Programme</text>
+  <text x="704" y="258" class="lbl" font-size="11.5">Milestones</text>
+  <text x="690" y="280" class="lbl" font-size="11.5">Risks</text>
+  <g class="ico" transform="translate(816,184)" stroke-width="1.2" stroke="#5B9CF6"><path d="M8 10l-4-2.8L0 10V1a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/></g>
+  <text x="662" y="474" class="dim" font-size="10">Version 0.18.0</text>
+
+  <!-- callouts -->
+  <g class="lead">
+    <path d="M60 66 L60 44 L150 44"/>
+    <path d="M769 66 L769 40 L700 40"/>
+    <path d="M120 300 L30 300"/>
+    <path d="M420 505 L420 520"/>
+    <path d="M744 300 L880 300"/>
+    <path d="M208 165 L208 528 L300 528"/>
+  </g>
+  <text x="156" y="48" class="cal">New file · Move file</text>
+  <text x="694" y="44" class="cal" text-anchor="end">Dark/Light · Help · You</text>
+  <text x="24" y="292" class="cal" text-anchor="end">Sidebar</text>
+  <text x="24" y="310" class="lbl" text-anchor="end">your folder tree</text>
+  <text x="420" y="537" class="cal" text-anchor="middle">Reader — the note you are on</text>
+  <text x="886" y="292" class="cal">Right panel</text>
+  <text x="886" y="310" class="lbl">Outline, Bookmarks,</text>
+  <text x="886" y="326" class="lbl">Comments, Links, Search</text>
+  <text x="306" y="532" class="cal">Click the tab to collapse a panel, drag the line to resize</text>
+</svg>
