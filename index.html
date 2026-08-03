@@ -594,10 +594,11 @@
       background: var(--bg-reader);
     }
     /* Shared positioning context for every corner control (nav pill, fold
-       pill, Edit, Properties) — same max-width/margin as #reader-content,
-       so this wrapper's own edges land at the same x-position as
-       #reader-content's padding-box edges, at any window width or
-       sidebar/right-panel state. NOTE: no padding here on purpose —
+       pill, Edit, Properties). Spans the reader panel edge to edge (see
+       WIDTH note below; it used to track #reader-content's max-width),
+       so every child's left/right offset is measured from the panel
+       itself at any window width or sidebar/right-panel state.
+       NOTE: no padding here on purpose —
        absolutely positioned children ignore an ancestor's padding for
        their own offset math (right:0 lands flush with the padding EDGE,
        not inset by it), so the 48px content-inset has to be baked into
@@ -608,10 +609,23 @@
        reach, which is why Edit/Properties looked "trimmed": the flare
        sits above them in stacking order at that same zero-clearance
        spot. Transparent middle lets clicks reach the reader underneath;
-       only the controls themselves (children) re-enable pointer events. */
+       only the controls themselves (children) re-enable pointer events.
+
+       WIDTH (changed v0.19.1, 2026-08-03): this box spans the full reader
+       panel and is deliberately NOT capped at var(--read-width) anymore.
+       The control bar is app chrome, not content. Tying it to the theme's
+       Narrow/Normal/Wide token made the whole row expand and contract
+       every time the content column changed, which read as the header
+       moving on its own. The content column still moves; the bar no
+       longer follows it. Do not reintroduce a --read-width cap here.
+       Clearance is unchanged and still safe: each handle's flare is 24px
+       wide and bulges inward from the panel edge, while every child below
+       sits at left/right: 48px, leaving 24px of gap on both sides at any
+       panel width and in either collapsed state. 48px is the floor. Do
+       not shrink a child's inset past it or the flare will overlap. */
     #reader-corner-align {
       position: absolute; top: 0; left: 0; right: 0;
-      max-width: var(--read-width); margin: 0 auto;
+      max-width: none; margin: 0;
       pointer-events: none;
     }
     #reader-corner-align > * { pointer-events: auto; }
@@ -737,9 +751,11 @@
       display: none;
       /* Reading width, size, spacing and font are all Theme-panel
          controls now (S32) — see the --read-width/--body-* block near
-         the top. #reader-corner-align must use the SAME --read-width or
-         the floating corner controls stop lining up with the text
-         margin (the v0.14.1 alignment fix). */
+         the top. SUPERSEDED (v0.19.1): #reader-corner-align used to be
+         pinned to this same --read-width so the floating corner controls
+         lined up with the text margin (the v0.14.1 alignment fix). It no
+         longer is. The control bar spans the panel and this column moves
+         under it independently, which is the intended behavior now. */
       max-width: var(--read-width);
       margin: 0 auto;
       padding: 40px 48px 80px;
@@ -947,6 +963,35 @@
     .md-callout.example .md-callout-label  { color: var(--co-purple-txt); }
     .md-callout.quote           { background: var(--co-gray-bg);   border-color: var(--co-gray-bd); }
     .md-callout.quote .md-callout-label    { color: var(--co-gray-txt); }
+    /* [!copy] (v0.19.2) — deliberately shares the neutral gray family with
+       quote rather than getting a color of its own. It's a utility block,
+       not a severity, and the same "chrome, not a call-to-action" rule that
+       keeps the reader fold pill neutral applies here. */
+    .md-callout.copy            { background: var(--co-gray-bg);   border-color: var(--co-gray-bd); }
+    .md-callout.copy .md-callout-label     { color: var(--co-gray-txt); }
+
+    /* Copy button, [!copy] callouts only. Sits at the far right of the
+       label row (which is already flex) via margin-left:auto, so it needs
+       no layout change to the row itself. Text label, not a bare icon —
+       this block exists precisely because someone was told "copy this",
+       so the affordance should say what it does. */
+    .md-callout-copy-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      background: var(--bg-reader);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 2px 9px;
+      cursor: pointer;
+    }
+    .md-callout-copy-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+    .md-callout-copy-btn.copied { color: var(--co-green-txt); border-color: var(--co-green-txt); }
 
     /* Lists. list-style is off — the bullet/number marker is rendered
        explicitly per item now (.md-li-marker) so the fold chevron can
@@ -1506,6 +1551,26 @@
     .resize-handle.handle-closed .rh-flare { opacity: 1; }
     #rh-sidebar .rh-flare { left: 0; }
     #rh-right   .rh-flare { right: 0; transform: scaleX(-1); }
+
+    /* Pane-hover persistence (v0.19.1) — the flare stays visible the whole
+       time the pointer is anywhere inside the pane that handle belongs to,
+       not only while it's on the 4px line. Left pane keeps the left flare
+       up, right pane keeps the right flare up, reader keeps neither, so
+       the affordance is always reachable without hunting for the line.
+       OPACITY ONLY, on purpose: no fill/background override lives here, so
+       the pane keeps the quiet --handle-rest tone and only a direct
+       :hover/.dragging on the handle itself brightens it. That preserves
+       the S15 decision to stop brightening chrome on panel hover while
+       still solving "where is the toggle".
+       Two different selectors because DOM order runs
+       #sidebar → #rh-sidebar → #reader-wrap → #rh-right → #right-panel:
+       the left handle follows its pane so a sibling combinator reaches it,
+       the right handle precedes its pane so :has() has to look forward.
+       Collapsed panes are already covered by .handle-closed above (a
+       zero-width pane can't be hovered), so these rules only ever apply
+       while the pane is open. */
+    #sidebar:hover ~ #rh-sidebar .rh-flare,
+    #rh-right:has(+ #right-panel:hover) .rh-flare { opacity: 1; }
 
     /* === Reader panel ======================================== */
     /* Responsive minimum width — panels can never squeeze reader below these values */
@@ -2170,7 +2235,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.19.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.19.2</button>
     </aside>
 
   </div>
@@ -3143,6 +3208,12 @@ const CALLOUT_META = {
   EXAMPLE:   { icon: '☰',  cls: 'example',  label: 'Example'   },
   QUOTE:     { icon: '❝',  cls: 'quote',    label: 'Quote'     },
   CITE:      { icon: '❝',  cls: 'quote',    label: 'Cite'      },
+  // [!copy] (v0.19.2) — WikiBase's own type, not one of Obsidian's 13.
+  // Obsidian doesn't know it and falls back to its default note styling
+  // with "Copy" as the title, so a vault using it stays perfectly
+  // readable there; only the button is WikiBase-side. That fallback is
+  // the whole reason this is a callout rather than new syntax.
+  COPY:      { icon: '📄', cls: 'copy',     label: 'Copy'      },
 };
 
 // ── Inline renderer ──────────────────────────────────────────────
@@ -3382,19 +3453,51 @@ function decodeFileLinkPath(href) {
 // to the link that was clicked. No navigation is attempted — browsers
 // can't open a native Explorer/Finder window from a page link either way.
 async function copyFolderPath(path, el) {
+  await writeClipboard(path);
+  showCopiedTip(el);
+}
+
+// Shared clipboard write. navigator.clipboard needs a secure context,
+// which file:// and some embedded WebViews are not — the hidden-textarea
+// + execCommand path is the fallback, same approach the theme share
+// string already uses. Never throws; a failed copy is silent rather than
+// breaking the click.
+async function writeClipboard(text) {
   try {
-    await navigator.clipboard.writeText(path);
-  } catch (_) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) { /* fall through to the legacy path */ }
+  try {
     const ta = document.createElement('textarea');
-    ta.value = path;
+    ta.value = text;
     ta.style.position = 'fixed';
     ta.style.opacity = '0';
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand('copy'); } catch (_) {}
+    let okLegacy = false;
+    try { okLegacy = document.execCommand('copy'); } catch (_) {}
     document.body.removeChild(ta);
-  }
-  showCopiedTip(el);
+    return okLegacy;
+  } catch (_) { return false; }
+}
+
+// [!copy] button (v0.19.2). Confirmation is on the button itself rather
+// than the floating tip used by folder links — the button is already the
+// thing the eye is on, and a tooltip that covers the first line of the
+// text you just copied is worse than useless here.
+async function copyCalloutBlock(idx, btn) {
+  const text = mdCopyBlocks[Number(idx)];
+  if (typeof text !== 'string') return;
+  const okCopy = await writeClipboard(text);
+  const prev = btn.textContent;
+  btn.textContent = okCopy ? 'Copied' : 'Press Ctrl+C';
+  btn.classList.toggle('copied', okCopy);
+  setTimeout(() => {
+    btn.textContent = prev;
+    btn.classList.remove('copied');
+  }, 1400);
 }
 
 function showCopiedTip(el) {
@@ -3429,6 +3532,16 @@ document.addEventListener('click', (e) => {
 // Also a prerequisite for tightening the CSP — every inline handler
 // removed is one step closer to dropping 'unsafe-inline' from script-src.
 function wbDelegatedClick(e) {
+  // [!copy] Copy button (v0.19.2). First branch on purpose: it sits
+  // inside a callout label, which sits inside the reader, and a stray
+  // match further down would swallow the click before it got here.
+  const copyBlk = e.target.closest('[data-wb-copyblk]');
+  if (copyBlk) {
+    e.preventDefault();
+    e.stopPropagation();
+    copyCalloutBlock(copyBlk.dataset.wbCopyblk, copyBlk);
+    return;
+  }
   // Sidebar "+" must be checked before the folder row it sits inside,
   // and must not also toggle that folder — this is the stopPropagation()
   // the old inline handler did.
@@ -3563,6 +3676,160 @@ function buildEmbedStub(name, inline) {
   return `<${tag} class="md-embed-stub">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note — not found</span></${tag}>`;
 }
 
+// ── [!copy] plain-text serializer (v0.19.2) ──────────────────────
+// Turns a parsed callout body back into the plain text a person would
+// want in their clipboard: what they see, with the Markdown markers
+// gone. NOT raw source — pasting `**Bold**` into an email is exactly
+// the outcome this feature exists to avoid.
+//
+// The leading ">" never appears here, because it's already gone: the
+// callout branch of parseBlocks strips one ">" per line before it
+// builds the body. That's what makes this whole feature cheap.
+//
+// Inline markers are stripped by running the text through the REAL
+// renderInline and taking textContent, rather than a second set of
+// strip-the-markers regexes. A parallel stripper would drift from the
+// renderer the first time either changed; this cannot, by construction.
+// It also means a [[Note|Alias]] yields "Alias" and a [text](url)
+// yields "text", which is what a reader would copy by hand.
+function cpInline(md) {
+  const d = document.createElement('div');
+  d.innerHTML = renderInline(md || '');
+  return (d.textContent || '').trim();
+}
+
+// Block structure is walked here rather than read off the rendered DOM,
+// so the output doesn't depend on layout, on innerText (which jsdom
+// doesn't implement, so this stays testable), or on the reader having
+// painted at all.
+function calloutPlainText(blocks) {
+  const out = [];
+  (blocks || []).forEach(b => {
+    switch (b.type) {
+      // Hard line breaks are preserved rather than joined. The renderer
+      // joins them (correct for prose), but in a copy block the author
+      // typed those breaks into text they mean to paste as-is, so
+      // flattening them would be wrong. This is the answer to "how does
+      // this work with wrapping": what you type is what you paste, and a
+      // soft wrap is not a line, so it costs nothing.
+      // Edge, accepted: an inline construct straddling a hard break
+      // (**bold\ntext**) won't be stripped, since each line is rendered
+      // on its own. Not worth structural surgery for a block type whose
+      // whole purpose is short plain text.
+      case 'para':
+        out.push((b.lines && b.lines.length ? b.lines : [b.content]).map(cpInline).join('\n'));
+        break;
+
+      case 'heading':
+        out.push(cpInline(b.content));
+        break;
+
+      // Verbatim on purpose — a fenced block is the one place where the
+      // characters ARE the content, so no inline pass over it.
+      case 'code':
+        out.push(b.content || '');
+        break;
+
+      case 'hr':
+        out.push('---');
+        break;
+
+      // Markers are kept ("- ", "1. ", "- [ ] ") and only the content
+      // after them is stripped. A bulleted list pasted into an email
+      // should still look like a bulleted list.
+      case 'list':
+        out.push((b.lines || []).map(l => {
+          const m = l.match(/^(\s*(?:[-*+] \[[ xX]\] |[-*+] |\d+\. )?)([\s\S]*)$/);
+          return m ? m[1] + cpInline(m[2]) : cpInline(l);
+        }).join('\n'));
+        break;
+
+      // Tab-separated, which is what spreadsheets and mail clients
+      // paste as a real table. Separator row dropped, same rule the
+      // renderer uses.
+      case 'table': {
+        const isSep = l => {
+          const parts = splitTableCells(l);
+          return parts.length > 0 && parts.every(c => /^:?-+:?$/.test(c));
+        };
+        out.push((b.lines || [])
+          .filter(l => l.trim() && !isSep(l))
+          .map(l => splitTableCells(l).map(cpInline).join('\t'))
+          .join('\n'));
+        break;
+      }
+
+      // Nested quote or callout: recurse. A [!copy] inside a [!copy]
+      // contributes its text like anything else; only the outer block
+      // gets a button.
+      case 'blockquote':
+      case 'callout':
+        out.push(calloutPlainText(b.body));
+        break;
+
+      // Images and embeds have no text worth pasting. Dropped rather
+      // than emitting a filename.
+      default:
+        break;
+    }
+  });
+  return out.filter(s => s !== '').join('\n\n');
+}
+
+// ── Table row splitter ───────────────────────────────────────────
+// Split one table row into cells on the pipes that are actually column
+// separators.
+//
+// The naive row.split('|') this replaces broke every row containing a
+// piped construct: [[File#Heading|Alias]] and ![[img.png|400]] became
+// two cells and shifted every cell after them one column right (reported
+// as "adding another row"), and `a|b` code spans did the same. Walking
+// the row is the only way to tell a separator pipe from a payload pipe,
+// since the two are the same character.
+//
+// Tracked states, all of which suppress a split:
+//   [[ ... ]]  wikilink / embed, nesting not possible so a flag is enough
+//   ` ... `    inline code span
+//   \|         explicit escape, emitted as a literal pipe
+//
+// Three entry points, one state machine, so the block detector,
+// isSeparatorRow and cell rendering can never disagree about where a
+// row's columns are:
+//   tableSplitRaw(s)     split as-is, edge pipes included
+//   splitTableCells(row) the cells of a row, edge pipes trimmed
+//   isTableRow(row)      does this line carry a real column pipe at all
+//
+// isTableRow deliberately asks tableSplitRaw, NOT splitTableCells: a
+// single-column row like `| Only |` trims down to one cell but is still a
+// table row, while a paragraph containing only [[a|b]] is not. Testing
+// the trimmed cell count would have dropped every one-column table.
+function tableSplitRaw(s) {
+  const out = [];
+  let buf = '', inWiki = false, inCode = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (c === '\\' && s[i + 1] === '|') { buf += '|'; i++; continue; }
+    if (c === '`') { inCode = !inCode; buf += c; continue; }
+    if (!inCode && !inWiki && c === '[' && s[i + 1] === '[') { inWiki = true;  buf += '[['; i++; continue; }
+    if (!inCode &&  inWiki && c === ']' && s[i + 1] === ']') { inWiki = false; buf += ']]'; i++; continue; }
+    if (c === '|' && !inWiki && !inCode) { out.push(buf.trim()); buf = ''; continue; }
+    buf += c;
+  }
+  out.push(buf.trim());
+  return out;
+}
+
+// Cells of one row. Leading/trailing table pipes are trimmed first
+// (trailing only when unescaped, so a row genuinely ending in \| keeps
+// its last cell).
+function splitTableCells(row) {
+  return tableSplitRaw(row.replace(/^\|/, '').replace(/(?<!\\)\|$/, ''));
+}
+
+function isTableRow(row) {
+  return tableSplitRaw(row).length > 1;
+}
+
 // ── Block parser ─────────────────────────────────────────────────
 // Sequential position of each task checkbox in document reading order —
 // reset per render, incremented in the 'list' case below. Lets a click
@@ -3570,6 +3837,17 @@ function buildEmbedStub(name, inline) {
 // needing per-line ids baked into the rendered HTML. Mirrors the de-dupe
 // approach already used for heading ids (uniqueHeadingId).
 let mdTaskCounter = 0;
+
+// Clipboard payloads for [!copy] callouts in the current render, by
+// index. The button carries only `data-wb-copyblk="<n>"` and looks the
+// text up here on click.
+//
+// Deliberately NOT stashed in a data attribute: the S12-sec rule is that
+// note content never gets interpolated into markup, and a whole block of
+// user text in an attribute is the largest possible version of that
+// mistake. An integer index is not user content. It also keeps arbitrarily
+// long payloads out of the DOM entirely. Reset per render below.
+let mdCopyBlocks = [];
 
 // Sequential index of each top-level list block in the document, reset
 // per render alongside mdTaskCounter — prefixes every list item's
@@ -3580,6 +3858,7 @@ let mdListCounter = 0;
 function parseMarkdown(md) {
   mdTaskCounter = 0;
   mdListCounter = 0;
+  mdCopyBlocks  = [];
   const lines = md.split('\n');
   let start = 0;
 
@@ -3662,10 +3941,15 @@ function parseBlocks(lines) {
       continue;
     }
 
-    // Table (needs | on this line and separator on next)
-    if (trimmed.includes('|') && i + 1 < lines.length && lines[i+1].match(/^\|?[\s\-:|]+\|/)) {
+    // Table (needs a real column pipe on this line and separator on next).
+    // "Real" = isTableRow, which ignores pipes living inside a
+    // [[File#Head|Alias]], an ![[img.png|400]], a `a|b` code span or an
+    // escaped \|. The bare includes('|') this replaces fired on all four,
+    // which is how a plain paragraph sitting under a table used to get
+    // swallowed into it.
+    if (isTableRow(trimmed) && i + 1 < lines.length && lines[i+1].match(/^\|?[\s\-:|]+\|/)) {
       const tableLines = [];
-      while (i < lines.length && lines[i].trim().includes('|')) {
+      while (i < lines.length && isTableRow(lines[i].trim())) {
         tableLines.push(lines[i]);
         i++;
       }
@@ -3732,7 +4016,14 @@ function parseBlocks(lines) {
       i++;
     }
     if (paraLines.length) {
-      blocks.push({ type: 'para', content: paraLines.join(' ') });
+      // `content` is the joined form the renderer uses (standard Markdown
+      // soft-break behavior: consecutive lines are one paragraph). `lines`
+      // keeps the author's original hard breaks, which only the [!copy]
+      // serializer reads — a copy block is text someone intends to paste
+      // verbatim, so their line structure is meaningful there even though
+      // it isn't in rendered prose. Nothing else uses `lines`; adding it
+      // changes no existing behavior.
+      blocks.push({ type: 'para', content: paraLines.join(' '), lines: paraLines.slice() });
     }
   }
 
@@ -3928,7 +4219,20 @@ function renderSingleBlock(block, seenIds) {
       const meta  = CALLOUT_META[block.cType] || { icon: '·', cls: 'note', label: block.cType };
       const title = block.customTitle || meta.label;
       const body  = block.body.length ? `<div class="md-callout-body">${renderBlockTree(block.body, seenIds)}</div>` : '';
-      return `<div class="md-callout ${meta.cls}"><div class="md-callout-label">${meta.icon} ${escHtml(title)}</div>${body}</div>`;
+      // [!copy] gets a Copy button in its label row (v0.19.2). The payload
+      // is computed once, here at render time, and parked in mdCopyBlocks
+      // under an integer index — see that declaration for why it doesn't
+      // go in the attribute. An empty body gets no button rather than a
+      // button that copies nothing.
+      let copyBtn = '';
+      if (block.cType === 'COPY') {
+        const text = calloutPlainText(block.body);
+        if (text) {
+          const idx = mdCopyBlocks.push(text) - 1;
+          copyBtn = `<button type="button" class="md-callout-copy-btn" data-wb-copyblk="${idx}" title="Copy this text">Copy</button>`;
+        }
+      }
+      return `<div class="md-callout ${meta.cls}"><div class="md-callout-label">${meta.icon} ${escHtml(title)}${copyBtn}</div>${body}</div>`;
     }
 
     case 'table': {
@@ -3938,14 +4242,20 @@ function renderSingleBlock(block, seenIds) {
       // The old line-level regex (/^\|?[\s\-:|]+\|/) matched any data row
       // whose first cell happened to be blank, whitespace, or a bare "-",
       // silently dropping real rows in wider tables where that's common.
+      //
+      // Both this check and cell extraction go through splitTableCells
+      // (see the block parser section) rather than split('|'), so a pipe
+      // inside [[File#Heading|Alias]], ![[img.png|400]], `a|b`, or an
+      // escaped \| stays inside its own cell instead of opening a new
+      // column and shifting the rest of the row.
       const isSeparatorRow = l => {
-        const parts = l.replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+        const parts = splitTableCells(l);
         return parts.length > 0 && parts.every(c => /^:?-+:?$/.test(c));
       };
       const rows = block.lines.filter(l => l.trim() && !isSeparatorRow(l));
       if (!rows.length) return '';
       const [headerRow, ...bodyRows] = rows;
-      const cells = row => row.replace(/^\||\|$/g,'').split('|').map(c => c.trim());
+      const cells = row => splitTableCells(row);
       const thead = `<thead><tr>${cells(headerRow).map(h => `<th>${renderInline(h)}</th>`).join('')}</tr></thead>`;
       const tbody = bodyRows.length
         ? `<tbody>${bodyRows.map(r => `<tr>${cells(r).map(c => `<td>${renderInline(c)}</td>`).join('')}</tr>`).join('')}</tbody>`

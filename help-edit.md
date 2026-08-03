@@ -306,6 +306,9 @@ A YAML block at the **very top** of the file, before anything else. WikiBase rea
 | `bug` | — | 🐛 |
 | `example` | — | ☰ |
 | `quote` | `cite` | ❝ |
+| `copy` | — | 📄 |
+
+`copy` is WikiBase's own addition and behaves differently from the rest — see below.
 
 Add `-` after the type for collapsed-by-default, `+` for expanded-but-foldable: `> [!faq]-`.
 
@@ -317,6 +320,24 @@ Callouts nest — `>>` and `>>>` work to any depth:
 >> [!note] Inner
 >> Nested body.
 ```
+
+### The copy callout
+
+`[!copy]` is WikiBase's own type, not one of Obsidian's. It renders like any other callout but adds a **Copy** button to its title row, which puts the block's text on the clipboard as plain text.
+
+```md
+> [!copy] Standard reply
+> Thanks for reaching out. Your ticket number is [NUMBER]
+> and someone will be in touch within one business day.
+```
+
+Use it for text people are meant to paste somewhere else: a standard reply, a mailing address, a form of words that has to be exact. It's deliberately opt-in — no other callout gets a button, so the affordance only shows up where you asked for it.
+
+What lands on the clipboard is what you see, not the Markdown source. `**Bold**` copies as `Bold`, `[[Some Note|this note]]` copies as `this note`, and the leading `>` is never included. Bullet and number markers are kept, since a list should still look like a list when it's pasted. Tables come across tab-separated, which is what a spreadsheet or a mail client expects. Fenced code is copied exactly as written, markers and all.
+
+**On line breaks.** Your hard line breaks are preserved. Press Enter and you get a new line in the clipboard; leave a `>` on its own for a blank line and you get a paragraph gap. A line that simply looks wrapped on screen is not a break and costs you nothing, so write a paragraph as one long line and let it wrap. Note that a rendered callout still joins consecutive lines into one paragraph, exactly as Obsidian does — only the copied text keeps your breaks.
+
+Opening the same note in Obsidian is safe. Obsidian doesn't recognise the type, so it draws a plain note-styled callout titled "Copy" and shows the text normally. There's no button and nothing breaks, because the button only ever exists at render time. Nothing is written to the file.
 
 ### Tags
 

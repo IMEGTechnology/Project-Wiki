@@ -1,10 +1,47 @@
 # Project-WikiBase — Changelog
 
-*One entry per shipped deploy zip. Newest at top. Not a substitute for the session log — this is the short version, for tracking what actually went out the door.*
+*One entry per shipped deploy. Newest at top. Not a substitute for the session log — this is the short version, for tracking what actually went out the door.*
+
+*Packaging (changed 2026-08-03, from 0.19.1 on): deploys are a plain `deploy/` folder in the project root, not a versioned zip. Deployment now happens from this PC straight into the repository, so a zip was one unpack step with nothing to show for it. The folder is overwritten in place each release; the version it holds is whatever the badge in `index.html` says.*
 
 *Versioning (locked 2026-07-22): `MAJOR.MINOR.PATCH`. MAJOR stays `0` for the whole beta — moves to `1` at full release. MINOR bumps when a session ships new user-facing capability; PATCH bumps when a session only fixes or polishes what's already shipped. MINOR always resets PATCH to `0`. Everything below `0.12.0` was originally shipped under an older `vX.Y[-N]` tag — those are noted per entry for traceability against already-shipped deploy zips. Everything from `0.12.1` onward is native to this scheme.*
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
+
+---
+
+## 0.19.2 — 2026-08-03
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`
+**Added:** `supporting/tests/copy-callout.test.js`
+
+*One small feature: a callout you can copy out of.*
+
+- **New `[!copy]` callout type** with a **Copy** button in its title row. Written for the case where a note holds text someone is meant to paste elsewhere — a standard reply, an address, a form of words that has to be exact. Deliberately opt-in: no other callout type gets a button, so the affordance appears only where an author asked for it rather than on every Note and Warning in the vault.
+- **Obsidian compatibility is the reason it's a callout and not new syntax.** Obsidian doesn't know the type, so it falls back to its default note styling with "Copy" as the title and shows the text normally. The button exists only at render time and nothing is ever written to the file, so a vault using this stays completely readable in Obsidian.
+- **What gets copied is what you see, not the source.** Inline markers are stripped by running the text through the real `renderInline` and taking `textContent`, rather than a second set of strip-the-markers regexes that would drift from the renderer the first time either changed. `**Bold**` copies as `Bold`, `[[Note|Alias]]` as `Alias`. List markers are kept (a list should paste as a list), tables come out tab-separated for spreadsheets and mail clients, and fenced code is copied verbatim.
+- **The leading `>` is never in the payload,** because it's already gone: the callout branch of `parseBlocks` strips one `>` per line before it builds the body. That's what made this cheap rather than a project — the same job on a heading section would need line-range mapping that nothing in the app does.
+- **Hard line breaks survive into the clipboard.** The `para` block now also carries its original `lines` alongside the joined `content` the renderer uses. Rendering still joins consecutive lines into one paragraph, matching Obsidian; only the copy path keeps the author's breaks, because in a block whose whole purpose is verbatim text those breaks are meaningful. A soft wrap is not a line and costs nothing. Caught by the test suite, which had asserted the flattened behavior and was wrong.
+- **Payloads live in a module-level `mdCopyBlocks` array keyed by integer index; the button carries only `data-wb-copyblk="<n>"`.** Putting a block of note text into a DOM attribute would be the largest possible version of exactly what the S12-sec hardening pass existed to stop, and it keeps arbitrarily long payloads out of the DOM entirely. Handled by the existing delegated `wbDelegatedClick`, checked first since the button sits inside a callout label inside the reader.
+- Clipboard writing factored into a shared `writeClipboard()` with the hidden-textarea fallback for non-secure contexts (`file://`, some embedded WebViews), reused by the existing folder-path copy. Confirmation is on the button itself rather than the floating tip, which would otherwise cover the first line of the text you just copied.
+- Verified with a new 57-check suite covering registration, the button appearing on `[!copy]` and on nothing else, twelve payload shapes (bold, italic, code spans, wikilink aliases, links, lists, tasks, tables, fenced code, nesting, escaped pipes, hard breaks), empty bodies, multiple blocks in one file, index/payload alignment, per-render reset, the full click path including the confirm-and-restore cycle, and the security posture. The 0.19.1 (52), theme (136) and help-split (34) suites re-run clean.
+- The 0.19.1 suite's exact-version assertion was loosened to a floor. Pinning the current version in every suite means every release breaks every suite for no useful reason; only the current release's own suite pins it.
+
+---
+
+## 0.19.1 — 2026-08-03
+
+**Changed:** `index.html`
+**Added:** `supporting/tests/bugfix-0191.test.js`
+**Packaging:** first release shipped as `deploy/` instead of a zip.
+
+*Three reported bugs, no new capability.*
+
+- **A pipe inside a table cell no longer breaks the row.** `| [[File Name#Test|Name of Link]] | b | c |` was being split with a bare `row.split('|')`, so the aliased link became two cells and shifted every cell after it one column right. `![[img.png|400]]`, `` `a|b` `` and an escaped `\|` all failed the same way. Splitting is now a small state machine (`tableSplitRaw`) that walks the row tracking `[[ ]]`, backtick spans and `\|`, with three entry points on top of it — `splitTableCells` for cells, `isTableRow` for detection, and `isSeparatorRow` for the dashes row — so the parser and the renderer can't disagree about where a row's columns are.
+- **Same fix ends a second, quieter bug:** the table block detector accepted any line that merely `includes('|')`, so a paragraph containing a single `[[a|b]]` sitting under a table got swallowed into it as a row. Detection asks `isTableRow` now. `isTableRow` deliberately tests the *raw* line rather than the trimmed cell count, because `| Only |` trims to one cell and is still a real one-column table.
+- **The reader control bar no longer resizes with the content column.** `#reader-corner-align` was capped at `var(--read-width)`, the Theme panel's Narrow/Normal/Wide token, which was correct when it shipped (v0.14.1, keeping the corner buttons on the text margin) but meant the whole header row expanded and contracted every time the reading width changed. It spans the reader panel now; the content column moves under it independently. Every child keeps its 48px inset, which is 24px clear of the 24px handle flare on both sides at any panel width and in either collapsed state. 48px is the floor and the test suite asserts it.
+- **The collapse flare stays visible while the pointer is in its own pane.** Before, it only appeared on direct hover of the 4px handle line or permanently once that pane was collapsed, so finding the toggle meant hunting for the line. Left pane hovered keeps the left flare up, right pane hovered keeps the right flare up, the reader keeps neither. Opacity only, on purpose — the tone still comes from `:hover`/`.dragging` on the handle itself, so the S15 decision to stop brightening chrome on panel hover is intact. Two selectors rather than one because DOM order runs sidebar → handle → reader → handle → right panel: the left handle follows its pane and takes a sibling combinator, the right handle precedes its pane and needs `:has()` to look forward.
+- Verified with a new 51-check suite covering the splitter against 22 row shapes, rendered column counts, the swallowed-paragraph and one-column regressions, the header rule and every child's flare clearance, and the flare rules including the DOM-order assumption they rest on. The 136-check theme suite and 34-check help-split suite both re-run clean against the modified file.
 
 ---
 
