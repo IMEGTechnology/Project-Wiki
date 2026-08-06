@@ -2120,15 +2120,22 @@
     .rv-ov-accept:hover { border-color: var(--co-green-bd); color: var(--co-green-txt); }
     .rv-ov-reject:hover { border-color: var(--co-red-bd); color: var(--co-red-txt); }
 
-    /* Right panel inbox strip (S5; moved below the panes S37 — border flipped
-       to the top edge because the strip now separates the panes from the
-       version footer rather than the tab rail from the panes). The two
-       buttons stack with no gap otherwise, which read as one control. */
-    .rp-inbox-strip {
-      padding: 6px 8px; border-top: 1px solid var(--border); flex-shrink: 0;
+    /* Vault-wide entry points (S41). These used to be an "inbox strip" that
+       sat OUTSIDE the panes — first above them (where showing it pushed every
+       pane down), then below them (S37, which fixed the jump but left two
+       buttons floating in the panel belonging to no tool in particular).
+       Both positions were wrong for the same reason: the button is the
+       Comments tool's own vault-wide view, so it belongs INSIDE the Comments
+       pane, pinned to that pane's bottom. Same for Review. There is no strip
+       any more and no updateInboxStrip() — a pane owns its own footer.
+       The rule this encodes: the PANE is per-file, the PAGE is vault-wide. */
+    .pane-foot {
+      padding: 6px 8px; border-top: 1px solid var(--border);
+      flex-shrink: 0; margin-top: auto;
       display: flex; flex-direction: column; gap: 4px;
+      background: var(--bg-sidebar);
     }
-    .rp-inbox-btn {
+    .pane-foot-btn {
       width: 100%; padding: 5px 8px;
       font-size: 12px; font-weight: 500;
       background: none; border: 1px solid var(--border);
@@ -2136,7 +2143,62 @@
       color: var(--text-secondary); text-align: left;
       display: flex; align-items: center; gap: 6px;
     }
-    .rp-inbox-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+    .pane-foot-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+    .pane-foot-btn svg { width: 13px; height: 13px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* === Docks (S41) ========================================= */
+    /* Both sides are now the same thing: a rail of tool icons over a stack of
+       panes. #sidebar and #right-panel are the two dock shells; everything
+       inside them is rendered from WB_TOOLS by renderDocks(). A pane is a
+       single DOM node that gets appended into whichever dock body owns it,
+       which is the same appendChild move the right panel already used to
+       reorder its own stack — moving a tool across docks costs nothing extra. */
+    #left-rail  { justify-content: flex-start; padding-left: 4px; padding-right: 0; }
+    #right-rail { justify-content: flex-end; }
+
+    /* Unified pane header. Replaces RP_HEADER_COMMENTS / RP_HEADER_LINKS /
+       RP_HEADER_REVIEW (three constants restating what the rail already says)
+       and generalises #ot-toolbar's shape, which was the only one doing it
+       properly: label, count, then the pane's own controls. The move and close
+       buttons live here because the header is the only per-pane surface that
+       every tool has. */
+    .pane-head {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 6px 7px 12px;
+      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      flex-shrink: 0; min-width: 0;
+      cursor: grab;
+    }
+    .pane-head.dragging { opacity: 0.45; cursor: grabbing; }
+    .pane-head .ph-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pane-head .ph-spacer { flex: 1; min-width: 4px; }
+    .pane-head .ph-tools { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .pane-head .icon-btn { width: 22px; height: 22px; }
+    .pane-head .icon { width: 13px; height: 13px; }
+    .pane-head .ph-move,
+    .pane-head .ph-close { opacity: 0; transition: opacity 0.12s; }
+    .rp-pane:hover .pane-head .ph-move,
+    .rp-pane:hover .pane-head .ph-close { opacity: 0.75; }
+    .pane-head .ph-move:hover, .pane-head .ph-close:hover { opacity: 1; color: var(--accent); }
+    /* Drop indicator while dragging a pane header to reorder */
+    .rp-pane.drop-above { box-shadow: inset 0 2px 0 0 var(--accent); }
+    .rp-pane.drop-below { box-shadow: inset 0 -2px 0 0 var(--accent); }
+
+    /* Files pane must not scroll as a whole — its toolbar and What's New row
+       stay put while #sb-tree scrolls beneath them, which is the behaviour
+       #sidebar had before it became a dock. Every other pane scrolls as one
+       block, so this is the single exception rather than a new default. */
+    #rp-files.active { overflow: hidden; }
+
+    /* New / Move, relocated out of the header (S41). They sit at the foot of
+       whichever dock holds Files, because they act on the vault tree and had
+       no business in the app header next to Theme and Help. Visibility is
+       still updateEditBtn()'s tier check — this is a placement change only. */
+    .dock-actions {
+      display: flex; gap: 4px; padding: 6px 8px;
+      border-top: 1px solid var(--border); flex-shrink: 0;
+    }
+    .dock-actions .icon-btn { width: 26px; height: 26px; }
 
     /* Review inbox reader view (S5) */
     .review-filter-bar { display: flex; gap: 4px; flex-shrink: 0; }
@@ -2182,16 +2244,9 @@
 
   <!-- ── Header ─────────────────────────────────────────── -->
   <header id="header">
-    <!-- New file/folder (S14) — sidebar toggle removed (S15), redundant
-         with the resize-handle flare, which now does the same job. -->
-    <button class="icon-btn" id="btn-new" title="New file or folder" aria-label="New file or folder" onclick="openCreateModal(null)">
-      <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </button>
-
-    <!-- Move file (S14) -->
-    <button class="icon-btn" id="btn-move" title="Move a file" aria-label="Move a file" onclick="openMoveModal()">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/><polyline points="13 11 15 13 13 15"/></svg>
-    </button>
+    <!-- S41: New and Move moved out of the header to the foot of the dock
+         that holds Vault Files. They act on the vault tree, so they belong
+         beside it, not next to Theme and Help. See #dock-actions-left. -->
 
     <div id="vault-title">
       WikiBase <span></span>
@@ -2268,33 +2323,56 @@
   <!-- ── Body ───────────────────────────────────────────── -->
   <div id="body">
 
-    <!-- Sidebar -->
-    <nav id="sidebar" aria-label="Vault navigation">
-      <div id="sb-toolbar">
-        <span class="sbt-label">Vault Files</span>
-        <!-- S33/0.21.0: one symbol, matching the Outline's. Collapse unused
-             went with the reader's and the Outline's for the same reason —
-             no mainstream file tree ships it as a visible button. -->
-        <div class="sbt-group" id="sbt-group">
-          <button class="icon-btn" id="sb-fold-toggle" title="Collapse all" aria-label="Collapse all" onclick="sidebarToggleAll()"></button>
+    <!-- Left dock (S41) — same shell as the right panel: a rail of tool icons
+         over a stack of panes. Both rails and both stacks are rendered from
+         WB_TOOLS by renderDocks(); nothing about which tool lives here is
+         hardcoded except Vault Files, which is pinned (it cannot be closed or
+         moved to the other side, but it can be reordered against its
+         neighbours). -->
+    <nav id="sidebar" aria-label="Left dock">
+      <div class="rp-tabs" id="left-rail"></div>
+      <div class="rp-body" id="left-body">
+        <!-- Vault Files pane. Everything inside it is exactly what #sidebar
+             used to hold directly, IDs unchanged, so the tree renderer, the
+             fold control and What's New all keep working untouched. -->
+        <div class="rp-pane active" id="rp-files">
+          <div id="sb-toolbar">
+            <span class="sbt-label">Vault Files</span>
+            <!-- S33/0.21.0: one symbol, matching the Outline's. Collapse unused
+                 went with the reader's and the Outline's for the same reason —
+                 no mainstream file tree ships it as a visible button. -->
+            <div class="sbt-group" id="sbt-group">
+              <button class="icon-btn" id="sb-fold-toggle" title="Collapse all" aria-label="Collapse all" onclick="sidebarToggleAll()"></button>
+            </div>
+          </div>
+          <!-- What's New (S35/0.23.0). Pinned BETWEEN the toolbar and the tree,
+               deliberately not inside it: in the tree, Collapse all would touch
+               it and it would scroll out of sight, which is the opposite of what
+               a notification row is for. S41 kept it here rather than promoting
+               it to a rail tool — it is a notification, not a workspace. -->
+          <button id="sb-whats-new" onclick="openWhatsNew()" title="What's New">
+            <span class="wn-nav-label">What's New</span>
+            <span class="badge accent" id="wn-count" style="display:none">0</span>
+          </button>
+          <div id="sb-tree">
+            <div class="sb-msg">Loading vault…</div>
+          </div>
         </div>
       </div>
-      <!-- What's New (S35/0.23.0). Pinned BETWEEN the toolbar and the tree,
-           deliberately not inside it: in the tree, Collapse all would touch
-           it and it would scroll out of sight, which is the opposite of what
-           a notification row is for. -->
-      <button id="sb-whats-new" onclick="openWhatsNew()" title="What's New">
-        <span class="wn-nav-label">What's New</span>
-        <span class="badge accent" id="wn-count" style="display:none">0</span>
-      </button>
-      <div id="sb-tree">
-        <div class="sb-msg">Loading vault…</div>
+      <!-- Follows the Files pane between docks, see renderDockActions() -->
+      <div class="dock-actions" id="dock-actions-left" style="display:none">
+        <button class="icon-btn" id="btn-new" title="New file or folder" aria-label="New file or folder" onclick="openCreateModal(null)">
+          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-move" title="Move a file" aria-label="Move a file" onclick="openMoveModal()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/><polyline points="13 11 15 13 13 15"/></svg>
+        </button>
       </div>
     </nav>
 
     <!-- Sidebar resize handle -->
     <div class="resize-handle" id="rh-sidebar" title="Drag to resize">
-      <svg class="rh-flare" viewBox="0 0 24 64" title="Toggle sidebar" aria-label="Toggle sidebar" onmousedown="event.stopPropagation()" onclick="if(event.detail>1)return; toggleSidebar()">
+      <svg class="rh-flare" viewBox="0 0 24 64" title="Click to collapse, drag to resize" aria-label="Toggle sidebar">
         <path class="flare-shape" d="M0,64 L0,12 Q0,6 6,6 L18,6 Q24,6 24,12 L24,34 C24,48 8,48 4,60 L4,64 Z"/>
         <rect x="7.2" y="12.2" width="3.2" height="9.6" fill="var(--text-secondary)"/>
         <rect x="7.2" y="12.2" width="9.6" height="9.6" rx="1" fill="none" stroke="var(--text-secondary)" stroke-width="1.05"/>
@@ -2376,7 +2454,7 @@
 
     <!-- Right panel resize handle -->
     <div class="resize-handle" id="rh-right" title="Drag to resize">
-      <svg class="rh-flare" viewBox="0 0 24 64" title="Toggle right panel" aria-label="Toggle right panel" onmousedown="event.stopPropagation()" onclick="if(event.detail>1)return; toggleRightPanel()">
+      <svg class="rh-flare" viewBox="0 0 24 64" title="Click to collapse, drag to resize" aria-label="Toggle right panel">
         <path class="flare-shape" d="M0,64 L0,12 Q0,6 6,6 L18,6 Q24,6 24,12 L24,34 C24,48 8,48 4,60 L4,64 Z"/>
         <g transform="scale(-1,1) translate(-24,0)">
           <rect x="13.6" y="12.2" width="3.2" height="9.6" fill="var(--text-secondary)"/>
@@ -2387,30 +2465,8 @@
     </div>
 
     <!-- Right panel (Sections 4 + 5) -->
-    <aside id="right-panel" aria-label="Right panel">
-      <div class="rp-tabs">
-        <button class="rp-tab active" data-tab="outline" title="Outline — click to toggle, double-click to view alone" aria-label="Outline" onclick="rpTabClick('outline')" ondblclick="rpTabDblClick('outline')">
-          <svg class="rp-tab-ic" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        </button>
-        <button class="rp-tab" data-tab="bookmarks" title="Bookmarks — click to toggle, double-click to view alone" aria-label="Bookmarks" onclick="rpTabClick('bookmarks')" ondblclick="rpTabDblClick('bookmarks')">
-          <svg class="rp-tab-ic" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-          <span class="tab-count" id="bm-tab-count" style="display:none">0</span>
-        </button>
-        <button class="rp-tab" data-tab="comments" title="Comments — click to toggle, double-click to view alone" aria-label="Comments" onclick="rpTabClick('comments')" ondblclick="rpTabDblClick('comments')">
-          <svg class="rp-tab-ic" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span class="tab-count" id="cmt-tab-count" style="display:none">0</span>
-        </button>
-        <button class="rp-tab" data-tab="backlinks" title="Links — click to toggle, double-click to view alone" aria-label="Links" onclick="rpTabClick('backlinks')" ondblclick="rpTabDblClick('backlinks')">
-          <svg class="rp-tab-ic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        </button>
-        <button class="rp-tab" data-tab="review" id="tab-review" title="Review changes — click to toggle, double-click to view alone" aria-label="Review changes" style="display:none" onclick="rpTabClick('review')" ondblclick="rpTabDblClick('review')">
-          <svg class="rp-tab-ic" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span class="tab-count" id="review-count" style="display:none">0</span>
-        </button>
-        <button class="rp-tab" data-tab="search" title="Search — click to toggle, double-click to view alone" aria-label="Search" onclick="rpTabClick('search')" ondblclick="rpTabDblClick('search')">
-          <svg class="rp-tab-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-      </div>
+    <aside id="right-panel" aria-label="Right dock">
+      <div class="rp-tabs" id="right-rail"></div>
       <div class="rp-body" id="rp-body">
         <div class="rp-pane active" id="rp-outline">
           <!-- S34: one symbol, not three buttons. The lock toggle is gone —
@@ -2435,7 +2491,7 @@
         <div class="rp-pane"        id="rp-backlinks"><div class="rp-empty">Open a file to see backlinks.</div></div>
         <div class="rp-pane"        id="rp-review">   <div class="rp-empty">Open a file to see its changes.</div></div>
         <div class="rp-pane"        id="rp-search">
-          <div class="rp-pane-header">Search</div>
+          <div class="pane-chrome-slot" data-tool="search"></div>
           <div class="search-box">
             <input type="text" id="search-input" placeholder="Search…" autocomplete="off" spellcheck="false" aria-label="Search">
             <button id="search-clear" title="Clear" aria-label="Clear search" style="display:none" onclick="clearSearch(true)">✕</button>
@@ -2443,26 +2499,13 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
-      <!-- Vault-wide inboxes (open in reader) — each shows only with its own tab.
-           S37: moved below .rp-body. It used to sit between the tab rail and
-           the panes, where showing or hiding it pushed every pane down by its
-           own height — a jump at the top of the panel triggered by switching
-           tabs. Below the panes it grows against the version footer instead,
-           and the pane content above it does not move. -->
-      <div class="rp-inbox-strip" id="rp-inbox-strip" style="display:none">
-        <button class="rp-inbox-btn" id="btn-cmt-inbox" style="display:none" onclick="openReviewView()">
-          <svg style="width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Comment Inbox<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span>
-        </button>
-        <button class="rp-inbox-btn" id="btn-review-inbox" style="display:none" onclick="openChangesView()">
-          <svg style="width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          Review Inbox
-        </button>
-      </div>
+      <!-- S41: the inbox strip that used to live here is gone. Both buttons
+           moved inside their own panes (see PANE_FOOT), because a vault-wide
+           view of comments is the Comments tool's, not the panel's. -->
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.27.2</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.28.0</button>
     </aside>
 
   </div>
@@ -2725,13 +2768,12 @@ const state = {
   fileIndex:    {},    // { [lc-name-without-ext]: serverRelativeUrl } — for link resolution
   fileFolder:   {},    // { [url]: folderId|null } — populated alongside fileIndex, used to
                         // expand the right folder chain when restoring the last-opened file
-  // Right panel now stacks tools (locked 2026-07-22, replaces the old
-  // single-active-tab model) — openRPTabs is the stack, in click order,
-  // top to bottom. rpFlex holds each open tab's flex-grow share of the
-  // stack's height, set by dragging the handle between two open panes;
-  // session-only, resets to an even split on reload.
-  openRPTabs:      ['outline'],
-  rpFlex:          {},
+  // Docks (S41, replaces openRPTabs/rpFlex). Two stacks, each in top-to-bottom
+  // order, holding tool ids from WB_TOOLS. dockFlex holds each open tool's
+  // flex-grow share of its dock's height, set by dragging the handle between
+  // two panes — persisted now, unlike the old rpFlex which reset on reload.
+  docks:           { left: ['files'], right: ['outline'] },
+  dockFlex:        { left: {}, right: {} },
   backlinksMap:    {},  // { [targetKey]: [{name, url}] } — populated as files are opened
   outlineObserver: null,// IntersectionObserver for active heading highlight
   jumpPinnedId:    null, // heading id "pinned" active by an Outline click / anchor jump —
@@ -5232,7 +5274,7 @@ function goForward() {
 // the full name/label, unchanged) and the new reader-panel filename (S —
 // reader header bar), which drops a trailing .md since the app already
 // makes clear every vault file is Markdown. Used for real files and for
-// the fixed-label views (Help/Changelog/Review changes/Comment Inbox).
+// the fixed-label views (Help/Changelog/All changes/All comments).
 function setReaderTitle(label) {
   const bc = $('breadcrumb');
   if (bc) bc.textContent = '/ ' + label;
@@ -5418,13 +5460,66 @@ function fitToolbarLabel(containerId, labelSel, groupId) {
 // onOpen:  called when a click on an already-closed handle reopens it
 // onResize: called on every drag-move tick, so header labels can re-check
 // whether their button group still fits (see fitToolbarLabel)
+// Widest rendered row in a dock, in px, including its own left offset so an
+// indented tree row measures from the panel edge rather than from itself.
+// Measured against a temporarily-widened panel because every row in here
+// ellipsises at the panel's current width — asking a clipped row how wide it
+// wants to be always answers "exactly as wide as I already am".
+function fitPanelToContent(panel, side, max) {
+  const prevW    = panel.style.width;
+  const prevMinW = panel.style.minWidth;
+  const prevTran = panel.style.transition;
+  panel.style.transition = 'none';
+  panel.style.width    = max + 'px';
+  panel.style.minWidth = max + 'px';
+
+  const panelLeft = panel.getBoundingClientRect().left;
+  let widest = 0;
+  panel.querySelectorAll(
+    '.folder-name, .file-name, .file-row, .folder-row, .ot-row, .bm-row, .search-hit, .backlink-item, .ph-label, .sbt-label'
+  ).forEach(el => {
+    if (!el.offsetParent && el.offsetWidth === 0) return; // not rendered
+    const r = el.getBoundingClientRect();
+    const w = (r.left - panelLeft) + (el.scrollWidth || r.width);
+    if (w > widest) widest = w;
+  });
+
+  panel.style.width    = prevW;
+  panel.style.minWidth = prevMinW;
+  panel.style.transition = prevTran;
+
+  if (!widest) return;
+  let w = Math.ceil(widest) + 24; // breathing room + scrollbar gutter
+  w = Math.min(max, w);
+
+  // Never push the reader below its minimum — same ceiling the drag enforces.
+  const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
+  const bodyWidth  = $('body').offsetWidth;
+  const otherWidth = otherPanel.classList.contains('closed') ? 0 : otherPanel.offsetWidth;
+  w = Math.min(w, bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin());
+  w = Math.max(w, SNAP_THRESHOLD);
+
+  panel.style.width    = w + 'px';
+  panel.style.minWidth = w + 'px';
+}
+
 function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max = 480, onResize) {
   const handle     = $(handleId);
   const panel      = $(panelId);
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
   const otherKey   = side === 'left' ? 'wb_rp_width'   : 'wb_sb_width';
-  const DBLCLICK_MS = 400; // two plain clicks within this window = collapse
-  let lastPlainClick = 0;
+
+  // Double-click the handle line to size the panel to its widest visible row,
+  // so a long file name stops being truncated without hunting for the edge.
+  // Deliberately fits to what is RENDERED, not to the longest name anywhere in
+  // the vault: fitting to a name three collapsed folders deep would throw the
+  // panel open to an absurd width because of a file you cannot even see.
+  handle.addEventListener('dblclick', e => {
+    if (e.target.closest && e.target.closest('.rh-flare')) return; // flare is collapse only
+    if (panel.classList.contains('closed')) return;
+    fitPanelToContent(panel, side, max);
+    persist(storageKey, panel.offsetWidth);
+  });
 
   handle.addEventListener('mousedown', e => {
     e.preventDefault();
@@ -5454,6 +5549,7 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
 
     const startX     = e.clientX;
     const startWidth = panel.offsetWidth;
+    const fromFlare  = !!(e.target.closest && e.target.closest('.rh-flare'));
     let moved = false;
 
     function onMove(e) {
@@ -5483,19 +5579,25 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
       handle.classList.remove('dragging');
 
       if (!moved) {
-        // A plain click, no drag — only collapse on the second click within
-        // the window (double-click). A single click is a no-op, so an
-        // accidental click while aiming for a drag doesn't collapse the panel.
-        const now = Date.now();
-        if (now - lastPlainClick < DBLCLICK_MS) {
-          lastPlainClick = 0;
+        // S41 — three gestures, two targets, no overlap:
+        //   drag the handle (from anywhere on it, flare included) = resize
+        //   click the flare without moving                        = collapse
+        //   double-click the handle line                          = fit to content
+        //
+        // What changed and why: the flare used to swallow mousedown and toggle
+        // on any click, so aiming at the flare to START a drag collapsed the
+        // panel instead — the reported bug. The fix is distance, not duration.
+        // A time threshold fights the drag: a slow, careful resize is exactly
+        // the gesture a long-press rule would misread as a hold. Movement past
+        // CLICK_THRESHOLD means drag, full stop, however long you took over it.
+        // The old double-click-to-collapse on the line is gone; collapse now
+        // lives on the flare only, which frees double-click for fit-to-content.
+        if (fromFlare) {
           panel.style.width    = '';
           panel.style.minWidth = '';
           panel.classList.add('closed');
           handle.classList.add('handle-closed');
           onClose();
-        } else {
-          lastPlainClick = now;
         }
       } else if (panel.offsetWidth < SNAP_THRESHOLD) {
         // Snap closed — clear inline widths so CSS closed state takes over cleanly
@@ -5845,7 +5947,7 @@ function switchUser() {
   state.user = null;
   $('user-badge').style.display = 'none';
   updateBookmarkTabBadge();
-  if (state.openRPTabs.includes('bookmarks')) renderBookmarksTab();
+  if (isToolOpen('bookmarks')) renderBookmarksTab();
   openIdentityModal('');
 }
 
@@ -6518,34 +6620,39 @@ async function scanBadges() {
 }
 
 function updateBadges() {
+  // S41 — order matters, and it is the opposite of what it used to be.
+  //
+  // The rail is rendered from WB_TOOLS now, and a gated tool's icon is not
+  // hidden at User, it is not built at all. That is the behaviour a permission
+  // surface should have (absent, not disabled), but it means the count spans
+  // are created and destroyed by the render rather than living permanently in
+  // the markup. So: drop a locked tool out of its dock, re-render both docks,
+  // and only THEN write counts into whatever the render produced. Writing
+  // first would set text on a node the render is about to throw away, and
+  // reading a count element without a null guard would throw outright at User.
+  if (!reviewAllowed()) {
+    const side = dockOf('review');
+    if (side) { state.docks[side].splice(state.docks[side].indexOf('review'), 1); persistDocks(); }
+  }
+  renderDocks();
+
   const n = state.cmtOpenCount;
   ['cmt-tab-count', 'cmt-inbox-count'].forEach(id => {
     const el = $(id);
     if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
   });
-  $('tab-review').style.display = reviewAllowed() ? '' : 'none';
-  updateInboxStrip();
   const total = state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0);
   const rc = $('review-count');
-  rc.textContent   = total;
-  rc.style.display = (reviewAllowed() && total) ? '' : 'none';
-  // if review got switched off while its tab was open, close it out of the stack
-  if (!reviewAllowed()) {
-    const i = state.openRPTabs.indexOf('review');
-    if (i !== -1) { state.openRPTabs.splice(i, 1); renderRPStack(); }
+  if (rc) {
+    rc.textContent   = total;
+    rc.style.display = total ? '' : 'none';
   }
 }
 
-// Inbox buttons live with their tabs: Comment Inbox shows whenever the
-// comments tab is open, Review Inbox whenever the review tab is open
-// (and review tools are on) — both can show together if both are open.
-function updateInboxStrip() {
-  const showCmt = state.openRPTabs.includes('comments');
-  const showRev = state.openRPTabs.includes('review') && reviewAllowed();
-  $('btn-cmt-inbox').style.display    = showCmt ? '' : 'none';
-  $('btn-review-inbox').style.display = showRev ? '' : 'none';
-  $('rp-inbox-strip').style.display   = (showCmt || showRev) ? '' : 'none';
-}
+// S41: updateInboxStrip() is gone. The two vault-wide buttons are no longer a
+// strip whose visibility had to be kept in step with which tabs were open —
+// each one is rendered inside its own pane by that pane's render function, so
+// it exists exactly when its tool does and there is nothing left to sync.
 
 // ── What's New (S35 / 0.23.0) ────────────────────────────────────
 // New vs Updated is decided by whether a path was in the LAST KNOWN INDEX,
@@ -7300,7 +7407,7 @@ async function openChangesView() {
   state.activeName = null;
   renderSidebar();
   updateEditBtn();
-  setReaderTitle('Review changes');
+  setReaderTitle('All changes');
   empty.style.display = 'none';
   rc.style.display    = 'block';
   rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault…</p>';
@@ -7323,7 +7430,7 @@ function buildChangesHTML() {
     return '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Nothing to review.</p>';
   }
 
-  let html = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">Document Changes</h1>';
+  let html = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">All changes</h1>';
   if (!hasChanges) {
     html += '<p class="md-p" style="color:var(--text-muted);margin-bottom:24px">No pending changes.</p>';
   }
@@ -7390,7 +7497,7 @@ async function approveNewFileCore(f) {
   await scanBadges();
 }
 
-// From the reader's Document Changes screen.
+// From the reader's All changes screen.
 async function approveNewFile(idx) {
   const f = state.unauditedFiles[idx];
   if (!f) return;
@@ -7432,7 +7539,7 @@ async function markReviewedCore(fileUrl, changesUrl) {
   await scanBadges();
 }
 
-// From the Review Inbox view (reader).
+// From the All changes view (reader).
 async function markReviewed(idx) {
   const r = state.reviewChanges[idx];
   if (!r) return;
@@ -7448,7 +7555,7 @@ async function markReviewed(idx) {
 // Vault-wide overview — always at the top of the Review tab, in two
 // subsections ("File changes" / "New files"), so you can browse and act
 // on either list while the reader shows whatever file you're actually
-// looking at. This is the same data as the Review Inbox reader screen
+// looking at. This is the same data as the All changes reader screen
 // (buildChangesHTML) — just laid out as a compact right-panel list
 // instead of taking over the reader.
 function renderReviewOverview() {
@@ -7486,7 +7593,7 @@ function renderReviewOverview() {
   return html;
 }
 
-// Same core actions as the reader's Document Changes screen, but these
+// Same core actions as the reader's All changes screen, but these
 // refresh the right panel (and the open file, if it's the one touched)
 // instead of overwriting reader-content — the overview never hijacks
 // whatever you're actually reading.
@@ -7521,29 +7628,31 @@ async function approveNewFileFromOverview(idx) {
   }
 }
 
-const RP_HEADER_REVIEW = '<div class="rp-pane-header">Review changes</div>';
+// S41: the vault-wide overview no longer renders inside this pane. The pane is
+// per-file; the vault-wide list is the "All changes" page reached from the
+// footer button. renderReviewOverview() is still called by that page.
+const RP_HEADER_REVIEW = () => paneHead('review');
 
 async function renderReviewTab() {
   const pane = $('rp-review');
-  const overview = renderReviewOverview();
 
   if (!state.activeUrl) {
-    pane.innerHTML = RP_HEADER_REVIEW + (overview || '<div class="rp-empty">Open a file to see its changes.</div>');
+    pane.innerHTML = RP_HEADER_REVIEW() + '<div class="rp-empty">Open a file to see its changes.</div>' + PANE_FOOT_REVIEW;
     return;
   }
   const changesUrl = changesUrlFor(state.activeUrl);
-  pane.innerHTML = RP_HEADER_REVIEW + overview + '<div class="rp-empty">Loading…</div>';
+  pane.innerHTML = RP_HEADER_REVIEW() + '<div class="rp-empty">Loading…</div>' + PANE_FOOT_REVIEW;
   const txt = await readVaultFileOrNull(changesUrl);
   const entries = txt ? parseChanges(txt) : [];
   pane._wbEntries = entries;
 
   if (!entries.length) {
-    pane.innerHTML = RP_HEADER_REVIEW + (overview || '<div class="rp-empty">No recorded changes for this file.</div>');
+    pane.innerHTML = RP_HEADER_REVIEW() + '<div class="rp-empty">No recorded changes for this file.</div>' + PANE_FOOT_REVIEW;
     return;
   }
   const open = entries.filter(e => e.reviewed === 'no').length;
   const head = headOpenIdx(entries);
-  let html = overview;
+  let html = '';
   if (open > 1) {
     html += `<div style="padding:10px 12px;border-bottom:1px solid var(--border)">
       <button class="rv-mark-btn" style="width:100%" onclick="markReviewedFromTab()">Accept all (${open})</button>
@@ -7571,7 +7680,7 @@ async function renderReviewTab() {
     </div>`;
   });
   html += '</div>';
-  pane.innerHTML = RP_HEADER_REVIEW + html;
+  pane.innerHTML = RP_HEADER_REVIEW() + html + PANE_FOOT_REVIEW;
   // keep the selection in sync with an already-open diff strip
   if (diffEntryIdx >= 0) {
     const sel = pane.querySelector(`.comment-card[data-ci="${diffEntryIdx}"]`);
@@ -9194,17 +9303,55 @@ function loadPersistedState() {
       }
     }
 
-    // Which tools were left open in the stack — flex split (rpFlex) is
-    // deliberately session-only, same as every other drag-to-resize
-    // ratio in the app; only which tabs are open survives a reload.
-    const rpOpen = localStorage.getItem('wb_rp_open');
-    if (rpOpen) {
+    // S41 — which tools sit in which dock, in what order, AND their sizes.
+    // Sizes persist now; they used to reset every reload, so half the layout
+    // survived a restart and half did not.
+    //
+    // Migration off wb_rp_open (the single right-hand stack): anything that
+    // was open goes back to the right dock in the same order, and the left
+    // dock starts at its default. wb_rp_open is left in localStorage
+    // untouched, so reverting this file restores the old layout exactly —
+    // same courtesy as the wb_review/wb_editing keys in 0.27.0.
+    const savedDocks = localStorage.getItem('wb_docks');
+    if (savedDocks) {
       try {
-        const arr = JSON.parse(rpOpen).filter(t => RP_TABS.includes(t));
-        state.openRPTabs = arr; // may be [] — a deliberately-cleared stack stays cleared
+        const d = JSON.parse(savedDocks);
+        DOCK_SIDES.forEach(side => {
+          if (Array.isArray(d[side])) {
+            state.docks[side] = d[side].filter(t => RP_TABS.includes(t));
+          }
+        });
+      } catch (e) {}
+    } else {
+      const rpOpen = localStorage.getItem('wb_rp_open');
+      if (rpOpen) {
+        try {
+          state.docks.right = JSON.parse(rpOpen).filter(t => RP_TABS.includes(t));
+        } catch (e) {}
+      }
+    }
+    // A pinned tool cannot be absent, whatever a stored layout claims — a
+    // saved dock written before a tool was pinned, or hand-edited, must not
+    // be able to leave the vault tree unreachable.
+    WB_TOOLS.filter(t => t.pinned).forEach(t => {
+      if (!dockOf(t.id)) state.docks[t.home].unshift(t.id);
+    });
+    // …and no tool may appear twice, which a merged/edited store could do.
+    const seenTool = new Set();
+    DOCK_SIDES.forEach(side => {
+      state.docks[side] = state.docks[side].filter(id => !seenTool.has(id) && seenTool.add(id));
+    });
+
+    const savedFlex = localStorage.getItem('wb_dock_flex');
+    if (savedFlex) {
+      try {
+        const f = JSON.parse(savedFlex);
+        DOCK_SIDES.forEach(side => {
+          if (f[side] && typeof f[side] === 'object') state.dockFlex[side] = f[side];
+        });
       } catch (e) {}
     }
-    renderRPStack();
+    renderDocks();
 
     // Restore custom panel widths from drag
     const sbW = localStorage.getItem('wb_sb_width');
@@ -9261,18 +9408,119 @@ function loadPersistedState() {
 // Section 4 — Right panel tab content
 // ================================================================
 
-// ── Tab stacking (locked 2026-07-22, replaces the old single-active-tab
-// switchRPTab) ──────────────────────────────────────────────────────
-// Click adds/removes a tool from state.openRPTabs, the stack — multiple
-// can be open at once, stacked top to bottom in click order, each with
-// its own scroll and a drag handle to resize against its neighbor.
-// Double-click a tool icon solos it, same disambiguation delay already
-// used for list-item fold vs subtree-fold (liChevronClick/DblClick).
-const RP_TABS = ['outline', 'bookmarks', 'comments', 'backlinks', 'review', 'search'];
+// ── Docks (S41, generalises the 2026-07-22 tab stacking) ────────────
+// Both sides are now the same thing. A dock is a rail of tool icons over a
+// stack of panes; state.docks says which tools are in which dock and in what
+// order. Clicking a rail icon adds/removes its tool from that dock's stack,
+// double-clicking solos it, and dragging a pane header reorders it or throws
+// it to the other dock. All of that is one code path per side instead of a
+// hardcoded sidebar plus a six-tab right panel that did not rhyme with it.
+//
+// A pane is ONE DOM node with a stable id, appended into whichever dock body
+// owns it. That is the same appendChild the right panel already used to
+// reorder its own stack, so moving a tool across docks costs nothing extra
+// and no pane is ever rebuilt just because it changed sides.
+const WB_TOOLS = [
+  { id: 'files', label: 'Vault Files', home: 'left', pinned: true,
+    icon: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>' },
+  { id: 'search', label: 'Search', home: 'left',
+    icon: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' },
+  { id: 'bookmarks', label: 'Bookmarks', home: 'left', countId: 'bm-tab-count',
+    icon: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' },
+  { id: 'outline', label: 'Outline', home: 'right',
+    icon: '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' },
+  { id: 'comments', label: 'Comments', home: 'right', countId: 'cmt-tab-count',
+    icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
+  { id: 'backlinks', label: 'Links', home: 'right',
+    icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>' },
+  { id: 'review', label: 'Review', home: 'right', countId: 'review-count', gated: true,
+    icon: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>' },
+];
+
+const RP_TABS   = WB_TOOLS.map(t => t.id);
+const DOCK_SIDES = ['left', 'right'];
+
+function toolById(id) { return WB_TOOLS.find(t => t.id === id) || null; }
+
+// Which dock currently holds a tool, or null if it is closed.
+function dockOf(id) {
+  return DOCK_SIDES.find(s => state.docks[s].includes(id)) || null;
+}
+function isToolOpen(id) { return !!dockOf(id); }
+
+// A gated tool is only ever offered at Contributor and above. This is the one
+// visibility rule the registry carries, and it is the SAME reviewAllowed()
+// the panes themselves use — not a second gate that could drift out of step
+// with the first (see the canEdit()/Properties hole closed in 0.27.0).
+function toolVisible(t) { return !t.gated || reviewAllowed(); }
+
+function dockBody(side) { return side === 'left' ? $('left-body') : $('rp-body'); }
+function dockRail(side) { return side === 'left' ? $('left-rail') : $('right-rail'); }
 
 function rpRenderFns() {
-  return { outline: renderOutlineTab, bookmarks: renderBookmarksTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null };
+  return { files: null, outline: renderOutlineTab, bookmarks: renderBookmarksTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null };
 }
+
+function persistDocks() {
+  persist('wb_docks', state.docks);
+  persist('wb_dock_flex', state.dockFlex);
+}
+
+// ── The one pane header ───────────────────────────────────────────
+// Replaces RP_HEADER_COMMENTS / RP_HEADER_LINKS / RP_HEADER_REVIEW, three
+// constants that restated what the rail above already said and carried no
+// controls. This is #ot-toolbar's shape generalised: label, optional count,
+// the pane's own controls, then move and close.
+//
+// Move and close live here because the header is the only per-pane surface
+// every tool has, and because a control that moves a pane belongs on the pane,
+// not in a settings screen. Both are hidden until the pane is hovered so they
+// do not read as content.
+function paneHead(toolId, opts) {
+  const t = toolById(toolId);
+  if (!t) return '';
+  const o = opts || {};
+  const side  = dockOf(toolId) || t.home;
+  const other = side === 'left' ? 'right' : 'left';
+  const count = (o.count === undefined || o.count === null || o.count === '')
+    ? '' : `<span class="badge">${escHtml(String(o.count))}</span>`;
+
+  const moveBtn = t.pinned ? '' :
+    `<button class="icon-btn ph-move" title="Move to ${other} panel" aria-label="Move to ${other} panel"` +
+    ` onclick="event.stopPropagation();moveTool('${toolId}','${other}')">` +
+    (other === 'right'
+      ? '<svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>'
+      : '<svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>') +
+    '</button>';
+
+  const closeBtn = t.pinned ? '' :
+    `<button class="icon-btn ph-close" title="Close ${escHtml(t.label)}" aria-label="Close ${escHtml(t.label)}"` +
+    ` onclick="event.stopPropagation();closeTool('${toolId}')">` +
+    '<svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+    '</button>';
+
+  return `<div class="pane-head" data-pane-head="${toolId}" title="Drag to reorder or move between panels"` +
+         ` onmousedown="paneHeadDragStart(event,'${toolId}')">` +
+         `<span class="ph-label">${escHtml(t.label)}</span>${count}` +
+         `<span class="ph-spacer"></span>` +
+         `<span class="ph-tools">${o.controls || ''}${moveBtn}${closeBtn}</span>` +
+         '</div>';
+}
+
+// ── Pane footers: the vault-wide view of a per-file tool ──────────
+// The rule S41 settles: the PANE is per-file, the PAGE is vault-wide, and the
+// way from one to the other is a button pinned inside the pane it belongs to.
+// These used to be an "inbox strip" outside the panes entirely, which is why
+// they appeared to belong to the panel rather than to a tool.
+const PANE_FOOT_COMMENTS =
+  '<div class="pane-foot"><button class="pane-foot-btn" id="btn-cmt-inbox" onclick="openReviewView()">' +
+  '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+  'All comments<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span></button></div>';
+
+const PANE_FOOT_REVIEW =
+  '<div class="pane-foot"><button class="pane-foot-btn" id="btn-review-inbox" onclick="openChangesView()">' +
+  '<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>' +
+  'All changes</button></div>';
 
 let rpClickTimers = {};
 const RP_DBLCLICK_MS = 220;
@@ -9287,110 +9535,337 @@ function rpTabDblClick(tab) {
   soloRPTab(tab);
 }
 
-function ensureRightPanelOpen() {
-  if (state.rightPanelOpen) return;
-  state.rightPanelOpen = true;
-  setPanelOpen('right-panel', 'rh-right', 'wb_rp_width', true);
-  persist('wb_right_panel', true);
+function ensureDockOpen(side) {
+  if (side === 'left') {
+    if (state.sidebarOpen) return;
+    state.sidebarOpen = true;
+    setPanelOpen('sidebar', 'rh-sidebar', 'wb_sb_width', true);
+    persist('wb_sidebar', true);
+  } else {
+    if (state.rightPanelOpen) return;
+    state.rightPanelOpen = true;
+    setPanelOpen('right-panel', 'rh-right', 'wb_rp_width', true);
+    persist('wb_right_panel', true);
+  }
 }
+// Kept for the callers that only ever mean the right panel (search hotkey).
+function ensureRightPanelOpen() { ensureDockOpen('right'); }
 
+// Toggling a tool opens it in its HOME dock if it is closed, and closes it
+// from wherever it currently is. A pinned tool (Vault Files) never closes —
+// clicking its icon reveals the dock instead, which is what a permanently
+// available tool should do rather than silently doing nothing.
 function toggleRPTab(tab) {
-  ensureRightPanelOpen();
-  const i = state.openRPTabs.indexOf(tab);
-  if (i === -1) {
-    state.openRPTabs.push(tab);
-    renderRPStack();
+  const t = toolById(tab);
+  if (!t) return;
+  const side = dockOf(tab);
+  if (side) {
+    if (t.pinned) { ensureDockOpen(side); return; }
+    state.docks[side].splice(state.docks[side].indexOf(tab), 1);
+    delete state.dockFlex[side][tab];
+    renderDocks();
+  } else {
+    const home = t.home;
+    ensureDockOpen(home);
+    state.docks[home].push(tab);
+    renderDocks();
     const fn = rpRenderFns()[tab];
     if (fn) fn();
-  } else {
-    state.openRPTabs.splice(i, 1);
-    delete state.rpFlex[tab];
-    renderRPStack();
   }
-  persist('wb_rp_open', state.openRPTabs);
+  persistDocks();
 }
 
+// Solo clears the tool's OWN dock only. The other dock is left alone, because
+// double-clicking Outline to see it by itself should not also close the file
+// tree on the opposite side of the window.
 function soloRPTab(tab) {
-  ensureRightPanelOpen();
-  state.openRPTabs = [tab];
-  state.rpFlex = {};
-  renderRPStack();
+  const t = toolById(tab);
+  if (!t) return;
+  const side = dockOf(tab) || t.home;
+  ensureDockOpen(side);
+  const pinnedKeep = state.docks[side].filter(id => id !== tab && (toolById(id) || {}).pinned);
+  state.docks[side] = [...pinnedKeep, tab];
+  state.dockFlex[side] = {};
+  renderDocks();
   const fn = rpRenderFns()[tab];
   if (fn) fn();
-  persist('wb_rp_open', state.openRPTabs);
+  persistDocks();
 }
 
-// Lays out whichever tabs are in state.openRPTabs — icon highlight state,
-// pane visibility + flex share, DOM order (matches stack/click order),
-// and the resize handle between each adjacent pair. Pure layout: doesn't
-// re-render tab content, callers that add a tab do that separately.
-function renderRPStack() {
-  const body = $('rp-body');
-  body.querySelectorAll('.rp-stack-handle').forEach(h => h.remove());
+// Move a tool to the other dock, keeping it open. Pinned tools stay put.
+function moveTool(tab, toSide) {
+  const t = toolById(tab);
+  if (!t || t.pinned) return;
+  const from = dockOf(tab);
+  if (!from || from === toSide) return;
+  state.docks[from].splice(state.docks[from].indexOf(tab), 1);
+  delete state.dockFlex[from][tab];
+  state.docks[toSide].push(tab);
+  ensureDockOpen(toSide);
+  renderDocks();
+  const fn = rpRenderFns()[tab];
+  if (fn) fn();
+  persistDocks();
+}
 
-  const open = state.openRPTabs;
-  document.querySelectorAll('.rp-tab').forEach(t => t.classList.toggle('active', open.includes(t.dataset.tab)));
-  document.querySelectorAll('.rp-pane').forEach(p => {
-    const tab = p.id.slice(3); // 'rp-outline' -> 'outline'
-    const isOpen = open.includes(tab);
-    p.classList.toggle('active', isOpen);
-    p.style.flex = isOpen ? `${state.rpFlex[tab] || 1} 1 0` : '';
-  });
+function closeTool(tab) {
+  const t = toolById(tab);
+  if (!t || t.pinned) return;
+  const side = dockOf(tab);
+  if (!side) return;
+  state.docks[side].splice(state.docks[side].indexOf(tab), 1);
+  delete state.dockFlex[side][tab];
+  renderDocks();
+  persistDocks();
+}
 
-  let emptyHint = $('rp-stack-empty');
-  if (!open.length) {
-    if (!emptyHint) {
-      emptyHint = document.createElement('div');
-      emptyHint.id = 'rp-stack-empty';
-      emptyHint.className = 'rp-empty';
-      emptyHint.textContent = 'Nothing open. Click a tool above.';
-      body.appendChild(emptyHint);
+// ── Reordering a stack by dragging a pane header ──────────────────
+// Drag a header onto another pane to sit above or below it; drag it onto the
+// opposite dock's body to throw it across. Deliberately NOT HTML5 drag and
+// drop: this file already carries one delegated pointer-drag system for
+// bookmarks, and mixing the two idioms in one panel is how you end up with
+// two ways to reorder that behave differently.
+let dockDrag = null;
+
+function paneHeadDragStart(e, tab) {
+  if (e.button !== 0) return;
+  const head = e.currentTarget;
+  const startX = e.clientX, startY = e.clientY;
+  let armed = false;
+
+  function onMove(ev) {
+    if (!armed) {
+      if (Math.abs(ev.clientX - startX) < CLICK_THRESHOLD &&
+          Math.abs(ev.clientY - startY) < CLICK_THRESHOLD) return;
+      armed = true;
+      dockDrag = { tab };
+      head.classList.add('dragging');
     }
-  } else if (emptyHint) {
-    emptyHint.remove();
+    clearDropMarks();
+    const target = dropTargetAt(ev.clientX, ev.clientY);
+    if (target && target.pane) target.pane.classList.add(target.before ? 'drop-above' : 'drop-below');
   }
 
-  open.forEach((tab, i) => {
-    const pane = $('rp-' + tab);
-    body.appendChild(pane); // moves it — DOM order becomes stack order
-    if (i < open.length - 1) {
-      const belowTab = open[i + 1];
-      const handle = document.createElement('div');
-      handle.className = 'rp-stack-handle';
-      handle.title = 'Drag to resize';
-      makeStackResizable(handle, pane, $('rp-' + belowTab), tab, belowTab);
-      body.appendChild(handle);
-    }
-  });
+  function onUp(ev) {
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    head.classList.remove('dragging');
+    clearDropMarks();
+    if (!armed) { dockDrag = null; return; }
+    const target = dropTargetAt(ev.clientX, ev.clientY);
+    dockDrag = null;
+    if (!target) return;
+    applyDrop(tab, target);
+  }
 
-  updateInboxStrip();
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
 }
 
-// Drag the split between two adjacent open panes. Session-only —
-// state.rpFlex resets to an even split on reload, same as everything
-// else about the stack's layout (only which tabs are open persists).
-function makeStackResizable(handle, aboveEl, belowEl, aboveTab, belowTab) {
+function clearDropMarks() {
+  document.querySelectorAll('.rp-pane.drop-above, .rp-pane.drop-below')
+    .forEach(p => p.classList.remove('drop-above', 'drop-below'));
+}
+
+// Which pane (and which half of it) is under the pointer, or the empty area
+// of a dock body. Returns null when the pointer is over neither dock.
+function dropTargetAt(x, y) {
+  for (const side of DOCK_SIDES) {
+    const body = dockBody(side);
+    if (!body) continue;
+    const r = body.getBoundingClientRect();
+    if (x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
+    for (const id of state.docks[side]) {
+      const pane = $('rp-' + id);
+      if (!pane) continue;
+      const pr = pane.getBoundingClientRect();
+      if (y >= pr.top && y <= pr.bottom) {
+        return { side, overId: id, pane, before: y < pr.top + pr.height / 2 };
+      }
+    }
+    return { side, overId: null, pane: null, before: false };
+  }
+  return null;
+}
+
+function applyDrop(tab, target) {
+  const t = toolById(tab);
+  if (!t) return;
+  const from = dockOf(tab);
+  if (!from) return;
+  if (t.pinned && target.side !== from) return; // pinned tools never change side
+  if (target.overId === tab) return;
+
+  state.docks[from].splice(state.docks[from].indexOf(tab), 1);
+  if (from !== target.side) delete state.dockFlex[from][tab];
+
+  const list = state.docks[target.side];
+  if (target.overId === null) {
+    list.push(tab);
+  } else {
+    const i = list.indexOf(target.overId);
+    list.splice(target.before ? i : i + 1, 0, tab);
+  }
+  ensureDockOpen(target.side);
+  renderDocks();
+  const fn = rpRenderFns()[tab];
+  if (fn && from !== target.side) fn();
+  persistDocks();
+}
+
+// Builds both rails from WB_TOOLS. A tool's icon appears in the rail of the
+// dock it currently sits in, or in its home rail when it is closed, so a tool
+// you moved left stays reachable from the left after you close it.
+function renderRails() {
+  DOCK_SIDES.forEach(side => {
+    const rail = dockRail(side);
+    if (!rail) return;
+    const ids = WB_TOOLS
+      .filter(t => toolVisible(t) && (dockOf(t.id) || t.home) === side)
+      .map(t => t.id);
+    rail.innerHTML = ids.map(id => {
+      const t = toolById(id);
+      const open = isToolOpen(id);
+      const count = t.countId ? `<span class="tab-count" id="${t.countId}" style="display:none">0</span>` : '';
+      const hint = t.pinned ? 'always available' : 'click to toggle, double-click to view alone';
+      return `<button class="rp-tab${open ? ' active' : ''}" id="tab-${id}" data-tab="${id}"` +
+             ` title="${escHtml(t.label)} — ${hint}" aria-label="${escHtml(t.label)}"` +
+             ` onclick="rpTabClick('${id}')" ondblclick="rpTabDblClick('${id}')">` +
+             `<svg class="rp-tab-ic" viewBox="0 0 24 24">${t.icon}</svg>${count}</button>`;
+    }).join('');
+  });
+}
+
+// Lays out both docks — rail highlight, pane visibility and flex share, DOM
+// order (which is stack order), and the resize handle between each adjacent
+// pair. Pure layout: it does not re-render pane CONTENT, callers that open a
+// tool do that separately. Replaces renderRPStack, which only knew about the
+// right panel.
+function renderDocks() {
+  renderRails();
+  document.querySelectorAll('.rp-stack-handle').forEach(h => h.remove());
+
+  const openAll = [...state.docks.left, ...state.docks.right];
+  document.querySelectorAll('.rp-pane').forEach(p => {
+    const tab = p.id.slice(3); // 'rp-outline' -> 'outline'
+    const side = dockOf(tab);
+    const isOpen = openAll.includes(tab);
+    p.classList.toggle('active', isOpen);
+    p.style.flex = isOpen ? `${(state.dockFlex[side] || {})[tab] || 1} 1 0` : '';
+  });
+
+  DOCK_SIDES.forEach(side => {
+    const body = dockBody(side);
+    if (!body) return;
+    const open = state.docks[side];
+
+    let hint = body.querySelector('.dock-empty');
+    if (!open.length) {
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.className = 'rp-empty dock-empty';
+        hint.textContent = 'Nothing open. Click a tool above.';
+        body.appendChild(hint);
+      }
+    } else if (hint) {
+      hint.remove();
+    }
+
+    open.forEach((tab, i) => {
+      const pane = $('rp-' + tab);
+      if (!pane) return;
+      body.appendChild(pane); // moves it, across docks too — DOM order is stack order
+      if (i < open.length - 1) {
+        const belowTab = open[i + 1];
+        const handle = document.createElement('div');
+        handle.className = 'rp-stack-handle';
+        handle.title = 'Drag to resize';
+        makeStackResizable(handle, pane, $('rp-' + belowTab), tab, belowTab, side);
+        body.appendChild(handle);
+      }
+    });
+  });
+
+  renderPaneChrome();
+  renderDockActions();
+}
+
+// Two panes keep their own bespoke toolbars rather than the generic header:
+// #sb-toolbar (Vault Files) and #ot-toolbar (Outline). Both already carry a
+// label, a count where relevant and their own fold control, and #sb-toolbar's
+// exact position between nothing and #sb-whats-new is asserted by the What's
+// New suite. Rather than restyle them into pane-head, they get the one thing
+// they were missing: the same drag-to-reorder the generic header has.
+// Static slots (Search) are filled here too, so every pane has a header
+// regardless of whether its content is rendered lazily.
+function renderPaneChrome() {
+  document.querySelectorAll('.pane-chrome-slot').forEach(slot => {
+    const id = slot.dataset.tool;
+    if (!id) return;
+    slot.innerHTML = paneHead(id);
+  });
+  [['sb-toolbar', 'files'], ['ot-toolbar', 'outline']].forEach(([elId, toolId]) => {
+    const el = $(elId);
+    if (!el || el._wbDragWired) return;
+    el._wbDragWired = true;
+    el.style.cursor = 'grab';
+    el.title = 'Drag to reorder or move between panels';
+    el.addEventListener('mousedown', e => {
+      // Never start a drag from the fold button or anything else clickable
+      if (e.target.closest('button')) return;
+      paneHeadDragStart(e, toolId);
+    });
+  });
+}
+
+// Back-compat alias. Several call sites (search, tier changes, boot) still say
+// "render the stack"; they all mean the same thing now.
+function renderRPStack() { renderDocks(); }
+
+// New and Move follow the Vault Files pane between docks, because they act on
+// the tree. Their VISIBILITY is still updateEditBtn()'s tier check and is not
+// duplicated here — this only decides which dock the row hangs in.
+function renderDockActions() {
+  const row = $('dock-actions-left');
+  if (!row) return;
+  const side = dockOf('files') || 'left';
+  const host = side === 'left' ? $('sidebar') : $('right-panel');
+  if (host && row.parentElement !== host) {
+    const anchor = side === 'left' ? null : $('app-version');
+    if (anchor) host.insertBefore(row, anchor); else host.appendChild(row);
+  }
+}
+
+// Drag the split between two adjacent open panes.
+// S41: this now PERSISTS. It used to reset to an even split on every reload,
+// which meant half the panel layout survived a restart and half did not —
+// which tools were open came back, the shape you gave them did not. If the
+// point of docks is a layout that stays where you put it, the sizes are part
+// of the layout.
+function makeStackResizable(handle, aboveEl, belowEl, aboveTab, belowTab, side) {
   handle.addEventListener('mousedown', e => {
     e.preventDefault();
     handle.classList.add('dragging');
+    const flex = state.dockFlex[side] || (state.dockFlex[side] = {});
     const startY     = e.clientY;
-    const startAbove = state.rpFlex[aboveTab] || 1;
-    const startBelow = state.rpFlex[belowTab] || 1;
+    const startAbove = flex[aboveTab] || 1;
+    const startBelow = flex[belowTab] || 1;
     const total      = startAbove + startBelow;
 
     function onMove(ev) {
-      const bodyH = $('rp-body').getBoundingClientRect().height || 1;
+      const bodyH = dockBody(side).getBoundingClientRect().height || 1;
       const delta = ((ev.clientY - startY) / bodyH) * total;
       const newAbove = Math.min(total - 0.15, Math.max(0.15, startAbove + delta));
-      state.rpFlex[aboveTab] = newAbove;
-      state.rpFlex[belowTab] = total - newAbove;
-      aboveEl.style.flex = `${state.rpFlex[aboveTab]} 1 0`;
-      belowEl.style.flex = `${state.rpFlex[belowTab]} 1 0`;
+      flex[aboveTab] = newAbove;
+      flex[belowTab] = total - newAbove;
+      aboveEl.style.flex = `${flex[aboveTab]} 1 0`;
+      belowEl.style.flex = `${flex[belowTab]} 1 0`;
     }
     function onUp() {
       handle.classList.remove('dragging');
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      persistDocks();
     }
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
@@ -9403,7 +9878,7 @@ function makeStackResizable(handle, aboveEl, belowEl, aboveTab, belowTab) {
 // whichever tabs happen to be in the stack.
 function refreshRightPanel() {
   const fns = rpRenderFns();
-  state.openRPTabs.forEach(tab => { const fn = fns[tab]; if (fn) fn(); });
+  [...state.docks.left, ...state.docks.right].forEach(tab => { const fn = fns[tab]; if (fn) fn(); });
 }
 
 // ── Outline tab ──────────────────────────────────────────────────
@@ -9670,7 +10145,7 @@ function toggleBookmarkHeading(id, text) {
   saveUserRecord();
   updateBookmarkTabBadge();
   renderOutlineTab();
-  if (state.openRPTabs.includes('bookmarks')) renderBookmarksTab();
+  if (isToolOpen('bookmarks')) renderBookmarksTab();
 }
 
 function toggleFavoriteBm(file, id, text) {
@@ -9841,10 +10316,10 @@ function renderBmSection(section, title) {
 function renderBookmarksTab() {
   const pane = $('rp-bookmarks');
   if (!state.user) {
-    pane.innerHTML = '<div class="rp-empty">Sign in to see your bookmarks.</div>';
+    pane.innerHTML = paneHead('bookmarks') + '<div class="rp-empty">Sign in to see your bookmarks.</div>';
     return;
   }
-  pane.innerHTML = renderBmSection('fav', 'Favorites') + `<div style="border-top:1px solid var(--border)">${renderBmSection('bm', 'Bookmarks')}</div>`;
+  pane.innerHTML = paneHead('bookmarks') + renderBmSection('fav', 'Favorites') + `<div style="border-top:1px solid var(--border)">${renderBmSection('bm', 'Bookmarks')}</div>`;
   attachBmInlineInputs();
 }
 
@@ -10027,12 +10502,12 @@ function renderLinkGroup(label, items, kind) {
   return `<div class="rv-ov-label">${label}</div>${rows}`;
 }
 
-const RP_HEADER_LINKS = '<div class="rp-pane-header">Links</div>';
+const RP_HEADER_LINKS = () => paneHead('backlinks');
 
 function renderBacklinksTab() {
   const pane = $('rp-backlinks');
   if (!state.activeUrl) {
-    pane.innerHTML = RP_HEADER_LINKS + '<div class="rp-empty">Open a file to see its links.</div>';
+    pane.innerHTML = RP_HEADER_LINKS() + '<div class="rp-empty">Open a file to see its links.</div>';
     return;
   }
 
@@ -10061,7 +10536,7 @@ function renderBacklinksTab() {
   }
   html += `<div class="backlink-note">Backlinks only include files opened this session — WikiBase has no way to scan the whole vault for links without opening each file.</div>`;
 
-  pane.innerHTML = RP_HEADER_LINKS + html;
+  pane.innerHTML = RP_HEADER_LINKS() + html;
 }
 
 // ── Search tab (S6 — compiled this session) ─────────────────────
@@ -10090,13 +10565,19 @@ async function buildSearchIndex() {
 }
 
 function openSearch() {
-  ensureRightPanelOpen();
   // Adds search to the stack alongside whatever's already open, rather
   // than replacing it — ⌘K shouldn't close tools you already had open.
-  if (!state.openRPTabs.includes('search')) {
-    state.openRPTabs.push('search');
-    renderRPStack();
-    persist('wb_rp_open', state.openRPTabs);
+  // Opens whichever dock search currently lives in, which is not always the
+  // right panel any more: its home is the left rail and the user can move it.
+  const side = dockOf('search');
+  if (side) {
+    ensureDockOpen(side);
+  } else {
+    const home = toolById('search').home;
+    ensureDockOpen(home);
+    state.docks[home].push('search');
+    renderDocks();
+    persistDocks();
   }
   setTimeout(() => $('search-input').focus(), 30);
 }
@@ -10211,12 +10692,7 @@ $('search-input').addEventListener('keydown', e => {
   } else if (e.key === 'Escape') {
     if ($('search-input').value) clearSearch(true); // first ESC clears…
     else {                                           // …second closes
-      const i = state.openRPTabs.indexOf('search');
-      if (i !== -1) {
-        state.openRPTabs.splice(i, 1);
-        renderRPStack();
-        persist('wb_rp_open', state.openRPTabs);
-      }
+      closeTool('search');
     }
   }
 });
@@ -10251,19 +10727,19 @@ function serializeComments(comments) {
   ).join('');
 }
 
-const RP_HEADER_COMMENTS = '<div class="rp-pane-header">Comments</div>';
+const RP_HEADER_COMMENTS = () => paneHead('comments');
 
 async function renderCommentsTab() {
   const pane = $('rp-comments');
   if (!state.activeUrl) {
-    pane.innerHTML = RP_HEADER_COMMENTS + '<div class="rp-empty">Open a file to see comments.</div>';
+    pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Open a file to see comments.</div>' + PANE_FOOT_COMMENTS;
     return;
   }
 
   const commentsUrl = commentsUrlFor(state.activeUrl);
   let comments = [];
 
-  pane.innerHTML = RP_HEADER_COMMENTS + '<div class="rp-empty">Loading…</div>';
+  pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Loading…</div>' + PANE_FOOT_COMMENTS;
 
   const cText = await readVaultFileOrNull(commentsUrl);
   if (cText !== null) comments = parseComments(cText);
@@ -10310,7 +10786,7 @@ async function renderCommentsTab() {
     <button class="comment-submit" onclick="postComment()">Post</button>
   </div>`;
 
-  pane.innerHTML = RP_HEADER_COMMENTS + html;
+  pane.innerHTML = RP_HEADER_COMMENTS() + html + PANE_FOOT_COMMENTS;
 }
 
 // Shared list of rendered block selectors for text-match highlighting.
@@ -10421,7 +10897,7 @@ async function closeComment(idx) {
 }
 
 // ================================================================
-// Section 5 — Comment Inbox (vault-wide review view)
+// Section 5 — All comments (the vault-wide view of the Comments tool)
 // ================================================================
 
 async function openReviewView() {
@@ -10434,7 +10910,7 @@ async function openReviewView() {
   renderSidebar();
   updateEditBtn();
 
-  setReaderTitle('Comment Inbox');
+  setReaderTitle('All comments');
 
   empty.style.display = 'none';
   rc.style.display    = 'block';
@@ -10490,7 +10966,7 @@ function buildReviewHTML(data, filter) {
   let html = `
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:0.25rem">
       <div>
-        <h1 class="md-h md-h1" style="margin-bottom:4px">Comment Inbox</h1>
+        <h1 class="md-h md-h1" style="margin-bottom:4px">All comments</h1>
         <p class="md-p" style="margin-top:2px">${escHtml(countText)}</p>
       </div>
       <div class="review-filter-bar">${chips}</div>

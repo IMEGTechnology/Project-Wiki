@@ -1,7 +1,7 @@
 # WikiBase Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.27.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.28.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 

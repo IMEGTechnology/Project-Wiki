@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.27.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.28.0**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
@@ -14,7 +14,7 @@ New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is
 ## Contents
 
 1. [[#1. Start here]] — what this is, installing it, your first launch
-2. [[#2. Getting around]] — the header, panels, the sidebar, moving between notes
+2. [[#2. Getting around]] — the header, the panels, Vault Files, moving between notes
 3. [[#3. Reading a note]] — folding, links, images, checkboxes
 4. [[#4. Finding things]] — What's New, Outline, Search, Bookmarks, Links
 5. [[#5. Making it yours]] — the Theme panel and Settings
@@ -57,7 +57,9 @@ To change it later: **your initials badge, top right → Switch user**.
 
 ### The screen at a glance
 
-Three panels. The **sidebar** is your folder tree, the **reader** is the note you are on, and the **right panel** holds tools: Outline, Bookmarks, Comments, Links and Search. Either side panel collapses out of the way.
+Three columns. The **reader** in the middle is the note you are on. Either side of it is a **panel** holding tools, and both panels work the same way: a row of tool icons across the top, and whichever tools you have open stacked below.
+
+Out of the box the left panel holds the tools for getting somewhere — **Vault Files**, **Search**, **Bookmarks** — and the right holds the tools about what you are reading — **Outline**, **Comments**, **Links**, and **Review** if you have it. You can move any tool to either side. Either panel collapses out of the way.
 
 ![The WikiBase screen, annotated](help-assets/fig-01-screen-at-a-glance.svg)
 
@@ -99,12 +101,14 @@ When a panel is collapsed its tab stays permanently lit so you can find it. Clic
 
 **If a panel stops widening**, it has hit the reader's floor. The reader keeps a minimum width that scales with your screen — 1200px on a 1920-wide monitor, 900px from 1440, 600px below that — and the side panels stop before they push it under that. Collapse the other panel if you need more room.
 
-### Vault Files, the sidebar
+### Vault Files
 
-![The sidebar, annotated](help-assets/fig-05-sidebar.svg)
+![Vault Files, annotated](help-assets/fig-05-sidebar.svg)
 
 - **Expand a folder** — click the folder row. Files load the first time you open it and stay cached until you reload.
-- **Fold control** — one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed. It hides if you narrow the sidebar enough to crowd the label.
+- **Fold control** — one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed. It hides if you narrow the panel enough to crowd the label.
+- **Vault Files is always available.** It is the one tool that cannot be closed or moved to the other side. You can reorder it against Search and Bookmarks, but it is always somewhere.
+- **New and Move** sit at the bottom of whichever panel holds Vault Files, and only appear at Contributor or above.
 - **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine. This is the one fold in WikiBase that is saved — notes, outlines and callouts all open fresh every time. A closed folder is obviously a closed folder, so remembering it can never mislead you the way a silently collapsed heading could.
 - **Sort order** — folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
 - **File counts** — the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
@@ -214,17 +218,27 @@ Set them the same way as any other property, in the Properties panel or in Obsid
 
 **Where this is stored:** on your own machine, like your theme and your open folders. Nothing about what you have read is written into the vault, and nobody else can see it.
 
-### The right panel
+### The panels
 
-The right panel holds five tools, six with review turned on. They **stack** rather than replace each other.
+Both panels behave identically. Tools **stack** rather than replace each other.
 
-![How the right panel stacks](help-assets/fig-07-right-panel-stacking.svg)
+![How the panels stack](help-assets/fig-07-right-panel-stacking.svg)
 
-- **Click a tab** — add that tool to the stack, or take it out.
-- **Double-click a tab** — show that one alone, closing the rest.
+- **Click a tool icon** — add that tool to the stack, or take it out.
+- **Double-click a tool icon** — show that one alone, closing the rest of that panel.
 - **Drag the handle between two open tools** — change how the height is split.
+- **Drag a tool's title bar** — move it up or down the stack, or across to the other panel.
+- **Move button in a tool's title bar** — send it to the other panel in one click.
 
-Which tools you keep open is remembered. The height split resets on reload.
+Which tools are in which panel, the order they are stacked in, and the height you gave each one are all remembered.
+
+### Resizing a panel
+
+The thin line between a panel and the reader does three things.
+
+- **Drag it** — resize the panel. Dragging never collapses it, however slowly you drag.
+- **Click the tab that appears on it** — collapse the panel, or open it again. The tab stays visible while a panel is collapsed, so there is always a way back.
+- **Double-click the line** — widen the panel to fit its longest visible row. Useful when a file name is being cut off. It fits what is on screen, not what is inside folders you have not opened.
 
 ### Outline
 
@@ -334,10 +348,10 @@ Rainbow by position means folders cycle through a colour set based on where they
 
 | Control | What it does |
 |---|---|
-| Chrome tone | **Contrast** gives the sidebar, header and reader their own shades. **Match reader** flattens the sidebar and header into the reader surface. **Flat** puts everything on one surface. Default Contrast. |
+| Chrome tone | **Contrast** gives the panels, header and reader their own shades. **Match reader** flattens the panels and header into the reader surface. **Flat** puts everything on one surface. Default Contrast. |
 | Borders | None, **Hairline** (default) or Strong. |
 | Active row | How the open file is marked: a **Bar** on the edge, a **Tint** behind the row, or **Both** (default). |
-| Density | **Compact**, Normal (default) or Roomy row spacing in the sidebar and Outline. |
+| Density | **Compact**, Normal (default) or Roomy row spacing in Vault Files and Outline. |
 
 > [!NOTE] Borders → None
 > This clears the decorative dividing lines only. Toggle tracks, resize handles and input outlines keep their outline on purpose — without it they vanish rather than look minimal.
@@ -432,7 +446,9 @@ Open the **Comments** tab in the right panel. It shows the comments on the note 
 
 **Clicking a comment** selects it and tries to find the text it refers to in the note, so you can see what it is about without hunting.
 
-**The whole vault at once:** with the Comments tab open, a **Comment Inbox** button appears at the bottom of the panel. That scans every folder and lists every open comment across the vault in the reader, so nothing sits unanswered in a folder nobody opened. The number on the Comments tab is that same vault-wide count of open comments.
+**The whole vault at once:** at the bottom of the Comments tool there is an **All comments** button. That scans every folder and lists every open comment across the vault in the reader, so nothing sits unanswered in a folder nobody opened. The number on the Comments icon is that same vault-wide count of open comments. The Review tool has the same thing, **All changes**.
+
+The rule is the same for both: the **tool** shows the note you are reading, the **button at the bottom of it** shows the whole vault.
 
 | Type | Use for |
 |---|---|
@@ -501,7 +517,7 @@ WikiBase remembers your choice and reuses it every launch, so this does not clea
 You have probably picked a parent folder. Re-pick the folder that directly contains your notes and note folders.
 
 **A link shows muted and dashed**
-Its target is in a folder you have not expanded yet. Open that folder in the sidebar and the link activates.
+Its target is in a folder you have not expanded yet. Open that folder in Vault Files and the link activates.
 
 **Images are not loading**
 The image must be in the attachments subfolder beside the note that references it, with the filename matching exactly, including case. If *every* image in the whole vault is broken, the attachments subfolder name configured in the app does not match what Obsidian actually created — flag it to whoever manages WikiBase.

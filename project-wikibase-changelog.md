@@ -10,11 +10,79 @@
 
 ---
 
+## 0.28.0 — 2026-08-06
+
+**Changed:** `index.html`, `supporting/tests/docks.test.js` (new), `supporting/tests/access-tiers.test.js`, `supporting/tests/paragraph-breaks.test.js`
+
+*Two docks instead of a sidebar and a panel that never rhymed. The review workflow is deliberately NOT in this release — it is specced in `docs/project-wikibase-review-workflow-spec.html` and is the next session.*
+
+### Panel assignment
+
+- **The left sidebar and the right panel are now the same thing.** A dock is a rail of tool icons over a stack of panes. Both are rendered from one registry, `WB_TOOLS`, by one function, `renderDocks()`. Before this, the right panel had a six-tab rail with stacking, resizing and solo, and the left was a fixed single-purpose tree that had none of it.
+
+- **Default assignment: left is where you go, right is what you are reading.** Left holds Vault Files, Search and Bookmarks; right holds Outline, Comments, Links and Review. Search and Bookmarks were navigation tools sitting in the panel that otherwise means "about this file".
+
+- **Any tool can be moved to either dock.** Via the move button in its pane header, or by dragging the header across. Both dock assignment and stack order persist per user in `wb_docks`.
+
+- **Vault Files is pinned.** It can be reordered against Search and Bookmarks but cannot be closed or moved to the right dock, through any route — close, move, toggle and drag all refuse. A stored layout that lost it has it restored on boot, because that store is user-writable JSON and losing the file tree would leave nothing to click.
+
+- **Stack order is explicit.** It used to be click order via `state.openRPTabs` with no way to reorder.
+
+- **Pane sizes persist.** `state.rpFlex` reset to an even split on every reload, so which tools were open survived a restart and the shape you gave them did not. Half a layout persisting is worse than none.
+
+- **New and Move left the header** for the foot of whichever dock holds Vault Files. They act on the vault tree. Their tier gate is unchanged — this is a placement change only.
+
+- **One pane header replaces three constants.** `RP_HEADER_COMMENTS`, `RP_HEADER_LINKS` and `RP_HEADER_REVIEW` each restated what the rail above already said and carried no controls. `paneHead()` is `#ot-toolbar`'s shape generalised: label, optional count, the pane's own controls, then move and close. `#sb-toolbar` and `#ot-toolbar` keep their own markup and gain the drag affordance.
+
+### The panel shell
+
+- **The inbox strip is gone, and so is `updateInboxStrip()`.** "Comment Inbox" is now **All comments** and sits inside the Comments pane, pinned to its bottom; "Review Inbox" is now **All changes**, inside the Review pane. The strip lived above the panes until 0.24.0, where showing it pushed every pane down, then below them, which fixed the jump but left two buttons in the panel belonging to no tool in particular. Both positions were wrong for the same reason. **The rule this settles: the pane is per-file, the page is vault-wide.**
+
+- **Following from that rule, the vault-wide overview left the Review pane.** It renders on the All changes page only. It was appearing in both.
+
+### Resize handles
+
+- **Three gestures, two targets, no overlap:** drag the handle to resize, click the flare to collapse or expand, double-click the handle line to fit the panel to its widest visible row.
+
+- **The flare no longer collapses the panel when you meant to drag it.** It used to swallow `mousedown` and toggle on any click, so aiming at the flare to start a drag collapsed instead. **The fix is distance, not duration** — movement past `CLICK_THRESHOLD` is a drag however long you took over it. A time threshold would fight the drag, since a slow careful resize is exactly what a long-press rule misreads.
+
+- **Fit-to-content fits what is rendered, not the vault.** Fitting to the longest name inside a collapsed folder would throw the panel open because of a file you cannot see. It measures against a temporarily widened panel, because every row in there ellipsises and a clipped row always answers "exactly as wide as I already am".
+
+- The old double-click-to-collapse on the handle line is gone; collapse lives on the flare only, which is what freed double-click.
+
+### Tests
+
+- **`docks.test.js`, 104 checks, new.** Asserts both sides through the same operations, since a suite that only exercised the right dock would pass on the old code. Asserts the deleted shapes are absent (`openRPTabs`, `rpFlex`, the strip, `updateInboxStrip()`, New and Move in the header) so a revert turns it red rather than a half-revert slipping through.
+
+- `access-tiers.test.js` now asserts a downgraded Review tool is dropped from **neither dock**, not just the right one — the old single-array check would have passed for free the moment Review was moved left. Adds the pinned-tool refusals.
+
+- `paragraph-breaks.test.js`'s inbox-strip block is rewritten against the new invariant: the button is a descendant of its pane, in a footer that is the pane's last child.
+
+### Migration
+
+- `wb_rp_open` is read once into the right dock when there is no `wb_docks` yet, and is **left in localStorage untouched**, so reverting this file restores the previous layout exactly. Same courtesy as the `wb_review`/`wb_editing` keys in 0.27.0.
+
+---
+
 ## 0.27.2 — 2026-08-06
 
 **Changed:** `index.html`, `help.md`, `help-edit.md`, `supporting/tests/change-detection.test.js`, `supporting/tests/access-tiers.test.js`
 
-*A colour on the date, and the recovery path written down instead of built.*
+*A colour on the date, the recovery path written down instead of built, and the release itself put under test.*
+
+### Releasing
+
+- **`README.md` said "Current version: 0.19.2" for eight releases.** That string is the only place in the project that claims a current version, and nothing ever read it back, so it drifted silently while `index.html`, `deploy/` and the changelog were all correct. It is the version that was reported as showing up in the deploy.
+
+- **The archive zip stopped at 0.19.0.** Not an oversight so much as a side effect: 0.19.1 replaced the versioned zip with the `deploy/` folder, and the backup went with it. **0.20.0 through 0.27.1 have no zip and cannot be reconstructed from this folder** — only GitHub history has those. Zips resume at 0.27.2 in a new `archive/` folder, `wikibase-v<version>.zip`, the exact contents of `deploy/`.
+
+- **`supporting/release.sh <version>` is now the whole release.** It refuses to run without a matching changelog entry, stamps the version into `index.html`, `README.md`, `help.md` and `help-edit.md`, **reads all four back** rather than trusting the write, runs every suite, rebuilds `deploy/` with each copy verified, writes and verifies the archive zip, and refuses to overwrite an existing backup without `--force`. Strays found in `deploy/` are moved to `_delete-me/`, never deleted, per the standing rule.
+
+- **`release-integrity.test.js`, 29 checks, is the odd suite out** — it tests the release rather than the app. Every other suite passed for eight releases while the README was stale, because none of them looked. This one compares all four version strings to the badge, diffs `deploy/` against root byte for byte, checks the archive zip exists and contains the right version, and asserts `release.sh` still performs the guards it documents. `release.sh` runs it last, after the release has actually happened.
+
+- **Deliberately untouched: `sw.js` and git.** The service worker is network-first, so a new shell lands on its own and bumping `CACHE` would force a pointless re-download. **A failed GitHub Pages run is the one failure none of this can catch** — the app, `deploy/` and the archive will all read correctly while the live site serves the previous version. The script says so on the way out.
+
+### The app
 
 - **The date in What's New is now coloured by age** — green within the last week, amber to a month, muted after that. It sits on the date itself rather than on a new glyph, because that element already means "when" and the pills already mean something else: New is green, so a second green dot beside it would make one colour say two things.
 
