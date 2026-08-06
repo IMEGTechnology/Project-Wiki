@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" width="1000" height="420" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 486" width="1000" height="486" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
   <defs>
     <style>
       .acc { fill:#5B9CF6; font-size:12px; font-weight:600; }
@@ -9,7 +9,7 @@
       .ico { stroke:#A0A0A5; stroke-width:1.35; fill:none; stroke-linecap:round; stroke-linejoin:round; }
     </style>
   </defs>
-  <rect width="1000" height="420" fill="#17181c"/>
+  <rect width="1000" height="486" fill="#17181c"/>
 
   <text x="40" y="34" fill="#5B9CF6" font-size="15" font-weight="700">The right panel stacks</text>
   <text x="40" y="54" class="dim" font-size="11.5">Tools do not replace each other. Click a tab to add it to the stack or take it out; double-click to show one alone.</text>
@@ -109,7 +109,7 @@
     <text x="0" y="358" class="dim">same for Search from anywhere.</text>
   </g>
 
-  <text x="40" y="400" class="dim">Which tools you keep open is remembered between visits. The height split between them is not — it resets to an even share on reload.</text>
+  <text x="40" y="466" class="dim">Which tools you keep open is remembered between visits. The height split between them is not — it resets to an even share on reload.</text>
   <text x="866" y="100" class="acc">Outline</text>
   <text x="866" y="120" class="acc">Bookmarks</text>
   <text x="866" y="140" class="acc">Comments</text>

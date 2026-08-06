@@ -1,7 +1,7 @@
 # WikiBase Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.18.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.27.2**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -17,7 +17,7 @@
 1. [[#1. Before you start]] — read-only by default, and how to change that
 2. [[#2. Creating and moving files]]
 3. [[#3. Editing a note]]
-4. [[#4. Properties]]
+4. [[#4. Properties]] — including the two that drive What's New
 5. [[#5. Review]] — what happens after someone edits
 6. [[#6. Writing Markdown]] — the full syntax reference
 7. [[#7. What WikiBase does not render]]
@@ -26,11 +26,13 @@
 
 ## 1. Before you start
 
-WikiBase is **read-only until you turn editing on**, per person. With it off, nothing you click can change a file.
+WikiBase is **read-only until you move up a tier**, per person and per PC. On the default **User** tier, nothing you click can change a file.
 
-**Settings → Advanced Settings → Enable editing.** Open Settings from your initials badge, top right, then expand Advanced Settings.
+**Settings → Advanced Settings → Access → Contributor.** Open Settings from your initials badge, top right, expand Advanced Settings, and pick Contributor from the dropdown. You will be asked for the Contributor password. If nobody has set one yet, it lets you straight through and Settings tells you so.
 
-That one switch turns on all of it:
+Dropping back to User never asks for anything.
+
+That one change turns on all of it:
 
 - **New** and **Move** in the header
 - **Edit** and **Properties** at the reader's top right
@@ -112,15 +114,37 @@ Property edits **apply quietly** — no change-log entry and no status flip, sin
 
 Anything not listed here, edit in the file's own frontmatter, see [[#Properties, frontmatter]].
 
+### Flagging a page in What's New
+
+Two optional properties change how a note appears in [What's New](help.md). Neither has a field in the Properties panel yet — add them in the file's own frontmatter, or in Obsidian.
+
+```yaml
+---
+must-read: true
+onboarding: true
+---
+```
+
+| Property | What it does |
+|---|---|
+| `must-read` | Puts the note in the **Required reading** group with an orange pill, and excludes it from Mark all seen — so a bulk clear can never wipe it unread. It stops being required 30 days after it first surfaced **to each person**, counted per reader rather than from the file's date, so someone on leave still gets their full window. After that it keeps its unseen dot and stays in the list until they actually open it. |
+| `onboarding` | Marks the note as one a new starter should read. Never expires. Separate from `must-read` on purpose: one key cannot mean both "everyone needs to see this change" and "this is part of learning the job". |
+
+Both default to absent, which means false. No existing file needs changing.
+
+**Use `must-read` sparingly.** Its whole value is that it overrides someone's Mark all seen, and that only works while it stays rare.
+
 ---
 
 ## 5. Review
 
-**Settings → Advanced Settings → Show review tools.** Off by default.
+**Review is part of the Contributor tier**, the same tier as editing. There is no separate switch for it.
 
-Change records are always written whether or not you have this on. The setting only decides whether you see the review interface, so a reader who never reviews anything is not shown machinery they do not need.
+That pairing is deliberate: only an edit made in the app writes a change record, so a reviewer who cannot edit would be looking at an empty list.
 
-With it on you get a **Review tab** in the right panel, a **bell** with a count of open items, and a **Review Inbox** covering the whole vault.
+Change records are always written whether or not anyone is on Contributor. The tier only decides whether you see the review interface, so a reader who never reviews anything is not shown machinery they do not need.
+
+On Contributor you get a **Review tab** in the right panel, a **bell** with a count of open items, and a **Review Inbox** covering the whole vault.
 
 ### It is sequential, per file
 
@@ -173,7 +197,13 @@ All six levels render, fold and appear in the Outline. Their colours, underlines
 
 ### Paragraphs
 
-A blank line starts a new one. For a break inside a paragraph, use two trailing spaces or `Shift+Enter`.
+A blank line starts a new one.
+
+**Every line break you type is kept.** Press Enter once and the next line starts on its own line, exactly as it looks while you are writing it in Obsidian. You do not need two trailing spaces or `Shift+Enter`, though both still work.
+
+This is deliberate, and it is not what standard Markdown does. Most Markdown renderers merge consecutive lines into one flowing paragraph, and WikiBase did too before version 0.24.0. The change was made because pages here are written in Obsidian's editor, so the shape you see while typing is the shape you meant.
+
+**One thing to watch.** Text pasted from an email or a PDF often arrives already wrapped at someone else's line width, and it will render with those wraps intact, giving short ragged lines. Join those lines back together after pasting and it flows normally.
 
 ### Links and embeds
 
@@ -282,7 +312,7 @@ due: 2026-11-15
 ---
 ```
 
-A YAML block at the **very top** of the file, before anything else. WikiBase reads all of it. Six fields are editable through the Properties panel — Status, Section, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched.
+A YAML block at the **very top** of the file, before anything else. WikiBase reads all of it. Six fields are editable through the Properties panel — Status, Section, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched. `must-read` and `onboarding` are read here but have no panel field yet, see [[#Flagging a page in What's New]].
 
 ### Callouts
 

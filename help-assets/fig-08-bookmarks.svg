@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" width="1000" height="420" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 470" width="1000" height="470" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
   <defs>
     <style>
       .acc { fill:#5B9CF6; font-size:12px; font-weight:600; }
@@ -10,7 +10,7 @@
       .ico { stroke:#A0A0A5; stroke-width:1.35; fill:none; stroke-linecap:round; stroke-linejoin:round; }
     </style>
   </defs>
-  <rect width="1000" height="420" fill="#17181c"/>
+  <rect width="1000" height="470" fill="#17181c"/>
 
   <text x="40" y="34" fill="#5B9CF6" font-size="15" font-weight="700">Bookmarks start in the Outline</text>
   <text x="40" y="54" class="dim" font-size="11.5">A bookmark saves a file and a heading, not a copy of the text. Click it later and you land back on that exact section.</text>
@@ -113,6 +113,6 @@
   <text x="708" y="336" class="dim">Opens that file, scrolls to that heading, unfolds</text>
   <text x="708" y="350" class="dim">whatever was hiding it, and unfolds the section.</text>
 
-  <text x="40" y="386" class="dim">Bookmarks are yours, stored against your email in the vault — so they follow you to another PC rather than living in one browser.</text>
-  <text x="40" y="404" class="dim">The organise toggle is off by default on purpose: with it off, there is nothing to drag out of place by accident.</text>
+  <text x="40" y="432" class="dim">Bookmarks are yours, stored against your email in the vault — so they follow you to another PC rather than living in one browser.</text>
+  <text x="40" y="450" class="dim">The organise toggle is off by default on purpose: with it off, there is nothing to drag out of place by accident.</text>
 </svg>

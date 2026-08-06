@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.18.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.27.2**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
@@ -16,7 +16,7 @@ New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is
 1. [[#1. Start here]] — what this is, installing it, your first launch
 2. [[#2. Getting around]] — the header, panels, the sidebar, moving between notes
 3. [[#3. Reading a note]] — folding, links, images, checkboxes
-4. [[#4. Finding things]] — Outline, Search, Bookmarks, Links
+4. [[#4. Finding things]] — What's New, Outline, Search, Bookmarks, Links
 5. [[#5. Making it yours]] — the Theme panel and Settings
 6. [[#6. Comments]] — leaving and answering comments
 7. [[#7. Quick reference]] — shortcuts and where every control lives
@@ -104,7 +104,8 @@ When a panel is collapsed its tab stays permanently lit so you can find it. Clic
 ![The sidebar, annotated](help-assets/fig-05-sidebar.svg)
 
 - **Expand a folder** — click the folder row. Files load the first time you open it and stay cached until you reload.
-- **Fold controls** — three buttons to the right of the "Vault Files" label: **Collapse all**, **Collapse unused** (closes everything except the chain leading to the note you are reading), **Expand all**. They hide as a group if you narrow the sidebar enough to crowd the label.
+- **Fold control** — one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed. It hides if you narrow the sidebar enough to crowd the label.
+- **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine. This is the one fold in WikiBase that is saved — notes, outlines and callouts all open fresh every time. A closed folder is obviously a closed folder, so remembering it can never mislead you the way a silently collapsed heading could.
 - **Sort order** — folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
 - **File counts** — the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
 - **Strip folder prefixes** — hides the `NN_` from folder names on screen without touching the actual folder. Settings, off by default.
@@ -115,7 +116,7 @@ When a panel is collapsed its tab stays permanently lit so you can find it. Clic
 
 The reader's own top-left corner holds **Back**, **Forward** and the name of the note you are on. Back and Forward work like browser tabs and restore your scroll position, not just the file. The history is session-only and resets when you reload.
 
-**Open last note** (Settings → Navigation, on by default) reopens the note you were last reading when you launch, expanding just the folders needed to reach it. Turn it off and WikiBase starts with everything collapsed.
+**Open last note** (Settings → Navigation, on by default) reopens the note you were last reading when you launch, expanding whatever folders are needed to reach it **on top of** the tree you left open. The two work together: your saved tree is the starting point, the path to the note is added to it. Turn it off and you simply get your tree back without a note opening.
 
 ---
 
@@ -125,25 +126,29 @@ The reader's own top-left corner holds **Back**, **Forward** and the name of the
 
 ### Folding headings
 
-Every heading H1 through H6 folds. Click the **chevron** to the left of a heading to fold or unfold its section; child headings fold with their parent. Folds are remembered per note, so a section you collapsed is still collapsed next time you open it.
+Every heading H1 through H6 folds. Click the **chevron** to the left of a heading to fold or unfold its section; child headings fold with their parent. **Alt-click** the chevron (Option on a Mac) to fold or unfold the entire subtree beneath it in one go.
 
-**Clicking the heading text**, rather than the chevron, does something different: it *selects* that heading. The row highlights and the Outline moves its marker to match, and it holds there until you scroll. This is how you tell Collapse unused which heading you actually care about.
+**A note always opens fully expanded.** Nothing you fold is remembered between visits. This is deliberate: folds used to be saved per note, which meant a note could open collapsed weeks later because of a Collapse All somebody ran once, with nothing on screen to say anything was missing.
 
-### Fold controls
+When something *is* folded, the row says so — a small **"N hidden"** badge appears next to it, counting the headings and list items tucked underneath. You should never have to wonder whether a note is short or just closed.
 
-Top right of the reader, three buttons acting on the current note's headings:
+**Clicking the heading text**, rather than the chevron, selects that heading: the row highlights and the Outline moves its marker to match, holding there until you scroll.
 
-| Button | What it does |
-|---|---|
-| **Collapse all** | Folds every heading, all six levels |
-| **Collapse unused** | Folds everything except the chain of headings above the one you are on, so you keep your place and lose the noise |
-| **Expand all** | Unfolds everything |
-
-These act on **headings**. Nested list items fold separately, below.
+**Collapse all and Expand all are in the Outline panel**, not the reader — see [[#Outline]] below. The reader folds one heading at a time.
 
 ### Folding lists
 
-Nested lists get their own chevrons. Click one to fold that item's children; double-click to fold its whole subtree, at any depth. List folds are remembered per note, separately from heading folds, and the three fold buttons above deliberately leave them alone.
+Nested lists get their own chevrons. Click one to fold that item's children, or **Alt-click** to fold its whole subtree at any depth — the same modifier as headings.
+
+**Hover anywhere over a list** and a small **All** control appears at the end of its first row, folding or unfolding that entire list. It does nothing Alt-click cannot; it is there so you can find it. Lists with no nesting have nothing to collapse and get no control.
+
+Unlike headings, **list folds are remembered per note.** The asymmetry is on purpose: headings are scaffolding you did not write, lists are content the author shaped, and a long checklist you collapsed is usually meant to stay collapsed. The "N hidden" badge is what makes that safe — a bullet that reopens reading "12 hidden" tells you exactly what it is holding.
+
+### Folding callouts
+
+Every callout with a body has a **chevron** at the right of its coloured title row. Click it to fold the body away. The title row keeps its colour, icon and title, so a folded warning still reads as a warning.
+
+If you write callouts in Obsidian, its `-` and `+` suffixes work here: `> [!warning]-` opens collapsed, `> [!warning]+` opens expanded. Unlike Obsidian, you do not *need* a suffix — every callout folds here regardless. Nothing is written back to the file and nothing is remembered; the file decides how a callout opens, every time.
 
 ### Links between notes
 
@@ -179,6 +184,38 @@ Each note's images live in a subfolder next to it, named "Attachments" by defaul
 
 ## 4. Finding things
 
+### What's New
+
+![What's New, annotated](help-assets/fig-09-whats-new.svg)
+
+The row above the vault tree, with a count of pages you have not seen yet. Click it for a page listing everything that has changed, newest first. The count disappears when you are up to date rather than sitting at zero.
+
+- **New vs Updated** — New means the page did not exist last time WikiBase looked. Updated means it did and its contents have changed since. New is worked out from the list of pages rather than from dates, so a page still reads as New even after its properties get filled in. Updated is worked out by comparing the page's actual text, so OneDrive touching a file without changing anything in it does not count as an edit.
+- **An updated page lists the sections that changed.** The headings appear under the file name. Click one and the page opens at that heading with it highlighted, the same as clicking an Outline entry. The highlight stays until you scroll. If several separate edits land before you get to the page, all of them are listed.
+- **Clicking a heading clears that heading only.** The others stay waiting. The file itself is not marked seen until the last one is done, so the count still tells you there is reading left. Opening the file name instead of a heading answers all of them at once, because you opened the page.
+- **A heading you have already read stays in the list**, greyed out, and stays clickable. That is how you get back to it if you clicked the wrong one. If it gets edited again later it goes back to unread, because clearing it answered the edit you read, not every edit it will ever get.
+- **A page with no sections listed** was changed somewhere outside a heading, or only in its properties.
+- **The date on the right is colour-coded by age** — green within the last week, amber up to a month, grey after that. It is only ever a second way of saying what the date and the group heading already say, so nothing is hidden if the colours are hard for you to tell apart.
+- **Seen happens when you leave a page, not when you open it.** Open something from the list, read it, come back, and it is marked seen. That way the highlight is still there when you return, instead of clearing the instant you click.
+- **The first time you ever open WikiBase, everything counts as seen.** You start from today rather than from a list of every page anyone has ever written.
+- **Filters** — Unseen, New, Updated or All, and a separate 30 days / 90 days / All time window. Both are remembered, and every one of them shows the changed headings under a file, not just Unseen.
+- **Mark all seen** clears the list, and **skips anything marked as required reading**, telling you what it skipped. Required pages can only be cleared by actually opening them.
+- **Renaming or moving a page in Obsidian does not resurface it** for the whole team — it is matched by its contents, so it keeps whatever seen state it already had. Deleting one removes it from the list.
+- **If hundreds of pages change at once** — usually OneDrive rewriting timestamps rather than anyone editing — the list says so in one line instead of flooding.
+
+**Required reading and onboarding.** Two optional properties an author can put on a note:
+
+| Property | What it does |
+|---|---|
+| `must-read: true` | Puts the page in a **Required reading** group with an orange pill, and keeps it out of Mark all seen. Fades from required after 30 days, counted from the first time *you* saw it, so time off doesn't cost you the notice. It stays in your list as unseen until you open it. |
+| `onboarding: true` | Marks the page as one a new starter should read. Never expires. |
+
+Set them the same way as any other property, in the Properties panel or in Obsidian. See [Help — Editing and Markdown](help-edit.md).
+
+**Where this is stored:** on your own machine, like your theme and your open folders. Nothing about what you have read is written into the vault, and nobody else can see it.
+
+### The right panel
+
 The right panel holds five tools, six with review turned on. They **stack** rather than replace each other.
 
 ![How the right panel stacks](help-assets/fig-07-right-panel-stacking.svg)
@@ -193,10 +230,13 @@ Which tools you keep open is remembered. The height split resets on reload.
 
 Every heading H1 through H6 in the current note, indented by level. Click one to scroll to it; the active heading highlights as you scroll.
 
-The Outline's toolbar has **Collapse all / Collapse unused / Expand all** for the outline tree, plus a **lock toggle** on the left:
+The badge next to the label counts the headings in the note, the same way the badge on a folder row counts its files.
 
-- **Unlocked (default)** — the Outline folds independently of the reader. Collapse the outline for a quick overview without collapsing the note you are reading.
-- **Locked** — outline and reader share one fold state, both directions, live.
+Each outline row with headings under it has its own chevron; **Alt-click** one to take its whole subtree. The **single button** on the right of the toolbar collapses the whole outline, and the same button expands it again once everything is folded.
+
+**The Outline and the reader fold independently.** Collapsing the outline gives you a quick map of a long note without collapsing the note you are reading, and folding a heading in the reader leaves the outline intact. This is how Word's Navigation Pane, Obsidian's Outline and VS Code's Outline view all behave — an outline is a view of the document, so folding it is a view operation.
+
+Neither the outline's folds nor the reader's survive a reload.
 
 ### Search
 
@@ -314,7 +354,7 @@ Dark vs light is **not** included in a shared theme. That stays personal, and it
 
 #### Elsewhere
 
-**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset.
+**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset. There's also a 14th type WikiBase adds itself, `[!copy]`, which carries a **Copy** button that puts its text on your clipboard as plain text — see [Editing and Markdown](help-edit.md) for how to write one.
 
 ### Settings
 
@@ -326,14 +366,51 @@ Open with **initials badge → Settings**.
 | Strip folder prefixes | Off | Hides the `NN_` prefix from folder names on screen |
 | Show file counts | On | The file-count badge on each folder |
 
-**Advanced Settings**, collapsed by default:
+**Advanced Settings**, collapsed by default, holds one thing: **Access**.
 
-| Setting | Default | What it does |
-|---|---|---|
-| Show review tools | Off | Adds the Review tab, the bell and the mark-reviewed controls |
-| Enable editing | Off | Turns on New, Move, Edit, Properties and clickable task checkboxes |
+### Access tiers
 
-Both are covered in [Help — Editing and Markdown](help-edit.md).
+WikiBase has three levels, each one including everything below it. You pick yours from the dropdown in Advanced Settings.
+
+| Tier | What it adds |
+|---|---|
+| **User** | The default. Read, search, outline, bookmarks, comments, What's New, themes. Nothing in the vault changes. |
+| **Contributor** | New, Move, Edit, the Properties fields, clickable task checkboxes, the Review tab, the bell and both inboxes. |
+| **Administrator** | Changing the two tier passwords. |
+
+**Moving up asks for that tier's password. Moving down never does**, so nobody is stuck in a mode they turned on by accident. Your tier is remembered on **this PC** and does not follow you to another machine.
+
+Anything your tier does not include is not shown at all, rather than shown greyed out.
+
+Editing and reviewing are both Contributor, deliberately. Only an edit made in the app writes the change record that the Review tab exists to show, so a reviewer who cannot edit would be looking at an empty list.
+
+### Setting the passwords the first time
+
+A new vault has no passwords, and until an Administrator password exists **every tier is open to anyone**. That is the same as the old on/off switches, and Settings says so plainly while it is the case.
+
+To turn the gate on: switch to **Administrator** (you will not be asked for anything), then set both passwords together. Setting only one leaves a door open, because anyone can pick Administrator and change the other.
+
+Afterwards, an Administrator can change either password from the same place.
+
+**What this is and is not.** This is an interface gate, not security. The passwords are stored as one-way hashes in your vault at `zSystem/auth.json`, never in the app, which is why an app update never wipes them. But the check runs in your browser and someone determined can get around it, and anyone who can reach the vault can edit any note in Obsidian no matter what tier they picked in WikiBase. Treat tiers as a way to keep people out of controls they do not need, not as a lock.
+
+Both tiers above User are covered in [Help — Editing and Markdown](help-edit.md).
+
+### Forgetting a password
+
+There is no reset button, and that is deliberate: a reset you could reach from this screen without the password would be a second door with no lock on it. The way back is the vault itself.
+
+1. Open the vault in Obsidian, or in SharePoint in a browser.
+2. Delete `zSystem/auth.json`.
+3. Switch back to WikiBase. Every tier opens again with no prompt, exactly like a vault that was never set up.
+4. Go to **Settings → Access**, switch to **Administrator**, and set both passwords again.
+
+You do not need to reload WikiBase. It re-reads that file whenever you come back to the tab, so tabbing out to delete it and tabbing back is all it takes.
+
+**Nobody can be permanently locked out.** Anyone who could lose a password already has the vault access needed to undo it — the file lives in the same SharePoint folder as the notes. If that is not the answer you want, the thing to change is who can write to the vault, not the passwords.
+
+The same three steps fix a hand-edited `auth.json` that has stopped making sense: a malformed file reads as "not set up", which is an open gate rather than a lockout.
+
 
 ### Where your preferences live
 
@@ -355,7 +432,7 @@ Open the **Comments** tab in the right panel. It shows the comments on the note 
 
 **Clicking a comment** selects it and tries to find the text it refers to in the note, so you can see what it is about without hunting.
 
-**The whole vault at once:** with the Comments tab open, a **Comment Inbox** button appears above it. That scans every folder and lists every open comment across the vault in the reader, so nothing sits unanswered in a folder nobody opened. The number on the Comments tab is that same vault-wide count of open comments.
+**The whole vault at once:** with the Comments tab open, a **Comment Inbox** button appears at the bottom of the panel. That scans every folder and lists every open comment across the vault in the reader, so nothing sits unanswered in a folder nobody opened. The number on the Comments tab is that same vault-wide count of open comments.
 
 | Type | Use for |
 |---|---|
@@ -390,16 +467,21 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Theme, colours, fonts, density | Initials badge → Theme |
 | Dark / Light | Sun-moon icon in the header |
 | Change your name or email | Initials badge → Switch user |
+| Point the app at a different folder | Initials badge → Reconnect to vault |
+| What changed since you last looked | **What's New**, above the vault tree |
 | Open or close a side panel | Click the tab on that panel's drag line |
 | Resize a panel | Drag the line; double-click it to collapse |
-| Collapse folders | Three buttons above the vault tree |
-| Collapse headings | Three buttons at the reader's top right |
+| Collapse folders | One button above the vault tree |
+| Collapse headings | One button in the Outline panel |
+| Fold a whole subtree | Alt-click the chevron (Option on Mac) |
+| Fold a whole list | Hover the list, click **All** on its first row |
+| Fold a callout | Chevron at the right of its title row |
 | Back and Forward | Reader's top left, beside the filename |
 | Edit a note | Pencil, reader top right. Needs editing on |
 | Note properties | Sliders icon, next to the pencil |
 | Bookmark a heading | Ribbon icon on that heading's Outline row |
 | Search | `⌘K` / `Ctrl+K`, or the magnifier tab |
-| Version and changelog | "Version 0.18.0" at the bottom of the right panel |
+| Version and changelog | The version button at the bottom of the right panel |
 | How to write Markdown | [Help — Editing and Markdown](help-edit.md) |
 
 ---
@@ -412,6 +494,9 @@ The browser's permission to your vault folder was reset. A Chrome or Edge update
 **"Could not load vault"**
 The folder WikiBase remembers has been moved, renamed or unsynced from OneDrive. Click **Open a different folder…** and re-pick it.
 
+**You picked the wrong folder and it keeps loading that one**
+WikiBase remembers your choice and reuses it every launch, so this does not clear itself. Initials badge → **Reconnect to vault**, then pick the right folder. Cancelling the picker changes nothing, so a misclick costs you nothing.
+
 **The vault opens but shows no files**
 You have probably picked a parent folder. Re-pick the folder that directly contains your notes and note folders.
 
@@ -422,7 +507,7 @@ Its target is in a folder you have not expanded yet. Open that folder in the sid
 The image must be in the attachments subfolder beside the note that references it, with the filename matching exactly, including case. If *every* image in the whole vault is broken, the attachments subfolder name configured in the app does not match what Obsidian actually created — flag it to whoever manages WikiBase.
 
 **New, Move or Edit will not work**
-Turn on **Settings → Advanced Settings → Enable editing**. If they still will not, your name is not on the app's editors list. See [Help — Editing and Markdown](help-edit.md).
+You are on the **User** tier. Switch to **Contributor** in **Settings → Advanced Settings → Access**. You will be asked for the Contributor password, unless nobody has set one yet. See [Help — Editing and Markdown](help-edit.md).
 
 **A panel width or fold state did not come back**
 Those save to this browser's local storage. Clearing browser data or using a private window resets them. Your bookmarks and profile are unaffected, they live in the vault.
@@ -431,7 +516,13 @@ Those save to this browser's local storage. Clearing browser data or using a pri
 Most likely raw HTML, a Mermaid diagram or MathJax. See [Help — Editing and Markdown](help-edit.md) for what WikiBase deliberately does not render.
 
 **Someone else's changes are not showing**
-The vault syncs through OneDrive, so there is a lag between their save and your copy. Check OneDrive has finished syncing, then reload.
+The vault syncs through OneDrive, so there is a lag between their save and your copy. Check OneDrive has finished syncing, then come back to the tab — WikiBase re-reads the vault whenever it regains focus, so you should not need to reload.
+
+**What's New is not picking up an edit**
+Switch to another window and back. That is when WikiBase re-reads the vault. If it still does not appear, OneDrive has not finished syncing the file to your machine yet.
+
+**Nobody knows the Administrator password**
+Nobody is locked out. See [Forgetting a password](#Forgetting a password) — you delete one file in the vault and set them again.
 
 **I think I am on an old version**
 When a newer version is ready, an **up arrow** appears in the header. Click it to reload into it. Installed apps do not always pick up new versions on their own, which is what that arrow is for.

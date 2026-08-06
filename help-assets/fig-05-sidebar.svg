@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 428" width="1000" height="428" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
   <defs>
     <style>
       .acc { fill:#5B9CF6; font-size:12px; font-weight:600; }
@@ -8,83 +8,88 @@
       .ico { stroke:#A0A0A5; stroke-width:1.3; fill:none; stroke-linecap:round; stroke-linejoin:round; }
     </style>
   </defs>
-  <rect width="1000" height="400" fill="#17181c"/>
+  <rect width="1000" height="428" fill="#17181c"/>
 
   <text x="40" y="34" fill="#5B9CF6" font-size="15" font-weight="700">Vault Files, the sidebar</text>
   <text x="40" y="54" class="dim" font-size="11.5">Your folder tree. Click a folder to expand it; files load the first time and stay loaded until you reload the app.</text>
 
   <!-- sidebar -->
-  <rect x="40" y="78" width="270" height="290" rx="6" fill="#1e1f24" stroke="#35363a"/>
+  <rect x="40" y="78" width="270" height="316" rx="6" fill="#1e1f24" stroke="#35363a"/>
 
   <!-- toolbar -->
   <text x="58" y="102" fill="#C9C9CE" font-size="11.5" font-weight="700">Vault Files</text>
-  <g class="ico" transform="translate(232,93)"><polyline points="0,8 5,3 10,8"/><polyline points="0,3 5,-2 10,3"/></g>
-  <g class="ico" transform="translate(256,93)"><path d="M0 1.6A1.6 1.6 0 0 1 1.6 0h3.2L6.4 1.6h5A1.6 1.6 0 0 1 13 3.2v5A1.6 1.6 0 0 1 11.4 9.8H1.6A1.6 1.6 0 0 1 0 8.2Z"/><line x1="4" y1="5.6" x2="9" y2="5.6"/></g>
-  <g class="ico" transform="translate(282,93)"><polyline points="0,0 5,5 10,0"/><polyline points="0,5 5,10 10,5"/></g>
-  <line x1="40" y1="114" x2="310" y2="114" stroke="#35363a"/>
+  <g class="ico" transform="translate(282,93)"><polyline points="0,8 5,3 10,8"/><polyline points="0,3 5,-2 10,3"/></g>
+
+  <!-- What's New row (0.23.0) — pinned between the toolbar and the tree -->
+  <text x="58" y="124" fill="#8A8A8F" font-size="12">What's New</text>
+  <rect x="270" y="114" width="26" height="14" rx="7" fill="#5B9CF6"/>
+  <text x="283" y="124.5" fill="#ffffff" font-size="9.5" font-weight="700" text-anchor="middle">3</text>
+  <line x1="40" y1="138" x2="310" y2="138" stroke="#35363a"/>
 
   <!-- rows -->
-  <g class="ico" transform="translate(56,128)" stroke-width="1.2"><polyline points="0,0 4,4 0,8"/></g>
-  <rect x="72" y="126" width="12" height="10.5" rx="2.5" fill="#FF8080" opacity=".85"/>
-  <text x="94" y="136" class="t">00_Identity</text>
-  <rect x="248" y="127" width="22" height="13" rx="6.5" fill="#2c2d33"/>
-  <text x="259" y="137" fill="#8A8A8F" font-size="9" text-anchor="middle">6</text>
+  <g class="ico" transform="translate(56,154)" stroke-width="1.2"><polyline points="0,0 4,4 0,8"/></g>
+  <rect x="72" y="152" width="12" height="10.5" rx="2.5" fill="#FF8080" opacity=".85"/>
+  <text x="94" y="162" class="t">00_Identity</text>
+  <rect x="248" y="153" width="22" height="13" rx="6.5" fill="#2c2d33"/>
+  <text x="259" y="163" fill="#8A8A8F" font-size="9" text-anchor="middle">6</text>
 
-  <g class="ico" transform="translate(56,156)" stroke-width="1.2"><polyline points="0,0 4,4 8,0"/></g>
-  <rect x="72" y="154" width="12" height="10.5" rx="2.5" fill="#F5C26B" opacity=".85"/>
-  <text x="94" y="164" class="t">01_Projects</text>
-  <rect x="248" y="155" width="22" height="13" rx="6.5" fill="#2c2d33"/>
-  <text x="259" y="165" fill="#8A8A8F" font-size="9" text-anchor="middle">3</text>
+  <g class="ico" transform="translate(56,182)" stroke-width="1.2"><polyline points="0,0 4,4 8,0"/></g>
+  <rect x="72" y="180" width="12" height="10.5" rx="2.5" fill="#F5C26B" opacity=".85"/>
+  <text x="94" y="190" class="t">01_Projects</text>
+  <rect x="248" y="181" width="22" height="13" rx="6.5" fill="#2c2d33"/>
+  <text x="259" y="191" fill="#8A8A8F" font-size="9" text-anchor="middle">3</text>
 
-  <g class="ico" transform="translate(74,184)" stroke-width="1.2"><polyline points="0,0 4,4 8,0"/></g>
-  <rect x="90" y="182" width="12" height="10.5" rx="2.5" fill="#5FD98A" opacity=".85"/>
-  <text x="112" y="192" class="t">Site A</text>
+  <g class="ico" transform="translate(74,210)" stroke-width="1.2"><polyline points="0,0 4,4 8,0"/></g>
+  <rect x="90" y="208" width="12" height="10.5" rx="2.5" fill="#5FD98A" opacity=".85"/>
+  <text x="112" y="218" class="t">Site A</text>
   <!-- hover state + button -->
-  <rect x="66" y="178" width="240" height="20" fill="#5B9CF6" opacity=".07"/>
-  <circle cx="286" cy="188" r="8" fill="#2c2d33" stroke="#5B9CF6"/>
-  <text x="286" y="192" text-anchor="middle" fill="#5B9CF6" font-size="11" font-weight="700">+</text>
+  <rect x="66" y="204" width="240" height="20" fill="#5B9CF6" opacity=".07"/>
+  <circle cx="286" cy="214" r="8" fill="#2c2d33" stroke="#5B9CF6"/>
+  <text x="286" y="218" text-anchor="middle" fill="#5B9CF6" font-size="11" font-weight="700">+</text>
 
-  <rect x="106" y="210" width="10" height="12" rx="1.5" fill="none" stroke="#6E6E73"/>
-  <text x="126" y="220" class="t" fill="#8A8A8F">scope.md</text>
+  <rect x="106" y="236" width="10" height="12" rx="1.5" fill="none" stroke="#6E6E73"/>
+  <text x="126" y="246" class="t" fill="#8A8A8F">scope.md</text>
 
   <!-- active file row -->
-  <rect x="66" y="232" width="244" height="22" fill="#5B9CF6" opacity=".10"/>
-  <rect x="308" y="232" width="2" height="22" fill="#5B9CF6"/>
-  <rect x="106" y="238" width="10" height="12" rx="1.5" fill="none" stroke="#5B9CF6"/>
-  <text x="126" y="248" fill="#5B9CF6" font-size="12.5">programme.md</text>
+  <rect x="66" y="258" width="244" height="22" fill="#5B9CF6" opacity=".10"/>
+  <rect x="308" y="258" width="2" height="22" fill="#5B9CF6"/>
+  <rect x="106" y="264" width="10" height="12" rx="1.5" fill="none" stroke="#5B9CF6"/>
+  <text x="126" y="274" fill="#5B9CF6" font-size="12.5">programme.md</text>
 
-  <g class="ico" transform="translate(74,270)" stroke-width="1.2"><polyline points="0,0 4,4 0,8"/></g>
-  <rect x="90" y="268" width="12" height="10.5" rx="2.5" fill="#5B9CF6" opacity=".85"/>
-  <text x="112" y="278" class="t">Site B</text>
+  <g class="ico" transform="translate(74,296)" stroke-width="1.2"><polyline points="0,0 4,4 0,8"/></g>
+  <rect x="90" y="294" width="12" height="10.5" rx="2.5" fill="#5B9CF6" opacity=".85"/>
+  <text x="112" y="304" class="t">Site B</text>
 
-  <g class="ico" transform="translate(56,300)" stroke-width="1.2"><polyline points="0,0 4,4 0,8"/></g>
-  <rect x="72" y="298" width="12" height="10.5" rx="2.5" fill="#A0A0A5" opacity=".85"/>
-  <text x="94" y="308" class="t">02_Admin</text>
+  <g class="ico" transform="translate(56,326)" stroke-width="1.2"><polyline points="0,0 4,4 0,8"/></g>
+  <rect x="72" y="324" width="12" height="10.5" rx="2.5" fill="#A0A0A5" opacity=".85"/>
+  <text x="94" y="334" class="t">02_Admin</text>
 
   <!-- leaders -->
   <g class="lead">
     <path d="M300 98 L400 98"/>
-    <path d="M270 133 L400 133"/>
-    <path d="M296 188 L400 188"/>
-    <path d="M312 243 L400 243"/>
-    <path d="M100 322 L100 348 L200 348"/>
+    <path d="M300 121 L400 121"/>
+    <path d="M270 159 L400 159"/>
+    <path d="M296 214 L400 214"/>
+    <path d="M312 269 L400 269"/>
+    <path d="M100 348 L100 372 L200 372"/>
   </g>
 
-  <text x="410" y="94" class="acc">Collapse all · Collapse unused · Expand all</text>
-  <text x="410" y="110" class="dim">Collapse unused keeps open only the folders leading to the note you are reading.</text>
-  <text x="410" y="124" class="dim">The three hide together if you narrow the sidebar enough to crowd the label.</text>
+  <text x="410" y="94" class="acc">Collapse all, then Expand all</text>
+  <text x="410" y="108" class="dim">One symbol, both directions. It hides if you narrow the sidebar enough to crowd the label.</text>
+  <text x="410" y="126" class="acc">What's New</text>
+  <text x="410" y="142" class="dim">Pages added or changed since you last looked. The count hides when you are up to date.</text>
 
-  <text x="410" y="137" class="acc">File count</text>
-  <text x="492" y="137" class="dim">how many .md files are in that folder. Turn off in Settings.</text>
+  <text x="410" y="166" class="acc">File count</text>
+  <text x="410" y="182" class="dim">How many .md files are in that folder. Turn off in Settings.</text>
 
-  <text x="410" y="185" class="acc">Hover a folder → +</text>
-  <text x="410" y="201" class="dim">Creates a new file inside that folder. The header's + creates at the vault root.</text>
-  <text x="410" y="215" class="dim">Only shows with editing turned on.</text>
+  <text x="410" y="211" class="acc">Hover a folder → +</text>
+  <text x="410" y="227" class="dim">Creates a new file inside that folder. The header's + creates at the vault root.</text>
+  <text x="410" y="241" class="dim">Only shows with editing turned on.</text>
 
-  <text x="410" y="247" class="acc">The note you are reading</text>
-  <text x="410" y="263" class="dim">Marked with a tint, a bar, or both — your choice, under Theme → Interface.</text>
+  <text x="410" y="273" class="acc">The note you are reading</text>
+  <text x="410" y="289" class="dim">Marked with a tint, a bar, or both — your choice, under Theme → Interface.</text>
 
-  <text x="206" y="352" class="acc">Numeric prefixes sort numerically</text>
-  <text x="206" y="368" class="dim">Unprefixed folders sort alphabetically after them. Hide the NN_ on screen with</text>
-  <text x="206" y="382" class="dim">Settings → Strip folder prefixes; the folder itself is never renamed.</text>
+  <text x="206" y="376" class="acc">Numeric prefixes sort numerically</text>
+  <text x="206" y="392" class="dim">Unprefixed folders sort alphabetically after them. Hide the NN_ on screen with</text>
+  <text x="206" y="406" class="dim">Settings → Strip folder prefixes; the folder itself is never renamed.</text>
 </svg>

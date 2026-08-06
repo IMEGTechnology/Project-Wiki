@@ -569,6 +569,49 @@
     .cm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
     #move-modal .s-select { width: 100%; }
 
+    /* ── S14 access tiers (0.27.0) ────────────────────────────────
+       The unlock prompt reuses the create-modal shell so there is one
+       modal look in the app, not two. */
+    #tier-overlay {
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #tier-modal {
+      width: 340px; padding: 16px; border-radius: 10px;
+      background: var(--bg-reader); border: 1px solid var(--border-strong);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .tier-input {
+      width: 100%; padding: 7px 10px; font-size: 13px; font-family: inherit;
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      background: var(--bg-app); color: var(--text-primary); outline: none;
+      display: block; margin-bottom: 8px; box-sizing: border-box;
+    }
+    .tier-input:focus { border-color: var(--accent); }
+    .tier-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.45; }
+    .tier-err { font-size: 12px; color: #e06c75; margin: 0; min-height: 15px; }
+    .tier-ok  { font-size: 12px; color: var(--accent); margin: 0; min-height: 15px; }
+    .tier-badge {
+      display: inline-block; padding: 1px 7px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; letter-spacing: .02em;
+      border: 1px solid var(--border-strong); color: var(--text-muted);
+    }
+    .tier-badge.t-contributor { border-color: var(--accent); color: var(--accent); }
+    .tier-badge.t-admin { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+    .tier-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .tier-row .s-select { flex: 1; min-width: 0; }
+    .tier-note {
+      font-size: 11.5px; color: var(--text-muted); line-height: 1.5;
+      margin: 6px 0 0;
+    }
+    .tier-warn {
+      font-size: 11.5px; line-height: 1.5; margin: 8px 0 0;
+      padding: 8px 10px; border-radius: var(--radius);
+      border: 1px solid var(--border-strong); color: var(--text-muted);
+      background: var(--bg-app);
+    }
+
     /* Local test mode picker (shown when CONFIG has placeholders) */
     .local-pick-btn {
       margin-top: 10px;
@@ -641,11 +684,12 @@
        same size, grouped the same way the fold-pill icons are on the
        right so they move together instead of needing separate math. */
     #reader-nav-pill {
-      /* right:218px leaves clearance for the fold-pill/props/edit cluster
-         on the opposite corner (fold-pill alone runs ~89px wide starting
-         at right:120 — see #reader-fold-pill below) so the filename can
-         flex-grow into all the space between, instead of a small fixed box. */
-      position: absolute; top: 8px; left: 48px; right: 218px; z-index: 6;
+      /* right:124px clears the props/edit pair on the opposite corner
+         (props starts at right:84 and is 28px wide, ending at right:112)
+         so the filename can flex-grow into all the space between, instead
+         of a small fixed box. Was 218px until S34, when the fold pill that
+         used to sit at right:120 was removed. */
+      position: absolute; top: 8px; left: 48px; right: 124px; z-index: 6;
       display: flex; align-items: center; gap: 6px;
     }
     #reader-nav-pill .icon-btn { background: var(--bg-reader); flex-shrink: 0; }
@@ -676,20 +720,144 @@
       pointer-events: none; z-index: 5;
       transition: opacity 0.15s ease;
     }
-    /* Fold controls (collapse all / collapse unused / expand all) for the
-       reader's own headings. Neutral tone — deliberately not accent-colored
-       so it reads as app chrome, not a call-to-action. Sits left of Properties. */
-    #reader-fold-pill {
-      position: absolute; top: 8px; right: 120px; z-index: 6;
-      display: flex; align-items: center; gap: 2px;
+    /* S34: #reader-fold-pill and its .rfp-sep are gone — bulk folding moved
+       to the Outline panel. Nothing replaces them here; the corner is now
+       just Back/Forward + filename on the left, Properties + Edit on the right. */
+
+    /* Hidden-item count on a folded heading, list item or callout (S34).
+       Folded state used to be invisible unless you noticed a rotated
+       chevron, which is the single biggest reason the reader read as
+       "randomly collapsed". Muted and small — a signal, not a control. */
+    .md-hidden-count {
+      font-size: 11px; font-weight: 500; letter-spacing: 0;
+      text-transform: none; color: var(--text-muted);
+      background: var(--badge-bg); border-radius: 10px;
+      padding: 0 6px; margin-left: 8px; flex-shrink: 0;
+      vertical-align: middle;
     }
-    #reader-fold-pill .icon-btn { width: 26px; height: 26px; }
-    #reader-fold-pill .icon-btn:hover { background: var(--hover); }
-    #reader-fold-pill .rfp-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; margin-left: 6px; }
+    /* ── What's New (S35 / 0.23.0) ──────────────────────────────
+       Unseen styling is "option B": an accent dot plus full-strength
+       text, with SEEN rows fading back to --text-secondary. The rejected
+       option was an accent-background wash with a left rail, which spends
+       --accent-bg on a passive state where it collides with --hover and
+       with row selection, and floods the whole pane after a bulk import.
+       Red is never used here — it stays reserved for comments. A new page
+       is not an alert. */
+    #sb-whats-new {
+      display: flex; align-items: center; gap: 8px;
+      width: calc(100% - 16px); margin: 0 8px 4px; padding: 5px 8px;
+      font-family: inherit; font-size: 12.5px; text-align: left;
+      color: var(--text-secondary); background: none;
+      border: none; border-radius: var(--radius);
+      cursor: pointer; flex-shrink: 0;
+    }
+    #sb-whats-new:hover { background: var(--hover); color: var(--text-primary); }
+    #sb-whats-new.active { background: var(--active-bg, var(--hover)); color: var(--text-primary); }
+    #sb-whats-new .wn-nav-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge.accent { background: var(--accent); color: #fff; font-weight: 600; }
+
+    .wn-wrap { padding-bottom: 40px; }
+    .wn-sub { font-size: 13px; color: var(--text-secondary); margin: -4px 0 16px; }
+    .wn-bar {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
+      padding-bottom: 12px; margin-bottom: 8px;
+      border-bottom: 1px solid var(--border-strong);
+    }
+    .wn-filters { display: flex; gap: 2px; }
+    .wn-filter {
+      font-family: inherit; font-size: 12px; padding: 3px 9px;
+      color: var(--text-secondary); background: none;
+      border: 1px solid transparent; border-radius: var(--radius); cursor: pointer;
+    }
+    .wn-filter:hover { background: var(--hover); color: var(--text-primary); }
+    .wn-filter.on { color: var(--accent); border-color: var(--accent); }
+    .wn-marklink {
+      font-family: inherit; font-size: 12px; padding: 3px 6px; margin-left: auto;
+      color: var(--text-muted); background: none; border: none; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .wn-marklink:hover { color: var(--text-primary); }
+    .wn-note { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.5; }
+    .wn-empty { font-size: 13px; color: var(--text-muted); padding: 24px 0; }
+    .wn-group { margin-bottom: 22px; }
+    .wn-group-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 0 6px; margin-bottom: 2px;
+    }
+    .wn-group-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .wn-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 8px; border-radius: var(--radius); cursor: pointer;
+    }
+    .wn-row:hover { background: var(--hover); }
+    .wn-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
+    }
+    .wn-name { font-size: 13.5px; color: var(--text-primary); flex: 1; min-width: 0;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Seen rows recede. Nothing is hidden — the row is still readable and
+       still clickable, it just stops competing with what you haven't read. */
+    .wn-row.seen .wn-name { color: var(--text-secondary); }
+    .wn-pills { display: flex; gap: 4px; flex-shrink: 0; }
+    .wn-when { font-size: 11.5px; color: var(--text-muted); flex-shrink: 0; min-width: 62px; text-align: right; }
+    /* Age colour, 0.27.2. On the date itself, because that element already
+       means "when" — no new glyph, and no clash with the pills, which encode
+       kind (New is green) rather than age. Old is muted, not red: red is
+       reserved app-wide for destructive actions, and an old page is not a
+       fault. The three themes follow because these are the shared --co-*
+       ramps, not literals. */
+    .wn-when.wn-age-fresh { color: var(--co-green-txt);  font-weight: 600; }
+    .wn-when.wn-age-mid   { color: var(--co-yellow-txt); font-weight: 600; }
+    .wn-when.wn-age-old   { color: var(--text-muted); }
+    /* A page you have read stops competing on every axis, colour included. */
+    .wn-row.seen .wn-when { color: var(--text-muted); font-weight: 400; }
+    /* Changed sections, indented under their file. Aligned to the file name
+       rather than the row edge (8px padding + 7px dot + 10px gap) so they read
+       as belonging to it. No leading bullet or arrow glyph: these are buttons,
+       and the hover state is what says so. */
+    .wn-secs {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      padding: 0 8px 6px 33px; margin-top: -2px;
+    }
+    .wn-sec {
+      font: inherit; font-size: 12px; line-height: 1.3;
+      color: var(--text-secondary); background: var(--bg-secondary);
+      border: 1px solid var(--border); border-radius: 5px;
+      padding: 2px 8px; cursor: pointer; max-width: 100%;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .wn-sec:hover { background: var(--hover); color: var(--text-primary); }
+    /* A section you've opened stays in the list and stays clickable — it is
+       how you get back when you clicked the wrong one — but it recedes, the
+       same treatment .wn-row.seen gives a file you've read. Nothing is hidden
+       and nothing is disabled; hover brings it back to full strength. */
+    .wn-sec.read {
+      color: var(--text-muted); background: transparent;
+      border-style: dashed; opacity: 0.7;
+    }
+    .wn-sec.read:hover { opacity: 1; background: var(--hover); color: var(--text-secondary); }
+    .wn-sec-more { font-size: 11.5px; color: var(--text-muted); align-self: center; padding-left: 2px; }
+    .wn-pill {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; padding: 1px 6px; border-radius: 9px;
+      border: 1px solid;
+    }
+    .wn-pill-new  { color: var(--co-green-txt);  background: var(--co-green-bg);  border-color: var(--co-green-bd); }
+    .wn-pill-upd  { color: var(--co-gray-txt);   background: var(--co-gray-bg);   border-color: var(--co-gray-bd); }
+    .wn-pill-must { color: var(--co-orange-txt); background: var(--co-orange-bg); border-color: var(--co-orange-bd); }
+    .wn-pill-onb  { color: var(--text-muted);    background: var(--badge-bg);     border-color: var(--border-strong); }
+
     /* Properties flyout (S13) */
     #props-panel {
       position: absolute; top: 44px; right: 48px; z-index: 20;
-      width: 270px; max-height: 70%; overflow-y: auto;
+      /* max-height was 70%, which resolved against #reader-corner-align — position:absolute
+         with no height and only absolutely-positioned children, so its content height is 0.
+         70% of 0 collapsed the flyout to one row plus a scrollbar. Viewport units instead. */
+      width: 270px; max-height: min(70vh, 560px); overflow-y: auto;
       padding: 12px 14px; border-radius: 10px;
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
@@ -944,6 +1112,28 @@
     .md-callout-body > .md-p:first-child { margin-top: 0; }
     .md-callout-body > .md-p:last-child  { margin-bottom: 0; }
     .md-callout-body .md-callout { margin: 0.5rem 0; }
+
+    /* Foldable callouts (S34). The title takes the free space so the copy
+       button and the fold chevron can sit at the right edge in source
+       order — .md-callout-copy-btn keeps its own margin-left:auto, which
+       is now inert but harmless, rather than being edited out from under
+       the v0.19.2 [!copy] work.
+
+       Collapsed keeps the label row at full colour, icon and title, so the
+       callout's TYPE is still readable when its body is hidden. That was
+       the explicit requirement: fold the content, never the identity. */
+    .md-callout-title { flex: 1; min-width: 0; }
+    .md-callout-fold {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; flex-shrink: 0; margin-left: 6px;
+      padding: 0; border: none; background: none; cursor: pointer;
+      border-radius: 4px; color: inherit;
+    }
+    .md-callout-fold:hover { background: var(--hover); }
+    .md-callout-fold .md-fold-icon { width: 12px; height: 12px; margin-top: 0; }
+    .md-callout.folded .md-callout-fold .md-fold-icon { transform: rotate(-90deg); }
+    .md-callout.folded .md-callout-label { margin-bottom: 0; }
+    .md-callout.folded .md-callout-body   { display: none; }
     /* 13 Obsidian callout types -> 9 color families (locked S7) */
     .md-callout.note, .md-callout.info, .md-callout.todo         { background: var(--co-blue-bg);   border-color: var(--co-blue-bd); }
     .md-callout.note .md-callout-label, .md-callout.info .md-callout-label, .md-callout.todo .md-callout-label { color: var(--co-blue-txt); }
@@ -1047,6 +1237,28 @@
     .md-li-cont { display: block; color: var(--text-muted); font-size: 0.93em; margin-top: 2px; }
     .md-li.folded > .md-li-row .md-fold-icon { transform: rotate(-90deg); }
     .md-li-section.folded { display: none; }
+
+    /* Whole-list fold control (S34). Sits at the right edge of the list's
+       FIRST row and only appears while the pointer is somewhere in that
+       list, so a page of short lists isn't covered in controls. It does
+       nothing Alt-click on the top chevron can't already do — it exists
+       purely so the capability is visible, since a modifier gesture is
+       exactly as undiscoverable as the double-click it replaced. */
+    .md-list-allfold {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 4px; flex-shrink: 0; margin-left: 8px;
+      padding: 1px 7px; border-radius: 10px;
+      border: 1px solid var(--border-strong); background: var(--bg-reader);
+      font-family: inherit; font-size: 10.5px; font-weight: 600;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      opacity: 0; transition: opacity 0.12s ease;
+    }
+    .md-list:hover > .md-li > .md-li-row > .md-list-allfold,
+    .md-list-allfold:focus-visible { opacity: 1; }
+    .md-list-allfold:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+    .md-list-allfold .md-fold-icon { width: 10px; height: 10px; margin-top: 0; }
+    .md-list-allfold.all-folded .md-fold-icon { transform: rotate(-90deg); }
 
     /* .md-task-item now lives on the row div, not the <li> — the <li>
        itself just wraps the row + its optional child section, and
@@ -1707,6 +1919,7 @@
       gap: 10px;
       padding: 7px 8px 7px 12px;
     }
+    #ot-toolbar .ot-lead { display: flex; align-items: center; gap: 6px; min-width: 0; }
     #ot-toolbar .ot-label { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
     #ot-toolbar .ot-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
     #ot-toolbar .ot-group.hidden { display: none; }
@@ -1733,7 +1946,10 @@
     .wb-copied-tip.show { opacity: 1; transform: translateY(0); }
     /* Neutral tone when locked (shared) — same "chrome, not a call-to-action"
        rule as the reader fold pill. No accent color. */
-    #ot-lock-toggle.locked { background: var(--badge-bg); color: var(--text-primary); }
+    /* S34: #ot-lock-toggle's rule removed with the lock itself. The
+       neutral-tone rule it carried lives on in spirit — the Outline's
+       single fold symbol is a plain .icon-btn, never accent-coloured,
+       same "chrome, not a call-to-action" rule as the sidebar's. */
 
     /* Outline list */
     .rp-outline-list { padding: 6px 0; }
@@ -1904,8 +2120,14 @@
     .rv-ov-accept:hover { border-color: var(--co-green-bd); color: var(--co-green-txt); }
     .rv-ov-reject:hover { border-color: var(--co-red-bd); color: var(--co-red-txt); }
 
-    /* Right panel inbox strip (S5) */
-    .rp-inbox-strip { padding: 6px 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    /* Right panel inbox strip (S5; moved below the panes S37 — border flipped
+       to the top edge because the strip now separates the panes from the
+       version footer rather than the tab rail from the panes). The two
+       buttons stack with no gap otherwise, which read as one control. */
+    .rp-inbox-strip {
+      padding: 6px 8px; border-top: 1px solid var(--border); flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 4px;
+    }
     .rp-inbox-btn {
       width: 100%; padding: 5px 8px;
       font-size: 12px; font-weight: 500;
@@ -2031,6 +2253,14 @@
           <svg class="icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
           Switch user
         </button>
+        <!-- Reconnect to vault — local FSA mode only (SharePoint mode has no
+             folder to pick, the path comes from CONFIG). Shown/hidden by
+             toggleUserDropdown() on every open rather than once at boot, so
+             it can't be left in the wrong state by boot ordering. -->
+        <button class="ud-item" id="ud-reconnect" style="display:none" onclick="reconnectVault()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          Reconnect to vault
+        </button>
       </div>
     </div>
   </header>
@@ -2042,18 +2272,21 @@
     <nav id="sidebar" aria-label="Vault navigation">
       <div id="sb-toolbar">
         <span class="sbt-label">Vault Files</span>
+        <!-- S33/0.21.0: one symbol, matching the Outline's. Collapse unused
+             went with the reader's and the Outline's for the same reason —
+             no mainstream file tree ships it as a visible button. -->
         <div class="sbt-group" id="sbt-group">
-          <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="sidebarCollapseAll()">
-            <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
-          </button>
-          <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="sidebarCollapseUnused()">
-            <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-          </button>
-          <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="sidebarExpandAll()">
-            <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
-          </button>
+          <button class="icon-btn" id="sb-fold-toggle" title="Collapse all" aria-label="Collapse all" onclick="sidebarToggleAll()"></button>
         </div>
       </div>
+      <!-- What's New (S35/0.23.0). Pinned BETWEEN the toolbar and the tree,
+           deliberately not inside it: in the tree, Collapse all would touch
+           it and it would scroll out of sight, which is the opposite of what
+           a notification row is for. -->
+      <button id="sb-whats-new" onclick="openWhatsNew()" title="What's New">
+        <span class="wn-nav-label">What's New</span>
+        <span class="badge accent" id="wn-count" style="display:none">0</span>
+      </button>
       <div id="sb-tree">
         <div class="sb-msg">Loading vault…</div>
       </div>
@@ -2089,20 +2322,10 @@
         <span id="reader-filename" class="reader-filename"></span>
       </div>
 
-      <!-- Fold controls for this file's headings — collapse all / collapse
-           unused (keeps the current heading's ancestor chain open) / expand all -->
-      <div id="reader-fold-pill">
-        <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="readerCollapseAll()">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
-        </button>
-        <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="readerCollapseUnused()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-        </button>
-        <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="readerExpandAll()">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
-        </button>
-        <div class="rfp-sep"></div>
-      </div>
+      <!-- S34: the reader's fold pill is gone. Bulk folding lives in the
+           Outline panel only — the reader folds one heading at a time via
+           its own chevrons, which is what Word's Navigation Pane, Obsidian's
+           Outline and VS Code's Outline view all do. -->
 
       <!-- Edit button (S9) — floats top-right of the reader -->
       <button class="icon-btn" id="btn-edit" title="Edit this file" aria-label="Edit this file" style="display:none" onclick="enterEdit()">
@@ -2188,33 +2411,21 @@
           <svg class="rp-tab-ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
       </div>
-      <!-- Vault-wide inboxes (open in reader) — each shows only with its own tab -->
-      <div class="rp-inbox-strip" id="rp-inbox-strip" style="display:none">
-        <button class="rp-inbox-btn" id="btn-cmt-inbox" style="display:none" onclick="openReviewView()">
-          <svg style="width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Comment Inbox<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span>
-        </button>
-        <button class="rp-inbox-btn" id="btn-review-inbox" style="display:none" onclick="openChangesView()">
-          <svg style="width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          Review Inbox
-        </button>
-      </div>
       <div class="rp-body" id="rp-body">
         <div class="rp-pane active" id="rp-outline">
+          <!-- S34: one symbol, not three buttons. The lock toggle is gone —
+               the Outline no longer shares fold state with the reader in
+               either direction, which is how Word's Navigation Pane,
+               Obsidian's Outline and VS Code's Outline view all behave.
+               The badge counts headings in the open file, matching the
+               file-count badge on sidebar folder rows. -->
           <div id="ot-toolbar" style="display:none">
-            <span class="ot-label">Outline</span>
+            <span class="ot-lead">
+              <span class="ot-label">Outline</span>
+              <span class="badge" id="ot-count">0</span>
+            </span>
             <div class="ot-group" id="ot-group">
-              <button class="icon-btn" id="ot-lock-toggle" title="Fold state independent — click to share with reader" aria-label="Fold state independent — click to share with reader" onclick="toggleOutlineFoldMode()"></button>
-              <div class="ot-sep"></div>
-              <button class="icon-btn" title="Collapse all" aria-label="Collapse all" onclick="outlineCollapseAll()">
-                <svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>
-              </button>
-              <button class="icon-btn" title="Collapse unused" aria-label="Collapse unused" onclick="outlineCollapseUnused()">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-              </button>
-              <button class="icon-btn" title="Expand all" aria-label="Expand all" onclick="outlineExpandAll()">
-                <svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>
-              </button>
+              <button class="icon-btn" id="ot-fold-toggle" title="Collapse all" aria-label="Collapse all" onclick="outlineToggleAll()"></button>
             </div>
           </div>
           <div id="ot-list"><div class="rp-empty">Open a file to see its outline.</div></div>
@@ -2232,10 +2443,26 @@
           <div id="search-results"><div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div></div>
         </div>
       </div>
+      <!-- Vault-wide inboxes (open in reader) — each shows only with its own tab.
+           S37: moved below .rp-body. It used to sit between the tab rail and
+           the panes, where showing or hiding it pushed every pane down by its
+           own height — a jump at the top of the panel triggered by switching
+           tabs. Below the panes it grows against the version footer instead,
+           and the pane content above it does not move. -->
+      <div class="rp-inbox-strip" id="rp-inbox-strip" style="display:none">
+        <button class="rp-inbox-btn" id="btn-cmt-inbox" style="display:none" onclick="openReviewView()">
+          <svg style="width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Comment Inbox<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span>
+        </button>
+        <button class="rp-inbox-btn" id="btn-review-inbox" style="display:none" onclick="openChangesView()">
+          <svg style="width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          Review Inbox
+        </button>
+      </div>
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.19.2</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.27.2</button>
     </aside>
 
   </div>
@@ -2276,6 +2503,21 @@
       <div class="cm-actions">
         <button class="ed-btn" onclick="closeCreateModal()">Cancel</button>
         <button class="ed-btn ed-save" id="cm-create-btn" onclick="submitCreate()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tier unlock / first-time setup modal (S14) ─────── -->
+  <div id="tier-overlay" style="display:none" onclick="closeTierModal()">
+    <div id="tier-modal" role="dialog" aria-label="Access" onclick="event.stopPropagation()">
+      <div class="cm-title" id="tier-m-title">Unlock Contributor</div>
+      <p class="tier-sub" id="tier-m-sub">Enter the Contributor password.</p>
+      <input type="password" class="tier-input" id="tier-pw1" autocomplete="off" placeholder="Password">
+      <input type="password" class="tier-input" id="tier-pw2" autocomplete="off" placeholder="Administrator password" style="display:none">
+      <p class="tier-err" id="tier-m-err"></p>
+      <div class="cm-actions">
+        <button class="ed-btn" onclick="closeTierModal()">Cancel</button>
+        <button class="ed-btn ed-save" id="tier-m-ok">Unlock</button>
       </div>
     </div>
   </div>
@@ -2342,30 +2584,54 @@
       </div>
     </div>
 
-    <!-- Advanced Settings — Review + Editing, collapsed by default -->
+    <!-- Advanced Settings — Access tier (S14, 0.27.0). Replaced the
+         separate "Show review tools" and "Enable editing" toggles: both
+         were the same question asked twice, with no ladder between them. -->
     <div class="s-section">
       <div class="s-label s-label-collapsible" id="adv-settings-toggle" onclick="toggleAdvancedSettings()">
         <svg class="s-adv-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
         Advanced Settings
       </div>
       <div id="adv-settings-body" style="display:none">
-        <div class="s-sublabel">Review</div>
-        <div class="toggle-row">
-          Show review tools
-          <label class="toggle">
-            <input type="checkbox" id="tgl-review">
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
+        <div class="s-sublabel">Access</div>
+        <div class="tier-row">
+          <select class="s-select" id="sel-tier">
+            <option value="user">User</option>
+            <option value="contributor">Contributor</option>
+            <option value="admin">Administrator</option>
+          </select>
+          <span class="tier-badge" id="tier-badge">User</span>
         </div>
-        <div class="s-sublabel">Editing</div>
-        <div class="toggle-row">
-          Enable editing
-          <label class="toggle">
-            <input type="checkbox" id="tgl-editing">
-            <div class="toggle-track"></div>
-            <div class="toggle-thumb"></div>
-          </label>
+        <p class="tier-note" id="tier-desc"></p>
+        <div class="tier-warn" id="tier-unarmed" style="display:none">
+          <b>Access isn't set up.</b> Every tier is open to anyone using this vault.
+          Switch to Administrator — you won't be asked for a password — and set both
+          passwords to turn the gate on.
+        </div>
+        <div id="tier-admin" style="display:none">
+          <div class="s-sublabel">Passwords</div>
+          <div class="tier-row">
+            <select class="s-select" id="pw-which">
+              <option value="contributor">Contributor</option>
+              <option value="admin">Administrator</option>
+            </select>
+            <button class="ed-btn" id="pw-change">Change…</button>
+          </div>
+          <p class="tier-ok" id="pw-msg"></p>
+        </div>
+        <!-- Recovery, 0.27.2. Deliberately OUTSIDE #tier-admin: the person who
+             needs this is locked out at User, so hiding it behind the rung
+             they cannot reach would be the one placement that fails. It is a
+             pointer, not a mechanism — the vault already IS the recovery, and
+             any reset reachable from this browser without the password would
+             be a second door with no lock. -->
+        <div class="tier-warn" id="tier-recovery">
+          <b>Locked out?</b> The passwords are SHA-256 hashes in
+          <code>zSystem/auth.json</code> in the vault. Delete that file in Obsidian
+          or in SharePoint and every tier opens again with no prompt, the same as a
+          vault that was never set up. Come back to this tab, switch to
+          Administrator and set both passwords again. Anyone who can be locked out
+          already has the vault access needed to undo it.
         </div>
       </div>
     </div>
@@ -2401,9 +2667,11 @@ const CONFIG = {
   // it's always hidden from the nav tree, same as zSystem.
   attachmentsFolderName: 'Attachments',
   authorName:   '[YOUR_NAME]',           // displayed on comments you post
-  // S9 Editor mode: names allowed to edit. Empty array = everyone can edit
-  // (small-team default). Names must match the authorName each user sets.
-  editors:      [],
+  // S14 (0.27.0): `editors` is gone. It defaulted to [] meaning "everyone",
+  // and it compared against CONFIG.authorName — still a placeholder here,
+  // because identity moved to zSystem/Users/<email>.json in S29. So it was
+  // a permission list that had never once denied anything. Access tiers are
+  // now the single gate; two mechanisms for one job was the reason to cut it.
 };
 
 // ── State ────────────────────────────────────────────────────────
@@ -2440,8 +2708,13 @@ const state = {
   editUrl:      null,  // S9 — file being edited
   editName:     null,  // S9 — its display name
   editOriginal: '',    // S9 — content at editor open (dirty check + stale guard + diff)
-  reviewTools:  false, // S14 — Settings "Show review tools" (bell + change views)
-  editingEnabled: false, // Settings "Enable editing" — off by default; gates New/Move/Edit
+  // S14 access tiers (0.27.0). One ladder replaced the two independent
+  // toggles that used to live here (reviewTools, editingEnabled). tier is
+  // per device in wb_tier; authHashes is the vault's zSystem/auth.json,
+  // null until it has been read (or read and found missing).
+  tier:         'user',
+  authHashes:   null,  // { contributor?: hex, admin?: hex } — {} means no file
+  authLoaded:   false, // false until the read has been attempted at least once
   reviewChanges: [],   // S14 — [{name,url,changesUrl,entries,unreviewed}]
   cmtOpenCount: 0,     // S14 — vault-wide open comments (badges)
   stripPfx:     false,
@@ -2464,12 +2737,10 @@ const state = {
   jumpPinnedId:    null, // heading id "pinned" active by an Outline click / anchor jump —
                         // suspends the scroll-spy observer until a genuine user scroll
                         // happens after the jump settles (see revealHeading/clearJumpHighlight)
-  outlineFoldMode: 'independent', // 'independent' | 'shared' — Outline's own
-                        // fold-chevron state vs. sharing the reader's wb_folds
-  outlineSessionFolds: new Set(), // folded heading ids for help.md/changelog —
-                        // no stable url to key a localStorage entry to, so
-                        // these are session-only (mirrors the reader's own
-                        // persistFoldState, which silently skips saving too)
+                        // S34: outlineFoldMode / outlineSessionFolds removed.
+                        // The Outline no longer shares fold state with the
+                        // reader, and its folds live in the module-level
+                        // outlineFolds Map instead of on state.
   reviewData:      null,// cached inbox data (array of {name, url, commentsUrl, comments})
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
   openLastNote:    true,  // Settings "Open last note" — default on
@@ -2485,6 +2756,20 @@ const state = {
   bmCollapsedGroups:{},
   bmEditingKey:     null,
   bmNewGroupDraft:  null,
+
+  // ── What's New (S35 / 0.23.0) ──────────────────────────────────
+  // whatsNewOpen is the pseudo-page flag, exactly like helpOpen and
+  // changelogOpen above — activeUrl stays null while it shows.
+  whatsNewOpen:    false,
+  wnEntries:       [],     // [{url,name,folderId,kind,modified,seen,mustRead,onboarding,lapsed}]
+  wnFlags:         {},     // { [url]: {mustRead, onboarding} } — filled by scanBadges, which
+                            // already reads every file for the audit. No second sweep.
+  wnFilter:        'unseen',// 'unseen' | 'new' | 'updated' | 'all'
+  wnWindow:        30,      // 30 | 90 | 0 (0 = all time)
+  wnBulk:          null,    // {count, at} when a scan tripped the bulk-change threshold
+  wnSkipMsg:       null,    // transient "marked N, skipped M must-reads" line
+  wnPending:       null,    // url whose seen-stamp commits when you navigate away
+  wnPendingSec:    null,    // …and the one heading uid to clear, if you arrived via a section button
 };
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -2611,16 +2896,80 @@ async function savedVaultHandle() {
   try { return await idbGet(); } catch (e) { return null; }
 }
 
-async function startLocalVault(root) {
+// Everything derived from the PREVIOUS vault has to be cleared before
+// bootVault() runs against a different folder. The per-folder caches are
+// keyed by path, and paths repeat across vaults ("Policies" exists in both),
+// so without this a reconnect can show the old vault's file list under the
+// new vault's folder names. Safe on first boot too — clearing empty state is
+// a no-op, which is why this lives here instead of only on the reconnect path.
+//   `fresh` additionally drops the remembered last note, which belongs to the
+// folder being left behind. Only a deliberate reconnect passes it, so a normal
+// boot still reopens where you left off.
+function resetVaultState(fresh) {
+  vaultReady     = false;
+  vaultFolders   = [];
+  vaultRootFiles = [];
+  searchIndex    = null; // rebuilt lazily on next search
+
+  state.folderLoaded = {};
+  state.folderFiles  = {};
+  state.folderKids   = {};
+  state.folderStale  = {};
+  state.fileIndex    = {}; // stale entries here would resolve [[links]] into the old vault
+  state.fileFolder   = {};
+
+  // Badge sources. scanBadges() refills these from the new vault, but it's
+  // fire-and-forget — if it fails there, a leftover bell/comment count from
+  // the old vault would sit in the header looking authoritative.
+  state.reviewChanges = [];
+  state.cmtOpenCount  = 0;
+
+  state.activeUrl     = null;
+  state.activeName    = null;
+  state.helpOpen      = false;
+  state.changelogOpen = false;
+  state.backStack     = [];
+  state.forwardStack  = [];
+  updateBackButtons();
+
+  // S35 — the derived What's New view. The persisted index and seen map are
+  // deliberately NOT cleared: they are keyed by path, and a different vault's
+  // paths simply fall out as deletions on the next scan, which self-heals.
+  // Clearing them would instead re-seed and silently mark a returning vault
+  // entirely seen.
+  state.whatsNewOpen = false;
+  state.wnEntries    = [];
+  state.wnFlags      = {};
+  state.wnBulk       = null;
+  state.wnSkipMsg    = null;
+  state.wnPending    = null;
+  state.wnPendingSec = null;
+  updateWhatsNewBadge();
+
+  closeDiffStrip();
+  closePropsPanel();
+  setReaderTitle('');
+  const rc = $('reader-content');
+  if (rc) { rc.innerHTML = ''; rc.style.display = 'none'; }
+  const empty = $('reader-empty');
+  if (empty) empty.style.display = '';
+  updateEditBtn();
+  refreshRightPanel(); // Outline would otherwise keep the old file's headings
+
+  if (fresh) localStorage.removeItem('wb_last_file');
+}
+
+async function startLocalVault(root, fresh = false) {
   LOCAL.root  = root;
   LOCAL.on    = true;
   LOCAL.dirs  = {};
   LOCAL.files = {};
+  resetVaultState(fresh);
   try { await idbSet(root); } catch (e) { /* remembering is best-effort */ }
   await bootVault();
 }
 
-async function pickLocalVault() {
+async function pickLocalVault(fresh = false) {
   if (!window.showDirectoryPicker) {
     alert('Local mode needs Chrome or Edge — this browser does not support the File System Access API.');
     return;
@@ -2634,7 +2983,17 @@ async function pickLocalVault() {
       '\n\nIf this says the operation is not allowed, your browser is blocking folder access for pages opened from disk. Tell Claude the exact message and browser.');
     return;
   }
-  await startLocalVault(root);
+  await startLocalVault(root, fresh);
+}
+
+// Point the app at a different folder after it's already loaded one — the fix
+// for picking the wrong folder at boot, where the only previous escape was
+// clearing site data. Cancelling the picker is a clean no-op: nothing is reset
+// until a folder is actually chosen, so a misclick costs nothing.
+async function reconnectVault() {
+  closeUserDropdown();
+  if (!guardLeaveEdit()) return; // unsaved edit in the CURRENT vault wins
+  await pickLocalVault(true);
 }
 
 async function reopenLocalVault() {
@@ -2651,6 +3010,25 @@ async function reopenLocalVault() {
   }
 }
 
+// Stage 1 of change detection (Section 13). Reads modified time and size off
+// the handle without reading the file's contents. Before 0.25.0 both
+// enumerations pushed `modified: null`, which silently disabled What's New's
+// Updated group, its date-window filter and the 30-day must-read expiry — all
+// three shipped, none of them ever able to fire. A file that vanishes between
+// the directory listing and this call yields nulls rather than throwing;
+// enumeration must never be stoppable by one bad entry.
+async function localStat(handle) {
+  try {
+    const f = await handle.getFile();
+    return {
+      modified: f.lastModified ? new Date(f.lastModified).toISOString() : null,
+      size: typeof f.size === 'number' ? f.size : null,
+    };
+  } catch (_) {
+    return { modified: null, size: null };
+  }
+}
+
 async function localEnumRoot() {
   const folders = [];
   const files   = [];
@@ -2662,7 +3040,8 @@ async function localEnumRoot() {
     } else if (handle.kind === 'file' && name.endsWith('.md') && !isIgnored(name)) {
       const url = `local:/${name}`;
       LOCAL.files[url] = handle;
-      files.push({ name, url, modified: null });
+      const st = await localStat(handle);
+      files.push({ name, url, modified: st.modified, size: st.size });
     }
   }
   files.sort((a, b) => a.name.localeCompare(b.name));
@@ -2684,7 +3063,8 @@ async function localEnumFolder(folder) {
       } else if (handle.kind === 'file' && name.endsWith('.md') && !isIgnored(name)) {
         const url = `local:/${folder.id}/${name}`;
         LOCAL.files[url] = handle;
-        files.push({ name, url, modified: null });
+        const st = await localStat(handle);
+        files.push({ name, url, modified: st.modified, size: st.size });
       }
     }
   }
@@ -2888,10 +3268,12 @@ const ICON = {
   foldChevron:`<svg class="md-fold-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`,
   embedFile:  `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   imgErr:     `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="4" y1="4" x2="20" y2="20"/></svg>`,
-  // Outline fold-mode toggle (S ③b) — unlocked = independent (default),
-  // locked = shared with the reader's own wb_folds:<url> store.
-  lockOpen:   `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`,
-  lockClosed: `<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  // Outline collapse/expand-all symbol (S34). One control, two glyphs —
+  // the lock pair that used to live here went with the shared-fold mode.
+  // Same double-chevron shapes the sidebar's own fold buttons use, so the
+  // two panels speak the same visual language.
+  collapseAll:`<svg class="icon" viewBox="0 0 24 24"><polyline points="7 15 12 10 17 15"/><polyline points="7 10 12 5 17 10"/></svg>`,
+  expandAll:  `<svg class="icon" viewBox="0 0 24 24"><polyline points="7 9 12 14 17 9"/><polyline points="7 14 12 19 17 14"/></svg>`,
   // Bookmarks tab (S30)
   bookmark:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
   bookmarkFilled: `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
@@ -2909,6 +3291,7 @@ let vaultReady     = false; // true once bootVault() has completed at least once
 
 function renderSidebar() {
   const tree = $('sb-tree');
+  updateSidebarToolbar();
   if (!vaultFolders.length && !vaultRootFiles.length) {
     tree.innerHTML = '<div class="sb-msg">No files found in vault.</div>';
     return;
@@ -2987,6 +3370,9 @@ function renderSidebar() {
   }
 
   tree.innerHTML = html;
+  updateWhatsNewBadge(); // S35 — keeps the pinned row's active state and count
+                          // in step with the tree it sits above, so the two can
+                          // never disagree about what is selected.
 }
 
 // ── Toggle folder ────────────────────────────────────────────────
@@ -2996,9 +3382,13 @@ async function toggleFolder(folderId) {
 
   const opening = !state.openFolders[folderId];
   state.openFolders[folderId] = opening;
-  // Not persisted — folder-open state at boot is governed entirely by the
-  // Settings → "Open last note" toggle (see bootVault), not by whatever was
-  // left open last session.
+  // S33/0.21.0: persisted again. This reverses the S20 removal, and it is
+  // the OPPOSITE call from heading folds one release earlier — on purpose.
+  // A folder tree is furniture: you arrange it once and want it to stay put,
+  // and a closed folder is visibly closed, so it can never mislead you the
+  // way a silently collapsed heading did. localStorage is per browser
+  // profile, which on this deployment is per person per PC.
+  persistFolderState();
 
   if (opening && (!state.folderLoaded[folderId] || state.folderStale[folderId])) {
     renderSidebar();
@@ -3008,30 +3398,67 @@ async function toggleFolder(folderId) {
   renderSidebar();
 }
 
-// ── Sidebar fold controls (collapse all / collapse unused / expand all) ──
-// "Collapse unused" closes every folder except the ancestor chain down to
-// the currently open file — it doesn't hide the tree to that file.
-function sidebarCollapseAll() {
-  state.openFolders = {};
-  renderSidebar();
+// ── Sidebar fold control (S33/0.21.0) ────────────────────────────
+// One symbol, two directions, exactly like the Outline's. Collapse unused
+// is gone from here too — it was the same control nobody reached for.
+//
+// Folder state persists (see persistFolderState). Deliberately different
+// from heading folds, which forget: a folder tree is navigation furniture
+// you arrange once, and its closed state is self-evident on screen. A
+// collapsed heading hid content with no indication; a closed folder is
+// visibly a closed folder.
+function folderStateKey() { return 'wb_folders'; }
+
+function persistFolderState() {
+  const open = Object.keys(state.openFolders).filter(id => state.openFolders[id]);
+  if (open.length) localStorage.setItem(folderStateKey(), JSON.stringify(open));
+  else localStorage.removeItem(folderStateKey());
 }
 
-function sidebarCollapseUnused() {
-  const keep = {};
-  const folderId = state.activeUrl ? state.fileFolder[state.activeUrl] : null;
-  if (folderId) {
-    let acc = '';
-    folderId.split('/').forEach(seg => { acc = acc ? `${acc}/${seg}` : seg; keep[acc] = true; });
+function readFolderState() {
+  try {
+    const ids = JSON.parse(localStorage.getItem(folderStateKey())) || [];
+    const out = {};
+    ids.forEach(id => { out[id] = true; });
+    return out;
+  } catch (_) { return {}; }
+}
+
+// "All folded" means every folder that exists is closed. collectFolders()
+// only sees folders whose parents have been enumerated, which is why the
+// expand branch below has to preload and re-render.
+function sidebarAllFolded() {
+  const all = collectFolders();
+  if (!all.length) return false;
+  return all.every(({ folder }) => !state.openFolders[folder.id]);
+}
+
+function updateSidebarToolbar() {
+  const btn = $('sb-fold-toggle');
+  if (!btn) return;
+  const allFolded = sidebarAllFolded();
+  btn.innerHTML = allFolded ? ICON.expandAll : ICON.collapseAll;
+  const label = allFolded ? 'Expand all' : 'Collapse all';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+}
+
+async function sidebarToggleAll() {
+  if (sidebarAllFolded()) {
+    collectFolders().forEach(({ folder }) => { state.openFolders[folder.id] = true; });
+    persistFolderState();
+    renderSidebar();
+    // Opening reveals folders whose children were never enumerated, so this
+    // has to run twice: once to show them, once after their files land.
+    await preloadOpenFolders();
+    collectFolders().forEach(({ folder }) => { state.openFolders[folder.id] = true; });
+    persistFolderState();
+    renderSidebar();
+  } else {
+    state.openFolders = {};
+    persistFolderState();
+    renderSidebar();
   }
-  state.openFolders = keep;
-  renderSidebar();
-}
-
-async function sidebarExpandAll() {
-  collectFolders().forEach(({ folder }) => { state.openFolders[folder.id] = true; });
-  renderSidebar();
-  await preloadOpenFolders(); // load files for any folder that wasn't already loaded
-  renderSidebar();
 }
 
 // ================================================================
@@ -3532,6 +3959,29 @@ document.addEventListener('click', (e) => {
 // Also a prerequisite for tightening the CSP — every inline handler
 // removed is one step closer to dropping 'unsafe-inline' from script-src.
 function wbDelegatedClick(e) {
+  // What's New rows and controls (S35). Checked before the row itself so a
+  // click on "Mark group seen" — which sits inside the group header, not a
+  // row — can't be swallowed by anything below. Data in data-attributes,
+  // never in a handler string, per the S12 hardening rule.
+  const wnMark = e.target.closest('[data-wb-wnmark]');
+  if (wnMark) { e.preventDefault(); e.stopPropagation(); wnMarkAllSeen(wnMark.dataset.wbWnmark || null); return; }
+  const wnFil = e.target.closest('[data-wb-wnfilter]');
+  if (wnFil) { e.preventDefault(); e.stopPropagation(); wnSetFilter(wnFil.dataset.wbWnfilter); return; }
+  const wnWin = e.target.closest('[data-wb-wnwindow]');
+  if (wnWin) { e.preventDefault(); e.stopPropagation(); wnSetWindow(wnWin.dataset.wbWnwindow); return; }
+  // Section buttons are tested BEFORE the file row they sit under, per the
+  // standing rule that nested targets go first — otherwise the row swallows
+  // the click and every section opens the top of the page.
+  const wnSec = e.target.closest('[data-wb-wnsec]');
+  if (wnSec) {
+    e.preventDefault(); e.stopPropagation();
+    wnOpenSection(wnSec.dataset.wbWnsecurl, wnSec.dataset.wbWnsecname,
+                  wnSec.dataset.wbWnsec, wnSec.dataset.wbWnsectitle);
+    return;
+  }
+  const wnOpen = e.target.closest('[data-wb-wnopen]');
+  if (wnOpen) { e.preventDefault(); e.stopPropagation(); wnOpenEntry(wnOpen.dataset.wbWnopen, wnOpen.dataset.wbWnname); return; }
+
   // [!copy] Copy button (v0.19.2). First branch on purpose: it sits
   // inside a callout label, which sits inside the reader, and a stray
   // match further down would swallow the click before it got here.
@@ -3540,6 +3990,17 @@ function wbDelegatedClick(e) {
     e.preventDefault();
     e.stopPropagation();
     copyCalloutBlock(copyBlk.dataset.wbCopyblk, copyBlk);
+    return;
+  }
+  // Callout fold chevron. Sits in the same label row as the [!copy]
+  // button, so both are matched by closest() — this one first only
+  // because it is the more specific target; the copy branch above
+  // already returned if that was the actual click.
+  const coFold = e.target.closest('[data-wb-cofold]');
+  if (coFold) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCalloutFold(coFold);
     return;
   }
   // Sidebar "+" must be checked before the folder row it sits inside,
@@ -3596,11 +4057,20 @@ function wbDelegatedClick(e) {
     window.open(ext.dataset.wbExternal, '_blank', 'noopener,noreferrer');
     return;
   }
+  // Whole-list fold control. Sits inside a .md-li-row, so it has to be
+  // tested before anything that matches the row or the list around it.
+  const listAll = e.target.closest('[data-wb-listall]');
+  if (listAll) {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleListAll(listAll);
+    return;
+  }
   const outFold = e.target.closest('[data-wb-outfold]');
   if (outFold) {
     e.preventDefault();
     e.stopPropagation();
-    toggleOutlineHeading(outFold.dataset.wbOutfold);
+    toggleOutlineHeading(outFold.dataset.wbOutfold, e.altKey);
     return;
   }
   const outJump = e.target.closest('[data-wb-outjump]');
@@ -3919,17 +4389,31 @@ function parseBlocks(lines) {
     // the remainder re-parsed via parseBlocks, so a line that started as
     // ">>" or ">>>" recurses into a nested callout/blockquote automatically.
     if (line.startsWith('>')) {
-      const coM = line.match(/^>\s*\[!(\w+)\](.*)/);
+      // S34: the suffix is captured, not swallowed. The old pattern was
+      // /^>\s*\[!(\w+)\](.*)/ with everything after the bracket becoming the
+      // title, so Obsidian's own fold markers landed in the visible text —
+      // "> [!note]-" rendered a callout literally titled "-", and
+      // "> [!warning]- Check this" rendered "- Check this". Any collapsed
+      // callout authored in Obsidian has been showing a stray dash here.
+      //   -  starts collapsed
+      //   +  starts expanded, explicitly
+      //   (neither) starts expanded
+      // Unlike Obsidian, the ABSENCE of a suffix doesn't make a callout
+      // unfoldable — every callout gets a chevron here (Jayson's call:
+      // the existing vault has no suffixes and nobody should have to learn
+      // a convention to collapse a long note).
+      const coM = line.match(/^>\s*\[!(\w+)\]([-+]?)(.*)/);
       if (coM) {
         const cType       = coM[1].toUpperCase();
-        const customTitle = coM[2].trim();
+        const startFolded = coM[2] === '-';
+        const customTitle = coM[3].trim();
         const bodyLines   = [];
         i++;
         while (i < lines.length && lines[i].startsWith('>')) {
           bodyLines.push(lines[i].replace(/^>\s?/, ''));
           i++;
         }
-        blocks.push({ type: 'callout', cType, customTitle, body: parseBlocks(bodyLines) });
+        blocks.push({ type: 'callout', cType, customTitle, startFolded, body: parseBlocks(bodyLines) });
       } else {
         const quoteLines = [];
         while (i < lines.length && lines[i].startsWith('>')) {
@@ -4016,13 +4500,12 @@ function parseBlocks(lines) {
       i++;
     }
     if (paraLines.length) {
-      // `content` is the joined form the renderer uses (standard Markdown
-      // soft-break behavior: consecutive lines are one paragraph). `lines`
-      // keeps the author's original hard breaks, which only the [!copy]
-      // serializer reads — a copy block is text someone intends to paste
-      // verbatim, so their line structure is meaningful there even though
-      // it isn't in rendered prose. Nothing else uses `lines`; adding it
-      // changes no existing behavior.
+      // `lines` keeps the author's original hard breaks; `content` is the
+      // space-joined form. From 0.24.0 the RENDERER reads `lines` — every
+      // authored break is kept (see the 'para' case in renderSingleBlock
+      // for why). `content` is still populated and still read by the
+      // [!copy] serializer and by search, both of which want one flat
+      // string rather than a line structure, so it is not dead.
       blocks.push({ type: 'para', content: paraLines.join(' '), lines: paraLines.slice() });
     }
   }
@@ -4050,7 +4533,7 @@ function renderBlockTree(blocks, seenIds) {
       const sectionHtml = j > i + 1 ? renderBlockTree(blocks.slice(i + 1, j), seenIds) : '';
       const hid = uniqueHeadingId(block.content, seenIds);
       html += `<div class="md-h-block">
-<div class="md-h-row md-h-row-h${level}" onclick="toggleFold(this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}" onclick="selectReaderHeading(event, this)">${renderInline(block.content)}</h${level}></div>
+<div class="md-h-row md-h-row-h${level}" onclick="headingFoldClick(event, this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}" onclick="selectReaderHeading(event, this)">${renderInline(block.content)}</h${level}></div>
 <div class="md-section">${sectionHtml}</div>
 </div>`;
       i = j;
@@ -4092,7 +4575,9 @@ function renderListLevel(nodes, isRoot, parentPath) {
   const isOl    = !hasTask && nodes[0].kind === 'ol';
   const tag     = isOl ? 'ol' : 'ul';
   const cls     = hasTask ? 'md-task-list' : (isOl ? 'md-ol' : 'md-ul');
-  const nestCls = isRoot ? '' : ' md-list-nested';
+  // S34: root lists carry .md-list so the whole-list fold control has a
+  // container to hover-scope against and closest() to climb to.
+  const nestCls = isRoot ? ' md-list' : ' md-list-nested';
   // Ordinal counts only the 'ol'-kind items in this level, not raw
   // array position — a level with an interspersed bullet or checkbox
   // (rare, but possible) shouldn't skip numbers.
@@ -4101,9 +4586,10 @@ function renderListLevel(nodes, isRoot, parentPath) {
   // level, appended to its parent's path. Doubles as the fold-memory
   // key (see liFoldStateKey below); list items have no natural id the
   // way headings do, so DOM position is the only stable handle.
+  const anyFoldable = isRoot && nodes.some(n => n.children.length > 0);
   const itemsHtml = nodes.map((n, i) => {
     const path = parentPath ? `${parentPath}.${i + 1}` : `${i + 1}`;
-    return renderListItem(n, n.kind === 'ol' ? ++olCounter : null, path);
+    return renderListItem(n, n.kind === 'ol' ? ++olCounter : null, path, anyFoldable && i === 0);
   }).join('');
   return `<${tag} class="${cls}${nestCls}">${itemsHtml}</${tag}>`;
 }
@@ -4114,10 +4600,10 @@ function renderListLevel(nodes, isRoot, parentPath) {
 // Native list markers are off (see renderListLevel), so the bullet/
 // number here is the only marker rendered; that's what makes the
 // chevron sit outside it instead of between it and the text.
-function renderListItem(n, ordinal, path) {
+function renderListItem(n, ordinal, path, showAllFold) {
   const hasKids  = n.children.length > 0;
   const foldEl = hasKids
-    ? `<span class="md-li-fold-btn" onclick="liChevronClick(event, this)" ondblclick="liChevronDblClick(event, this)">${ICON.foldChevron}</span>`
+    ? `<span class="md-li-fold-btn" onclick="liChevronClick(event, this)">${ICON.foldChevron}</span>`
     : '<span class="md-li-spacer"></span>';
   const contHtml = n.cont.length ? `<span class="md-li-cont">${renderInline(n.cont.join(' '))}</span>` : '';
 
@@ -4143,29 +4629,28 @@ function renderListItem(n, ordinal, path) {
 
   const rowCls = n.kind === 'task' ? 'md-li-row md-task-item' : 'md-li-row';
   const liCls  = hasKids ? 'md-li md-li-parent' : 'md-li';
+  // Whole-list fold control (S34) — only on the first row of a ROOT list,
+  // and only when something in that list is actually foldable. A flat list
+  // with no nesting gets nothing, because there is nothing to collapse.
+  const allFoldEl = showAllFold
+    ? `<button type="button" class="md-list-allfold" data-wb-listall="1" title="Collapse this whole list" aria-label="Collapse this whole list">${ICON.foldChevron}<span>All</span></button>`
+    : '';
   return `<li class="${liCls}" data-li-path="${path}">
-<div class="${rowCls}">${foldEl}${markerEl}${textEl}</div>
+<div class="${rowCls}">${foldEl}${markerEl}${textEl}${allFoldEl}</div>
 ${hasKids ? `<div class="md-li-section">${renderListLevel(n.children, false, path)}</div>` : ''}
 </li>`;
 }
 
-// Click/dblclick disambiguation. e.detail>1 alone only skips the SECOND
-// click of a double-click — the first click still fires immediately, so
-// a double-click used to fold one level and then fold the whole subtree
-// on top of that. Fix: delay the single-click action; if a second click
-// (dblclick) lands within the window, cancel it and let dblclick own
-// the gesture entirely.
-let liClickTimer = null;
-const LI_DBLCLICK_WINDOW = 220; // ms
-
+// S34: the 220ms click/dblclick disambiguation window is gone, and with
+// it the double-click gesture it existed to protect. Two reasons, and the
+// second is the one that mattered: staff never discovered double-click,
+// and every ordinary single click paid a 220ms delay to keep a gesture
+// nobody used. Alt/Option-click now takes the subtree — the same modifier
+// Finder, Explorer and VS Code all use on a disclosure control — so single
+// clicks fire instantly again.
 function liChevronClick(e, btn) {
-  if (liClickTimer) { clearTimeout(liClickTimer); liClickTimer = null; return; }
-  liClickTimer = setTimeout(() => { liClickTimer = null; toggleLiFold(btn); }, LI_DBLCLICK_WINDOW);
-}
-
-function liChevronDblClick(e, btn) {
-  if (liClickTimer) { clearTimeout(liClickTimer); liClickTimer = null; }
-  toggleLiSubtree(btn);
+  if (e && e.altKey) toggleLiSubtree(btn);
+  else toggleLiFold(btn);
 }
 
 // Collapse/expand just this item's direct section, exactly like a
@@ -4176,7 +4661,9 @@ function toggleLiFold(btn) {
   if (!section) return;
   const folded = li.classList.toggle('folded');
   section.classList.toggle('folded', folded);
+  setHiddenCountBadge(li.querySelector(':scope > .md-li-row'), section, folded);
   persistLiFoldState();
+  refreshListAllFoldBtn(li);
 }
 
 // Fold/unfold this item's entire subtree at once, all levels down —
@@ -4190,10 +4677,62 @@ function toggleLiSubtree(btn) {
     const sec = el.querySelector(':scope > .md-li-section');
     if (sec) {
       sec.classList.toggle('folded', willFold);
+      setHiddenCountBadge(el.querySelector(':scope > .md-li-row'), sec, willFold);
       sec.querySelectorAll(':scope > ul > .md-li, :scope > ol > .md-li').forEach(apply);
     }
   })(li);
   persistLiFoldState();
+  refreshListAllFoldBtn(li);
+}
+
+// ── Callout fold (S34) ───────────────────────────────────────────
+// Collapsing hides the body only. The label row keeps its full colour,
+// icon and title, so a collapsed [!warning] still reads as a warning —
+// fold the content, never the identity.
+function toggleCalloutFold(btn) {
+  const co = btn.closest('.md-callout');
+  if (!co) return;
+  const folded = co.classList.toggle('folded');
+  const label = folded ? 'Expand' : 'Collapse';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+}
+
+// ── Whole-list fold (S34) ────────────────────────────────────────
+// Folds or unfolds every foldable item in a root list at once. This adds
+// no capability over Alt-clicking the top item's chevron; it exists so
+// the capability is VISIBLE, since a modifier gesture is exactly as
+// undiscoverable as the double-click it replaced.
+function listAllFolded(rootList) {
+  const items = [...rootList.querySelectorAll('.md-li')].filter(li => li.querySelector(':scope > .md-li-section'));
+  return items.length > 0 && items.every(li => li.classList.contains('folded'));
+}
+
+function refreshListAllFoldBtn(node) {
+  const rootList = node && node.closest('.md-list');
+  if (!rootList) return;
+  const btn = rootList.querySelector(':scope > .md-li > .md-li-row > .md-list-allfold');
+  if (!btn) return;
+  const all = listAllFolded(rootList);
+  btn.classList.toggle('all-folded', all);
+  const label = all ? 'Expand this whole list' : 'Collapse this whole list';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+}
+
+function toggleListAll(btn) {
+  const rootList = btn.closest('.md-list');
+  if (!rootList) return;
+  const willFold = !listAllFolded(rootList);
+  rootList.querySelectorAll('.md-li').forEach(li => {
+    const sec = li.querySelector(':scope > .md-li-section');
+    if (!sec) return;
+    li.classList.toggle('folded', willFold);
+    sec.classList.toggle('folded', willFold);
+    setHiddenCountBadge(li.querySelector(':scope > .md-li-row'), sec, willFold);
+  });
+  persistLiFoldState();
+  refreshListAllFoldBtn(rootList);
 }
 
 // ── Single block renderer ─────────────────────────────────────────
@@ -4204,7 +4743,34 @@ function renderSingleBlock(block, seenIds) {
       return '<hr class="md-hr">';
 
     case 'para':
-      return `<p class="md-p">${renderInline(block.content)}</p>`;
+      // S37: every authored line break is kept. Standard Markdown merges
+      // consecutive lines into one flowing paragraph, and this file did
+      // that until 0.24.0 (`block.content` is still the joined form, kept
+      // because the [!copy] serializer and search both read it). The call
+      // is Jayson's and it matches the one made in 0.9i-2 for tab trees:
+      // pages here are authored in Obsidian's Edit view, so the line
+      // structure the author sees while typing is the structure they mean.
+      // Reading view happens to agree; Edit view is the reason.
+      // Known cost, accepted: text pasted from an email arrives wrapped at
+      // someone else's column width and renders ragged. Join those lines
+      // at the source. Blank-line paragraphs are unaffected either way.
+      // Reverting is this one line — swap the expression back for
+      // renderInline(block.content).
+      //
+      // Note the join, and why it is \u0001 rather than \n. The lines go
+      // through renderInline as ONE string, because rendering them
+      // separately breaks any inline span that crosses a line —
+      // **bold that\nwraps** would lose its markers and show the
+      // asterisks. But the separator cannot be a newline either: the
+      // emphasis regexes are all `(.+?)`, and `.` does not match \n, so
+      // joining with one silently breaks the same spans. \u0001 is an
+      // ordinary character to `.`, so every inline rule sees exactly what
+      // it saw when this joined with a space — inline parsing is
+      // byte-for-byte what it was before 0.24.0 — and the sentinel becomes
+      // <br> afterwards. A control character cannot occur in a .md file,
+      // so there is nothing to collide with (the slot markers renderInline
+      // uses internally are \x00, also distinct).
+      return `<p class="md-p">${renderInline((block.lines || [block.content]).join('\u0001')).replace(/\u0001/g, '<br>')}</p>`;
 
     case 'code': {
       const lang = escHtml(block.lang || '');
@@ -4232,7 +4798,16 @@ function renderSingleBlock(block, seenIds) {
           copyBtn = `<button type="button" class="md-callout-copy-btn" data-wb-copyblk="${idx}" title="Copy this text">Copy</button>`;
         }
       }
-      return `<div class="md-callout ${meta.cls}"><div class="md-callout-label">${meta.icon} ${escHtml(title)}${copyBtn}</div>${body}</div>`;
+      // Folding is view-only: the file's own -/+ sets the opening state and
+      // nothing is ever written back or stored, which is why callouts need
+      // no localStorage of their own. An empty callout gets no chevron for
+      // the same reason an empty one gets no Copy button.
+      const foldable = block.body.length > 0;
+      const folded   = foldable && block.startFolded;
+      const foldBtn  = foldable
+        ? `<button type="button" class="md-callout-fold" data-wb-cofold="1" title="${folded ? 'Expand' : 'Collapse'}" aria-label="${folded ? 'Expand' : 'Collapse'}">${ICON.foldChevron}</button>`
+        : '';
+      return `<div class="md-callout ${meta.cls}${folded ? ' folded' : ''}"><div class="md-callout-label"><span class="md-callout-title">${meta.icon} ${escHtml(title)}</span>${copyBtn}${foldBtn}</div>${body}</div>`;
     }
 
     case 'table': {
@@ -4335,46 +4910,56 @@ function renderSingleBlock(block, seenIds) {
 }
 
 // ── Fold / unfold heading section ────────────────────────────────
-function toggleFold(row) {
+// S34: heading folds are VIEW state, not saved data. The old
+// wb_folds:<url> store (S20, Obsidian-style fold memory) is gone —
+// every file now opens fully expanded, every time. That store was the
+// single biggest source of "why is this page collapsed?": it replayed
+// whatever state a bulk Collapse All left behind, weeks later, with no
+// visible indication anything was hidden. Removing it is what makes
+// "always opens expanded" actually true, so don't reintroduce it
+// without also solving the invisibility problem it created.
+//
+// Alt/Option-click folds the whole subtree instead of just this row —
+// the Finder / Explorer / VS Code convention, and the replacement for
+// the double-click gesture nobody discovered.
+function toggleFold(row, opts) {
   const section = row.nextElementSibling;
   if (!section) return;
-  const folded = row.classList.toggle('folded');
-  section.classList.toggle('folded', folded);
-  persistFoldState(row, folded);
-  maybeRefreshOutlineAfterReaderFold();
-}
-
-// Per-file collapsed-heading memory (Obsidian-style). Keyed by file URL,
-// stores the heading ids currently folded. Applied on next open of that file.
-function foldStateKey(url) { return 'wb_folds:' + url; }
-
-function persistFoldState(row, folded) {
-  if (!state.activeUrl) return; // help / no file open — nothing to key it to
-  const h = row.querySelector('.md-h');
-  if (!h || !h.id) return;
-  const key = foldStateKey(state.activeUrl);
-  let ids = [];
-  try { ids = JSON.parse(localStorage.getItem(key)) || []; } catch (e) { ids = []; }
-  if (folded) {
-    if (!ids.includes(h.id)) ids.push(h.id);
-  } else {
-    ids = ids.filter(id => id !== h.id);
+  const deep = !!(opts && opts.deep);
+  const folded = !row.classList.contains('folded');
+  readerFoldRow(row, folded);
+  if (deep) {
+    section.querySelectorAll('.md-h-row').forEach(r => readerFoldRow(r, folded));
   }
-  if (ids.length) localStorage.setItem(key, JSON.stringify(ids));
-  else localStorage.removeItem(key);
 }
 
-function applyFoldState(url) {
-  let ids = [];
-  try { ids = JSON.parse(localStorage.getItem(foldStateKey(url))) || []; } catch (e) { ids = []; }
-  if (!ids.length) return;
-  ids.forEach(id => {
-    const h = document.getElementById(id);
-    const row = h && h.closest('.md-h-row');
-    const section = row && row.nextElementSibling;
-    if (row) row.classList.add('folded');
-    if (section) section.classList.add('folded');
-  });
+// Click target on a heading row. Separated from toggleFold() so the
+// modifier read lives in exactly one place and toggleFold() stays
+// callable programmatically (revealHeading, scrollToAnchor).
+function headingFoldClick(e, row) {
+  toggleFold(row, { deep: e && e.altKey });
+}
+
+// Count of heading rows + list items hidden underneath a folded heading.
+// Written into the row so folded state is legible at a glance instead of
+// hinging on a rotated chevron nobody looks at.
+function foldHiddenCount(section) {
+  if (!section) return 0;
+  return section.querySelectorAll('.md-h-row, .md-li').length;
+}
+
+function setHiddenCountBadge(host, section, folded) {
+  if (!host) return;
+  const existing = host.querySelector(':scope > .md-hidden-count');
+  if (!folded) { if (existing) existing.remove(); return; }
+  const n = foldHiddenCount(section);
+  if (!n) { if (existing) existing.remove(); return; }
+  const label = n + ' hidden';
+  if (existing) { existing.textContent = label; return; }
+  const el = document.createElement('span');
+  el.className = 'md-hidden-count';
+  el.textContent = label;
+  host.appendChild(el);
 }
 
 // Per-file collapsed-list-item memory, same idea as the heading fold
@@ -4404,109 +4989,81 @@ function applyLiFoldState(url) {
     li.classList.add('folded');
     const section = li.querySelector(':scope > .md-li-section');
     if (section) section.classList.add('folded');
+    // S34: a restored fold has to bring its own "N hidden" badge with it.
+    // Without this, list persistence would recreate exactly the invisible
+    // collapsed state that got heading persistence deleted.
+    setHiddenCountBadge(li.querySelector(':scope > .md-li-row'), section, true);
   });
+  document.querySelectorAll('#reader-content .md-list').forEach(refreshListAllFoldBtn);
 }
 
-// ── Reader fold controls (collapse all / collapse unused / expand all) ──
-// Mirrors the sidebar's fold controls, but over this file's own heading
-// sections instead of the folder tree.
+// ── Single heading row fold ──────────────────────────────────────
+// S34: readerCollapseAll / readerExpandAll / readerCollapseUnused are
+// gone along with the pill that called them. Collapse unused was cut
+// outright — no mainstream editor ships it as visible chrome (VS Code
+// has it as a keybinding only), and it was the least-used of the three.
+// This helper survives because revealHeading() and the search-hit
+// locator still need to unfold an ancestor chain programmatically.
 function readerFoldRow(row, folded) {
   const section = row.nextElementSibling;
   if (row.classList.contains('folded') === folded) return;
   row.classList.toggle('folded', folded);
   if (section) section.classList.toggle('folded', folded);
-  persistFoldState(row, folded);
+  setHiddenCountBadge(row, section, folded);
 }
 
-function readerCollapseAll() {
-  document.querySelectorAll('#reader-content .md-h-row').forEach(row => readerFoldRow(row, true));
-  maybeRefreshOutlineAfterReaderFold();
-}
+// ── Outline fold state ─────────────────────────────────────────────────
+// S34: the Outline's folds are its own, session-only, and never touch the
+// reader. Three things went away here and each for a different reason:
+//
+//   wb_outline_folds:<url>  — persistence, dropped for the same reason as
+//                             the reader's: a file that reopens collapsed
+//                             reads as broken. Folds now live in a plain
+//                             Map for as long as the app is open.
+//   the lock / shared mode  — dropped because it was solving a problem
+//                             nobody has. Word's Navigation Pane,
+//                             Obsidian's Outline and VS Code's Outline
+//                             view all fold the OUTLINE only; the outline
+//                             is a view of the document, so folding it is
+//                             a view operation.
+//   collapse unused         — cut, see the note over readerFoldRow.
+//
+// Keyed by url so switching files and coming back inside one session
+// still feels right; '' covers help.md and the changelog, which have no
+// stable url of their own.
+const outlineFolds = new Map();
 
-function readerExpandAll() {
-  document.querySelectorAll('#reader-content .md-h-row').forEach(row => readerFoldRow(row, false));
-  maybeRefreshOutlineAfterReaderFold();
-}
-
-// Keeps open only the current heading and its ancestor chain — the same
-// "don't hide the path to where you are" rule as the sidebar and the
-// Outline (outlineCollapseUnused, below — shares isSelfOrAncestorHeading).
-// "Current heading" is whichever one the Outline has marked active; falls
-// back to the first heading if none is active yet (e.g. a short file that
-// never triggered the scroll-spy observer).
-function readerCollapseUnused() {
-  const activeItem = document.querySelector('.rp-outline-item.active') || document.querySelector('.rp-outline-item');
-  const activeId = activeItem && activeItem.dataset.hid;
-  const activeEl = activeId ? document.getElementById(activeId) : null;
-
-  document.querySelectorAll('#reader-content .md-h-row').forEach(row => {
-    const h = row.querySelector('.md-h');
-    readerFoldRow(row, !isSelfOrAncestorHeading(h, activeEl));
-  });
-  maybeRefreshOutlineAfterReaderFold();
-}
-
-// ── Outline fold state (chevrons + collapse-all/unused/expand-all) ──────
-// Independent by default: its own per-file store, wb_outline_folds:<url>,
-// separate from the reader's wb_folds:<url> (S20 fold memory) — folding a
-// heading in the Outline doesn't hide reader content, and vice versa. The
-// lock toggle in the Outline toolbar switches to Shared: same heading ids,
-// same storage key as the reader, so a fold either place folds both.
-function outlineFoldShared() { return state.outlineFoldMode === 'shared'; }
-
-function outlineFoldKey(url) { return 'wb_outline_folds:' + url; }
-
-// Folded heading ids for whatever's open, as a Set. Help/changelog have no
-// stable url — folds there are session-only (state.outlineSessionFolds),
-// same reasoning as persistFoldState silently skipping the save above.
 function getOutlineFolds(url) {
-  if (!url) return state.outlineSessionFolds;
-  const key = outlineFoldShared() ? foldStateKey(url) : outlineFoldKey(url);
-  let ids = [];
-  try { ids = JSON.parse(localStorage.getItem(key)) || []; } catch (e) { ids = []; }
-  return new Set(ids);
+  const key = url || '';
+  if (!outlineFolds.has(key)) outlineFolds.set(key, new Set());
+  return outlineFolds.get(key);
 }
 
 function saveOutlineFolds(url, idsSet) {
-  if (!url) { state.outlineSessionFolds = idsSet; return; }
-  const key = outlineFoldShared() ? foldStateKey(url) : outlineFoldKey(url);
-  const ids = [...idsSet];
-  if (ids.length) localStorage.setItem(key, JSON.stringify(ids));
-  else localStorage.removeItem(key);
+  outlineFolds.set(url || '', idsSet);
 }
 
-// Keeps the reader's own row/section classes in sync when a fold happens
-// through the Outline while Shared mode is on (storage alone won't repaint
-// the already-rendered reader DOM).
-function mirrorFoldToReader(hid, folded) {
-  const h = document.getElementById(hid);
-  const row = h && h.closest('.md-h-row');
-  const section = row && row.nextElementSibling;
-  if (row) row.classList.toggle('folded', folded);
-  if (section) section.classList.toggle('folded', folded);
-}
-
-function toggleOutlineHeading(hid) {
+function toggleOutlineHeading(hid, deep) {
   const url = state.activeUrl || null;
   const ids = getOutlineFolds(url);
   const folded = !ids.has(hid);
   folded ? ids.add(hid) : ids.delete(hid);
+
+  // Alt/Option-click takes the whole subtree with it, same gesture as the
+  // reader's heading chevrons. Descendants are every heading deeper than
+  // this one up to the next equal-or-shallower sibling.
+  if (deep) {
+    const meta = outlineHeadingsMeta();
+    const i = meta.findIndex(m => m.id === hid);
+    if (i !== -1) {
+      for (let j = i + 1; j < meta.length && meta[j].level > meta[i].level; j++) {
+        if (!meta[j].hasChildren) continue;
+        folded ? ids.add(meta[j].id) : ids.delete(meta[j].id);
+      }
+    }
+  }
   saveOutlineFolds(url, ids);
-  if (outlineFoldShared()) mirrorFoldToReader(hid, folded);
   renderOutlineTab();
-}
-
-function toggleOutlineFoldMode() {
-  state.outlineFoldMode = outlineFoldShared() ? 'independent' : 'shared';
-  persist('wb_outline_fold_mode', state.outlineFoldMode);
-  renderOutlineTab();
-}
-
-// Refreshes the Outline after a fold happens through the reader's own
-// controls (heading click, or its collapse-all/unused/expand-all pill) —
-// only matters in Shared mode, and only if the Outline tab is visible.
-function maybeRefreshOutlineAfterReaderFold() {
-  if (outlineFoldShared() && state.openRPTabs.includes('outline')) renderOutlineTab();
 }
 
 // Outline's own heading list (h1-h6, matching what renderOutlineTab shows)
@@ -4525,45 +5082,23 @@ function outlineHeadingsMeta() {
   });
 }
 
-// True if `h` is `activeEl` itself, or an ancestor of it (its .md-section
-// contains activeEl) — shared by readerCollapseUnused and
-// outlineCollapseUnused so "keep the path to where you are open" stays
-// one implementation instead of two.
-function isSelfOrAncestorHeading(h, activeEl) {
-  if (!h || !activeEl) return false;
-  if (h === activeEl) return true;
-  const row = h.closest ? h.closest('.md-h-row') : null;
-  const section = row && row.nextElementSibling;
-  return !!(section && section.contains(activeEl));
+// One symbol, two directions. Collapse all until everything foldable is
+// folded, then the same control expands. Three buttons collapsed to one
+// because with nothing persisted the state is genuinely binary — you
+// always start expanded, so there is never a third thing to offer.
+function outlineAllFolded() {
+  const foldable = outlineHeadingsMeta().filter(m => m.hasChildren);
+  if (!foldable.length) return false;
+  const ids = getOutlineFolds(state.activeUrl || null);
+  return foldable.every(m => ids.has(m.id));
 }
 
-function outlineCollapseAll() {
-  if (outlineFoldShared()) { readerCollapseAll(); return; }
-  const ids = new Set(outlineHeadingsMeta().filter(m => m.hasChildren).map(m => m.id));
+function outlineToggleAll() {
+  const foldable = outlineHeadingsMeta().filter(m => m.hasChildren);
+  const ids = outlineAllFolded() ? new Set() : new Set(foldable.map(m => m.id));
   saveOutlineFolds(state.activeUrl || null, ids);
   renderOutlineTab();
 }
-
-function outlineExpandAll() {
-  if (outlineFoldShared()) { readerExpandAll(); return; }
-  saveOutlineFolds(state.activeUrl || null, new Set());
-  renderOutlineTab();
-}
-
-function outlineCollapseUnused() {
-  if (outlineFoldShared()) { readerCollapseUnused(); return; }
-  const activeItem = document.querySelector('.rp-outline-item.active') || document.querySelector('.rp-outline-item');
-  const activeId = activeItem && activeItem.dataset.hid;
-  const activeEl = activeId ? document.getElementById(activeId) : null;
-
-  const ids = new Set();
-  outlineHeadingsMeta().forEach(m => {
-    if (m.hasChildren && !isSelfOrAncestorHeading(m.el, activeEl)) ids.add(m.id);
-  });
-  saveOutlineFolds(state.activeUrl || null, ids);
-  renderOutlineTab();
-}
-
 // ── Jump to a heading — shared by the Outline (scrollToHeading, below)
 // and same-page/cross-file anchor links (scrollToAnchor) ──────────────
 // A heading inside a folded ancestor section is display:none, so its
@@ -4614,7 +5149,6 @@ function revealHeading(id) {
     if (row && row.classList.contains('md-h-row')) readerFoldRow(row, false);
     node = section.parentElement;
   }
-  maybeRefreshOutlineAfterReaderFold();
 
   const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - READER_TOP_CLEARANCE;
 
@@ -4746,10 +5280,19 @@ async function openFile(url, name) {
   state.navRestoreScroll = 0;
   updateBackButtons();
 
+  // S35 — What's New commits "seen" on LEAVING a page, not on opening it.
+  // Marking on open would clear the highlight before you ever saw it, which
+  // is the failure mode of every single-lastSeen-timestamp implementation.
+  // The page being left is committed here; the page being opened becomes
+  // pending only once it has actually rendered (see the try block below),
+  // so a file that fails to load is never counted as read.
+  wnCommitPending();
+
   state.activeUrl  = url;
   state.activeName = name;
   state.helpOpen   = false;
   state.changelogOpen = false;
+  state.whatsNewOpen = false;
 
   setReaderTitle(name);
 
@@ -4768,7 +5311,7 @@ async function openFile(url, name) {
     rc.innerHTML = inlineTitleHTML(name) + parseMarkdown(text);
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
-    applyFoldState(url); // restore collapsed headings from last visit
+    // S34: headings always open expanded — no applyFoldState any more.
     applyLiFoldState(url); // restore collapsed list items from last visit
     // Back/Forward lands you back where you were reading; any other
     // navigation (sidebar, wiki link, search) starts at the top, same as
@@ -4778,6 +5321,18 @@ async function openFile(url, name) {
     // Settings → "Open last note" reads this back at next boot. Written on
     // success only, so a broken link never becomes "the file to reopen".
     persist('wb_last_file', { url, name, folderId: state.fileFolder[url] ?? null });
+
+    // Rendered successfully — now it counts as a page you're on, and its
+    // seen stamp commits when you navigate away from it.
+    //
+    // _pendingSecUid rides in from a What's New section button and says
+    // "clear this one heading, not the file". Consumed here, alongside the
+    // pending stamp it qualifies, so every other route into openFile — the
+    // sidebar, a wiki link, search, Back — leaves it null and still marks the
+    // whole page seen.
+    state.wnPending    = url;
+    state.wnPendingSec = openFile._pendingSecUid || null;
+    openFile._pendingSecUid = null;
 
     // Register this file's outgoing links so other files can show it as a backlink
     extractAndRegisterLinks(text, url);
@@ -4789,6 +5344,27 @@ async function openFile(url, name) {
       const anchor = openFile._pendingAnchor;
       openFile._pendingAnchor = null;
       setTimeout(() => scrollToAnchor(null, headingId(anchor.replace('#',''))), 80);
+    }
+
+    // Opened from a What's New section button: the id is already the deduped
+    // one, so it is used as-is. If it does not resolve, fall back to the first
+    // heading row whose visible text matches (see wnOpenSection).
+    if (openFile._pendingHeadingId || openFile._pendingHeadingText) {
+      const hid   = openFile._pendingHeadingId;
+      const htext = openFile._pendingHeadingText;
+      openFile._pendingHeadingId = null;
+      openFile._pendingHeadingText = null;
+      setTimeout(() => {
+        let target = hid && document.getElementById(hid) ? hid : null;
+        if (!target && htext) {
+          const want = htext.trim().toLowerCase();
+          const hit  = [...document.querySelectorAll('#reader-content .md-h-row')]
+            .find(r => r.textContent.trim().toLowerCase() === want);
+          const el = hit && hit.querySelector('[id]');
+          if (el) target = el.id;
+        }
+        if (target) scrollToAnchor(null, target);
+      }, 80);
     }
   } catch (e) {
     rc.innerHTML = `<p class="md-p" style="color:var(--text-muted);padding-top:32px">Could not load file: ${escHtml(e.message)}</p>`;
@@ -5029,10 +5605,12 @@ async function openHelpDoc(file) {
   const empty = $('reader-empty');
   const rc    = $('reader-content');
 
+  wnCommitPending(); // S35 — leaving a page commits its seen stamp
   state.activeUrl  = null; // deselect any active sidebar file
   state.activeName = null;
   state.helpOpen   = true; // lets Outline read the help doc's own headings below
   state.changelogOpen = false;
+  state.whatsNewOpen = false;
   renderSidebar();
   updateEditBtn();
 
@@ -5075,6 +5653,7 @@ async function openHelpDoc(file) {
 // app level, same as help.md, and ships in the deploy zip alongside it.
 async function openChangelog() {
   if (!guardLeaveEdit()) return;
+  wnCommitPending(); // S35 — leaving a page commits its seen stamp
   const empty = $('reader-empty');
   const rc    = $('reader-content');
 
@@ -5082,6 +5661,7 @@ async function openChangelog() {
   state.activeName = null;
   state.helpOpen   = false;
   state.changelogOpen = true;
+  state.whatsNewOpen = false;
   renderSidebar();
   updateEditBtn();
 
@@ -5250,6 +5830,8 @@ function toggleUserDropdown(e) {
     $('settings-panel').classList.remove('open');
   }
   closeThemePanel();
+  const rc = $('ud-reconnect');
+  if (rc) rc.style.display = LOCAL.on ? '' : 'none';
   $('user-dropdown').classList.toggle('open');
 }
 
@@ -5295,18 +5877,120 @@ function wbAuthor() {
   return (a && !a.startsWith('[')) ? a : 'Anonymous';
 }
 
-function canEdit() {
-  const eds = CONFIG.editors;
-  if (!Array.isArray(eds) || !eds.length) return true; // empty list = everyone
-  return eds.includes(CONFIG.authorName);
+// ── S14 access tiers (0.27.0) ────────────────────────────────────
+//
+// Three tiers on a ladder, each inheriting everything below it:
+//   User          read, search, comments, What's New, themes  (default)
+//   Contributor   new/move/edit, task checkboxes, review + inboxes
+//   Administrator change the tier passwords, usage analytics (not built)
+//
+// Editing sits in CONTRIBUTOR, not Administrator. The first S38 shape had
+// it the other way and was circular: only in-app edits write a .changes.md
+// diff, so with editing at the top the only person who can create review
+// work sits above the reviewer and the Contributor queue is empty by design.
+//
+// Moving UP asks for that tier's password; moving DOWN never does, so
+// nobody is stuck in a mode they turned on by accident.
+//
+// HONEST CEILING, and it stays in help.md: this is an interface gate, not
+// security. The hashes are readable by anyone with vault access and the
+// check runs in this browser, so it can be bypassed from the console. What
+// hashing buys is that the password itself never sits in readable form and
+// cannot be lifted and tried elsewhere. Anyone with vault write access can
+// edit any note in Obsidian regardless of tier — which is the whole reason
+// Section 15 (vault audit) exists.
+const WB_TIERS  = ['user', 'contributor', 'admin'];
+const TIER_NAME = { user: 'User', contributor: 'Contributor', admin: 'Administrator' };
+const TIER_DESC = {
+  user:        'Read, search, comment and bookmark. Nothing in the vault is changed.',
+  contributor: 'Everything above, plus creating, moving and editing pages, and the review tools.',
+  admin:       'Everything above, plus changing the tier passwords.',
+};
+const tierRank = t => WB_TIERS.indexOf(t);
+
+// The single question every gated surface asks.
+function atLeast(t) { return tierRank(state.tier) >= tierRank(t); }
+
+// The ADMINISTRATOR password is what arms the gate — not the file existing,
+// and not any password existing. Two rejected alternatives, both worse:
+//   "a tier with no hash is open" fails open in the case that matters, since
+//     a Contributor password with no Administrator password is decorative —
+//     anyone picks Administrator from the dropdown and changes it;
+//   "any hash present locks every tier without one" locks the person who
+//     just set one password out of setting the other.
+// Setup writes both at once, so a half-configured ladder never exists.
+function authArmed() {
+  return !!(state.authHashes && state.authHashes.admin);
 }
 
-// Settings "Enable editing" toggle, off by default. Gates New/Move/Edit
-// on top of (not instead of) the existing canEdit() permission list —
-// both must allow it.
-function editingAllowed() {
-  return state.editingEnabled && canEdit();
+// Full 64-char SHA-256, unlike wnHash() which truncates to 16 for the change
+// index. Truncation is fine for detecting an edit and wrong for a password.
+// Without a secure context there is no crypto.subtle; this returns null and
+// every unlock refuses rather than degrading to something weaker.
+async function tierHash(str) {
+  if (typeof crypto === 'undefined' || !crypto.subtle) return null;
+  try {
+    const dig = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(dig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (_) { return null; }
 }
+
+// Same hidden-sidecar convention as zSystem/theme.json and the identity
+// records. Living in the vault rather than in index.html is what makes the
+// passwords survive a deploy: an update replaces the app files and the vault
+// is a different folder that is never touched. A file in the GitHub repo was
+// considered and rejected — the repo is public, client-side decryption ships
+// the key beside the ciphertext, and a deploy would overwrite it anyway.
+function vaultAuthUrl() {
+  return LOCAL.on ? 'zSystem/auth.json' : `${CONFIG.vaultRelPath}/zSystem/auth.json`;
+}
+
+async function loadVaultAuth() {
+  try {
+    const txt = await readVaultFileOrNull(vaultAuthUrl());
+    const obj = txt ? JSON.parse(txt) : null;
+    state.authHashes = (obj && typeof obj.hashes === 'object' && obj.hashes) ? obj.hashes : {};
+  } catch (_) {
+    // A malformed auth.json must never block boot. It reads as "not set up",
+    // which is the same as a fresh vault rather than a lockout.
+    state.authHashes = {};
+  }
+  state.authLoaded = true;
+  renderTierSettings();
+}
+
+async function saveVaultAuth() {
+  // Local mode creates missing directories on the way to the file handle;
+  // the SharePoint path does not, same as setVaultDefaultTheme().
+  if (!LOCAL.on) { try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* exists */ } }
+  await spWriteFile(vaultAuthUrl(), JSON.stringify({
+    version: 1,
+    note: 'WikiBase access tiers. SHA-256 hashes only — no passwords are stored here. Interface gate, not security.',
+    hashes: state.authHashes || {},
+  }, null, 2));
+}
+
+// Applying a tier is one function so every path — unlock, drop down, boot
+// restore — refreshes the same surfaces in the same order.
+function applyTier(t, opts) {
+  if (!WB_TIERS.includes(t)) t = 'user';
+  state.tier = t;
+  if (!(opts && opts.noPersist)) persist('wb_tier', t);
+  refreshEditControls();
+  updateBadges();
+  renderTierSettings();
+  // Unlocking Contributor reveals the review surfaces, which need the sweep
+  // that fills them. Skipped on the boot restore (noScan) because boot runs
+  // its own scanBadges() once the vault is loaded — calling it here would
+  // walk the whole vault before the tree exists.
+  if (!(opts && opts.noScan) && atLeast('contributor')) scanBadges();
+}
+
+// The two names the rest of the app already calls. Both now resolve to the
+// same rung, which is the point: "can edit" and "can review" were never two
+// questions — an edit is what creates the thing there is to review.
+function editingAllowed() { return atLeast('contributor'); }
+function reviewAllowed()  { return atLeast('contributor'); }
 
 // Task checkboxes are clickable straight from the reader — no need to open
 // the full editor for a status tick. Gated by the same editingAllowed()
@@ -5707,9 +6391,10 @@ async function saveEdit() {
 
 // ================================================================
 // Section 14 — Review mode, comment badges, create flow
-// Bell + review views hidden behind Settings → "Show review tools"
-// (localStorage wb_review, off by default). Comments stay a fully
-// separate feature — separate sidecars, separate badges.
+// Bell + review views are gated by reviewAllowed(), i.e. the Contributor
+// tier (0.27.0). They used to sit behind a Settings checkbox, wb_review,
+// which anyone could tick. Comments stay a fully separate feature —
+// separate sidecars, separate badges, and available to every tier.
 // ================================================================
 
 function parseChanges(text) {
@@ -5735,10 +6420,24 @@ function parseChanges(text) {
 function headOpenIdx(entries) { return entries.findIndex(e => e.reviewed === 'no'); }
 
 // Load every folder in the tree (BFS — each load can reveal new subfolders).
+//
+// 0.27.1: STALE COUNTS AS NOT LOADED. refreshVaultTree marks every loaded
+// folder stale on a focus regain but only really reloads the ones currently
+// expanded in the sidebar — a collapsed folder's badge isn't worth a fetch
+// nobody will look at. This filter used to test folderLoaded alone, so those
+// stale folders were skipped here too, and every file inside one kept its
+// boot-time size and modified time for the whole session. wnScan's stage-1
+// comparison then found nothing to hash, so What's New only ever moved on a
+// full app reload, and a second edit to a section you'd already cleared
+// never surfaced at all. Both symptoms, one line.
+//
+// The cost is metadata only: this is enumeration, not content. Files are
+// still read and hashed solely where m or s actually differs, so a focus
+// regain on an unchanged vault reads no file bodies.
 async function loadAllFolders() {
   let queue = [...vaultFolders];
   while (queue.length) {
-    const toLoad = queue.filter(f => !state.folderLoaded[f.id]);
+    const toLoad = queue.filter(f => !state.folderLoaded[f.id] || state.folderStale[f.id]);
     if (toLoad.length) {
       try { await Promise.all(toLoad.map(f => loadFolderFiles(f))); } catch (_) {}
     }
@@ -5775,10 +6474,11 @@ async function scanBadges() {
     let openCmts = 0;
     const review = [];
     const audit  = [];
+    const flags  = {}; // S35 — What's New must-read/onboarding, filled below
     await Promise.all(files.map(async f => {
       const cTxt = await readVaultFileOrNull(commentsUrlFor(f.url));
       if (cTxt) openCmts += parseComments(cTxt).filter(c => c.status === 'open').length;
-      if (state.reviewTools) {
+      if (reviewAllowed()) {
         const chUrl = changesUrlFor(f.url);
         const chTxt = await readVaultFileOrNull(chUrl);
         if (chTxt) {
@@ -5792,13 +6492,27 @@ async function scanBadges() {
       // status key = never touched by the app = a new file dropped in
       // directly. Read-only: this only lists files, never writes anything.
       const mainTxt = await readVaultFileOrNull(f.url);
-      if (mainTxt !== null && !parseFm(mainTxt).status) {
-        audit.push({ name: displayFileName(f.name), url: f.url });
+      if (mainTxt !== null) {
+        const fm = parseFm(mainTxt);
+        if (!fm.status) audit.push({ name: displayFileName(f.name), url: f.url });
+        // S35 — What's New reads its two frontmatter keys off the sweep
+        // that is already reading every file for the audit. A second
+        // vault-wide read for two booleans would double the boot cost of
+        // the slowest thing the app does. Absent means false; no migration
+        // is needed for existing files.
+        const mr  = String(fm['must-read']  || '').toLowerCase();
+        const onb = String(fm['onboarding'] || '').toLowerCase();
+        flags[f.url] = {
+          mustRead:   mr === 'true'  || mr === 'yes',
+          onboarding: onb === 'true' || onb === 'yes',
+        };
       }
     }));
     state.cmtOpenCount   = openCmts;
     state.reviewChanges  = review;
     state.unauditedFiles = audit;
+    state.wnFlags        = flags;
+    wnBuildEntries(); // flags changed, so must-read grouping may have too
     updateBadges();
   } catch (_) {} finally { scanBusy = false; }
 }
@@ -5809,14 +6523,14 @@ function updateBadges() {
     const el = $(id);
     if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
   });
-  $('tab-review').style.display = state.reviewTools ? '' : 'none';
+  $('tab-review').style.display = reviewAllowed() ? '' : 'none';
   updateInboxStrip();
   const total = state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0);
   const rc = $('review-count');
   rc.textContent   = total;
-  rc.style.display = (state.reviewTools && total) ? '' : 'none';
+  rc.style.display = (reviewAllowed() && total) ? '' : 'none';
   // if review got switched off while its tab was open, close it out of the stack
-  if (!state.reviewTools) {
+  if (!reviewAllowed()) {
     const i = state.openRPTabs.indexOf('review');
     if (i !== -1) { state.openRPTabs.splice(i, 1); renderRPStack(); }
   }
@@ -5827,10 +6541,754 @@ function updateBadges() {
 // (and review tools are on) — both can show together if both are open.
 function updateInboxStrip() {
   const showCmt = state.openRPTabs.includes('comments');
-  const showRev = state.openRPTabs.includes('review') && state.reviewTools;
+  const showRev = state.openRPTabs.includes('review') && reviewAllowed();
   $('btn-cmt-inbox').style.display    = showCmt ? '' : 'none';
   $('btn-review-inbox').style.display = showRev ? '' : 'none';
   $('rp-inbox-strip').style.display   = (showCmt || showRev) ? '' : 'none';
+}
+
+// ── What's New (S35 / 0.23.0) ────────────────────────────────────
+// New vs Updated is decided by whether a path was in the LAST KNOWN INDEX,
+// never by TimeCreated. That is the whole design, and the reason is
+// specific: new pages are authored in Obsidian and get their frontmatter
+// injected here afterwards, which rewrites the file. Under any timestamp
+// scheme every genuinely-new page would arrive looking like an edit.
+// Path-presence is injection-proof, and the same index answers renames and
+// deletions for free — which is why it beat three separate heuristics.
+//
+// Everything below is per-user and lives in localStorage. Nothing is
+// written to the vault, so this stays compatible with a read-only deploy.
+const WN_INDEX_KEY = 'wb_wn_index';   // { [url]: { m, s, h } } — the last known vault
+const WN_SEEN_KEY  = 'wb_wn_seen';    // { [url]: signature-you-last-saw }
+const WN_META_KEY  = 'wb_wn_meta';    // { seeded, surfaced:{}, lapsed:{} }
+// { [url]: [[uid, title, read], …] } — which sections of that page have
+// changed, and which of those you have opened. Kept beside the seen map rather
+// than inside the index, because the index mirrors the vault and this is
+// personal: it accumulates across scans so three separate edits between two
+// visits all still show.
+//
+// 0.27.1 added the third field and stopped deleting entries when a page is
+// marked seen. Reading a section marks it read; it stays listed, greyed, so
+// you can get back to it when you clicked the wrong one — and so the Updated,
+// All and date-window views show the same structure the Unseen view does
+// instead of collapsing to a bare list of file names. 0.26.0 wrote two-element
+// entries; those read as unread, which is exactly what they were.
+const WN_SECT_KEY  = 'wb_wn_sections';
+// Per file. Unread entries are never dropped — only read ones are trimmed,
+// oldest first — so a long-lived page cannot grow this store without bound
+// and cannot lose a section you still owe a read either.
+const WN_SECT_KEEP = 12;
+const WN_MUSTREAD_DAYS = 30;          // per person, from first surfacing — not from file mtime
+const WN_BULK_THRESHOLD = 25;         // above this many updates in one scan, collapse
+
+// Section 13 — the change signature.
+//
+// The index record is { m: modified ISO, s: size, h: content hash }. What
+// decides whether a file changed is the HASH, never the timestamp: OneDrive
+// rewrites modified times on files whose content never changed, and treating
+// that as an edit is what the bulk guard was built to absorb. The timestamp is
+// kept for display, sorting and the date-window filter only.
+//
+// Two-stage, so this stays cheap on a 500-note vault: m + s come free from
+// enumeration and are compared on every scan; the file is only read and hashed
+// where one of them differs. Steady state hashes nothing.
+const WN_HASH_OK = !!(typeof crypto !== 'undefined' && crypto.subtle);
+
+// SHA-256, truncated to 16 hex chars. 64 bits is far beyond what change
+// detection needs and it keeps the stored index near 32KB for 500 notes.
+// One guard, not a second algorithm: without a secure context there is no
+// crypto.subtle, so this returns null and wnSig falls back to m + s. Noisier,
+// never broken.
+async function wnHash(str) {
+  if (!WN_HASH_OK) return null;
+  try {
+    const dig = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(dig).slice(0, 8))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (_) { return null; }
+}
+
+// ── Per-section detection (0.26.0) ───────────────────────────────
+//
+// Knowing a file changed is not much use in a 4000-word handbook, so the index
+// also carries a hash per heading and the list names the sections that moved.
+//
+// A section runs from its heading to the NEXT heading of ANY level, so an edit
+// under an H4 is attributed to that H4 and never bubbles up to its parents.
+// Six levels are supported because the vault uses six.
+//
+// Frontmatter is stripped before hashing. WikiBase writes its own keys
+// (status, must-read, onboarding) into pages it touches, so leaving it in would
+// flag pages nobody edited — the same reasoning that makes New run off path
+// presence rather than a created date.
+function wnSplitSections(raw) {
+  let text = String(raw == null ? '' : raw);
+  const fm = text.match(/^---\r?\n[\s\S]*?\r?\n---[ \t]*(\r?\n|$)/);
+  if (fm) text = text.slice(fm[0].length);
+
+  const out  = [];
+  const seen = new Map();
+  let cur    = { uid: '', title: '', level: 0, body: [] };  // preamble
+  let fence  = null;
+
+  for (const line of text.split(/\r?\n/)) {
+    // A '#' inside a fenced block is a shell comment or a CSS id, not a
+    // heading. Getting this wrong invents sections out of every code sample.
+    const f = line.match(/^\s{0,3}(```+|~~~+)/);
+    if (f) {
+      if (!fence) fence = f[1][0]; else if (f[1][0] === fence) fence = null;
+      cur.body.push(line);
+      continue;
+    }
+    if (fence) { cur.body.push(line); continue; }
+
+    const h = line.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
+    if (h) {
+      out.push(cur);
+      const base = headingId(h[2]);
+      const n    = (seen.get(base) || 0) + 1;
+      seen.set(base, n);
+      cur = { uid: n === 1 ? base : base + '-' + n, title: h[2], level: h[1].length, body: [] };
+    } else {
+      cur.body.push(line);
+    }
+  }
+  out.push(cur);
+  return out.filter(s => s.uid || s.body.join('').trim());
+}
+
+// { uid: [title, hash] }, keyed by the same unique heading id the renderer puts
+// in the DOM, so a click in the list maps straight onto an element.
+async function wnSectionMap(raw) {
+  const m = {};
+  for (const s of wnSplitSections(raw)) {
+    if (!s.uid) continue;                       // preamble belongs to the file
+    m[s.uid] = [s.title, await wnHash(s.body.join('\n').trim())];
+  }
+  return m;
+}
+
+// A renamed heading arrives as a uid that did not exist before, so it reads as
+// a changed section carrying its new name. That is the honest answer: the new
+// name is what the reader is going to see when they open the page.
+function wnChangedSections(oldSec, newSec) {
+  const out = [];
+  Object.keys(newSec || {}).forEach(uid => {
+    const o = oldSec && oldSec[uid];
+    if (!o || o[1] !== newSec[uid][1]) out.push([uid, newSec[uid][0]]);
+  });
+  return out;
+}
+
+// Degrades to m + s rather than to '' — an empty signature is precisely the
+// bug this section fixes, because it makes every file identical to every other.
+// Normalises whatever is in the store into fresh [uid, title, read] triples,
+// so every caller can mutate the result without writing through to another
+// one's copy, and a 0.26.0 two-element entry reads as unread.
+function wnSecList(v) {
+  if (!Array.isArray(v)) return [];
+  return v.filter(x => Array.isArray(x) && x[0]).map(x => [x[0], x[1] || '', x[2] ? 1 : 0]);
+}
+
+// Unread first, then read, each keeping its own order. This is both the stored
+// order and the render order: the six-item display cap would otherwise be
+// spent on sections you have already opened and hide the ones you have not.
+function wnSecSort(list) {
+  return [...list.filter(s => !s[2]), ...list.filter(s => s[2])];
+}
+
+function wnSig(rec) {
+  if (!rec || typeof rec !== 'object') return '';
+  if (rec.h) return rec.h;
+  return String(rec.m) + '|' + String(rec.s);
+}
+
+// Pre-0.25.0 stored a bare string per path (and in local mode that string was
+// always ''). Adopting those as real records would make the entire vault
+// arrive as Updated on the upgrade scan, so a legacy index triggers a re-seed
+// instead — the same rule as first run.
+function wnIsLegacyIndex(idx) {
+  if (!idx || typeof idx !== 'object') return false;
+  return Object.values(idx).some(v => v === null || typeof v !== 'object');
+}
+
+function wnRead(key, fallback) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch (_) { return fallback; }
+}
+function wnWrite(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch (_) {}
+}
+function wnMeta() {
+  const m = wnRead(WN_META_KEY, null);
+  return (m && typeof m === 'object') ? { seeded: !!m.seeded, surfaced: m.surfaced || {}, lapsed: m.lapsed || {} }
+                                      : { seeded: false, surfaced: {}, lapsed: {} };
+}
+
+// A rename is a path that vanished and a path that appeared carrying the same
+// CONTENT. No enumeration in either backend returns a file id, so identity has
+// to be inferred, and content is the only honest basis for it: renaming or
+// moving a file in Obsidian leaves the bytes alone while OneDrive frequently
+// rewrites the modified time on the way through.
+//
+// This paired on the timestamp until 0.25.0, which in local mode meant pairing
+// on '' — every vanished path matched every arrived path, so the pairing was
+// arbitrary whenever more than one file moved at once.
+//
+// A false positive costs one page showing as seen that you hadn't read; a false
+// negative costs one page showing as New that you had. Both are recoverable,
+// unlike wiping the seen map, which is why this still errs toward matching.
+function wnDetectRenames(oldIdx, curIdx) {
+  const gone    = Object.keys(oldIdx).filter(u => !(u in curIdx));
+  const arrived = Object.keys(curIdx).filter(u => !(u in oldIdx));
+  const map = {};
+  if (!gone.length || !arrived.length) return map;
+  const byHash = {};
+  gone.forEach(u => {
+    const k = wnSig(oldIdx[u]);
+    if (!k) return;                       // unsignable record pairs with nothing
+    (byHash[k] = byHash[k] || []).push(u);
+  });
+  arrived.forEach(u => {
+    const pool = byHash[wnSig(curIdx[u])];
+    if (pool && pool.length) map[u] = pool.shift(); // newUrl -> oldUrl
+  });
+  return map;
+}
+
+// Stage 2. Builds the current index from the enumerated files, reading and
+// hashing ONLY the files whose modified time or size differs from the stored
+// record. Everything else carries its existing hash forward untouched, so a
+// steady-state scan reads no file contents at all.
+//
+// Passing oldIdx as null forces a full hash — that is the first run, and the
+// upgrade from a pre-0.25.0 index.
+async function wnBuildIndex(files, oldIdx) {
+  const curIdx = {};
+  for (const f of files) {
+    const m    = f.modified || null;
+    const s    = (typeof f.size === 'number') ? f.size : null;
+    const prev = oldIdx && oldIdx[f.url];
+
+    // Cheap path: both stage-1 fields match a record that already carries a
+    // hash. Nothing is read, and the section map rides along untouched.
+    if (prev && typeof prev === 'object' && prev.h && prev.m === m && prev.s === s) {
+      curIdx[f.url] = { m: prev.m, s: prev.s, h: prev.h, sec: prev.sec || {} };
+      continue;
+    }
+
+    // Expensive path, only for candidates. A read that fails leaves h null,
+    // and wnSig falls back to m + s for that file rather than dropping it.
+    const text = await readVaultFileOrNull(f.url);
+    const isText = (typeof text === 'string');
+    curIdx[f.url] = {
+      m, s,
+      h:   isText ? await wnHash(text) : null,
+      sec: isText ? await wnSectionMap(text) : (prev && prev.sec) || {},
+    };
+  }
+  return curIdx;
+}
+
+// The one place the index moves forward. Returns a summary so the caller
+// can report a bulk event; never throws, because a failure here must not
+// be able to stop boot.
+async function wnScan() {
+  try {
+    await loadAllFolders();
+    const files  = allMdFiles();
+
+    const meta   = wnMeta();
+    const oldIdx = wnRead(WN_INDEX_KEY, null);
+    let   seen   = wnRead(WN_SEEN_KEY, {});
+    let   sect   = wnRead(WN_SECT_KEY, {});
+    const legacy = wnIsLegacyIndex(oldIdx);
+    const curIdx = await wnBuildIndex(files, legacy ? null : oldIdx);
+
+    // First run seeds everything as seen and counts from here. Without this
+    // a new hire opens the app to "247 unseen", which is the same as no
+    // signal at all. Upgrading from a pre-0.25.0 index re-seeds for the same
+    // reason: every record gains a real signature at once, and adopting that
+    // as change would report the whole vault as Updated on one scan.
+    if (!meta.seeded || !oldIdx || legacy) {
+      seen = {};
+      Object.keys(curIdx).forEach(u => { seen[u] = wnSig(curIdx[u]); });
+      wnWrite(WN_SEEN_KEY, seen);
+      wnWrite(WN_SECT_KEY, {});
+      wnWrite(WN_INDEX_KEY, curIdx);
+      wnWrite(WN_META_KEY, { ...meta, seeded: true });
+      state.wnBulk = null;
+      wnBuildEntries();
+      return { seeded: true };
+    }
+
+    // Renames carry their seen state across, so a file someone renamed in
+    // Obsidian doesn't resurface as new for the whole team.
+    const renames = wnDetectRenames(oldIdx, curIdx);
+    Object.entries(renames).forEach(([newUrl, oldUrl]) => {
+      if (oldUrl in seen) seen[newUrl] = seen[oldUrl];
+      if (sect[oldUrl]) sect[newUrl] = sect[oldUrl];
+      if (meta.surfaced[oldUrl]) meta.surfaced[newUrl] = meta.surfaced[oldUrl];
+      delete seen[oldUrl]; delete sect[oldUrl];
+      delete meta.surfaced[oldUrl]; delete meta.lapsed[oldUrl];
+    });
+
+    // Deletions drop out of every store. A path that comes back later is
+    // genuinely new again, which is the honest answer.
+    Object.keys(seen).forEach(u => { if (!(u in curIdx)) delete seen[u]; });
+    Object.keys(sect).forEach(u => { if (!(u in curIdx)) delete sect[u]; });
+    Object.keys(meta.surfaced).forEach(u => { if (!(u in curIdx)) delete meta.surfaced[u]; });
+    Object.keys(meta.lapsed).forEach(u => { if (!(u in curIdx)) delete meta.lapsed[u]; });
+
+    // Bulk guard. A sync client rewriting Modified across the vault would
+    // otherwise poison the badge permanently — every page unseen, forever,
+    // with no way back except clearing storage. Above the threshold the
+    // changes are absorbed into the index and marked seen, and one summary
+    // row says so, rather than the list becoming useless.
+    // Note the guard now counts HASH-confirmed changes, so a sync sweep that
+    // only rewrites modified times no longer reaches it at all. What is left
+    // for it to absorb is a genuine bulk edit or a vault reorganisation.
+    const updated = Object.keys(curIdx)
+      .filter(u => (u in oldIdx) && wnSig(oldIdx[u]) !== wnSig(curIdx[u]));
+    if (updated.length > WN_BULK_THRESHOLD) {
+      updated.forEach(u => { seen[u] = wnSig(curIdx[u]); delete sect[u]; });
+      state.wnBulk = { count: updated.length, at: new Date().toISOString() };
+    } else {
+      state.wnBulk = null;
+      // Accumulate, do not replace. Three separate edits between two visits
+      // should all still be listed when you finally open the page, so each
+      // scan unions its findings into whatever is already there. Dedupe is
+      // by uid, and the newest title wins so a renamed heading updates rather
+      // than appearing twice.
+      //
+      // A section that changes again goes back to unread even if you had
+      // already read it — that is the whole point of item 3: clearing a
+      // section answers the edit you read, not every edit that section will
+      // ever get.
+      updated.forEach(u => {
+        const found = wnChangedSections(oldIdx[u] && oldIdx[u].sec, curIdx[u].sec);
+        if (!found.length) return;
+        const byUid = new Map(wnSecList(sect[u]).map(x => [x[0], x]));
+        found.forEach(([uid, title]) => byUid.set(uid, [uid, title, 0]));
+        const all    = [...byUid.values()];
+        const unread = all.filter(s => !s[2]);
+        const read   = all.filter(s =>  s[2]);
+        const room   = Math.max(0, WN_SECT_KEEP - unread.length);
+        sect[u] = [...unread, ...(room ? read.slice(-room) : [])];
+      });
+    }
+
+    wnWrite(WN_SEEN_KEY, seen);
+    wnWrite(WN_SECT_KEY, sect);
+    wnWrite(WN_INDEX_KEY, curIdx);
+    wnWrite(WN_META_KEY, meta);
+    wnBuildEntries();
+    return { seeded: false, updated: updated.length };
+  } catch (_) { return null; }
+}
+
+// Turns the three stores plus the frontmatter flags into the render list.
+// Pure read — safe to call on every filter change.
+function wnBuildEntries() {
+  const idx  = wnRead(WN_INDEX_KEY, null);
+  const seen = wnRead(WN_SEEN_KEY, {});
+  const sect = wnRead(WN_SECT_KEY, {});
+  const meta = wnMeta();
+  if (!idx) { state.wnEntries = []; updateWhatsNewBadge(); return; }
+
+  const nameFor = {};
+  allMdFiles().forEach(f => { nameFor[f.url] = f.name; });
+
+  const now = Date.now();
+  let metaDirty = false;
+  const out = [];
+
+  Object.keys(idx).forEach(url => {
+    const flags = state.wnFlags[url] || {};
+    const isSeen = seen[url] === wnSig(idx[url]);
+    // "New" means the app had never seen this path at the moment it was
+    // first indexed. Once a path is in the index it can only ever be
+    // Updated, which is why first-sight is recorded on the seen map rather
+    // than recomputed: seen[url] === undefined is exactly "never indexed".
+    const kind = (url in seen) ? 'updated' : 'new';
+
+    // must-read expiry is counted per person from when the page first
+    // surfaced to THIS person, not from the file's modified date. Someone
+    // back from five weeks' leave would otherwise get a pre-expired list.
+    let lapsed = false;
+    if (flags.mustRead) {
+      if (!meta.surfaced[url]) { meta.surfaced[url] = new Date().toISOString(); metaDirty = true; }
+      const age = (now - Date.parse(meta.surfaced[url])) / 86400000;
+      if (age > WN_MUSTREAD_DAYS) {
+        lapsed = true;
+        if (!meta.lapsed[url]) { meta.lapsed[url] = new Date().toISOString(); metaDirty = true; }
+      }
+    }
+
+    const raw = nameFor[url] || url.split('/').pop();
+    out.push({
+      url, name: displayFileName(raw), file: raw,
+      folderId: state.fileFolder[url] ?? null,
+      // The timestamp is display-only from 0.25.0 on — sorting, the relative
+      // "3 days ago" label and the date-window filter. Change is decided by
+      // the hash, never by this.
+      kind, modified: (idx[url] && idx[url].m) || '', seen: isSeen,
+      // Every Updated row carries its sections now, read ones included, so
+      // Unseen / Updated / All and the three date windows all render the same
+      // shape. Before 0.27.1 this was gated on !isSeen, which is why every
+      // view except Unseen degraded to a bare list of file names with no way
+      // back to a section you had opened by mistake.
+      //
+      // A New page still gets none: there is no "before" to diff it against,
+      // and the whole file is the change.
+      //
+      // A seen file's sections are forced to read for display. Storage should
+      // already agree, but a row that says seen while a badge under it says
+      // unread is a contradiction the reader has to resolve, and the seen
+      // stamp is the authority.
+      sections: (kind === 'updated')
+        ? (isSeen ? wnSecList(sect[url]).map(s => [s[0], s[1], 1]) : wnSecSort(wnSecList(sect[url])))
+        : [],
+      mustRead: !!flags.mustRead, onboarding: !!flags.onboarding, lapsed,
+    });
+  });
+
+  if (metaDirty) wnWrite(WN_META_KEY, meta);
+
+  out.sort((a, b) => String(b.modified).localeCompare(String(a.modified)));
+  state.wnEntries = out;
+  updateWhatsNewBadge();
+}
+
+function wnUnseenCount() {
+  return state.wnEntries.filter(e => !e.seen).length;
+}
+
+function updateWhatsNewBadge() {
+  const row = $('sb-whats-new');
+  const cnt = $('wn-count');
+  if (!row || !cnt) return;
+  const n = wnUnseenCount();
+  cnt.textContent   = n;
+  cnt.style.display = n ? '' : 'none';   // hidden entirely at zero, not a "0"
+  row.classList.toggle('active', state.whatsNewOpen);
+}
+
+// Seen commits when you LEAVE a page, not when you open it — otherwise the
+// unseen highlight is invisible by definition: you'd never see the state
+// you were being shown.
+function wnMarkSeen(url) {
+  if (!url) return;
+  const idx = wnRead(WN_INDEX_KEY, null);
+  if (!idx || !(url in idx)) return;
+  const seen = wnRead(WN_SEEN_KEY, {});
+  const s = wnSig(idx[url]);
+  if (seen[url] === s) return;
+  seen[url] = s;
+  wnWrite(WN_SEEN_KEY, seen);
+  // Opening the page itself answers every section it was flagging, so they
+  // all go read. Marked, not deleted (0.27.1): the list is what you navigate
+  // back through, and throwing it away is what made every view but Unseen a
+  // bare list of file names.
+  const sect = wnRead(WN_SECT_KEY, {});
+  const list = wnSecList(sect[url]);
+  if (list.length) { list.forEach(x => { x[2] = 1; }); sect[url] = list; wnWrite(WN_SECT_KEY, sect); }
+  wnBuildEntries();
+  if (state.whatsNewOpen) renderWhatsNew();
+}
+
+// Arriving via a section button answers THAT section and nothing else. Before
+// 0.27.1 both routes ran wnMarkSeen, so one click on a page with two changed
+// headings cleared both and marked the page read you had only read half of.
+//
+// The file's own seen stamp is deliberately withheld until the last unread
+// section is gone. The alternative — stamp the file on the first section click
+// and leave the remaining badges showing — produces a seen file with unread
+// sections hanging off it, which is a state the reader has to reconcile.
+function wnMarkSectionSeen(url, uid) {
+  if (!url || !uid) return;
+  const idx = wnRead(WN_INDEX_KEY, null);
+  if (!idx || !(url in idx)) return;
+  const sect = wnRead(WN_SECT_KEY, {});
+  const list = wnSecList(sect[url]);
+  // No section list to act on (a preamble-only edit, or a store trimmed by the
+  // bulk guard) means the page is the unit, so fall back to the file.
+  if (!list.length) { wnMarkSeen(url); return; }
+
+  let hit = false;
+  list.forEach(x => { if (x[0] === uid && !x[2]) { x[2] = 1; hit = true; } });
+  if (!hit) return;                       // re-visiting a section already read
+  sect[url] = list;
+  wnWrite(WN_SECT_KEY, sect);
+
+  if (!list.some(x => !x[2])) {
+    const seen = wnRead(WN_SEEN_KEY, {});
+    seen[url] = wnSig(idx[url]);
+    wnWrite(WN_SEEN_KEY, seen);
+  }
+  wnBuildEntries();
+  if (state.whatsNewOpen) renderWhatsNew();
+}
+
+function wnCommitPending() {
+  if (!state.wnPending) return;
+  const u = state.wnPending, sec = state.wnPendingSec;
+  state.wnPending = null; state.wnPendingSec = null;
+  if (sec) wnMarkSectionSeen(u, sec); else wnMarkSeen(u);
+}
+
+// Closing the tab is also leaving the page. Without this, the last file of
+// every session would stay unseen forever — the one page you definitely
+// read. pagehide fires on tab close, navigation and mobile backgrounding,
+// where beforeunload is unreliable.
+window.addEventListener('pagehide', wnCommitPending);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') wnCommitPending();
+});
+
+// Mark-all skips must-reads and says what it skipped. Jayson's call: an
+// unread required page must never be cleared by a bulk action, and the
+// skip has to be visible rather than silent.
+function wnMarkAllSeen(group) {
+  const idx  = wnRead(WN_INDEX_KEY, null) || {};
+  const seen = wnRead(WN_SEEN_KEY, {});
+  const sect = wnRead(WN_SECT_KEY, {});
+  const pool = wnVisibleEntries().filter(e => !e.seen && (!group || wnGroupOf(e) === group));
+  let marked = 0; const skipped = [];
+  pool.forEach(e => {
+    if (e.mustRead && !e.lapsed) { skipped.push(e.name); return; }
+    if (!(e.url in idx)) return;
+    seen[e.url] = wnSig(idx[e.url]);
+    // Read, not deleted — same reason as wnMarkSeen. A bulk clear should quiet
+    // the list, not erase the map of what moved.
+    const list = wnSecList(sect[e.url]);
+    if (list.length) { list.forEach(x => { x[2] = 1; }); sect[e.url] = list; }
+    marked++;
+  });
+  wnWrite(WN_SEEN_KEY, seen);
+  wnWrite(WN_SECT_KEY, sect);
+  state.wnSkipMsg = skipped.length
+    ? `Marked ${marked} as seen. Skipped ${skipped.length} required: ${skipped.join(', ')}.`
+    : (marked ? `Marked ${marked} as seen.` : 'Nothing to mark.');
+  wnBuildEntries();
+  renderWhatsNew();
+}
+
+// One filter axis, four values, plus a separate time window. Deliberately
+// collapsed from two overlapping axes — it loses "new AND unseen", which
+// nobody on a team of ten is going to ask for.
+function wnVisibleEntries() {
+  const cutoff = state.wnWindow ? Date.now() - state.wnWindow * 86400000 : null;
+  return state.wnEntries.filter(e => {
+    if (cutoff && Date.parse(e.modified || 0) < cutoff) return false;
+    if (state.wnFilter === 'unseen')  return !e.seen;
+    if (state.wnFilter === 'new')     return e.kind === 'new';
+    if (state.wnFilter === 'updated') return e.kind === 'updated';
+    return true;
+  });
+}
+
+// One set of thresholds, used by the grouping AND the age colour (0.27.2).
+// Jayson proposed 7 / 30 / 30+; the groups had always been 7 / 31, and a row
+// sitting under "Earlier this month" while its date is coloured as old is a
+// contradiction the reader has to resolve. So the existing boundary wins and
+// both signals read off these two numbers.
+const WN_AGE_WEEK  = 7;
+const WN_AGE_MONTH = 31;
+
+function wnAgeDays(e) {
+  const t = Date.parse((e && e.modified) || 0);
+  return t ? (Date.now() - t) / 86400000 : null;
+}
+
+function wnGroupOf(e) {
+  if (e.mustRead && !e.lapsed) return 'required';
+  const age = wnAgeDays(e);
+  if (age === null) return 'older';
+  if (age <= WN_AGE_WEEK)  return 'week';
+  if (age <= WN_AGE_MONTH) return 'month';
+  return 'older';
+}
+
+// Fresh reads as attention, old reads as background. Deliberately NOT a
+// green/amber/red traffic light: red is spent app-wide on destructive things
+// (rv-del, rv-reject-btn) and a page that merely changed two months ago is
+// not a problem — it is just less likely to matter. Muting it says that.
+//
+// The colour is redundant reinforcement, never the only channel: the row
+// still carries its group header and the date still reads "19 days ago".
+function wnAgeClass(e) {
+  const age = wnAgeDays(e);
+  if (age === null) return 'wn-age-old';
+  if (age <= WN_AGE_WEEK)  return 'wn-age-fresh';
+  if (age <= WN_AGE_MONTH) return 'wn-age-mid';
+  return 'wn-age-old';
+}
+
+const WN_GROUP_LABEL = {
+  required: 'Required reading',
+  week:     'This week',
+  month:    'Earlier this month',
+  older:    'Older',
+};
+
+function wnRelative(iso) {
+  const t = Date.parse(iso || 0);
+  if (!t) return '';
+  const days = Math.floor((Date.now() - t) / 86400000);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7)  return `${days} days ago`;
+  // Stored stamps are UTC; Date renders in the reader's own locale/zone.
+  return new Date(t).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+}
+
+// The reader page. A pseudo-page like Help and Changelog — activeUrl stays
+// null and state.whatsNewOpen carries the flag, mirroring state.helpOpen.
+async function openWhatsNew() {
+  if (!guardLeaveEdit()) return;
+  wnCommitPending();
+
+  const empty = $('reader-empty');
+  const rc    = $('reader-content');
+
+  state.activeUrl     = null;
+  state.activeName    = null;
+  state.helpOpen      = false;
+  state.changelogOpen = false;
+  state.whatsNewOpen  = true;
+  state.wnSkipMsg     = null;
+
+  setReaderTitle("What's New");
+  empty.style.display = 'none';
+  rc.style.display    = 'block';
+  rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:32px">Checking the vault…</p>';
+
+  renderSidebar();
+  updateEditBtn();
+
+  await wnScan();
+  renderWhatsNew();
+  refreshRightPanel();
+}
+
+function renderWhatsNew() {
+  const rc = $('reader-content');
+  if (!rc || !state.whatsNewOpen) return;
+
+  const vis = wnVisibleEntries();
+  const groups = { required: [], week: [], month: [], older: [] };
+  vis.forEach(e => groups[wnGroupOf(e)].push(e));
+
+  const filterBtn = (val, label) =>
+    `<button class="wn-filter${state.wnFilter === val ? ' on' : ''}" data-wb-wnfilter="${val}">${label}</button>`;
+  const windowBtn = (val, label) =>
+    `<button class="wn-filter${state.wnWindow === val ? ' on' : ''}" data-wb-wnwindow="${val}">${label}</button>`;
+
+  const row = e => {
+    const pills = [];
+    if (e.mustRead && !e.lapsed) pills.push('<span class="wn-pill wn-pill-must">Must read</span>');
+    if (e.kind === 'new')        pills.push('<span class="wn-pill wn-pill-new">New</span>');
+    else                          pills.push('<span class="wn-pill wn-pill-upd">Updated</span>');
+    if (e.onboarding)            pills.push('<span class="wn-pill wn-pill-onb">Onboarding</span>');
+    // Changed sections hang under the file, each one its own click target.
+    // Capped, because a page someone restructured can report forty headings
+    // and turn one row into a wall — the count says what was left out.
+    //
+    // Sorted unread first (0.27.1), so the cap is never spent on sections you
+    // have already opened while an unread one falls off the end. Read ones
+    // stay listed and stay clickable — that is the way back to a section you
+    // hit by mistake — they just recede, the same way a seen file row does.
+    const SEC_MAX = 6;
+    const secs    = wnSecSort(e.sections || []);
+    const shown   = secs.slice(0, SEC_MAX);
+    const rest    = secs.length - shown.length;
+    const secList = shown.length ? `<div class="wn-secs">${
+      shown.map(([uid, title, read]) =>
+        `<button class="wn-sec${read ? ' read' : ''}" data-wb-wnsec="${escHtml(uid)}" data-wb-wnsecurl="${escHtml(e.url)}" data-wb-wnsecname="${escHtml(e.file)}" data-wb-wnsectitle="${escHtml(title)}">${escHtml(title)}</button>`
+      ).join('')
+    }${rest > 0 ? `<span class="wn-sec-more">+${rest} more</span>` : ''}</div>` : '';
+
+    return `<div class="wn-item">
+      <div class="wn-row${e.seen ? ' seen' : ''}" data-wb-wnopen="${escHtml(e.url)}" data-wb-wnname="${escHtml(e.file)}">
+        <span class="wn-dot"${e.seen ? ' style="visibility:hidden"' : ''}></span>
+        <span class="wn-name">${escHtml(e.name)}</span>
+        <span class="wn-pills">${pills.join('')}</span>
+        <span class="wn-when ${wnAgeClass(e)}">${escHtml(wnRelative(e.modified))}</span>
+      </div>
+      ${secList}
+    </div>`;
+  };
+
+  const section = key => {
+    const list = groups[key];
+    if (!list.length) return '';
+    const unseen = list.filter(e => !e.seen).length;
+    return `<div class="wn-group">
+      <div class="wn-group-head">
+        <span class="wn-group-title">${WN_GROUP_LABEL[key]}</span>
+        <span class="badge">${list.length}</span>
+        ${unseen ? `<button class="wn-marklink" data-wb-wnmark="${key}">Mark group seen</button>` : ''}
+      </div>
+      ${list.map(row).join('')}
+    </div>`;
+  };
+
+  const body = ['required', 'week', 'month', 'older'].map(section).join('');
+  const total = wnUnseenCount();
+
+  rc.innerHTML = `
+    <div class="wn-wrap">
+      <h1 class="md-h1">What's New</h1>
+      <p class="wn-sub">${total ? `${total} page${total === 1 ? '' : 's'} you haven't seen` : 'You are up to date.'}</p>
+      <div class="wn-bar">
+        <div class="wn-filters">${filterBtn('unseen','Unseen')}${filterBtn('new','New')}${filterBtn('updated','Updated')}${filterBtn('all','All')}</div>
+        <div class="wn-filters">${windowBtn(30,'30 days')}${windowBtn(90,'90 days')}${windowBtn(0,'All time')}</div>
+        ${total ? '<button class="wn-marklink" data-wb-wnmark="">Mark all seen</button>' : ''}
+      </div>
+      ${state.wnSkipMsg ? `<p class="wn-note">${escHtml(state.wnSkipMsg)}</p>` : ''}
+      ${state.wnBulk ? `<p class="wn-note">${state.wnBulk.count} pages were updated at once and have been absorbed rather than listed. This usually means a sync client rewrote timestamps, not that anyone edited them.</p>` : ''}
+      ${body || '<p class="wn-empty">Nothing matches this filter.</p>'}
+    </div>`;
+  $('reader').scrollTop = 0;
+  updateWhatsNewBadge();
+}
+
+function wnSetFilter(v) { state.wnFilter = v; persist('wb_wn_filter', v); renderWhatsNew(); }
+function wnSetWindow(v) { state.wnWindow = Number(v); persist('wb_wn_window', state.wnWindow); renderWhatsNew(); }
+
+// Opening from the list uses openFile — the same path a sidebar click
+// takes — so history, backlinks, the Outline and the last-note store all
+// behave identically whether you arrived from here or from the tree.
+function wnOpenEntry(url, file) {
+  state.whatsNewOpen = false;
+  openFile(url, file);
+}
+
+// Opening a specific changed section. Same path as the file row, plus a pending
+// heading id that openFile hands to revealHeading — which unfolds the ancestors,
+// scrolls, and pins the highlight until the reader actually scrolls away. That
+// is the same pin the Outline and search use, so the cue is identical wherever
+// you arrived from.
+//
+// The id is passed through rather than recomputed from the title, because
+// duplicate headings are deduped (h-overview, h-overview-2) and running the
+// title back through headingId() would always resolve to the first one.
+//
+// The title rides along as a fallback: wnSplitSections reads raw Markdown and
+// skips headings nested inside blockquotes and callouts, while the renderer
+// counts them when it dedupes — so on a page that has both, a stored uid can
+// miss. Matching the visible heading text is the cheap correction, and it beats
+// duplicating the block parser to stay in lockstep with it.
+// Clearing is per section from 0.27.1: the uid is stashed for openFile to
+// consume, and wnCommitPending turns it into wnMarkSectionSeen when you leave.
+// The file only goes seen once its last unread section has been answered.
+function wnOpenSection(url, file, uid, title) {
+  state.whatsNewOpen = false;
+  openFile._pendingHeadingId = uid || null;
+  openFile._pendingHeadingText = title || null;
+  openFile._pendingSecUid = uid || null;
+  openFile(url, file);
 }
 
 // ── Review view ──────────────────────────────────────────────────
@@ -6364,17 +7822,171 @@ function highlightChangedLines(entry) {
   });
 })();
 
-$('tgl-review').addEventListener('change', e => {
-  state.reviewTools = e.target.checked;
-  persist('wb_review', state.reviewTools);
-  updateBadges();
-  if (state.reviewTools) scanBadges();
+// ── S14 access tier UI ───────────────────────────────────────────
+// Locked surfaces are not rendered at all — no greyed-out controls in a
+// 220px column — which is how the Review tab already behaved when review
+// tools were off. The one exception is the Settings dropdown itself: every
+// tier is listed, because hiding the rung you are trying to climb makes
+// the ladder unreachable.
+function renderTierSettings() {
+  const sel = $('sel-tier');
+  if (!sel) return;
+  sel.value = state.tier;
+
+  const badge = $('tier-badge');
+  badge.textContent = TIER_NAME[state.tier];
+  badge.className   = 'tier-badge' + (state.tier === 'user' ? '' : ' t-' + state.tier);
+
+  $('tier-desc').textContent = TIER_DESC[state.tier];
+
+  // Only claim "not set up" once the vault has actually been read. Before
+  // that the honest state is "unknown", and flashing a warning at every
+  // boot before the read lands would train people to ignore it.
+  $('tier-unarmed').style.display = (state.authLoaded && !authArmed()) ? '' : 'none';
+  $('tier-admin').style.display   = (state.tier === 'admin') ? '' : 'none';
+}
+
+$('sel-tier').addEventListener('change', async e => {
+  const want = e.target.value;
+  // Down never asks. Up while the gate is unarmed never asks either: there
+  // is nothing to ask for, and refusing would leave a fresh vault with no
+  // route to the screen that sets the passwords.
+  if (tierRank(want) <= tierRank(state.tier) || !authArmed()) { applyTier(want); return; }
+  if (!state.authHashes[want]) {
+    // Armed, but this rung has no password. Setup writes both, so this only
+    // happens to a hand-edited auth.json. Refuse rather than fail open.
+    alert(`No ${TIER_NAME[want]} password is set. An Administrator needs to set one.`);
+    renderTierSettings();
+    return;
+  }
+  openTierModal('unlock', want);
 });
 
-$('tgl-editing').addEventListener('change', e => {
-  state.editingEnabled = e.target.checked;
-  persist('wb_editing', state.editingEnabled);
-  refreshEditControls();
+$('pw-change').addEventListener('click', () => {
+  if (state.tier !== 'admin') return;
+  openTierModal('change', $('pw-which').value);
+});
+
+// One modal, three jobs: unlock a tier, set both passwords the first time,
+// change one afterwards. Kept as one so there is a single place where a
+// password is read out of the DOM and hashed.
+let tierModalMode = null, tierModalWhich = null;
+
+function openTierModal(mode, which) {
+  tierModalMode  = mode;
+  tierModalWhich = which;
+  const setup = (mode === 'change' && !authArmed());
+  if (setup) tierModalMode = 'setup';
+
+  $('tier-m-err').textContent = '';
+  $('tier-pw1').value = '';
+  $('tier-pw2').value = '';
+  $('tier-pw2').style.display = (tierModalMode === 'setup') ? '' : 'none';
+  $('tier-pw1').type = 'password';
+  $('tier-pw2').type = 'password';
+
+  if (tierModalMode === 'setup') {
+    $('tier-m-title').textContent = 'Set up access';
+    $('tier-m-sub').textContent   = 'Set both passwords together. One on its own leaves a door open, because anyone can pick Administrator and change the other.';
+    $('tier-pw1').placeholder     = 'Contributor password';
+    $('tier-pw2').placeholder     = 'Administrator password';
+    $('tier-m-ok').textContent    = 'Set up';
+  } else if (tierModalMode === 'change') {
+    $('tier-m-title').textContent = `Change the ${TIER_NAME[which]} password`;
+    $('tier-m-sub').textContent   = 'Anyone already unlocked on their own PC stays unlocked. The new password applies the next time someone moves up.';
+    $('tier-pw1').placeholder     = 'New password';
+    $('tier-m-ok').textContent    = 'Save';
+  } else {
+    $('tier-m-title').textContent = `Unlock ${TIER_NAME[which]}`;
+    $('tier-m-sub').textContent   = `Enter the ${TIER_NAME[which]} password.`;
+    $('tier-pw1').placeholder     = 'Password';
+    $('tier-m-ok').textContent    = 'Unlock';
+  }
+  $('tier-overlay').style.display = '';
+  $('tier-pw1').focus();
+}
+
+function closeTierModal() {
+  $('tier-overlay').style.display = 'none';
+  tierModalMode = tierModalWhich = null;
+  renderTierSettings();   // snaps the dropdown back if an unlock was abandoned
+}
+
+async function submitTierModal() {
+  const err = $('tier-m-err');
+  const p1  = $('tier-pw1').value;
+  const p2  = $('tier-pw2').value;
+
+  if (tierModalMode === 'unlock') {
+    const h = await tierHash(p1);
+    if (h === null) { err.textContent = 'This browser cannot hash passwords here. Open WikiBase over HTTPS.'; return; }
+    if (h !== state.authHashes[tierModalWhich]) {
+      err.textContent = `That is not the ${TIER_NAME[tierModalWhich]} password.`;
+      return;
+    }
+    const want = tierModalWhich;
+    $('tier-overlay').style.display = 'none';
+    tierModalMode = tierModalWhich = null;
+    applyTier(want);
+    return;
+  }
+
+  if (tierModalMode === 'setup') {
+    if (p1.length < 4 || p2.length < 4) { err.textContent = 'Both passwords need at least 4 characters.'; return; }
+    // Two tiers sharing one password is two tiers wearing three names —
+    // the whole reason there are two passwords rather than one.
+    if (p1 === p2) { err.textContent = 'Use two different passwords, or the two tiers are the same tier.'; return; }
+    const hc = await tierHash(p1), ha = await tierHash(p2);
+    if (hc === null || ha === null) { err.textContent = 'This browser cannot hash passwords here. Open WikiBase over HTTPS.'; return; }
+    const prev = state.authHashes;
+    state.authHashes = { contributor: hc, admin: ha };
+    try { await saveVaultAuth(); } catch (e) {
+      state.authHashes = prev;   // never claim a write that did not land
+      err.textContent = 'Could not write to the vault. Check your permissions.';
+      return;
+    }
+    closeTierModal();
+    setPwMsg('Access is set up. Moving up a tier now asks for a password.');
+    return;
+  }
+
+  if (tierModalMode === 'change') {
+    if (p1.length < 4) { err.textContent = 'Use at least 4 characters.'; return; }
+    const h = await tierHash(p1);
+    if (h === null) { err.textContent = 'This browser cannot hash passwords here. Open WikiBase over HTTPS.'; return; }
+    const other = tierModalWhich === 'admin' ? 'contributor' : 'admin';
+    if (h === state.authHashes[other]) {
+      err.textContent = 'That is the other tier\'s password. Two tiers sharing one is two tiers.';
+      return;
+    }
+    const prev = { ...state.authHashes };
+    state.authHashes[tierModalWhich] = h;
+    try { await saveVaultAuth(); } catch (e) {
+      state.authHashes = prev;
+      err.textContent = 'Could not write to the vault. Check your permissions.';
+      return;
+    }
+    const which = tierModalWhich;
+    closeTierModal();
+    setPwMsg(`${TIER_NAME[which]} password changed.`);
+  }
+}
+
+let pwMsgTimer = null;
+function setPwMsg(text) {
+  const el = $('pw-msg');
+  if (!el) return;
+  el.textContent = text;
+  clearTimeout(pwMsgTimer);
+  pwMsgTimer = setTimeout(() => { el.textContent = ''; }, 6000);
+}
+
+$('tier-m-ok').addEventListener('click', submitTierModal);
+['tier-pw1', 'tier-pw2'].forEach(id => {
+  $(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); submitTierModal(); }
+    if (e.key === 'Escape') closeTierModal();
+  });
 });
 
 // ── Create file / folder ─────────────────────────────────────────
@@ -6453,6 +8065,7 @@ async function submitCreate() {
         state.folderLoaded[folder.id] = false;
         await loadFolderFiles(folder);
         state.openFolders[folder.id] = true;
+        persistFolderState();
         renderSidebar();
       } else {
         await refreshVaultRoot();
@@ -6496,6 +8109,7 @@ async function submitCreate() {
         state.folderLoaded[folder.id] = false;
         await loadFolderFiles(folder);
         state.openFolders[folder.id] = true;
+        persistFolderState();
         renderSidebar();
       } else {
         await refreshVaultRoot();
@@ -6605,7 +8219,11 @@ async function submitMove() {
 // Section 13 — Properties flyout
 // View + edit frontmatter per the S13 spec. Edits write silently
 // (no change-log entry, no status flip) — Status/Reviewed here ARE
-// the review controls. Editable fields gated by canEdit().
+// the review controls. Editable fields gated by editingAllowed().
+// BEHAVIOUR CHANGE, 0.27.0: this used to call canEdit(), which always
+// returned true, so the Properties fields stayed editable even with the
+// "Enable editing" toggle off — a vault write that the editing gate was
+// never applied to. Under tiers it is Contributor, like every other write.
 // ================================================================
 
 const WB_STATUS_VALUES = ['In Progress', 'Draft', 'Needs Review', 'In Review', 'Reviewed', 'Master', 'Archived'];
@@ -6649,7 +8267,7 @@ async function togglePropsPanel() {
   catch (e) { alert('Could not read file: ' + e.message); return; }
 
   const fm   = parseFm(text);
-  const ro   = !canEdit() ? ' disabled' : '';
+  const ro   = !editingAllowed() ? ' disabled' : '';
   const fmTags = fmListToArr(fm.tags);
   const inTags = inlineTags(text);
   const allTags = [...new Set([...fmTags.map(t => t.startsWith('#') ? t : '#' + t), ...inTags])];
@@ -6698,7 +8316,7 @@ async function togglePropsPanel() {
     </div>`;
   panel.style.display = 'block';
 
-  if (canEdit()) {
+  if (editingAllowed()) {
     const wire = (id, key, transform) => {
       $(id).addEventListener('change', async e => {
         const raw = transform ? transform(e.target) : e.target.value.trim();
@@ -7533,6 +9151,19 @@ function loadPersistedState() {
       $('tgl-last-note').checked = state.openLastNote;
     }
 
+    // S35 — What's New filter + time window. Session-surviving on purpose:
+    // whichever view you work in is the one you want back.
+    const wnF = localStorage.getItem('wb_wn_filter');
+    if (wnF !== null) {
+      const v = JSON.parse(wnF);
+      if (['unseen', 'new', 'updated', 'all'].includes(v)) state.wnFilter = v;
+    }
+    const wnW = localStorage.getItem('wb_wn_window');
+    if (wnW !== null) {
+      const v = Number(JSON.parse(wnW));
+      if ([0, 30, 90].includes(v)) state.wnWindow = v;
+    }
+
     const strip = localStorage.getItem('wb_strip');
     if (strip !== null) {
       state.stripPfx = JSON.parse(strip);
@@ -7602,24 +9233,27 @@ function loadPersistedState() {
     const advOpen = localStorage.getItem('wb_adv_open');
     if (advOpen !== null) toggleAdvancedSettings(JSON.parse(advOpen));
 
-    const review = localStorage.getItem('wb_review');
-    if (review) {
-      state.reviewTools = JSON.parse(review);
-      $('tgl-review').checked = state.reviewTools;
-      updateBadges();
-    }
-
-    const editing = localStorage.getItem('wb_editing');
-    if (editing) {
-      state.editingEnabled = JSON.parse(editing);
-      $('tgl-editing').checked = state.editingEnabled;
+    // S14 (0.27.0) — one tier replaces wb_review and wb_editing. Those two
+    // keys are deliberately NOT migrated: they were unprotected checkboxes,
+    // so carrying them forward would hand every existing device Contributor
+    // without ever asking for the password the tier now exists to require.
+    // Everyone starts at User and unlocks once. The old keys are left in
+    // localStorage untouched, so reverting this file restores the previous
+    // behaviour exactly.
+    const savedTier = localStorage.getItem('wb_tier');
+    if (savedTier) {
+      // noPersist: this is a restore, not a change, and applyTier's other
+      // work (badges, edit controls) has to run either way.
+      applyTier(JSON.parse(savedTier), { noPersist: true, noScan: true });
+    } else {
+      renderTierSettings();
     }
 
     const diffH = localStorage.getItem('wb_diff_h');
     if (diffH) $('diff-strip').style.height = JSON.parse(diffH) + 'px';
 
-    const outlineMode = localStorage.getItem('wb_outline_fold_mode');
-    if (outlineMode) state.outlineFoldMode = JSON.parse(outlineMode);
+    // S34: wb_outline_fold_mode is no longer read — the lock it drove is
+    // gone. Any leftover key in a user's localStorage is simply ignored.
   } catch (_) {}
 }
 
@@ -7775,8 +9409,8 @@ function refreshRightPanel() {
 // ── Outline tab ──────────────────────────────────────────────────
 // Chevron per heading only when it has a nested heading below it
 // (outlineHeadingsMeta.hasChildren) — folding one hides its descendant
-// Outline rows (single hideLevel walk, below) without touching the reader
-// unless fold state is Shared (see outlineFoldShared / mirrorFoldToReader).
+// Outline rows (single hideLevel walk, below) without ever touching the
+// reader — S34 made that separation absolute, there is no shared mode.
 function renderOutlineTab() {
   const toolbar = $('ot-toolbar');
   const pane    = $('ot-list');
@@ -7795,7 +9429,7 @@ function renderOutlineTab() {
   }
 
   if (toolbar) toolbar.style.display = 'flex';
-  updateOutlineLockIcon();
+  updateOutlineToolbar(meta);
   fitToolbarLabel('ot-toolbar', '.ot-label', 'ot-group');
 
   const url    = state.activeUrl || null;
@@ -7843,15 +9477,18 @@ function renderOutlineTab() {
   }
 }
 
-function updateOutlineLockIcon() {
-  const btn = $('ot-lock-toggle');
+// Heading-count badge + the single collapse/expand symbol. The badge
+// mirrors the file-count badge on sidebar folder rows, deliberately —
+// same class, same shape, so the two panels read as siblings.
+function updateOutlineToolbar(meta) {
+  const badge = $('ot-count');
+  if (badge) badge.textContent = meta.length;
+
+  const btn = $('ot-fold-toggle');
   if (!btn) return;
-  const shared = outlineFoldShared();
-  btn.innerHTML = shared ? ICON.lockClosed : ICON.lockOpen;
-  btn.classList.toggle('locked', shared);
-  const label = shared
-    ? 'Fold state shared with reader — click to make independent'
-    : 'Fold state independent — click to share with reader';
+  const allFolded = outlineAllFolded();
+  btn.innerHTML = allFolded ? ICON.expandAll : ICON.collapseAll;
+  const label = allFolded ? 'Expand all' : 'Collapse all';
   btn.title = label;
   btn.setAttribute('aria-label', label);
 }
@@ -8076,7 +9713,6 @@ function expandHeadingSubtree(id) {
   if (row) readerFoldRow(row, false);
   const section = row && row.nextElementSibling;
   if (section) section.querySelectorAll('.md-h-row').forEach(r => readerFoldRow(r, false));
-  maybeRefreshOutlineAfterReaderFold();
 }
 
 // Same navigation a click inside the Outline already does (openFile +
@@ -8959,10 +10595,13 @@ async function bootVault() {
     vaultFolders   = folders;
     vaultRootFiles = files;
 
-    // Folder-open state at boot: Settings → "Open last note" decides it fresh
-    // every time, not whatever was left open last session (see toggleFolder).
+    // Folder-open state at boot, S33/0.21.0: restore what this person left
+    // open, THEN add the ancestor chain down to the last note if "Open last
+    // note" is on. The two compose rather than compete — the saved tree is
+    // the base, the path to the note is a union on top, so neither setting
+    // silently undoes the other.
     const last = state.openLastNote ? getLastFile() : null;
-    state.openFolders = {};
+    state.openFolders = readFolderState();
     if (last && last.folderId) {
       let acc = '';
       last.folderId.split('/').forEach(seg => { acc = acc ? `${acc}/${seg}` : seg; state.openFolders[acc] = true; });
@@ -8973,12 +10612,21 @@ async function bootVault() {
     renderSidebar();
     refreshEditControls(); // New/Move hidden unless Settings → Enable editing
     updateBackButtons();   // disabled at boot — nothing in history yet
-    scanBadges(); // S14 — async, fills comment + review badges
+    // S14 fills comment + review badges; S35 chains the What's New scan onto
+    // the end of it rather than running in parallel, because both walk the
+    // whole vault and scanBadges is what populates the must-read flags the
+    // scan's grouping depends on. Fire-and-forget either way — neither may
+    // hold up first paint, and a failure in either must not break boot.
+    scanBadges().then(() => wnScan()).catch(() => {});
     checkIdentity(); // S15 — async, shows the first-run/new-device prompt if needed
     // S32 pass 2 — adopts zSystem/theme.json, but only on a device that
     // has never had a theme of its own. Fire-and-forget: a missing or
     // malformed vault theme must never hold up or break boot.
     loadVaultDefaultTheme();
+    // S14 — read zSystem/auth.json. Fire-and-forget for the same reason:
+    // a vault with no auth.json (or a malformed one) reads as "not set up",
+    // which is an open gate, not a lockout, and must not hold up boot.
+    loadVaultAuth();
     vaultReady = true; // enables the focus-regain refresh below
 
     if (last) openFile(last.url, last.name);
@@ -9066,6 +10714,22 @@ async function refreshVaultTree() {
   }
 
   renderSidebar();
+  // S35 — a focus-regain refresh is exactly when someone else's edits land,
+  // so the What's New index moves forward here too. Fire-and-forget: this
+  // path already runs on every tab switch and must stay cheap to fail.
+  wnScan().then(() => { if (state.whatsNewOpen) renderWhatsNew(); }).catch(() => {});
+  // 0.27.2 — and so does zSystem/auth.json, which until now was read once at
+  // boot. That is what made the documented recovery path look broken: the way
+  // back from a lost Administrator password is to delete auth.json in Obsidian
+  // or SharePoint, and doing exactly that changed nothing on screen until the
+  // app was reloaded. Tabbing out to delete the file and tabbing back is the
+  // literal shape of the recovery, so this is the moment to re-read it.
+  //
+  // It also picks up a password another Administrator changed while you were
+  // away, which used to leave your device unlocking against a stale hash.
+  // Fire-and-forget, same as boot: a missing or malformed file reads as "not
+  // set up", which is an open gate rather than a lockout.
+  loadVaultAuth();
 }
 
 document.addEventListener('visibilitychange', async () => {
@@ -9081,7 +10745,7 @@ document.addEventListener('visibilitychange', async () => {
         rc.innerHTML = inlineTitleHTML(state.activeName) + parseMarkdown(text);
         rc.dataset.wbText = text;
         hydrateLocalImages(rc);
-        applyFoldState(state.activeUrl); // re-rendered content — restore collapsed headings
+        // S34: headings always render expanded after a re-render too.
         applyLiFoldState(state.activeUrl); // re-rendered content — restore collapsed list items
         extractAndRegisterLinks(text, state.activeUrl);
       }

@@ -10,6 +10,237 @@
 
 ---
 
+## 0.27.2 — 2026-08-06
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`, `supporting/tests/change-detection.test.js`, `supporting/tests/access-tiers.test.js`
+
+*A colour on the date, and the recovery path written down instead of built.*
+
+- **The date in What's New is now coloured by age** — green within the last week, amber to a month, muted after that. It sits on the date itself rather than on a new glyph, because that element already means "when" and the pills already mean something else: New is green, so a second green dot beside it would make one colour say two things.
+
+- **Green, amber, muted rather than green, amber, red.** Red is spent app-wide on destructive things, and a page that changed two months ago is not a fault, it is just less likely to matter. Muting says that; red would say something is wrong. The colour is always redundant reinforcement, never the only channel — the group heading and the date itself still say the same thing in words.
+
+- **The colour reads off the same two constants as the grouping**, `WN_AGE_WEEK` and `WN_AGE_MONTH`. The proposal was 7 / 30 / 30+ and the groups had always been 7 / 31; a row filed under "Earlier this month" with an old-coloured date is a contradiction the reader has to resolve, so the existing boundary won and both signals now come from one place. There are tests at both boundaries asserting the two agree, not just that each is individually right.
+
+- **Password recovery already existed. Nobody knew, and the app made it look broken.** The hashes are a file in the vault at `zSystem/auth.json`; deleting it in Obsidian or SharePoint unarms the gate, which is the already-documented "no Administrator hash means every tier is open" rule. But `loadVaultAuth()` only ran at boot, so deleting the file changed nothing on screen until a reload — and tabbing out to delete it and tabbing back is the literal shape of the recovery. It is now re-read on every focus regain, alongside the vault scan. That also picks up a password another Administrator changed while you were away, which used to leave a device unlocking against a stale hash.
+
+- **A recovery note in Settings, deliberately outside the Administrator block.** The person who needs it is stuck at User; hiding it behind the rung they cannot reach is the one placement that fails. `help.md` gains a *Forgetting a password* section with the four steps, and Troubleshooting points at it.
+
+- **Nothing was built that could be reached from the browser without the password.** A reset button on that screen is a second door with no lock. A recovery code was considered and rejected: a third secret to lose, exactly as strong as the file it would sit beside, and no help to the one person who has lost the other two. Email reset needs a server this app does not have. The vault is the recovery, and anyone who can be locked out already has the vault access to undo it — if that is not acceptable, the thing to change is who can write to the vault.
+
+- **`change-detection.test.js` is 114 checks, `access-tiers.test.js` 111.** Includes a check that no browser-reachable password reset was introduced, which is the kind of thing a later session adds in good faith.
+
+---
+
+## 0.27.1 — 2026-08-06
+
+**Changed:** `index.html`, `supporting/tests/change-detection.test.js`, `supporting/tests/whats-new.test.js`
+
+*Three reports against What's New, two of them the same one line.*
+
+- **What's New only moved on a full app reload.** `refreshVaultTree` marks every loaded folder stale when the app regains focus, but only really reloads the folders you have expanded — a collapsed folder's badge is not worth a fetch nobody will look at. `loadAllFolders` then filtered on `folderLoaded` alone and skipped those stale folders too, so every file inside one kept its boot-time size and modified time for the whole session. The scan's stage-1 comparison found nothing to hash, so nothing was ever reported. One line: stale now counts as not loaded. The cost is metadata only — file bodies are still read solely where size or modified time actually differs.
+
+- **The same line was the third report.** "Edit a section, clear it, edit it again, nothing shows" was not a section bug at all. The second edit was never enumerated, so there was nothing to detect. It is fixed by the same change, and there is now a test that walks that exact sequence: seed, edit, clear, edit again.
+
+- **One section click cleared every badge on the file.** Both routes into a page ran `wnMarkSeen`, which deleted the file's whole section list. Arriving from a section button now stashes that heading's uid, and leaving the page answers only that section. **The file's own seen stamp is withheld until its last unread section is gone** — the alternative, stamping the file on the first click and leaving the rest showing, produces a seen row with unread badges under it, which is a state the reader has to reconcile rather than read.
+
+- **Read sections stay listed instead of being deleted.** They recede — muted, dashed border, still clickable — the same treatment a seen file row already gets. This is what makes the other filter views usable: sections used to be gated on `!seen`, so Unseen showed structure and **New, Updated, All and the 30/90/all-time windows collapsed to a bare list of file names**, with no way back to a section you had clicked by mistake. Every Updated row now carries its sections in every view. A New page still lists none, because there is no "before" to diff it against and the whole file is the change.
+
+- **Unread sections sort ahead of read ones**, so the six-item display cap is never spent on sections you have already opened while an unread one falls off the end. The store keeps at most 12 entries per file, trimming read ones oldest-first and never dropping an unread one.
+
+- **A section that changes again goes back to unread**, even if you had already read it. Clearing a section answers the edit you read, not every edit that heading will ever get.
+
+- **Storage shape moved from `[uid, title]` to `[uid, title, read]`.** 0.26.0 entries read as unread, which is exactly what they were, so nothing needs migrating.
+
+- **`change-detection.test.js` is 99 checks, up from 66.** Each of the three fixes was reverted individually and confirmed to turn the suite red, including through `wnCommitPending` rather than only the function under it — a fix wired to nothing ships green otherwise.
+
+---
+
+## 0.27.0 — 2026-08-05
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`, `supporting/roles-tiers-sample.html`
+**Added:** `supporting/tests/access-tiers.test.js`
+
+*Two checkboxes anyone could tick became three tiers on a ladder.*
+
+**"Show review tools" and "Enable editing" are gone**, replaced by a single **Access** setting in Advanced Settings: **User** (default), **Contributor**, **Administrator**, each inheriting everything below it. Moving up asks for that tier's password; moving down never does, so nobody is stuck in a mode they turned on by accident.
+
+- **Editing sits in Contributor, not Administrator.** Only an edit made in the app writes a change record, so with editing at the top the one person who can create review work would sit above the reviewer and the Contributor queue would be empty by design. Contributor is "trusted with content"; Administrator is "runs the system."
+- **Two passwords, stored as SHA-256 hashes in the vault** at `zSystem/auth.json`. That is what makes them survive an update: a deploy replaces the app files and the vault is a different folder it never touches. It is also why they can be changed in-app without a redeploy. A file in the GitHub repo was considered and rejected, since the repo is public and a deploy would overwrite it anyway.
+- **The Administrator password is what arms the gate.** Until one exists, every tier is reachable with no prompt and Settings says so in plain words. Two alternatives were rejected: "a tier with no password is open" fails open in the case that matters, because a Contributor password with no Administrator password is decorative; "any password set locks every tier without one" locks the person who just set one out of setting the other. First-time setup asks for both together, and refuses two matching passwords, so a half-configured ladder never exists.
+- **Locked surfaces are not rendered at all**, matching how the Review tab already behaved. The one exception is the tier dropdown itself, because hiding the rung you are climbing makes the ladder unreachable.
+- **`CONFIG.editors` and `canEdit()` are removed.** `editors` defaulted to `[]`, meaning everyone, and compared against `CONFIG.authorName`, still a placeholder since identity moved to `zSystem/Users/` in 0.14.0. It was a permission list that had never once denied anything.
+- **Behaviour change worth knowing:** the Properties flyout used to call `canEdit()`, so its fields stayed editable even with "Enable editing" off — a vault write the editing gate was never actually applied to. It is Contributor now, like every other write.
+- **The old `wb_review` and `wb_editing` keys are deliberately not migrated.** They were unprotected checkboxes; carrying them forward would hand every existing device Contributor without ever asking for the password the tier exists to require. Everyone starts at User and unlocks once. Both keys are left in place, so reverting the file restores the previous behaviour untouched.
+- **Stated ceiling, and it is now in `help.md` rather than only in the code:** this is an interface gate, not security. The hashes are readable by anyone with vault access and the check runs in the browser. What hashing buys is that the password itself never sits in readable form. Anyone with vault write access can still edit any note in Obsidian regardless of tier — which is the whole reason the vault audit exists as its own section.
+
+## 0.26.0 — 2026-08-05
+
+**Changed:** `index.html`, `help.md`, `supporting/tests/change-detection.test.js`
+**Added:** `supporting/section-detection-sample.js`
+
+*What's New names the sections that changed, and takes you to them.*
+
+**A changed page now lists the headings whose contents moved**, beneath the file name, each one a click target. Clicking a section opens the page at that exact heading and holds the highlight there until you scroll away — the same cue the Outline and search already use. Knowing that a 4000-word handbook changed was never the useful part.
+
+- **The index carries a hash per heading**, not just one per file. Same two-stage machinery as 0.25.0: a page is only read and re-sectioned when its size or modified time moved, so this costs nothing in steady state.
+- **A section runs from its heading to the next heading of any level.** An edit under an H4 reports that H4 and does not bubble up to its parents, so one edit names one place. All six heading levels are supported, because the vault uses six.
+- **Frontmatter is stripped before hashing.** WikiBase writes its own keys into pages it touches, and leaving it in would flag pages nobody edited. A frontmatter rewrite still counts as a file change; it just reports no sections.
+- **A `#` inside a fenced code block is not a heading.** Shell comments and CSS ids would otherwise invent a section per code sample.
+- **Changed sections accumulate across scans and clear when you read the page.** Three separate edits between two visits all still show when you finally open it. Marking seen, individually or in bulk, clears the list with it.
+- **Duplicate heading text is deduped the way the renderer does it** (`h-overview`, `h-overview-2`), so a click lands on the right one rather than always the first. Where a page also nests headings inside blockquotes or callouts the stored id can miss, and the click falls back to matching the visible heading text — cheaper and steadier than keeping a second parser in lockstep with the block parser.
+- **Capped at six sections per file**, with a `+N more` count. A restructured page can report forty headings and turn one row into a wall.
+- Renaming a heading reports it under its new name, which is what the reader will see when they open the page.
+
+## 0.25.0 — 2026-08-05
+
+**Changed:** `index.html`, `supporting/tests/whats-new.test.js`
+**Added:** `supporting/tests/change-detection.test.js`, `supporting/change-detection-sample.js`
+
+*What's New can finally see an edit. Three shipped features were dead on arrival.*
+
+**Every file in the vault was being indexed with no modified date at all.** Both local enumerations pushed `modified: null`; only the dormant SharePoint path ever read a real timestamp, and local mode is what is deployed. So What's New compared every file's empty stamp against every other file's empty stamp, found them equal, and reported nothing. **Three features that shipped in 0.23.0 have never once been able to fire:**
+
+- The **Updated** group could not populate. Every edit made in Obsidian or in the app was invisible.
+- The **date-window filter** passed everything, because `Date.parse('')` is `NaN` and `NaN < cutoff` is false.
+- **Every page fell into the "Older" group.** `wnGroupOf()` buckets by age into This week / This month / Older, and with no date the age was `NaN`, which fails both tests. The two upper groups have never appeared.
+
+New pages still appeared, because that runs off path presence rather than dates — which is exactly why the feature looked like it worked.
+
+**Change is now decided by a content hash, not by a timestamp.** OneDrive rewrites modified times on files whose content never changed, so a timestamp alone would trade one broken signal for a noisy one. Detection is two-stage and stays cheap: modified time and size come free from enumeration and are compared on every scan; a file is only read and hashed where one of them differs. **A steady-state scan reads no file contents at all.** The index carries `{ m, s, h }` per path, roughly 32KB for 500 notes.
+
+- **SHA-256 via `crypto.subtle`, truncated to 16 hex characters.** One guard, not a second algorithm: without a secure context there is no `crypto.subtle`, so the hash is skipped and the comparison degrades to modified time plus size. Noisier, never broken.
+- **Renames and moves now pair on content instead of on the timestamp.** Renaming a file in Obsidian leaves the bytes alone while the move frequently rewrites its modified time, so the old timestamp pairing was unreliable in principle — and in local mode it was pairing every vanished path against every arrived one, because all of them read as the empty string. A moved page no longer resurfaces as New for the whole team.
+- **Upgrading re-seeds rather than flooding.** A pre-0.25.0 index is recognised by its shape and treated as a first run. Without that, every note in the vault would gain a real signature on the same scan and arrive as Updated at once.
+- **The bulk guard stays, and now guards something real.** It counts hash-confirmed changes, so a sync sweep that only rewrites modified times no longer reaches it. What is left for it to absorb is a genuine bulk edit or a vault reorganisation.
+- The timestamp is still read and still used — for sorting, the relative "3 days ago" label and the date-window filter. It just no longer decides what counts as a change.
+
+**Why it went unnoticed for two releases, which is the part worth keeping.** The 88-check What's New suite passed the whole time, because it built its vault entries by hand with timestamps written into the fixture. The bug was in the code meant to supply those timestamps. A suite that never touches the real data source cannot tell you the real data source is empty. The new `change-detection.test.js` drives `localEnumRoot()` and `localEnumFolder()` against faked file handles and asserts what comes out of enumeration, not what was handed to the algorithm. It also counts file reads, so the two-stage laziness is measured rather than assumed.
+
+## 0.24.0 — 2026-08-05
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`
+**Added:** `supporting/tests/paragraph-breaks.test.js`
+**Fixed:** `supporting/tests/smoke6-reopen.js` — the last file still carrying a dead session mount path
+
+*Line breaks are kept. The inbox strip moves to the bottom.*
+
+**Every line break you type is now kept in rendered prose.** Press Enter once and the next line starts on its own line. Standard Markdown merges consecutive lines into one flowing paragraph, and this app did that until now.
+
+- **The reason is Obsidian's editor, not its reading view.** Pages here are authored in Edit / Live Preview, where a single Enter visibly starts a new line, so that is the shape the author intended. Reading view happens to agree, but it is not the argument. This is the same call made in 0.9i-2 for tab trees, and matching it means the app has one rule to explain instead of two that point in opposite directions.
+- **Known cost, accepted rather than worked around.** Text pasted from an email or a PDF arrives wrapped at someone else's column width and will render with those wraps intact. The fix is to join the lines at the source. The alternative — merging everything — loses deliberate breaks in notes, address blocks and contact details, which is the more common case in this vault.
+- Blank-line paragraphs, headings, lists, quotes, tables and code are unaffected. Nothing about the block parser changed; only the `para` case of `renderSingleBlock` reads `block.lines` instead of `block.content`.
+- **Inline spans that cross a line still work.** The lines are handed to `renderInline` as one newline-separated string and the newlines become `<br>` afterwards, so `**bold that wraps**` keeps its formatting. Rendering line-by-line would have shown the raw asterisks. `renderInline` was already newline-safe by construction: its code-span regex excludes `\n` and `escHtml` leaves newlines alone.
+- **Revertible in one line**, marked at the change site. `block.content` is still populated and still read by the `[!copy]` serializer and by search, both of which want one flat string.
+
+**The Comment Inbox / Review Inbox strip now sits at the bottom of the right panel**, between the panes and the version tag, instead of between the tab rail and the panes. Agreed Session 33, built now.
+
+- Each button only shows with its own tab open, so in the old position every relevant tab switch resized the strip and pushed all pane content down by that amount — a jump at the top of a 220px column caused by something appearing at the far end of it. Below the panes it grows against the version footer and nothing above it moves.
+- The strip's border moved from its bottom edge to its top edge to match, and the two buttons now stack with a 4px gap. They previously touched, which read as one control with a seam rather than two buttons.
+- **Interim, on purpose.** Both inboxes are administrator surfaces and want a fuller rethink once a Roles concept exists. This is the positional half, which depends on nothing and should not have waited for it.
+- No behavior change: same buttons, same handlers, same show/hide rule in `updateCommentTabCount()`.
+
+## 0.23.0 — 2026-08-05
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`, all 8 existing files in `help-assets/`
+**Added:** `help-assets/fig-09-whats-new.svg`
+**Added:** `supporting/tests/whats-new.test.js` (88 checks)
+**Fixed:** the four older suites now resolve jsdom and the source path themselves
+
+*A page that tells you what changed since you last looked.*
+
+- **New "What's New" row in the sidebar**, pinned between the toolbar and the tree with a count of what you haven't seen. It sits outside the tree deliberately: inside it, Collapse all would fold it away and it would scroll out of sight, which is the opposite of what a notification row is for. The count is hidden entirely at zero rather than showing a `0`.
+- **New and Updated are decided by whether a path was in your last known index, never by the file's created date.** This is the load-bearing decision. New pages are written in Obsidian and get their WikiBase frontmatter injected afterwards, which rewrites the file — so under any timestamp scheme every genuinely-new page would arrive looking like an edit. Path-presence can't be fooled by that. The same index answers renames and deletions for free, which is why one mechanism beat three separate heuristics.
+- **Seen is tracked per page, and commits when you leave a page rather than when you open it.** A single "last visited" timestamp, which is what Confluence and Notion use, would clear the whole list the moment you opened it. Per-page also means a re-edited page becomes unseen again. Committing on leave is what makes the highlight visible at all: mark on open and you never see the state you were being shown. A page that fails to load is never counted as read, and closing the tab counts as leaving, so the last page of a session isn't stranded unseen.
+- **First run seeds everything as seen** and counts from that moment. Without it a new hire opens the app to "247 unseen", which carries the same information as no badge at all.
+- **Renames carry their seen state across**; deletions drop out of every store. A rename is detected as a path that vanished and a path that appeared with the same modified stamp — the only signal available, since neither backend returns a file id.
+- **A bulk timestamp rewrite is absorbed rather than listed.** More than 25 updates in one scan means a sync client touched the vault, not that anyone edited it; those changes go into the index and are marked seen, with one line saying so. Without this guard a single OneDrive event would poison the badge permanently with no way back except clearing site data.
+- **Unseen rows get an accent dot and full-strength text; seen rows fade back to secondary.** The rejected alternative was an accent-background wash with a left rail, which spends `--accent-bg` on a passive state where it collides with hover and row selection, and floods the pane after a bulk import. **Red is not used anywhere here** — it stays reserved for comments, because a new page is not an alert. New is green, Updated is gray, Must read is orange.
+- **One filter axis with four values** (Unseen / New / Updated / All) plus a separate time window (30 / 90 / All). Collapsed from two overlapping axes on purpose; it loses "new and unseen", which nobody on a team of ten is going to ask for. Both persist.
+- **Grouped as a digest, not a feed:** Required reading, This week, Earlier this month, Older.
+- **Two new frontmatter keys, `must-read` and `onboarding`.** They exist as a pair because one key can't carry both meanings. `must-read` is time-bound and **expires 30 days after the page first surfaced to *that person*, not from the file's modified date** — otherwise someone back from five weeks' leave gets a list that pre-expired without them. On lapse it loses the orange pill and leaves Required reading, but **keeps its unseen dot and stays in the list**; nothing is ever silently marked read. Both the first-surfaced and lapsed dates are recorded for later reporting.
+- **Mark all as seen skips must-reads and names what it skipped**, globally and per group. A required page that nobody has read must not be clearable by a bulk action, and the skip has to be visible rather than silent.
+- **Nothing is written to the vault.** The index, the seen map and the surfaced/lapsed dates are all per-user in local storage, so this stays compatible with a read-only deployment. The two frontmatter flags are read off the sweep `scanBadges()` already runs for the file audit, so the feature adds no vault reads at all.
+- Clicking a row opens through `openFile()`, the same path a sidebar click takes, so history, backlinks, the Outline and the last-note store all behave identically however you got there. Reconnecting to a different vault clears the view but deliberately **not** the stored index — the old vault's paths fall out as deletions on the next scan, which self-heals, where clearing would re-seed and mark a returning vault entirely seen.
+- Verified with an 88-check suite covering the index diff in both directions, first-run seeding, commit-on-leave including the failed-load case, deletions, rename pairing and its negative case, the bulk threshold from both sides, all four filters and the window, all four groups, per-person expiry and everything it must preserve, the mark-all skip and its message, the rendered page, the colour rules, and the absence of any vault write.
+**Help, same release.** What's New is documented in **Help → Finding things** with a **ninth figure** showing the sidebar row and the page together — the unseen dot, the pills, the filter bar, and callouts for the three things that are not self-evident (the count hides at zero, seen rows fade rather than disappear, and seen commits on leaving). The two frontmatter keys are in **Help — Editing and Markdown → Properties**. The 0.22.0 Reconnect item was also missing from help entirely and is now in both the control table and troubleshooting.
+
+**Every figure was rebuilt for legibility, and three were factually wrong.**
+
+- **All 8 SVG figures had text running into other text or off the canvas.** They are hand-drawn with absolute coordinates and no auto-layout, so a caption that grew by a few words silently landed on its neighbour — invisible in a diff, obvious on screen. 27 measured collisions and clipped labels, in 7 of the 8 files. The commonest cause was a full-width footer line laid across the bottom of a column of captions that had since grown taller than the canvas.
+- **The fix is measured, not eyeballed**, and **the measurement is now a test.** `help-split.test.js` computes every label's box, including inherited `<g transform>` offsets, and fails on any overlap or anything escaping the viewBox. Widths are estimated against a deliberately wide font, because these figures ask for `-apple-system`/`Segoe UI` and what a machine actually resolves varies — clean against the widest realistic fallback means clean everywhere.
+- **Three figures still drew controls that no longer exist.** `fig-01` and `fig-06` showed the reader's fold pill, deleted in 0.20.0; `fig-01` and `fig-05` showed the sidebar's three fold buttons, collapsed to one in 0.21.0; `fig-06` still explained that clicking a heading is "how Collapse unused knows where you are", and Collapse unused was cut outright. `fig-01` also had a hardcoded "Version 0.18.0". Two further assertions now guard exactly this: no figure may mention Collapse unused, and none may show a version older than 0.20.0.
+- `fig-01` and `fig-05` gained the What's New row, so the sidebar in a drawing matches the sidebar on screen.
+- **`fig-04` was worse than a layout bug:** its right-hand labels were one row out of step with their own leader lines, so Help's line pointed at the update caption and the badge's line pointed at Help. Every label on that side named the wrong icon.
+- Both help pages' "Written for Version" line had drifted five releases behind, to 0.18.0. Corrected, and now **pinned to the app's own version badge by a test** rather than to a literal, so the next release that forgets it fails instead of drifting quietly.
+- **Not built, and worth stating:** the byte-delta floor for trivial edits. Neither backend fetches file size today (`$select` asks for `Name`, `ServerRelativeUrl`, `TimeLastModified` only), so implementing it meant changing enumeration in both modes for a second-order noise filter. The bulk-change guard covers the case that actually hurts.
+
+---
+
+## 0.22.1 — 2026-08-05
+
+**Changed:** `index.html`
+**Added:** `supporting/tests/props-flyout.test.js` (13 checks)
+**Fixed:** `supporting/tests/reconnect-vault.test.js` — self-resolving paths
+
+*One line. The Properties flyout was collapsing to a single row.*
+
+- **`#props-panel` was capped at `max-height: 70%`, and 70% of nothing is nothing.** The flyout lives inside `#reader-corner-align`, which is `position: absolute` with no height set and only absolutely-positioned children, so its content height computes to zero. A percentage max-height resolves against that, which collapsed the panel to one row plus a scrollbar no matter how many properties the file had. Now `min(70vh, 560px)` — the viewport is a real height, and the second term stops the panel running the full length of a tall monitor.
+- This worked when it shipped in S13 and broke without anyone touching the rule, because the corner controls were later moved inside the `#reader-corner-align` wrapper (v0.14.1, aligning them to the text margin). Worth remembering as a class of bug rather than an incident: **any percentage height inside that wrapper is dead**, and the wrapper now holds the nav pill, the fold controls, Properties and Edit.
+
+---
+
+## 0.22.0 - 2026-08-05
+
+**Changed:** `index.html`
+**Added:** `supporting/tests/reconnect-vault.test.js` (25 checks)
+
+*A way out of picking the wrong folder.*
+
+- **New "Reconnect to vault" item in the user dropdown**, below Switch user. Opens the folder picker and points the app at a different folder. Previously a wrong pick at boot was only escapable by clearing site data, since the chosen folder is remembered in IndexedDB and reused silently on every launch.
+- **Local-mode only.** The item is shown or hidden on every dropdown open based on `LOCAL.on`, rather than once at boot, so boot ordering can't leave it in the wrong state. SharePoint mode has no folder to pick. The path comes from `CONFIG`.
+- **Cancelling the picker is a clean no-op.** Nothing is reset until a folder is actually chosen, so a misclick costs nothing. An unsaved edit in the current vault still blocks the switch through the existing `guardLeaveEdit()`.
+- **New `resetVaultState()` clears everything derived from the previous vault** before boot runs against the new folder: the four per-folder caches, the file index and folder map, the review and comment badge counts, nav history, the search index, and the reader itself. This also closes a latent bug on the pre-existing boot-time "different folder" path. The per-folder caches are keyed by path, and paths repeat across vaults, so a folder named `Policies` in the new vault could have shown the old vault's file list under it.
+- The remembered last note is dropped on a deliberate reconnect only. A normal boot still reopens where you left off.
+
+---
+
+## 0.21.0 — 2026-08-05
+
+**Changed:** `index.html`, `help.md`
+**Changed:** `supporting/tests/fold-consolidation.test.js` (grown to 156 checks)
+
+*The vault tree joins the fold consolidation, but takes the opposite decision on memory.*
+
+- **The sidebar's three fold buttons become one symbol**, matching the Outline's: Collapse all until every folder is closed, then the same control expands. **Collapse unused is cut here too**, for the same reason it went from the reader and the Outline.
+- **Folder open/closed state is remembered again**, per person, across sessions and reloads (`wb_folders`). This restores a store that 0.9a removed and **deliberately takes the opposite decision from heading folds one release earlier.** The distinction is that a folder tree is navigation furniture — you arrange it once and want it to stay arranged — and a closed folder is *visibly* a closed folder. A collapsed heading hid content with nothing on screen to say so, which is what made saving it a problem. Nothing about that reasoning applies to a tree whose closed state you can see.
+- **The saved tree and "Open last note" compose instead of competing.** At boot the saved folders are restored first, then the ancestor chain down to the last note is added on top as a union. Previously "Open last note" decided the whole tree fresh every launch. Turn it off and you now get your own tree back rather than everything collapsed.
+- Expanding everything runs the folder preload and re-applies, so folders whose children had never been enumerated open properly on the first click rather than needing a second.
+- Creating a file or folder inside a folder now persists that folder being open, so it is still open next launch.
+- Verified by a new section in the fold suite covering the single control, the removals, storage round-tripping, the empty-state cleanup, both toggle directions, the symbol's label, and the boot union.
+
+---
+
+## 0.20.0 — 2026-08-05
+
+**Changed:** `index.html`
+**Added:** `supporting/tests/fold-consolidation.test.js`
+
+*Ten fold controls become four, and files stop opening in a state nobody chose.*
+
+- **Files always open fully expanded.** The per-file heading-fold memory added in 0.9a-2 (`wb_folds:<url>`) is gone, along with the Outline's own equivalent (`wb_outline_folds:<url>`). That store was the reason the reader looked randomly collapsed: it faithfully replayed whatever a bulk Collapse All had left behind, weeks later, with nothing on screen to say anything was hidden. Removing it is what makes "opens expanded" actually true. **List folds are deliberately still remembered** (`wb_li_folds:<url>` is untouched) — see the hidden-count note below for why that asymmetry is safe now when heading memory wasn't.
+- **Bulk collapse moved out of the reader and into the Outline, as one symbol instead of three buttons.** `#reader-fold-pill` is deleted; the reader folds one heading at a time through its own chevrons. This matches where Word's Navigation Pane, Obsidian's Outline plugin and VS Code's Outline view all put it — the outline is a view of the document, so folding it is a view operation. With nothing persisted the state is genuinely binary, so one control that reads Collapse all until everything is folded and Expand all after covers both directions.
+- **The Outline and the reader no longer share fold state in either direction, and the lock toggle is gone.** This reverses the Session 22 decision that made sharing an option; that call was made before watching people use it, and every reference application keeps the two independent.
+- **Collapse unused is cut entirely.** No mainstream editor ships it as visible chrome — VS Code has the equivalent as a keybinding only — and of the three buttons it was the one nobody reached for.
+- **Folded rows now say what they're hiding.** A folded heading, list item or list carries a muted "N hidden" badge. Folded state used to hinge on noticing a rotated chevron, which is the single biggest reason a collapsed page read as broken rather than collapsed. This is also what makes keeping list-fold memory defensible: a bullet that reopens reading "12 hidden" is legible in a way a silently closed H2 never was.
+- **Alt/Option-click folds a whole subtree, replacing the double-click gesture.** The 220ms click/double-click disambiguation window is deleted with it, so ordinary single clicks fire instantly again instead of paying a delay to protect a gesture staff had never discovered. Alt-click on a disclosure control is the Finder, Explorer and VS Code convention. It works on heading chevrons, list chevrons and Outline chevrons alike.
+- **Root lists get a whole-list fold control** on their first row, revealed on hover anywhere in that list. It adds no capability over Alt-clicking the top chevron; it exists so the capability is visible, since a modifier gesture is exactly as undiscoverable as the double-click it replaced. Lists with no nesting get no control, because there's nothing to collapse.
+- **Callouts fold, and Obsidian's `-` / `+` suffix is finally parsed.** This fixes a real pre-existing bug: the old pattern swept everything after `[!type]` into the title, so `> [!warning]- Check this` rendered as "- Check this" and a bare `> [!note]-` rendered a callout literally titled `-`. Any collapsed callout authored in Obsidian has been showing a stray dash here. Now `-` opens collapsed, `+` opens expanded, and the title comes out clean. Unlike Obsidian, the absence of a suffix does **not** make a callout unfoldable — every callout with a body gets a chevron, because the existing vault has no suffixes and nobody should have to learn a convention to collapse a long note. Collapsing hides the body only: the label row keeps its full colour, icon and title, so a folded `[!warning]` still reads as a warning. Nothing is stored and nothing is written back to the file.
+- The Outline toolbar gains a heading-count badge, reusing the same `.badge` class as the file counts on sidebar folder rows so the two panels read as siblings.
+- Verified with a new 128-check suite covering the removals, the outline toolbar, both directions of the non-sync guarantee, alt-click subtrees, hidden counts, list behaviour, all four callout suffix forms, the `[!copy]` button still working alongside the new chevron, and the delegated click wiring. The suite resolves jsdom and the source path itself rather than hardcoding a session mount, which the three older suites still do.
+
+---
+
 ## 0.19.2 — 2026-08-03
 
 **Changed:** `index.html`, `help.md`, `help-edit.md`
