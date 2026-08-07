@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.28.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.32.0**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
@@ -15,7 +15,7 @@ New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is
 
 1. [[#1. Start here]] — what this is, installing it, your first launch
 2. [[#2. Getting around]] — the header, the panels, Vault Files, moving between notes
-3. [[#3. Reading a note]] — folding, links, images, checkboxes
+3. [[#3. Reading a note]] — folding, links, images, tables, checkboxes
 4. [[#4. Finding things]] — What's New, Outline, Search, Bookmarks, Links
 5. [[#5. Making it yours]] — the Theme panel and Settings
 6. [[#6. Comments]] — leaving and answering comments
@@ -176,6 +176,14 @@ A link to a network folder or drive path (`file://` UNC, or `X:\...`) cannot ope
 
 Each note's images live in a subfolder next to it, named "Attachments" by default here, following Obsidian's **"in subfolder under current folder"** setting. That subfolder is hidden from the tree automatically.
 
+### Tables, and widening a column
+
+Tables render as written. Obsidian sizes each column to its widest cell, so the usual way to force a narrow column wider there is to add a row of periods under the header.
+
+WikiBase understands that row. **A row made entirely of periods is hidden in the reader, but still sets the column widths** — you get the layout you set up in Obsidian without the dots showing. A cell needs **five or more periods and nothing else** to count as padding.
+
+If any cell in the row has real text in it, the whole row is treated as content and shows normally. So a cell reading `Waiting.....` is safe.
+
 ### Tags
 
 `#tag` renders as a coloured chip, `#parent/child` for a nested one. Tags follow your accent colour. They are display-only for now, no click-to-filter.
@@ -294,6 +302,22 @@ Two lists for the open note:
 
 - **Outgoing** — everything this note links to, bucketed into MD Files, Websites, Folders and Other. Read live from the note, always complete.
 - **Backlinks** — notes that link *to* this one. Only files opened this session are scanned, so this list grows as you browse. It is not a vault-wide index and is not meant to be one.
+
+### Usage
+
+**Administrator only.** A report on the vault, in three lists:
+
+- **Most read** — which pages the team actually opens. Usually not the pages you expected when you built the wiki.
+- **Never opened** — pages nobody has ever read. The most useful list here: either the page is dead and can go, or it is needed and nobody can find it.
+- **Gone quiet** — a page that used to get traffic and stopped for a month or more. Nearly always a page that went out of date and people gave up on.
+
+Each list shows the top five with a **Show more** for up to twenty-five. Click any row to open that page.
+
+**This reports on files, not on people.** No names, no per-person counts, no way to see who read what. The report cannot show that, because the totals it reads have already had the names dropped out of them.
+
+**What is recorded, and when.** WikiBase notes which page you are on once it has loaded, and how long you stayed. Nothing is written while you read. When you switch away from the tab or close it, that sitting is written to a hidden file in the vault under `zSystem/Analytics/`, one file per person per month, one line per page per day. That file is safe to delete at any time; it will simply start again.
+
+Because the write happens when you leave, your own reading appears quickly and other people's lags by up to one sitting, plus however long OneDrive takes to sync. It is near-live, not live.
 
 ---
 
@@ -497,6 +521,7 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Note properties | Sliders icon, next to the pencil |
 | Bookmark a heading | Ribbon icon on that heading's Outline row |
 | Search | `⌘K` / `Ctrl+K`, or the magnifier tab |
+| Which pages get read, and which never do | **Usage** tool. Administrator only |
 | Version and changelog | The version button at the bottom of the right panel |
 | How to write Markdown | [Help — Editing and Markdown](help-edit.md) |
 

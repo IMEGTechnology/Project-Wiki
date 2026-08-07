@@ -1,7 +1,7 @@
 # WikiBase Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.28.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.32.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -164,6 +164,44 @@ The oldest unresolved change on a file is the only one you can act on. Later one
 A second section of the review screen lists files WikiBase has never touched — usually notes added straight from Obsidian, which have no `status` property because only this app writes one.
 
 Clicking one opens it alongside its Properties so you can fill them in. **Update** adds only the property keys that are actually missing and never overwrites what is already there. Nothing is written automatically.
+
+### Changes made in Obsidian
+
+Most edits to your vault do not happen in WikiBase. It is a reader, and people write in Obsidian. Those edits show up too, as **Vault change** items in orange.
+
+WikiBase notices them by comparing the note against the last version somebody approved. Approving does **not** mean the change was allowed through — it already happened, and nothing WikiBase does can undo it. It means a competent person has seen it.
+
+Clicking a Vault change row opens the note with the change marked where it actually sits, and a bar at the bottom of the reader:
+
+| Marking | Means |
+|---|---|
+| **Green, NEW SECTION** | This heading was not there last time. |
+| **Amber, CHANGED** | This section's text is different. |
+| **Red, dashed, REMOVED** | This section is **gone**. WikiBase draws it back in so you can see what went. It is not part of the file and is never written back. |
+
+Use **↑ prev** and **↓ next** to walk the changes, then:
+
+| Button | What happens |
+|---|---|
+| **Approve file** | Records that you read it, in your own audit log. The note is not touched. |
+| **Flag** | Posts an ordinary comment on the file. **No revert** — see the warning below. |
+| **Version history ↗** | Reminds you where to find who changed it: right-click the file in the synced vault folder. |
+
+> [!NOTE] Why Flag does not revert
+> Reject reverts an edit made *in this app*, because the app still has the text it wrote. A change made in Obsidian is different: the file has already synced to everyone, and someone may have it open right now. Overwriting it would destroy their work. So Flag raises the problem and a person fixes it, which is the only safe answer.
+
+### A file whose only change is a new heading
+
+That is additive: nothing was altered and nothing was lost. Those sort into **New section** in yellow, under *Needs acknowledgement*, where **Acknowledge all** clears them in one go. Everything else needs opening.
+
+### Where approvals are recorded
+
+Each person writes their own file at `zSystem/audit/YYYY-MM-<your email>.md`. Rows are only ever added, never changed, so two people approving at the same moment cannot collide. The record is permanent and carries your name.
+
+Anyone on Contributor can approve anything, including their own edits. That is a deliberate choice for a small team: the log makes a careless approval findable afterwards, which is the honest trade when there may only be two of you.
+
+> [!TIP] The first run is quiet on purpose
+> The first time someone opens WikiBase on Contributor, the whole vault is recorded as approved. Otherwise day one would open with every note in the queue, which tells you nothing.
 
 ---
 

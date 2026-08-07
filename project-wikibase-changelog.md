@@ -10,6 +10,169 @@
 
 ---
 
+## 0.32.0 — 2026-08-07
+
+**Changed:** `index.html`, `supporting/tests/usage-analytics.test.js` (new), `supporting/tests/README.md`, `help.md`
+
+*Usage analytics. Which pages get read, which never do, and which have gone quiet. Shipped immediately after 0.31.0 and separately from it, so a problem in either is attributable to one of them.*
+
+### Four decisions, locked before anything was written
+
+Each of these closed off an alternative that looks like an improvement from the outside, so all four are recorded in the code beside what they govern:
+
+1. **One row per page per day, not one per open.** A row per open grows with traffic: forty pages a day, twenty days, ten people is roughly six megabytes of log a year, all of which the view would have to replay. Per day bounds the rows by *distinct pages read* and answers every question the report actually asks.
+2. **Administrator only to view.** Not Contributor. This is the first tool gated above Contributor, so `WB_TOOLS` gained an explicit `tier` rather than a second boolean beside `gated` — a ladder position is not a pair of flags.
+3. **Files, never people.** This is a file audit, not a user audit. The names are dropped inside `usageAggregate()`, which reads the per-person files and returns totals with nothing attached, so no render downstream is in a position to leak one. The rule is enforced by the data shape, not by every caller remembering it.
+4. **Collection runs at every tier.** Gating collection to Administrator would make the numbers describe one person's reading and call it the team's.
+
+### How it records
+
+The page you are on is noted once it has **rendered** — the same point What's New treats as "you are here", so a file that failed to load is never counted. Nothing is written while you read. On leaving the tab the sitting is folded into a buffer and flushed to `zSystem/Analytics/YYYY-MM-<user>.md`, one file per person per month.
+
+Per-person files are what stop OneDrive making conflict copies when two people read at once. The file is **rewritten** rather than appended, unlike the audit log, and that is safe for the specific reason that a usage file has exactly one writer — rewriting is what merges same-day rows into one instead of stacking them.
+
+Two guards worth naming. **Dwell is capped per visit**, so a tab left open over lunch cannot outweigh a week of real reading; opens are the honest signal and seconds only support it. And the buffer is **mirrored to `localStorage` on every commit**, because a `pagehide` write is not guaranteed to finish when a browser is killed — without the mirror, closing hard would lose the whole sitting.
+
+### How it reports
+
+Three lists: **Most read**, **Never opened**, **Gone quiet**. The middle one is the point — either the page is dead and can go, or it is needed and nobody can find it. Gone quiet is deliberately not "low count": a page with two opens last week is fine, a page with sixty opens and none this month is the one worth looking at.
+
+Top five per section with a **Show more** out to twenty-five. The cap is real, not a render trick: four hundred rows is not a report, it is the raw data with extra steps.
+
+**The logs are read only when the pane is opened**, cached for a minute, and never touched by the badge scan or by boot. That restraint is the direct lesson of 0.31.0, where the approval-log replay had been called from the scan and had to be pulled back out.
+
+### Covered by
+
+`usage-analytics.test.js`, 67 checks, a large share of them asserting **absence** — that Contributor sees no pane and no rail icon rather than a disabled one, that a demotion un-docks it, that no name or email survives into the rendered output, that no shared counts file or external endpoint exists, and that the scan never calls the aggregate.
+
+---
+
+## 0.31.0 — 2026-08-07
+
+**Changed:** `index.html`, `supporting/tests/scan-cache.test.js` (new), `supporting/tests/README.md`
+
+*No new features. The badge scan stopped re-reading a vault that had not moved, and four smaller costs in the same sweep were closed with it. Shipped on its own, ahead of the Usage panel, so the two are separately revertible.*
+
+### Switching back to the tab no longer re-reads the whole vault
+
+`scanBadges()` ran on every `visibilitychange`, and it swept every note in the vault: a full read of each file, a speculative read of both its sidecars, and at Contributor and above one hash of the note plus one hash per heading. Correct, and priced per note times per heading — which is the wrong direction for a vault that is filling out with long documents.
+
+It now keeps a per-file record of the parsed inputs (frontmatter, comments, change entries, hashes) and reuses it while the file's **modified stamp and size** are unchanged. That gate is not new: `wnBuildIndex()` has used the same two fields since 0.25.0, and enumeration has carried them for free just as long. A steady-state scan now reads nothing.
+
+**The cache holds parsed inputs, never derived rows.** The rows also depend on the audit baseline and on the current tier, so a cache of rows would need invalidating on both and would become the second source of truth this project keeps refusing. Tier is in the cache key, so unlocking Administrator costs one full scan and then settles.
+
+Accepted limitation, inherited deliberately from What's New: a sync tool that rewrites a file's content without changing either its size or its modified stamp would be missed. Same gate, same exposure, one place to fix it if it ever happens.
+
+### Four smaller costs in the same sweep
+
+- **Absent sidecars are no longer opened speculatively.** Every note used to attempt both a `.comments.md` and a `.changes.md` read; on a vault where most notes have neither, that is two thrown-and-swallowed errors per note per scan. One directory listing per `zSystem` folder now answers existence for every note in it, and yields each sidecar's own stamps as a bonus — which is what lets a comment added on another machine invalidate exactly one cache entry.
+- **The fan-out is bounded.** The sweep was `Promise.all` over every file, which asks the file system for three things per note all at once. Eight lanes now, which keeps the pipe full without handing the browser a burst it can only queue.
+- **The approval-log replay is cached.** It re-read every approver's every monthly log on every scan, and that folder grows by one file per person per month forever. It now compares the folder's own stamps first, and is cleared outright whenever an approval is appended.
+- **A scan requested during a scan is no longer dropped.** The guard returned early, so a save or an approval that landed mid-scan left the badges describing the vault as it was before it. Any number of dropped requests now collapse into one trailing re-run.
+
+Local-vault mode only, throughout. The dormant SharePoint path has no cheap per-folder stat, so it keeps its original read-and-see behaviour rather than acquiring a fast path nobody can test.
+
+### Covered by
+
+`scan-cache.test.js`, 41 checks. It **counts reads through a faked file system** rather than asserting about them, because a stale cache returns a perfectly well-formed wrong answer that a happy-path suite would wave through. It also asserts the derived badge state is byte-identical with the cache warm and cold, asserts the old unbounded shapes are absent so a revert turns it red, and measures the concurrency watermark rather than trusting the limit.
+
+---
+
+## 0.30.0 — 2026-08-06
+
+**Changed:** `index.html`, `supporting/tests/vault-audit.test.js` (new), `supporting/tests/change-detection.test.js`, `supporting/section15-sample.html` (new), `README.md`, `help-edit.md`
+
+*Blueprint Section 15, the vault audit. The last remaining build section, and the two review item types 0.29.0 deliberately left out.*
+
+### Edits made in Obsidian now surface for sign-off
+
+WikiBase is a reader, so nearly every change to the vault happens somewhere else. Until now nothing surfaced them. The dashboard gains two types:
+
+- **Vault change** (orange, band 1) — a note whose content differs from the last approved version. One row per file no matter how many things changed inside it.
+- **New section** (yellow, band 2) — a note whose *only* difference is new headings. Additive, so nothing was altered and nothing was lost, and **Acknowledge all** covers it.
+
+**Approve means acknowledged, not gated.** The edit already happened and already synced. Approving records that a competent person read it. There is no reject: **Flag** posts an ordinary comment instead. Reverting would overwrite work sitting in someone's open Obsidian window while OneDrive syncs underneath, so the existing reject-revert path stays scoped to in-app edits, where the app still holds the before-text it wrote.
+
+### The log, and why there is no index
+
+Each approver appends to their own `zSystem/audit/YYYY-MM-<user>.md`. Rows are only ever added. The approved baseline for a note is its most recent row across every approver's log, replayed on each scan — so there is no shared mutable file for OneDrive to make a conflict copy of. Same per-person-file pattern already locked for analytics.
+
+First run records the whole vault as approved, same call as What's New. Without it day one opens with every note in the queue, which carries no information.
+
+### In-file review, not dashboard diffs
+
+The row is a one-line blurb. Clicking it opens the note with the change marked where it sits, and a bar at the foot of the reader carrying prev/next, Approve file, Flag and Version history, so a queue is cleared without returning to the dashboard. Three markings: green NEW SECTION, amber CHANGED, and red dashed REMOVED.
+
+**A removed section is drawn back into the view and never written.** It exists in the rendered DOM only, is `user-select: none` so a copy of the page cannot pick it up, and disappears on the next render. An addition announces itself the next time someone reads the page; a deletion is invisible by definition, which is why it gets the loudest marking.
+
+**Marking is per section, not per line.** The log stores hashes, not content, so the app has no copy of the previous text and cannot produce an honest line diff. For exact wording it links out to OneDrive version history — the Session 37 call. Storing snapshots to fake a line diff would mean keeping a second copy of the vault.
+
+### Also
+
+- Filter chips carry a colour dot, one colour per type, all from the existing callout palette. `Content change` is renamed **App edit** now that there are two kinds of edit to tell apart.
+- Frontmatter is stripped before hashing, so the app's own property writes never flag a page nobody edited.
+- **Fixed during the build, found by the new suite:** two approvals landing in the same second let the *earlier* row win the replay, so a file could never leave the queue. Timestamps now carry milliseconds and a tie resolves to the later row.
+
+---
+
+## 0.29.1 — 2026-08-06
+
+**Changed:** `index.html`, `supporting/tests/table-spacer.test.js` (new), `supporting/table-spacer-sample.html` (new), `README.md`, `help.md`
+
+*Polish only. One reader change, plus a log compression and project cleanup.*
+
+### Table width-padding rows are hidden, not dropped
+
+- **A table row made entirely of periods no longer renders.** Obsidian's table editor sizes a column to its widest cell, so padding a row with `.....` is how you make a narrow column wide in the vault. That row was showing up verbatim in the reader.
+
+- **It is hidden, not removed — and that distinction is the feature.** The cells still lay out at their normal 14px, so the column widths the padding was written for survive into the reader; only the periods and the row's height go away. Removing the row instead would have deleted the one effect it was ever written to have, and every table would have snapped back to content width.
+
+- **The match is whole-row, deliberately.** A row qualifies only when at least one cell is **5 or more periods and nothing else**, and every other cell is empty or periods-only. A cell reading `Waiting.....` keeps its row. A per-cell test would have been simpler and would have silently eaten real content the first time someone wrote a long ellipsis in a table.
+
+- Separator rows are filtered before this test runs, so dashes never reach it. Hidden rows carry `aria-hidden`, so screen readers skip them, and `user-select: none`, so copying a table doesn't pick up invisible dots.
+
+---
+
+## 0.29.0 — 2026-08-06
+
+**Changed:** `index.html`, `supporting/tests/review-dashboard.test.js` (new), `supporting/tests/paragraph-breaks.test.js`, `README.md`, `help.md`, `help-edit.md`
+
+*Comments & Review — the review dashboard. Six of the eight item types the spec named; changed-outside-the-app and new-section wait for Section 15, the vault audit, which is next.*
+
+### The review dashboard
+
+- **One queue, typed items, three bands.** Band 1 (needs your decision: content changes, questions, escalations) sits above band 2 (needs acknowledgement: flagged, due) above band 3 (needs completion: new files, missing properties) — reading top to bottom is the review order. A band with zero items collapses itself and still shows a count of zero rather than disappearing, so the queue's shape stays stable between visits.
+
+- **Every type is stateless.** Each is re-derived from vault-native truth (frontmatter or a sidecar) on every `scanBadges()` sweep — no new store, nothing to keep in sync. Replaces the old "All changes" page, which only ever read `.changes.md`.
+
+- **A file is sorted into exactly one cause.** No status key is New file; status present but a required key missing is Missing properties; an unreviewed content-change entry is Content change, never also Flagged, even though the same in-app save sets both signals — Accept/Reject is the sharper action and wins.
+
+- **An open question blocks the file from leaving the queue.** New behaviour — previously a question was invisible to review entirely.
+
+- **Escalation is a fifth comment type**, not a third store: Note, Question, Action, Flag, Escalate, in the same panel every file already had. Fixed direction, Contributor to Administrator, so there's no per-person roster — tiers are shared passwords, not tied to identity. Escalated items sort to the top of band 1.
+
+- **Due for re-review** is live: the `due` property existed and drove nothing since Session 13. A passed due date surfaces in band 2; acknowledging clears it.
+
+- **Previous** — a collapsed section at the bottom listing resolved items across all six types: accepted/rejected changes, closed comments, files marked Reviewed. Nothing is ever deleted to build it; the 30-day default is a view, not a retention limit, and never applies to the live bands above. Comments and content-change entries now carry `closedTs`/`resolvedTs` so this has a real "when," not just "when it was first raised."
+
+- **Bulk actions, band 2 and 3 only.** "Fill all" writes only absent keys across every band-3 file; "Acknowledge all" marks band-2 flagged files Reviewed and clears due dates. Band 1 never gets one — if it could be done in bulk it wasn't a decision. A file "Fill all" completes still carries `status: Needs Review`, so it correctly funnels into Flagged next rather than silently leaving the queue.
+
+- **Next-item walk.** Clicking a row opens the file and lands on whichever existing surface already shows that item — the diff strip for a content change, the Comments pane (selected) for a question or escalation, the Properties flyout for a frontmatter fix. Next walks the same band-ordered list the dashboard rendered, no re-scan.
+
+### Property schema declared
+
+- `status`, `reviewed`, `created`, `author` are required; `tags`, `aliases`, `due`, `must-read`, `onboarding` are optional. `must-read`/`onboarding` arrived with What's New (0.23.0) and had never been added to the fill defaults until now.
+
+- **`section` is dropped** — decided out in Session 37, carried in the defaults and the Properties flyout ever since. Removed from both, plus the new-file creation template.
+
+- **A property fill writes the missing keys and nothing else.** `approveNewFileCore()` no longer stamps `edited-by`/`edited-at` unconditionally — correct for one deliberate file, wrong for a bulk sweep, where it would mark every file in the vault as edited by one person today.
+
+### Not in this build
+
+Changed-outside-the-app and new-section need a shared baseline that doesn't exist yet — Section 15's per-approver audit log, specced but not built. Building them now on a per-device `localStorage` baseline would silently diverge between people; both wait for Section 15, which is next.
+
+---
+
 ## 0.28.0 — 2026-08-06
 
 **Changed:** `index.html`, `supporting/tests/docks.test.js` (new), `supporting/tests/access-tiers.test.js`, `supporting/tests/paragraph-breaks.test.js`

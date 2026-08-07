@@ -889,13 +889,15 @@
       min-height: 0;
     }
     /* Review diff strip (S14+) */
-    #diff-bar {
+    #diff-bar, #audit-bar {
       flex-shrink: 0; display: flex; align-items: center; gap: 8px;
       padding: 4px 14px; border-top: 1px solid var(--border-strong);
       background: var(--bg-sidebar); cursor: row-resize; user-select: none;
       font-size: 11.5px; color: var(--text-muted);
     }
-    #diff-bar .diff-close {
+    #audit-bar .audit-dim { color: var(--text-muted); font-weight: 400; }
+    #audit-bar .audit-ghost-toggle { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-left: 4px; }
+    #diff-bar .diff-close, #audit-bar .diff-close {
       margin-left: auto; border: 0; background: none; cursor: pointer;
       color: var(--text-muted); font-size: 12px; padding: 2px 6px;
     }
@@ -905,6 +907,38 @@
       padding: 8px 16px; background: var(--bg-sidebar);
     }
     .wb-changed { background: var(--co-green-bg); border-radius: 3px; box-shadow: 0 0 0 3px var(--co-green-bg); }
+
+    /* S15 — vault audit marking. Three kinds, three colours, and the
+       gutter glyph repeats the colour so this still reads on a screen
+       where the tint is washed out. Added and modified sit on real
+       content; removed is drawn back in and says so. */
+    .wb-ch-add { background: var(--co-green-bg);  box-shadow: inset 3px 0 0 var(--co-green-bd);  border-radius: 3px; }
+    .wb-ch-mod { background: var(--co-yellow-bg); box-shadow: inset 3px 0 0 var(--co-yellow-bd); border-radius: 3px; }
+    .wb-ch-add::after, .wb-ch-mod::after {
+      margin-left: 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+      padding: 1px 6px; border-radius: 8px; vertical-align: middle;
+    }
+    .wb-ch-add::after { content: 'NEW SECTION'; background: var(--co-green-bg);  color: var(--co-green-txt);  border: 1px solid var(--co-green-bd); }
+    .wb-ch-mod::after { content: 'CHANGED';     background: var(--co-yellow-bg); color: var(--co-yellow-txt); border: 1px solid var(--co-yellow-bd); }
+    .wb-ch-ghost {
+      display: flex; align-items: center; gap: 8px;
+      margin: 10px 0; padding: 8px 12px 8px 10px;
+      font-size: 13.5px; color: var(--co-red-txt);
+      background: var(--co-red-bg);
+      border: 1px dashed var(--co-red-bd); border-radius: var(--radius);
+      text-decoration: line-through;
+      user-select: none; /* a drawn line must never end up pasted into a note */
+    }
+    .wb-ch-ghost .wb-ch-gut { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; text-decoration: none; }
+    .wb-ch-tag {
+      padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.05em; background: var(--co-red-bd); color: #fff; text-decoration: none;
+    }
+    .wb-ch-hint { margin-left: auto; font-size: 10.5px; color: var(--text-muted); text-decoration: none; }
+    .rv-tick {
+      flex-shrink: 0; padding: 1px 6px; border-radius: 8px;
+      font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums;
+    }
 
     .reader-empty {
       display: flex;
@@ -1291,6 +1325,21 @@
     .md-table td { color: var(--text-secondary); padding: 7px 12px; border-bottom: 1px solid var(--border); }
     .md-table tr:last-child td { border-bottom: none; }
     .md-table tr:hover td { background: var(--hover); }
+    /* Width-padding rows (0.29.1). A row padded with periods in Obsidian
+       exists only to force the column widths there. It is laid out here
+       but never drawn: line-height:0 with font-size left alone is the
+       whole trick — the cell still measures its periods at 14px, so the
+       widths the padding was written for survive, while the line box it
+       sits in has no height. Dropping the row instead would throw away
+       the one thing it was written to do. */
+    .md-table tr.md-table-spacer td {
+      padding-top: 0; padding-bottom: 0;
+      line-height: 0;
+      color: transparent;
+      border-bottom: none;
+      user-select: none;
+    }
+    .md-table tr.md-table-spacer:hover td { background: none; }
 
     /* Images */
     .md-img-wrap { margin: 0.75rem 0; }
@@ -1869,6 +1918,34 @@
     .rp-pane { display: none; }
     .rp-pane.active { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; min-height: 44px; }
     .rp-empty { padding: 20px 14px; color: var(--text-muted); font-size: 12px; text-align: center; line-height: 1.6; }
+    /* Usage pane (S45). No colour functions here — the standing rule in this
+       file is hardcoded values per theme variable only, because an older
+       embedded WebView treats an unsupported colour function as an invalid
+       variable and falls back to solid black. */
+    .usage-body { padding: 4px 0 10px; overflow-y: auto; }
+    .usage-sect { margin-bottom: 6px; }
+    .usage-sect-head {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--text-muted); padding: 12px 12px 6px;
+    }
+    .usage-count { font-weight: 600; letter-spacing: 0; opacity: 0.75; }
+    .usage-none  { padding: 6px 12px 8px; text-align: left; }
+    .usage-row   { padding: 5px 12px; cursor: pointer; border-radius: 4px; }
+    .usage-row:hover { background: var(--hover); }
+    .usage-row-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; }
+    .usage-name  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .usage-val   { flex: 0 0 auto; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .usage-meta  { flex: 0 0 auto; color: var(--text-muted); font-size: 11.5px; }
+    .usage-track { height: 4px; border-radius: 2px; background: var(--border); margin-top: 4px; overflow: hidden; }
+    .usage-fill  { height: 100%; border-radius: 2px; background: var(--accent); }
+    .usage-more  {
+      display: block; margin: 6px 12px 2px; padding: 3px 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 11.5px; font-family: inherit; text-align: left;
+    }
+    .usage-more:hover { color: var(--accent); text-decoration: underline; }
+    .usage-foot { padding: 12px 12px 0; margin-top: 6px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11px; line-height: 1.5; }
     .rp-stack-handle {
       height: 4px; flex-shrink: 0; cursor: row-resize;
       background: var(--border); position: relative; z-index: 5;
@@ -2209,6 +2286,7 @@
     }
     .review-chip:hover { color: var(--text-primary); }
     .review-chip.active { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); }
+    .rv-chip-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
     .review-file-block { margin: 1.5rem 0; }
     .review-file-header {
       display: flex; align-items: center; gap: 6px;
@@ -2228,6 +2306,49 @@
       background: var(--bg-sidebar); border: 1px solid var(--border);
       border-radius: var(--radius); font-size: 13px; color: var(--text-secondary); line-height: 1.6;
     }
+
+    /* === S42 Review dashboard — bands + Previous + queue bar === */
+    .rv-band { margin-bottom: 20px; }
+    .rv-band-head {
+      display: flex; align-items: center; gap: 8px; cursor: pointer;
+      padding: 8px 4px; border-bottom: 1px solid var(--border-strong);
+      font-size: 13px; font-weight: 700; color: var(--text-primary);
+      user-select: none;
+    }
+    .rv-band-head:hover { color: var(--accent); }
+    .rv-band-caret { display: inline-block; width: 10px; font-size: 10px; color: var(--text-muted); }
+    .rv-band-count {
+      min-width: 20px; padding: 1px 6px; border-radius: 10px; text-align: center;
+      font-size: 11px; font-weight: 700; background: var(--badge-bg); color: var(--text-secondary);
+    }
+    .rv-band-body { padding: 10px 2px 2px; }
+    .rv-band.collapsed .rv-band-body { display: none; }
+    .rv-sub-head {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--text-muted); margin: 14px 0 6px;
+    }
+    .rv-sub-head:first-child { margin-top: 0; }
+    .rv-bulk-row { margin-top: 10px; }
+    .rv-empty { padding: 10px 4px; font-size: 12.5px; color: var(--text-muted); }
+    .rv-prev-toggle {
+      display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 4px;
+      font-size: 12.5px; color: var(--text-muted); border-top: 1px solid var(--border);
+      margin-top: 24px;
+    }
+    .rv-prev-toggle:hover { color: var(--text-primary); }
+    .rv-prev-window { display: flex; gap: 4px; }
+    #rv-queue-bar {
+      display: none; align-items: center; gap: 10px; padding: 7px 16px;
+      background: var(--accent-bg); border-bottom: 1px solid var(--accent);
+      font-size: 12.5px; color: var(--text-primary); flex-shrink: 0;
+    }
+    #rv-queue-bar button {
+      padding: 3px 10px; font-size: 12px; font-family: inherit; cursor: pointer;
+      border: 1px solid var(--accent); border-radius: var(--radius);
+      background: var(--bg-reader); color: var(--accent);
+    }
+    #rv-queue-bar .rv-qb-pos { color: var(--text-muted); }
+    #rv-queue-bar .rv-qb-spacer { flex: 1; }
 
     /* === SVG icon helpers ==================================== */
     .icon    { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
@@ -2427,6 +2548,8 @@
       <div id="reader-fade" aria-hidden="true"></div>
       <main id="reader">
         <div class="reader-empty" id="reader-empty">Select a file to read</div>
+        <!-- S42 Review dashboard — Next-item walk bar -->
+        <div id="rv-queue-bar" style="display:none"></div>
         <div id="reader-content"></div>
         <!-- S9 Editor mode -->
         <div id="editor" style="display:none">
@@ -2450,6 +2573,19 @@
         <button class="diff-close" onclick="closeDiffStrip()" title="Close" aria-label="Close diff">✕</button>
       </div>
       <div id="diff-strip" style="display:none"><pre class="rv-diff" id="diff-body"></pre></div>
+      <!-- S15 vault-audit review bar. Separate from #diff-bar on purpose:
+           that one acts on .changes.md entries the app itself wrote, this
+           one acts on the audit log and can never revert anything. -->
+      <div id="audit-bar" style="display:none">
+        <span id="audit-title">Changed outside the app</span>
+        <button class="ed-btn" onclick="auditStep(-1)" title="Previous change">↑ prev</button>
+        <button class="ed-btn" onclick="auditStep(1)" title="Next change">↓ next</button>
+        <button class="ed-btn rv-accept-btn" onclick="auditApproveActive()">Approve file</button>
+        <button class="ed-btn rv-reject-btn" onclick="auditFlagActive()">Flag</button>
+        <button class="ed-btn" onclick="auditOpenHistory()">Version history ↗</button>
+        <label class="audit-ghost-toggle"><input type="checkbox" checked onchange="auditToggleGhosts(this.checked)"> Show deleted</label>
+        <button class="diff-close" onclick="auditCloseBar()" title="Close" aria-label="Close review bar">✕</button>
+      </div>
     </div>
 
     <!-- Right panel resize handle -->
@@ -2490,6 +2626,7 @@
         <div class="rp-pane"        id="rp-comments"> <div class="rp-empty">Open a file to see comments.</div></div>
         <div class="rp-pane"        id="rp-backlinks"><div class="rp-empty">Open a file to see backlinks.</div></div>
         <div class="rp-pane"        id="rp-review">   <div class="rp-empty">Open a file to see its changes.</div></div>
+        <div class="rp-pane"        id="rp-usage">    <div class="rp-empty">Usage.</div></div>
         <div class="rp-pane"        id="rp-search">
           <div class="pane-chrome-slot" data-tool="search"></div>
           <div class="search-box">
@@ -2505,7 +2642,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.28.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.32.0</button>
     </aside>
 
   </div>
@@ -2787,6 +2924,32 @@ const state = {
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
   openLastNote:    true,  // Settings "Open last note" — default on
   unauditedFiles:  [],    // files with no WikiBase "status" frontmatter key (S12 file audit)
+
+  // ── Review dashboard (S42) ───────────────────────────────────────
+  // The other four item types (missingProps, flaggedFiles, dueItems,
+  // questionItems, escalatedItems) and rvResolved are filled by scanBadges
+  // — not pre-declared with shapes here since they're plain arrays/objects
+  // rebuilt whole on every scan, same as reviewChanges/unauditedFiles above.
+  missingProps:    [],
+  // S15 — vault audit. auditBaseline is the replay of every approver's
+  // append-only log ({ path: {hash, ts, by, sections} }); it is vault
+  // state, not device state, which is why it is not in localStorage.
+  // vaultChanges/newSections are rebuilt whole on every scan like the rest.
+  auditBaseline:   {},
+  auditSeeded:     false,
+  vaultChanges:    [],
+  newSections:     [],
+  flaggedFiles:    [],
+  dueItems:        [],
+  questionItems:   [],
+  escalatedItems:  [],
+  rvResolved:      { changes: [], comments: [], files: [] },
+  rvFilter:        'all',   // type filter chip across the dashboard
+  rvPrevOpen:      false,   // Previous/resolved section collapsed by default
+  rvPrevAll:       false,   // false = last 30 days, true = everything
+  rvFlatQueue:     [],      // band-ordered items, built fresh each dashboard render
+  rvQueue:         null,    // active Next-item walk, or null when not navigating from the dashboard
+  rvQueuePos:      -1,
   user:            null,  // S15 — {name, email, bookmarks, favorites} once identity is
                           // set (S30 normalizeUserBookmarkData fills in the bookmarks/
                           // favorites shape); null before the first-run prompt is answered
@@ -2965,6 +3128,10 @@ function resetVaultState(fresh) {
   // the old vault would sit in the header looking authoritative.
   state.reviewChanges = [];
   state.cmtOpenCount  = 0;
+  // S45 — same reasoning one level down. The scan cache is keyed by path, and
+  // two vaults can hold the same path with different contents, so a stale
+  // entry would be reused as though it described the vault just opened.
+  clearScanCache();
 
   state.activeUrl     = null;
   state.activeName    = null;
@@ -4024,6 +4191,14 @@ function wbDelegatedClick(e) {
   const wnOpen = e.target.closest('[data-wb-wnopen]');
   if (wnOpen) { e.preventDefault(); e.stopPropagation(); wnOpenEntry(wnOpen.dataset.wbWnopen, wnOpen.dataset.wbWnname); return; }
 
+  // Usage pane (S45). "Show more" is tested before the row, same nested-first
+  // rule as the What's New section buttons above — the button sits inside the
+  // section, and a row match would swallow it.
+  const uMore = e.target.closest('[data-wb-usage-more]');
+  if (uMore) { e.preventDefault(); e.stopPropagation(); usageToggleSection(uMore.dataset.wbUsageMore); return; }
+  const uOpen = e.target.closest('[data-wb-usage-open]');
+  if (uOpen) { e.preventDefault(); e.stopPropagation(); usageOpenPath(uOpen.dataset.wbUsageOpen); return; }
+
   // [!copy] Copy button (v0.19.2). First branch on purpose: it sits
   // inside a callout label, which sits inside the reader, and a stray
   // match further down would swallow the click before it got here.
@@ -4873,9 +5048,38 @@ function renderSingleBlock(block, seenIds) {
       if (!rows.length) return '';
       const [headerRow, ...bodyRows] = rows;
       const cells = row => splitTableCells(row);
+
+      // Width-padding rows (0.29.1). Obsidian's table editor sizes a
+      // column to its widest cell, so a row of periods is how you make a
+      // narrow column wide there. That row is noise in the reader — but
+      // it is HIDDEN, not dropped. The cells still lay out (see
+      // .md-table-spacer), so the widths the padding was written for
+      // carry over. Removing the row would delete the only effect it
+      // was ever meant to have.
+      //
+      // Whole-row test, deliberately: at least one cell of 5+ periods
+      // and NOTHING else, every other cell empty or periods-only. A row
+      // reading "Waiting..... | pending" is content and stays, which a
+      // per-cell test would have silently eaten. Separator rows are
+      // already gone by here, so dashes never reach this.
+      const isSpacerRow = l => {
+        const parts = cells(l);
+        if (!parts.length) return false;
+        let padded = false;
+        for (const c of parts) {
+          if (c === '') continue;
+          if (!/^\.+$/.test(c)) return false;
+          if (c.length >= 5) padded = true;
+        }
+        return padded;
+      };
+
       const thead = `<thead><tr>${cells(headerRow).map(h => `<th>${renderInline(h)}</th>`).join('')}</tr></thead>`;
       const tbody = bodyRows.length
-        ? `<tbody>${bodyRows.map(r => `<tr>${cells(r).map(c => `<td>${renderInline(c)}</td>`).join('')}</tr>`).join('')}</tbody>`
+        ? `<tbody>${bodyRows.map(r => {
+            const attr = isSpacerRow(r) ? ' class="md-table-spacer" aria-hidden="true"' : '';
+            return `<tr${attr}>${cells(r).map(c => `<td>${renderInline(c)}</td>`).join('')}</tr>`;
+          }).join('')}</tbody>`
         : '';
       return `<div class="md-table-wrap"><table class="md-table">${thead}${tbody}</table></div>`;
     }
@@ -5375,6 +5579,9 @@ async function openFile(url, name) {
     state.wnPending    = url;
     state.wnPendingSec = openFile._pendingSecUid || null;
     openFile._pendingSecUid = null;
+    // S45 — the same point, for the same reason: the page rendered, so it
+    // counts as read. A file that failed to load never reaches here.
+    usageNoteOpen(url);
 
     // Register this file's outgoing links so other files can show it as a backlink
     extractAndRegisterLinks(text, url);
@@ -6481,6 +6688,15 @@ async function saveEdit() {
     await ensureZSystemDir(changesUrl);
     await spWriteFile(changesUrl, (prevLog ? prevLog.replace(/\s*$/, '') + '\n\n' : '') + entry + '\n');
 
+    // S15 — move the audit baseline to what we just wrote. Without this,
+    // the app's own save would come back on the next scan as an unexplained
+    // vault change and sit next to its own .changes.md entry, which is the
+    // same file in the queue twice. This is not an approval of the CONTENT:
+    // the .changes.md entry still needs Accept or Reject. It records that
+    // this text arrived through the app, so the audit has nothing to say
+    // about it. Best-effort — a failure here must never lose the save.
+    try { await auditRecord(state.editUrl, flagged); } catch (_) {}
+
     const url = state.editUrl, name = state.editName;
     exitEditMode();
     openFile(url, name); // re-render the saved version
@@ -6566,9 +6782,149 @@ function collectFolders(list = vaultFolders, depth = 0, out = []) {
 
 // One pass over the sidecars: open-comment count (always) + unreviewed
 // change entries (only when review tools are on).
-let scanBusy = false;
+//
+// Session 42 — the review dashboard's six item types ride this same sweep.
+// Every array below is re-derived here, every scan, from vault-native
+// truth (frontmatter + sidecars already being read for review/audit) —
+// no new store, nothing to keep in sync, nothing to migrate. The two
+// types that need a shared baseline (changed outside the app, new
+// section) are NOT here — they wait for Section 15's audit log.
+// ── S45 — the scan stopped re-reading a vault that had not moved ──
+//
+// Until 0.30.0 this swept the WHOLE vault on every call, and one of its
+// callers is the visibilitychange handler: every alt-tab back into the app
+// re-read every note in full, attempted both sidecars per note, and (at
+// Contributor+) took one hash of the note plus one per heading. Correct, and
+// unaffordable the moment the vault gets big or the notes get long — which
+// is the direction this vault is going.
+//
+// The fix is not new: wnBuildIndex() has done the same thing since 0.25.0.
+// Enumeration already carries each file's modified stamp and size for free,
+// so a file whose stamp pair is unchanged cannot have changed, and everything
+// this sweep derives from it is still true. Same gate, same two fields, same
+// accepted limitation — a sync tool that rewrites content without touching
+// either field would be missed here exactly as it would be missed there.
+//
+// What is cached is the PARSED INPUT per file (frontmatter, comment list,
+// change list, hash, section hashes), never the derived rows. The rows are
+// rebuilt from cache on every scan, because they also depend on the audit
+// baseline and on tier, and a cache that had to be invalidated on those too
+// would be the kind of second source of truth this project keeps refusing.
+const scanCache = new Map(); // url → { stamp, fm, cmts, ch, hash, sections, present }
+
+function clearScanCache() { scanCache.clear(); auditBaseCache = { sig: null, base: null }; }
+
+// Bounded fan-out. The old sweep was Promise.all over every file, which on a
+// 1000-note vault asks the file system for three thousand things at once;
+// the browser queues them anyway, and the queue is what makes the tab
+// unresponsive rather than merely busy. Eight at a time keeps the pipe full
+// without handing it a burst it cannot schedule.
+const SCAN_POOL = 8;
+async function runPooled(items, limit, worker) {
+  let i = 0;
+  const lanes = new Array(Math.min(limit, items.length)).fill(0).map(async () => {
+    for (;;) {
+      const idx = i++;
+      if (idx >= items.length) return;
+      await worker(items[idx]);
+    }
+  });
+  await Promise.all(lanes);
+}
+
+// One directory listing per zSystem folder, instead of two speculative reads
+// per note. Before this, a vault of 400 notes with a dozen comment files threw
+// and swallowed roughly 800 not-found errors on every single scan — invisible,
+// because each one is caught, and not free. The listing also yields each
+// sidecar's own stamp pair, which is what lets a comment added from another
+// machine invalidate that note's cache entry without reading anything.
+//
+// Local mode only. The SharePoint path has no cheap per-folder stat, so it
+// returns null and every caller below falls back to the original
+// read-and-see behaviour, cache included. That path is dormant, and making it
+// fast on a guess is how a dormant path acquires a bug nobody can reproduce.
+async function scanSidecarStats() {
+  if (!LOCAL.on) return null;
+  const out    = new Map();
+  const dirIds = new Set(['']);
+  Object.keys(state.folderFiles).forEach(id => {
+    if ((state.folderFiles[id] || []).length) dirIds.add(id);
+  });
+  await Promise.all([...dirIds].map(async id => {
+    const dirId = id ? `${id}/zSystem` : 'zSystem';
+    let dir;
+    try { dir = await localGetDir(dirId); }
+    catch (_) { return; } // no zSystem here — every sidecar in this folder is absent
+    const base = `local:/${dirId}`;
+    try {
+      for await (const [name, h] of dir.entries()) {
+        if (h.kind !== 'file') continue;
+        if (!name.endsWith('.comments.md') && !name.endsWith('.changes.md')) continue;
+        const st = await localStat(h);
+        out.set(`${base}/${name}`, `${st.modified || ''}:${st.size == null ? '' : st.size}`);
+      }
+    } catch (_) { /* listing failed — treated as "no sidecars here" */ }
+  }));
+  return out;
+}
+
+// Everything expensive about one file, done once and reused until one of the
+// four stamps under it moves. Tier is in the stamp because the hash and the
+// section hashes are only taken at Contributor+; without it, unlocking a tier
+// would reuse entries that never had them. The cost of including it is one
+// slow scan immediately after a tier change, which is the correct price.
+async function scanReadFile(f, sideStats, auditOn) {
+  const cUrl  = commentsUrlFor(f.url);
+  const chUrl = changesUrlFor(f.url);
+  const cSt   = sideStats ? (sideStats.get(cUrl)  || '') : null;
+  const chSt  = sideStats ? (sideStats.get(chUrl) || '') : null;
+
+  if (sideStats) {
+    const stamp = [f.modified || '', f.size == null ? '' : f.size, cSt, chSt, auditOn ? 'A' : 'U'].join('|');
+    const hit = scanCache.get(f.url);
+    if (hit && hit.stamp === stamp) return hit;
+    const rec = await scanBuildRec(f, cUrl, chUrl, auditOn, cSt !== '', chSt !== '');
+    rec.stamp = stamp;
+    scanCache.set(f.url, rec);
+    return rec;
+  }
+  return await scanBuildRec(f, cUrl, chUrl, auditOn, true, true);
+}
+
+async function scanBuildRec(f, cUrl, chUrl, auditOn, cMayExist, chMayExist) {
+  const rec = { stamp: '', fm: null, cmts: [], ch: [], hash: null, sections: null, present: false };
+  if (cMayExist) {
+    const cTxt = await readVaultFileOrNull(cUrl);
+    if (cTxt) rec.cmts = parseComments(cTxt);
+  }
+  if (auditOn && chMayExist) {
+    const chTxt = await readVaultFileOrNull(chUrl);
+    if (chTxt) rec.ch = parseChanges(chTxt);
+  }
+  const mainTxt = await readVaultFileOrNull(f.url);
+  if (mainTxt !== null) {
+    rec.present  = true;
+    rec.fm       = parseFm(mainTxt);
+    if (auditOn) {
+      rec.hash     = await auditHash(mainTxt);
+      rec.sections = await auditSections(mainTxt);
+    }
+  }
+  return rec;
+}
+
+let scanBusy  = false;
+let scanAgain = false;
+let auditSeedInFlight = false;
+
 async function scanBadges() {
-  if (scanBusy) return;
+  // A scan asked for while one is running used to be dropped on the floor.
+  // The request is almost always "something just changed" — a save, an
+  // approval, a tab regaining focus — so dropping it leaves the badges
+  // describing the vault as it was before the change that prompted the call.
+  // One trailing re-run collapses any number of dropped requests into the one
+  // scan that actually needs to happen.
+  if (scanBusy) { scanAgain = true; return; }
   scanBusy = true;
   try {
     await loadAllFolders();
@@ -6577,26 +6933,123 @@ async function scanBadges() {
     const review = [];
     const audit  = [];
     const flags  = {}; // S35 — What's New must-read/onboarding, filled below
-    await Promise.all(files.map(async f => {
-      const cTxt = await readVaultFileOrNull(commentsUrlFor(f.url));
-      if (cTxt) openCmts += parseComments(cTxt).filter(c => c.status === 'open').length;
-      if (reviewAllowed()) {
-        const chUrl = changesUrlFor(f.url);
-        const chTxt = await readVaultFileOrNull(chUrl);
-        if (chTxt) {
-          const entries    = parseChanges(chTxt);
-          const unreviewed = entries.filter(e => e.reviewed === 'no').length; // rejected = resolved (reverted)
-          if (unreviewed) review.push({ name: displayFileName(f.name), url: f.url, changesUrl: chUrl, entries, unreviewed });
+
+    const missingProps     = [];
+    const flagged          = [];
+    const due              = [];
+    const questions        = [];
+    const escalations      = [];
+    const resolvedChanges  = []; // content-change entries with reviewed !== 'no'
+    const resolvedComments = []; // closed comments, any type
+    const reviewedFiles    = []; // status: Reviewed — covers the new-file/missing-props/flagged/due resolution path
+    const vaultChanges     = []; // S15 — edited in Obsidian, needs a decision
+    const newSections      = []; // S15 — additive only, needs acknowledgement
+    const today = new Date().toISOString().slice(0, 10);
+
+    // S15 — replay the audit logs once per scan, before the file sweep.
+    // Below Contributor this is skipped entirely: the rows are not rendered
+    // at that tier, so there is no reason to read the logs either.
+    const auditOn   = reviewAllowed();
+    const auditBase = auditOn ? await auditLoadBaseline() : {};
+    const auditNow  = {}; // path → { hash, sections }, this scan's truth
+
+    // S45 — the sweep now runs over cached per-file records, eight lanes at a
+    // time. A file whose stamps have not moved contributes exactly what it
+    // contributed last scan without a single read. Everything below this line
+    // is the same derivation it always was; only where the inputs come from
+    // changed.
+    const sideStats = await scanSidecarStats();
+
+    await runPooled(files, SCAN_POOL, async f => {
+      let hasUnreviewedChange = false;
+      let hasVaultChange      = false;
+      const commentsUrl = commentsUrlFor(f.url);
+      const rec = await scanReadFile(f, sideStats, auditOn);
+
+      rec.cmts.forEach((c, ci) => {
+        if (c.status === 'open') {
+          openCmts++;
+          if (c.type === 'question')   questions.push({ name: displayFileName(f.name), url: f.url, commentsUrl, idx: ci, comment: c });
+          if (c.type === 'escalation') escalations.push({ name: displayFileName(f.name), url: f.url, commentsUrl, idx: ci, comment: c });
+        } else if (c.status === 'closed') {
+          resolvedComments.push({ name: displayFileName(f.name), url: f.url, ts: c.closedTs || c.ts, comment: c });
         }
+      });
+      if (reviewAllowed() && rec.ch.length) {
+        const chUrl      = changesUrlFor(f.url);
+        const entries    = rec.ch;
+        const unreviewed = entries.filter(e => e.reviewed === 'no').length; // rejected = resolved (reverted)
+        if (unreviewed) { review.push({ name: displayFileName(f.name), url: f.url, changesUrl: chUrl, entries, unreviewed }); hasUnreviewedChange = true; }
+        entries.forEach(e => {
+          if (e.reviewed !== 'no') resolvedChanges.push({ name: displayFileName(f.name), url: f.url, ts: e.resolvedTs || e.ts, entry: e });
+        });
       }
       // File audit — WikiBase is the only writer of the "status" frontmatter
       // key (new-file creation, editor saves, the Properties flyout). No
       // status key = never touched by the app = a new file dropped in
       // directly. Read-only: this only lists files, never writes anything.
-      const mainTxt = await readVaultFileOrNull(f.url);
-      if (mainTxt !== null) {
-        const fm = parseFm(mainTxt);
-        if (!fm.status) audit.push({ name: displayFileName(f.name), url: f.url });
+      if (rec.present) {
+        const fm = rec.fm;
+        // S15 — hash every file, stamped or not. The delta below only runs
+        // on stamped files, but the FIRST RUN seeds the whole vault, and a
+        // file left out of the seed would arrive looking edited the day
+        // someone finally stamps it.
+        if (auditOn) {
+          auditNow[auditPathKey(f.url)] = { hash: rec.hash, sections: rec.sections || [] };
+        }
+        if (!fm.status) {
+          audit.push({ name: displayFileName(f.name), url: f.url });
+        } else if (reviewAllowed()) {
+          // Session 42 fields are Contributor+ data, same gate as content
+          // changes above — not rendered below Contributor, so no reason to
+          // compute them below Contributor either.
+          //
+          // A file the app has already touched (has a status key). Required
+          // keys missing → Missing properties, and it never also becomes a
+          // New file or a Flagged item — one row per file per cause.
+          const reqMissing = REQUIRED_PROPS.filter(k => !(k in fm));
+          const optMissing = OPTIONAL_PROPS.filter(k => !(k in fm));
+          if (reqMissing.length) {
+            missingProps.push({ name: displayFileName(f.name), url: f.url, required: reqMissing, optional: optMissing });
+          } else {
+            const st  = (fm.status   || '').toLowerCase();
+            const rev = (fm.reviewed || '').toLowerCase();
+            // S15 — vault audit. Only files the app has already stamped are
+            // audited: an unstamped file is already in the queue as a New
+            // file, and listing it twice would break one-file-one-cause.
+            // The file hash is computed from text scanBadges already has in
+            // hand, so this costs a hash, not a read.
+            const key = auditPathKey(f.url);
+            const delta = auditDelta(auditNow[key], auditBase[key]);
+            if (delta) {
+              const row = {
+                name: displayFileName(f.name), url: f.url, delta,
+                base: auditBase[key],
+                counts: { added: delta.added.length, modified: delta.modified.length, removed: delta.removed.length },
+              };
+              // Additive-only goes to band 2. Anything that changed or lost
+              // text goes to band 1, including a preamble edit that names no
+              // section at all — "changed but nothing named" is still changed.
+              if (auditIsAdditive(delta)) { newSections.push(row); hasVaultChange = true; }
+              else                        { vaultChanges.push(row); hasVaultChange = true; }
+            }
+            // Flagged only if it isn't already a content-change row — the
+            // same in-app save sets both status:"Needs Review" and the
+            // .changes.md entry, and Accept/Reject is the sharper action.
+            // Same exclusion now applies to a vault change, for the same reason.
+            if (!hasUnreviewedChange && !hasVaultChange && (st === 'needs review' || rev === 'false')) {
+              flagged.push({ name: displayFileName(f.name), url: f.url, status: fm.status || '', reviewed: fm.reviewed || '' });
+            }
+            if (st === 'reviewed') {
+              reviewedFiles.push({ name: displayFileName(f.name), url: f.url, ts: f.modified || '' });
+            }
+          }
+          // Due is independent of the chain above — a reviewed policy page
+          // can still be due again, and should still surface.
+          if (fm.due && fm.due < today) {
+            due.push({ name: displayFileName(f.name), url: f.url, due: fm.due });
+          }
+        }
         // S35 — What's New reads its two frontmatter keys off the sweep
         // that is already reading every file for the audit. A second
         // vault-wide read for two booleans would double the boot cost of
@@ -6609,14 +7062,60 @@ async function scanBadges() {
           onboarding: onb === 'true' || onb === 'yes',
         };
       }
-    }));
+    });
+
+    // A deleted note must not keep its entry alive. Without this the cache is
+    // the one structure in the app that only ever grows, and it would hold a
+    // renamed file's old record for as long as the tab stayed open.
+    if (sideStats) {
+      const live = new Set(files.map(f => f.url));
+      [...scanCache.keys()].forEach(u => { if (!live.has(u)) scanCache.delete(u); });
+    }
+    // S15 — first run seeds the whole vault as approved, same call as
+    // What's New. Without it day one opens with every note flagged, which
+    // carries no information. Seeded once per VAULT, not per device: the
+    // test is whether any log file exists at all, so the second person to
+    // open the app finds logs already there and re-seeds nothing.
+    if (auditOn && !state.auditSeeded && !auditSeedInFlight && Object.keys(auditNow).length) {
+      auditSeedInFlight = true;
+      const ts = new Date().toISOString().slice(0, 23);
+      try {
+        await auditAppend(Object.keys(auditNow).map(p => ({
+          ts, path: p, hash: auditNow[p].hash || 'nohash',
+          sections: auditSectionsField(auditNow[p].sections),
+        })));
+        Object.keys(auditNow).forEach(p => {
+          state.auditBaseline[p] = { hash: auditNow[p].hash || 'nohash', ts, by: auditSlug(auditMe()), sections: auditNow[p].sections };
+        });
+        state.auditSeeded = true;
+      } catch (_) { /* read-only vault or below tier — stay unseeded, show nothing */ }
+      auditSeedInFlight = false;
+      vaultChanges.length = 0;   // a seed run has, by definition, nothing to review
+      newSections.length  = 0;
+    }
+
     state.cmtOpenCount   = openCmts;
+    state.vaultChanges   = vaultChanges;
+    state.newSections    = newSections;
     state.reviewChanges  = review;
     state.unauditedFiles = audit;
     state.wnFlags        = flags;
+    state.missingProps   = missingProps;
+    state.flaggedFiles   = flagged;
+    state.dueItems       = due;
+    state.questionItems  = questions;
+    state.escalatedItems = escalations;
+    state.rvResolved     = { changes: resolvedChanges, comments: resolvedComments, files: reviewedFiles };
     wnBuildEntries(); // flags changed, so must-read grouping may have too
     updateBadges();
-  } catch (_) {} finally { scanBusy = false; }
+  } catch (_) {} finally {
+    scanBusy = false;
+    // The trailing run is deliberately not awaited and deliberately fired
+    // after the flag clears, so it re-enters cleanly rather than recursing
+    // inside the guard. With the cache in place it is nearly free anyway:
+    // a repeat scan over a vault that has not moved reads nothing.
+    if (scanAgain) { scanAgain = false; scanBadges(); }
+  }
 }
 
 function updateBadges() {
@@ -6630,10 +7129,17 @@ function updateBadges() {
   // and only THEN write counts into whatever the render produced. Writing
   // first would set text on a node the render is about to throw away, and
   // reading a count element without a null guard would throw outright at User.
-  if (!reviewAllowed()) {
-    const side = dockOf('review');
-    if (side) { state.docks[side].splice(state.docks[side].indexOf('review'), 1); persistDocks(); }
-  }
+  // S45 — this used to name 'review' directly. It now asks the registry, so a
+  // tool added at any rung is dropped on the way down without a second edit
+  // here. Usage is the first tool this mattered for: it sits at Administrator,
+  // and a hard-coded reviewAllowed() check would have left it docked for a
+  // Contributor with nothing to render into it.
+  let dropped = false;
+  WB_TOOLS.filter(t => !toolVisible(t)).forEach(t => {
+    const side = dockOf(t.id);
+    if (side) { state.docks[side].splice(state.docks[side].indexOf(t.id), 1); dropped = true; }
+  });
+  if (dropped) persistDocks();
   renderDocks();
 
   const n = state.cmtOpenCount;
@@ -6641,7 +7147,7 @@ function updateBadges() {
     const el = $(id);
     if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
   });
-  const total = state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0);
+  const total = reviewDashboardTotal(); // Session 42 — all six item types, not just content changes
   const rc = $('review-count');
   if (rc) {
     rc.textContent   = total;
@@ -7148,9 +7654,15 @@ function wnCommitPending() {
 // every session would stay unseen forever — the one page you definitely
 // read. pagehide fires on tab close, navigation and mobile backgrounding,
 // where beforeunload is unreliable.
-window.addEventListener('pagehide', wnCommitPending);
+window.addEventListener('pagehide', () => { wnCommitPending(); usageCommitPending(); usageFlush(); });
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') wnCommitPending();
+  if (document.visibilityState !== 'hidden') return;
+  wnCommitPending();
+  // S45 — leaving the tab is the flush point. Not per page open: that would
+  // have OneDrive syncing a small file every few seconds. The page being read
+  // is committed first, so the sitting you are ending is included in it.
+  usageCommitPending();
+  usageFlush();
 });
 
 // Mark-all skips must-reads and says what it skipped. Jayson's call: an
@@ -7398,6 +7910,703 @@ function wnOpenSection(url, file, uid, title) {
   openFile(url, file);
 }
 
+// ================================================================
+// ================================================================
+// Section 15 — Vault audit (Session 44)
+//
+// Anyone can edit any note in Obsidian. This surfaces those edits for a
+// Contributor to sign off, and records the sign-off permanently.
+//
+// APPROVE MEANS ACKNOWLEDGED, NOT GATED. Pre-hoc gating is impossible in
+// a file-sync architecture, so this is post-hoc: a competent person read
+// the change. Nothing here ever writes a note. Flag writes an ordinary
+// comment; there is no revert, because reverting would overwrite work
+// sitting in someone's open Obsidian window while OneDrive syncs under it.
+// The existing reject-revert path stays scoped to in-app edits, where the
+// app still holds the before-text it wrote.
+//
+// NO SHARED MUTABLE INDEX. Each approver appends to their own
+// zSystem/audit/YYYY-MM-<user>.md and nothing is ever rewritten, so
+// OneDrive has nothing to produce a conflict copy of. The approved
+// baseline for a note is its most recent row across every approver's log,
+// derived by replay on each scan. Same per-person-file pattern already
+// locked for analytics, for the same reason.
+//
+// WHY SECTION GRANULARITY, NOT LINE. The log stores hashes, not content,
+// so the app has no copy of the previous text and cannot produce a real
+// line diff. It can name which SECTIONS were added, changed or removed,
+// which is what the in-file marking shows. For the exact wording that
+// changed, the app links out to OneDrive version history — the same call
+// as Session 37. Storing snapshots to fake a line diff would mean keeping
+// a second copy of the vault, which is the thing this architecture exists
+// to avoid. In-app edits keep their real line diffs; those come from
+// .changes.md, where the app wrote the before-text itself.
+//
+// The FILE hash is the authority on whether anything changed; section
+// hashes are truncated to 6 hex and only decide which section gets named.
+// A section-hash collision can mislabel a change, never hide one.
+// ================================================================
+
+const AUDIT_SUBDIR = 'zSystem/audit';
+const AUDIT_HEAD = [
+  '# WikiBase audit log',
+  '',
+  '<!-- Append-only. One row per approval. WikiBase never rewrites a row and',
+  '     never edits the notes themselves. The approved baseline for a note is',
+  '     its most recent row across every approver\'s log. Delete this file and',
+  '     those approvals are gone; nothing else breaks. -->',
+  '',
+  '| approved | path | hash | sections |',
+  '|---|---|---|---|',
+].join('\n');
+
+function auditDirUrl()  { return LOCAL.on ? AUDIT_SUBDIR : `${CONFIG.vaultRelPath}/${AUDIT_SUBDIR}`; }
+function auditSlug(s)   { return String(s || 'unknown').toLowerCase().replace(/[^a-z0-9._-]+/g, '-'); }
+function auditMonth(d)  { return (d || new Date()).toISOString().slice(0, 7); }
+function auditMe()      { return (state.user && state.user.email) || CONFIG.authorName || 'unknown'; }
+function auditLogUrl(who, month) { return `${auditDirUrl()}/${month || auditMonth()}-${auditSlug(who)}.md`; }
+
+// Vault-relative, so a log written in local mode still resolves if the
+// vault is ever served from SharePoint. Never store the mode's own url.
+function auditPathKey(url) {
+  let p = String(url || '');
+  if (p.startsWith('local:/')) return p.slice(7);
+  const root = CONFIG.vaultRelPath || '';
+  if (root && p.startsWith(root + '/')) return p.slice(root.length + 1);
+  return p;
+}
+
+// Frontmatter is stripped before hashing. WikiBase writes its own keys
+// (status, must-read, onboarding) into pages it touches, so leaving it in
+// would flag pages nobody edited — same reasoning as What's New.
+function auditStripFm(raw) {
+  const t = String(raw == null ? '' : raw);
+  const m = t.match(/^---\r?\n[\s\S]*?\r?\n---[ \t]*(\r?\n|$)/);
+  return m ? t.slice(m[0].length) : t;
+}
+// The `await` is not redundant. change-detection.test.js counts awaited
+// hash call sites to catch anything that starts deciding "changed" on its
+// own terms; a bare return would hide this one from that guard. Writing
+// the keyword is the only reason it is here. (Phrased without the literal
+// token, because the counter would match this comment too.)
+async function auditHash(raw) { return await wnHash(auditStripFm(raw).trim()); }
+
+// [[uid, hash6], …] in document order. Order matters: it is how a removed
+// section's old position is found again when drawing the ghost row.
+async function auditSections(raw) {
+  const out = [];
+  for (const s of wnSplitSections(raw)) {
+    if (!s.uid) continue;
+    const h = await wnHash(s.body.join('\n').trim());
+    out.push([s.uid, String(h || '000000').slice(0, 6)]);
+  }
+  return out;
+}
+function auditSectionsField(list) { return (list || []).map(p => `${p[0]}:${p[1]}`).join(' '); }
+function auditParseSections(field) {
+  return String(field || '').trim().split(/\s+/).filter(Boolean).map(tok => {
+    const i = tok.lastIndexOf(':');
+    return i < 0 ? [tok, ''] : [tok.slice(0, i), tok.slice(i + 1)];
+  });
+}
+
+// Tolerant on purpose: a human may open this file in Obsidian, and a
+// stray line must not void the log. Anything that is not a data row is
+// skipped rather than throwing.
+function auditParseLog(txt) {
+  const rows = [];
+  String(txt || '').split(/\r?\n/).forEach(line => {
+    if (!/^\s*\|/.test(line)) return;
+    const cells = line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(c => c.trim());
+    if (cells.length < 3) return;
+    if (!/^\d{4}-\d{2}-\d{2}T/.test(cells[0])) return; // header and |---| separator both fail this
+    rows.push({ ts: cells[0], path: cells[1], hash: cells[2], sections: cells[3] || '' });
+  });
+  return rows;
+}
+
+let auditDirReady = false;
+async function ensureAuditDir() {
+  if (auditDirReady) return;
+  if (!LOCAL.on) {
+    try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (_) { /* exists */ }
+    try { await spCreateFolder(`${CONFIG.vaultRelPath}/zSystem`, 'audit'); } catch (_) { /* exists */ }
+  }
+  // Local mode needs nothing: localWriteFile creates intermediate dirs.
+  auditDirReady = true;
+}
+
+async function auditListLogs() {
+  const out = [];
+  try {
+    if (LOCAL.on) {
+      const dir = await localGetDir(AUDIT_SUBDIR);
+      for await (const [name, h] of dir.entries()) {
+        if (h.kind === 'file' && name.endsWith('.md')) {
+          // S45 — the stamp pair rides along so the replay below can tell
+          // whether anything was approved since it last ran. It costs one
+          // handle call per log file and saves reading all of them.
+          const st = await localStat(h);
+          out.push({ name, url: `local:/${AUDIT_SUBDIR}/${name}`, modified: st.modified, size: st.size });
+        }
+      }
+    } else {
+      const data = await spFetch(
+        `${CONFIG.siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(auditDirUrl())}')/Files?$select=Name,ServerRelativeUrl`
+      );
+      (data.value || []).forEach(f => {
+        if (f.Name.endsWith('.md')) out.push({ name: f.Name, url: f.ServerRelativeUrl });
+      });
+    }
+  } catch (_) { /* folder absent = never seeded, which is a valid state */ }
+  return out;
+}
+
+// S45 — the replay is cached against the log folder's own stamps.
+//
+// This ran on every scan, reading every approver's every monthly file, one
+// after another. The folder grows by one file per person per month and is
+// never pruned, so the cost of knowing "what was last approved" climbed for
+// the life of the vault while the answer changed only when somebody approved
+// something. The signature below is the folder's whole state: a new log, a
+// grown log, or a log touched by another machine all change it.
+//
+// Local mode only, again. Without per-file stamps the signature cannot be
+// built, so the SharePoint path gets a signature that never matches and keeps
+// its original behaviour.
+let auditBaseCache = { sig: null, base: null };
+function auditLogsSig(logs) {
+  if (!LOCAL.on) return null;
+  return logs.map(f => `${f.name}:${f.modified || ''}:${f.size == null ? '' : f.size}`).sort().join('|');
+}
+
+// Replay. Latest row per path wins, across every approver's file.
+async function auditLoadBaseline() {
+  const logs = await auditListLogs();
+  const sig  = auditLogsSig(logs);
+  if (sig !== null && auditBaseCache.sig === sig) return auditBaseCache.base;
+  const base = {};
+  for (const f of logs) {
+    const by  = f.name.replace(/\.md$/, '').replace(/^\d{4}-\d{2}-/, '');
+    const txt = await readVaultFileOrNull(f.url);
+    if (!txt) continue;
+    // >= not >, and it matters. Timestamps carry milliseconds precisely so
+    // that two approvals of the same file rarely collide, but they still
+    // can — and the log is append-only, so within one file document order
+    // IS chronological. On a tie the LATER row must win; with > the seed
+    // row beat an approval written moments after it and the file stayed
+    // in the queue forever. Found by the suite, not by reasoning.
+    auditParseLog(txt).forEach(r => {
+      const prev = base[r.path];
+      if (!prev || r.ts >= prev.ts) {
+        base[r.path] = { hash: r.hash, ts: r.ts, by, sections: auditParseSections(r.sections) };
+      }
+    });
+  }
+  state.auditBaseline = base;
+  state.auditSeeded   = logs.length > 0;
+  auditBaseCache = { sig, base };
+  return base;
+}
+
+// The ONLY writer. Appends rows to this user's log for this month and
+// never touches any other file. Refuses below Contributor.
+async function auditAppend(rows) {
+  if (!rows || !rows.length) return;
+  if (!reviewAllowed()) throw new Error('Contributor tier required to approve');
+  const url = auditLogUrl(auditMe());
+  const existing = await readVaultFileOrNull(url);
+  const body = rows.map(r => `| ${r.ts} | ${r.path} | ${r.hash} | ${r.sections} |`).join('\n');
+  const next = existing
+    ? existing.replace(/\s*$/, '') + '\n' + body + '\n'
+    : AUDIT_HEAD + '\n' + body + '\n';
+  await ensureAuditDir();
+  await spWriteFile(url, next);
+  // Explicit, even though the folder's stamps would change anyway in local
+  // mode. An approval is the one event whose whole purpose is to move the
+  // baseline, and leaving that to a stat comparison is how a cache acquires
+  // a one-scan lag that only shows up when someone is watching.
+  auditBaseCache = { sig: null, base: null };
+}
+
+// Record one file at its current content. Called on approval, and on the
+// app's own saves — the app knows the text it just wrote is what that
+// person intended, so an in-app save is self-evidently acknowledged.
+async function auditRecord(url, rawText) {
+  const raw = rawText != null ? rawText : await readVaultFileOrNull(url);
+  if (raw == null) return;
+  const ts   = new Date().toISOString().slice(0, 23); // ms — see auditLoadBaseline's tie rule
+  const key  = auditPathKey(url);
+  const h    = await auditHash(raw);
+  const secs = await auditSections(raw);
+  await auditAppend([{ ts, path: key, hash: h || 'nohash', sections: auditSectionsField(secs) }]);
+  // Keep the in-memory baseline current so the row clears without a re-read.
+  state.auditBaseline[key] = { hash: h || 'nohash', ts, by: auditSlug(auditMe()), sections: secs };
+}
+
+// Unchanged → null. Otherwise which sections moved. A change confined to
+// the preamble (text above the first heading) names no section, which is
+// why the caller must treat "changed but nothing named" as a real change.
+function auditDelta(now, base) {
+  if (!base) return null;                    // never baselined — not an audit item
+  if (base.hash === now.hash) return null;
+  const oldMap = new Map(base.sections || []);
+  const newMap = new Map(now.sections  || []);
+  const added = [], modified = [], removed = [];
+  (now.sections || []).forEach(p => {
+    if (!oldMap.has(p[0])) added.push(p[0]);
+    else if (oldMap.get(p[0]) !== p[1]) modified.push(p[0]);
+  });
+  (base.sections || []).forEach(p => { if (!newMap.has(p[0])) removed.push(p[0]); });
+  return { added, modified, removed };
+}
+
+// A file whose ONLY delta is new headings is additive: nothing was
+// changed and nothing was lost, so it needs acknowledgement rather than a
+// decision. Everything else needs reading.
+function auditIsAdditive(d) {
+  return !!d && !d.modified.length && !d.removed.length && d.added.length > 0;
+}
+
+// Slug back to something readable. The log stores heading ids, not
+// titles, so a removed section can only be named by its id. Honest and
+// cheap; the alternative was a second field carrying every title.
+function auditSectionLabel(uid) {
+  return String(uid || '').replace(/^h-/, '').replace(/-/g, ' ').trim() || 'untitled section';
+}
+
+// ── Usage (S45 / 0.32.0) ──────────────────────────────────────────
+//
+// Which pages get read, and which never do. Four decisions, all Jayson's,
+// all locked before a line was written — they are recorded here because each
+// one closed off an alternative that a later session would otherwise re-open
+// in good faith:
+//
+//   1. ONE ROW PER PAGE PER DAY, not one per open. A row per open is the
+//      naive shape and it grows with traffic: forty pages a day, twenty days,
+//      ten people is roughly six megabytes of log a year, all of which the
+//      Usage view would have to replay. Per day bounds the rows by DISTINCT
+//      pages read and answers every question the view actually asks.
+//   2. ADMINISTRATOR ONLY to view. Not Contributor.
+//   3. FILES, NEVER PEOPLE. This is a file audit, not a user audit. The view
+//      shows no names, no per-person counts, and offers no way to rank staff.
+//      Attribution exists in the file names only, and only because per-person
+//      files are what stop OneDrive making conflict copies.
+//   4. Collection runs at EVERY tier. Gating collection to Administrator
+//      would make the numbers describe one person's reading and call it the
+//      team's.
+//
+// The write path deliberately mirrors the audit log: a hidden folder, one
+// file per person per month, so there is never a shared mutable file for two
+// machines to fight over. It differs in one way, and the reason matters —
+// the audit log is append-only, this one is REWRITTEN on each flush. That is
+// safe here precisely because a usage file has exactly one writer (each staff
+// member uses one work PC), and rewriting is what lets same-day rows merge
+// into one instead of accumulating.
+const USAGE_SUBDIR   = 'zSystem/Analytics';
+const USAGE_BUF_KEY  = 'wb_usage_buf';
+// A tab left open over lunch is not forty minutes of reading. Capping the
+// dwell per visit keeps one forgotten tab from drowning out a week of real
+// use. Opens are the honest signal; seconds are the supporting one.
+const USAGE_MAX_DWELL = 1800;
+const USAGE_HEAD = [
+  '<!-- WikiBase usage log. One row per page per day. Written by the app; safe to delete. -->',
+  '',
+  '| day | path | opens | seconds |',
+  '|---|---|---|---|',
+].join('\n');
+
+function usageDirUrl() { return LOCAL.on ? USAGE_SUBDIR : `${CONFIG.vaultRelPath}/${USAGE_SUBDIR}`; }
+function usageMonth(d) { return (d || new Date()).toISOString().slice(0, 7); }
+function usageDay(d)   { return (d || new Date()).toISOString().slice(0, 10); }
+function usageLogUrl(who, month) { return `${usageDirUrl()}/${month || usageMonth()}-${auditSlug(who)}.md`; }
+
+// The notepad. Keyed day|path so a second visit to the same page on the same
+// day lands on the same row rather than creating one.
+let usageBuf     = {};
+let usagePending = null; // { path, t0 } — the page currently being read
+
+// Mirrored to localStorage on every commit. The flush happens on pagehide,
+// and a pagehide write is not guaranteed to finish when a tab is killed —
+// so without this, closing the browser hard would lose the whole sitting.
+// localStorage is synchronous and survives that, and the next flush drains it.
+function usageSaveBuf() {
+  try { localStorage.setItem(USAGE_BUF_KEY, JSON.stringify(usageBuf)); } catch (_) {}
+}
+function usageLoadBuf() {
+  try { usageBuf = JSON.parse(localStorage.getItem(USAGE_BUF_KEY) || '{}') || {}; }
+  catch (_) { usageBuf = {}; }
+}
+
+// Called when a page has actually rendered — same point What's New treats as
+// "you are on this page now". A file that failed to load is never counted.
+function usageNoteOpen(url) {
+  usageCommitPending();
+  usagePending = { path: auditPathKey(url), t0: Date.now() };
+}
+
+// Called when leaving. The visit becomes one open plus its dwell, folded into
+// today's row for that path.
+function usageCommitPending() {
+  if (!usagePending) return;
+  const p = usagePending;
+  usagePending = null;
+  const secs = Math.min(USAGE_MAX_DWELL, Math.max(0, Math.round((Date.now() - p.t0) / 1000)));
+  const day  = usageDay();
+  const key  = `${day}|${p.path}`;
+  const e = usageBuf[key] || (usageBuf[key] = { day, path: p.path, opens: 0, secs: 0 });
+  e.opens += 1;
+  e.secs  += secs;
+  usageSaveBuf();
+}
+
+// Tolerant, same as the audit log: a human may open this in Obsidian and a
+// stray line must not void the file.
+function usageParseLog(txt) {
+  const rows = [];
+  String(txt || '').split(/\r?\n/).forEach(line => {
+    if (!/^\s*\|/.test(line)) return;
+    const c = line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(x => x.trim());
+    if (c.length < 4) return;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(c[0])) return; // header and |---| both fail this
+    rows.push({ day: c[0], path: c[1], opens: parseInt(c[2], 10) || 0, secs: parseInt(c[3], 10) || 0 });
+  });
+  return rows;
+}
+function usageSerialize(rows) {
+  const sorted = rows.slice().sort((a, b) => (a.day === b.day ? a.path.localeCompare(b.path) : a.day.localeCompare(b.day)));
+  return USAGE_HEAD + '\n' + sorted.map(r => `| ${r.day} | ${r.path} | ${r.opens} | ${r.secs} |`).join('\n') + '\n';
+}
+function usageMergeRows(existing, incoming) {
+  const by = new Map();
+  existing.forEach(r => by.set(`${r.day}|${r.path}`, { ...r }));
+  incoming.forEach(r => {
+    const k = `${r.day}|${r.path}`;
+    const prev = by.get(k);
+    if (prev) { prev.opens += r.opens; prev.secs += r.secs; }
+    else by.set(k, { ...r });
+  });
+  return [...by.values()];
+}
+
+let usageDirReady = false;
+async function ensureUsageDir() {
+  if (usageDirReady) return;
+  if (!LOCAL.on) {
+    try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (_) { /* exists */ }
+    try { await spCreateFolder(`${CONFIG.vaultRelPath}/zSystem`, 'Analytics'); } catch (_) { /* exists */ }
+  }
+  usageDirReady = true;
+}
+
+// One write per sitting, not one per page. Flushing per open would have
+// OneDrive syncing a small file constantly, which is the cost this whole
+// buffered shape exists to avoid.
+let usageFlushBusy = false;
+async function usageFlush() {
+  if (usageFlushBusy) return;
+  if (!Object.keys(usageBuf).length) return;
+  if (!vaultReady) return;
+  usageFlushBusy = true;
+  const sending = usageBuf;
+  try {
+    const url      = usageLogUrl(auditMe());
+    const existing = await readVaultFileOrNull(url);
+    const merged   = usageMergeRows(usageParseLog(existing), Object.values(sending));
+    await ensureUsageDir();
+    await spWriteFile(url, usageSerialize(merged));
+    // Only cleared once the write has actually returned. A read-only vault or
+    // a denied permission leaves the buffer intact for the next attempt
+    // rather than quietly throwing the sitting away.
+    Object.keys(sending).forEach(k => { if (usageBuf[k] === sending[k]) delete usageBuf[k]; });
+    usageSaveBuf();
+  } catch (_) { /* keep the buffer; try again next time */ }
+  finally { usageFlushBusy = false; }
+}
+
+// Read side. One file per person per month, so the folder grows slowly and
+// predictably; it is read ONLY when the Usage pane is opened, never on boot
+// and never from scanBadges. The approval-log replay used to be called from
+// the scan and that is exactly the cost 0.31.0 had to undo.
+async function usageListLogs() {
+  const out = [];
+  try {
+    if (LOCAL.on) {
+      const dir = await localGetDir(USAGE_SUBDIR);
+      for await (const [name, h] of dir.entries()) {
+        if (h.kind === 'file' && name.endsWith('.md')) out.push({ name, url: `local:/${USAGE_SUBDIR}/${name}` });
+      }
+    } else {
+      const data = await spFetch(
+        `${CONFIG.siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(usageDirUrl())}')/Files?$select=Name,ServerRelativeUrl`
+      );
+      (data.value || []).forEach(f => { if (f.Name.endsWith('.md')) out.push({ name: f.Name, url: f.ServerRelativeUrl }); });
+    }
+  } catch (_) { /* folder absent = nothing recorded yet, a valid state */ }
+  return out;
+}
+
+// Everyone's logs, summed per path. THE NAMES ARE DROPPED HERE, on purpose
+// and in one place: this function reads per-person files and returns totals
+// with no person attached, so no caller downstream is in a position to show
+// one. Decision 3 above is enforced by there being nothing to leak.
+let usageAggCache = { at: 0, data: null };
+async function usageAggregate(force) {
+  if (!force && usageAggCache.data && (Date.now() - usageAggCache.at) < 60000) return usageAggCache.data;
+  const logs = await usageListLogs();
+  const byPath = new Map(); // path → { opens, secs, days:Set, last }
+  for (const f of logs) {
+    const txt = await readVaultFileOrNull(f.url);
+    if (!txt) continue;
+    usageParseLog(txt).forEach(r => {
+      const e = byPath.get(r.path) || { path: r.path, opens: 0, secs: 0, days: new Set(), last: '' };
+      e.opens += r.opens;
+      e.secs  += r.secs;
+      e.days.add(r.day);
+      if (r.day > e.last) e.last = r.day;
+      byPath.set(r.path, e);
+    });
+  }
+  const data = { rows: [...byPath.values()], logCount: logs.length };
+  usageAggCache = { at: Date.now(), data };
+  return data;
+}
+
+// ── In-file marking ───────────────────────────────────────────────
+// Added and modified sections are marked where they sit. A removed
+// section is DRAWN BACK IN at its old position, red and struck through,
+// so you can see what went — and it is never written. It lives in the
+// rendered DOM only and disappears with the next render. Writing it back
+// would mean WikiBase overwriting a file it did not write, which is the
+// one thing this section exists not to do.
+function auditClearMarks() {
+  document.querySelectorAll('#reader-content .wb-ch-add, #reader-content .wb-ch-mod')
+    .forEach(el => el.classList.remove('wb-ch-add', 'wb-ch-mod'));
+  document.querySelectorAll('#reader-content .wb-ch-ghost').forEach(el => el.remove());
+}
+
+function auditHeadingRow(uid) {
+  const h = document.getElementById(uid);
+  if (!h) return null;
+  return h.closest ? h.closest('.md-h-row') : null;
+}
+
+function auditMarkSections(delta) {
+  auditClearMarks();
+  if (!delta) return [];
+  const marked = [];
+  const paint = (uid, cls) => {
+    const row = auditHeadingRow(uid);
+    if (!row) return;
+    row.classList.add(cls);
+    ensureVisible(row);
+    marked.push(row);
+  };
+  delta.added.forEach(uid    => paint(uid, 'wb-ch-add'));
+  delta.modified.forEach(uid => paint(uid, 'wb-ch-mod'));
+
+  // Ghosts. Position is recovered from the baseline's section ORDER: put
+  // the ghost before the first later section that still exists, else at
+  // the end of the document.
+  const base  = state.auditBaseline[auditPathKey(state.activeUrl)] || { sections: [] };
+  const order = (base.sections || []).map(p => p[0]);
+  const host  = $('reader-content');
+  if (!host) return marked;
+  delta.removed.forEach(uid => {
+    const ghost = document.createElement('div');
+    ghost.className = 'wb-ch-ghost';
+    ghost.setAttribute('aria-label', 'Removed section, shown for review only. Not part of this file.');
+    ghost.innerHTML = `<span class="wb-ch-gut">−</span>${escHtml(auditSectionLabel(uid))}` +
+      '<span class="wb-ch-tag">REMOVED</span>' +
+      '<span class="wb-ch-hint">drawn for review · not in the file</span>';
+    let anchor = null;
+    for (let i = order.indexOf(uid) + 1; i < order.length; i++) {
+      const row = auditHeadingRow(order[i]);
+      if (row) { anchor = row; break; }
+    }
+    if (anchor) anchor.parentNode.insertBefore(ghost, anchor);
+    else host.appendChild(ghost);
+    marked.push(ghost);
+  });
+  return marked;
+}
+
+// ── The in-file review bar ────────────────────────────────────────
+let auditWalk = { url: null, marks: [], pos: -1, delta: null };
+
+function auditOpenReview(url, delta) {
+  auditWalk = { url, marks: auditMarkSections(delta), pos: -1, delta };
+  auditShowBar();
+  if (auditWalk.marks.length) auditStep(1);
+}
+
+function auditStep(dir) {
+  const n = auditWalk.marks.length;
+  if (!n) return;
+  auditWalk.pos = (auditWalk.pos + dir + n) % n;
+  const el = auditWalk.marks[auditWalk.pos];
+  if (el) { ensureVisible(el); scrollToBlock(el); }
+  auditShowBar();
+}
+
+function auditShowBar() {
+  const bar = $('audit-bar');
+  if (!bar) return;
+  const d = auditWalk.delta;
+  if (!d) { bar.style.display = 'none'; return; }
+  const n   = auditWalk.marks.length;
+  const pos = auditWalk.pos >= 0 ? auditWalk.pos + 1 : 0;
+  const base = state.auditBaseline[auditPathKey(auditWalk.url)] || {};
+  $('audit-title').innerHTML =
+    `<b>${n ? `Change ${pos} of ${n}` : 'Changed outside the app'}</b>` +
+    `<span class="audit-dim"> · last approved ${base.ts ? escHtml(base.ts.slice(0, 10)) : 'never'}` +
+    `${base.by ? ' by ' + escHtml(base.by) : ''}</span>`;
+  bar.style.display = 'flex';
+}
+
+function auditCloseBar() {
+  auditWalk = { url: null, marks: [], pos: -1, delta: null };
+  auditClearMarks();
+  const bar = $('audit-bar');
+  if (bar) bar.style.display = 'none';
+}
+
+function auditToggleGhosts(on) {
+  document.querySelectorAll('#reader-content .wb-ch-ghost')
+    .forEach(el => { el.style.display = on ? '' : 'none'; });
+}
+
+async function auditApproveActive() {
+  const url = auditWalk.url;
+  if (!url) return;
+  try {
+    await auditRecord(url);                 // appends to the log; the note is untouched
+    auditCloseBar();
+    await scanBadges();
+    if (state.rvQueue) { rvShowQueueBar(); }
+    const rc = $('reader-content');
+    if (rc && !state.activeUrl) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not approve: ' + e.message); }
+}
+
+// Flag writes an ordinary comment. No new comment type, no new filter
+// chip, no revert — it lands in the inbox where someone will see it.
+async function auditFlagActive() {
+  const url = auditWalk.url;
+  if (!url) return;
+  const why = prompt('What needs looking at? This posts a comment on the file.');
+  if (why === null || !why.trim()) return;
+  try {
+    const cUrl = commentsUrlFor(url);
+    const txt  = await readVaultFileOrNull(cUrl);
+    const list = txt ? parseComments(txt) : [];
+    list.push({
+      type: 'flag', status: 'open',
+      ts: new Date().toISOString().slice(0, 16),
+      author: CONFIG.authorName || 'Anonymous',
+      body: why.trim(),
+    });
+    await ensureZSystemDir(cUrl);
+    await spWriteFile(cUrl, serializeComments(list));
+    await scanBadges();
+    soloRPTab('comments');
+    await renderCommentsTab();
+  } catch (e) { alert('Could not flag: ' + e.message); }
+}
+
+// OneDrive is the only thing that knows WHO changed a file. The app knows
+// who approved. Both matter, and this is the link between them.
+function auditOpenHistory() {
+  alert('Version history lives in OneDrive.\n\nRight-click this file in the synced vault folder and choose "Version history" to see who changed it and to restore an earlier copy.\n\nWikiBase deliberately does not build its own — it would duplicate what OneDrive already gives you for free.');
+}
+
+// Session 42 — Review dashboard
+//
+// Six item types, one queue. Each type's truth already lives in the vault
+// (frontmatter or a sidecar) and is re-derived by scanBadges() on every
+// scan — nothing here is a store of its own. The two types that need a
+// shared baseline (changed outside the app, new section) wait for
+// Section 15's audit log; building them on a per-device localStorage
+// baseline now would silently diverge between people.
+//
+// Three bands, in priority order: band 1 needs a decision (content
+// changes, questions, escalations — nothing here gets a bulk action,
+// because if it could be done in bulk it wasn't a decision). Band 2
+// needs acknowledgement (flagged, due — nothing here can be rejected,
+// because there's nothing to revert). Band 3 needs completion (new
+// files, missing properties — mechanical, bulk-actionable).
+// ================================================================
+
+const WB_COMMENT_ICONS = { note: '📝', question: '❓', action: '✅', flag: '🚩', escalation: '🚨' };
+
+// S15 renamed 'change' to "App edit" and added 'vaultchange'/'newsection'.
+// The two edit types read very differently and the old bare label "Content
+// change" gave no clue which one you were looking at.
+const RV_FILTERS = [
+  ['all',         'All',                 ''],
+  ['escalation',  'Escalated',           'red'],
+  ['vaultchange', 'Vault change',        'orange'],
+  ['change',      'App edit',            'blue'],
+  ['question',    'Question',            'purple'],
+  ['newsection',  'New section',         'yellow'],
+  ['flagged',     'Flagged',             'teal'],
+  ['due',         'Due',                 'gray'],
+  ['newfile',     'New file',            'green'],
+  ['missing',     'Missing properties',  'cyan'],
+];
+
+function reviewDashboardTotal() {
+  return state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0)
+    + state.questionItems.length + state.escalatedItems.length
+    + state.flaggedFiles.length + state.dueItems.length
+    + state.unauditedFiles.length + state.missingProps.length
+    + state.vaultChanges.length + state.newSections.length;
+}
+
+function rvBandState() {
+  try { return JSON.parse(localStorage.getItem('wb_rv_bands') || '{}'); } catch (_) { return {}; }
+}
+// A band with zero items collapses itself by default (but stays
+// togglable) so the queue's shape stays stable between visits — a band
+// never just disappears.
+function rvIsCollapsed(id, count) {
+  const s = rvBandState();
+  return (id in s) ? s[id] : (count === 0);
+}
+function rvToggleBand(id) {
+  const s = rvBandState();
+  s[id] = !rvIsCollapsed(id, rvBandCounts()[id]);
+  persist('wb_rv_bands', s);
+  const rc = $('reader-content');
+  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+}
+
+function rvBandCounts() {
+  const show = t => state.rvFilter === 'all' || state.rvFilter === t;
+  const band1 = (show('escalation') ? state.escalatedItems.length : 0)
+    + (show('vaultchange') ? state.vaultChanges.length : 0)
+    + (show('question') ? state.questionItems.length : 0)
+    + (show('change') ? state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0) : 0);
+  const band2 = (show('newsection') ? state.newSections.length : 0)
+    + (show('flagged') ? state.flaggedFiles.length : 0) + (show('due') ? state.dueItems.length : 0);
+  const band3 = (show('newfile') ? state.unauditedFiles.length : 0) + (show('missing') ? state.missingProps.length : 0);
+  return { band1, band2, band3 };
+}
+
+function setRvFilter(f) {
+  state.rvFilter = f;
+  const rc = $('reader-content');
+  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+}
+
+function rvBandHead(id, label, count, collapsed) {
+  return `<div class="rv-band-head" onclick="rvToggleBand('${id}')">
+    <span class="rv-band-caret">${collapsed ? '▶' : '▼'}</span>
+    <span>${escHtml(label)}</span>
+    <span class="rv-band-count">${count}</span>
+  </div>`;
+}
+
 // ── Review view ──────────────────────────────────────────────────
 async function openChangesView() {
   if (!guardLeaveEdit()) return;
@@ -7407,12 +8616,12 @@ async function openChangesView() {
   state.activeName = null;
   renderSidebar();
   updateEditBtn();
-  setReaderTitle('All changes');
+  setReaderTitle('Review dashboard');
   empty.style.display = 'none';
   rc.style.display    = 'block';
   rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault…</p>';
   await scanBadges();
-  rc.innerHTML = buildChangesHTML();
+  rc.innerHTML = buildReviewDashboardHTML();
 }
 
 function renderDiffBody(body) {
@@ -7423,56 +8632,451 @@ function renderDiffBody(body) {
   }).join('');
 }
 
-function buildChangesHTML() {
-  const hasChanges = !!state.reviewChanges.length;
-  const hasAudit    = !!state.unauditedFiles.length;
-  if (!hasChanges && !hasAudit) {
-    return '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Nothing to review.</p>';
+// S15 — the dashboard row is a blurb, not a diff. The detail lives in the
+// file, which is where the change actually is; repeating it here was the
+// clutter that made whole-vault auditing unreadable.
+function rvAuditBlurb(it) {
+  const d = it.delta || { added: [], modified: [], removed: [] };
+  const bits = [];
+  if (d.added.length)    bits.push(`new section “${auditSectionLabel(d.added[0])}”${d.added.length > 1 ? ` +${d.added.length - 1}` : ''}`);
+  if (d.modified.length) bits.push(`“${auditSectionLabel(d.modified[0])}” changed${d.modified.length > 1 ? ` +${d.modified.length - 1}` : ''}`);
+  if (d.removed.length)  bits.push(`“${auditSectionLabel(d.removed[0])}” removed${d.removed.length > 1 ? ` +${d.removed.length - 1}` : ''}`);
+  // A change above the first heading belongs to no section. It is still a
+  // change, and saying nothing would be worse than saying where it is not.
+  if (!bits.length) bits.push('edited above the first heading');
+  return bits.join(' · ');
+}
+
+function rvAuditTicks(c) {
+  c = c || {};
+  let h = '';
+  if (c.added)    h += `<span class="rv-tick" style="background:var(--co-green-bg);color:var(--co-green-txt)">+${c.added}</span>`;
+  if (c.modified) h += `<span class="rv-tick" style="background:var(--co-yellow-bg);color:var(--co-yellow-txt)">~${c.modified}</span>`;
+  if (c.removed)  h += `<span class="rv-tick" style="background:var(--co-red-bg);color:var(--co-red-txt)">−${c.removed}</span>`;
+  return h;
+}
+
+// Approve straight from a row, without opening the file. Only offered on
+// band 2, where the item is additive — band 1 has no bulk and no
+// approve-without-reading, because the whole value of the audit is that
+// somebody looked.
+async function rvApproveAudit(url) {
+  try {
+    await auditRecord(url);
+    await scanBadges();
+    const rc = $('reader-content');
+    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not approve: ' + e.message); }
+}
+
+function buildReviewDashboardHTML() {
+  const total  = reviewDashboardTotal();
+  const show   = t => state.rvFilter === 'all' || state.rvFilter === t;
+  const queue  = []; // band-ordered — becomes state.rvFlatQueue below, what Next walks
+  const counts = rvBandCounts();
+
+  // S15 — the chip carries the type's colour as a dot. One colour per
+  // type, all from the existing callout palette, so no new tokens. The
+  // icon and label always travel with it: the colour is a re-find aid,
+  // not a code anyone has to memorise.
+  const chips = RV_FILTERS.map(([id, label, col]) =>
+    `<button class="review-chip${state.rvFilter === id ? ' active' : ''}" onclick="setRvFilter('${id}')">` +
+    (col ? `<span class="rv-chip-dot" style="background:var(--co-${col}-bd)"></span>` : '') +
+    `${escHtml(label)}</button>`
+  ).join('');
+
+  let html = `<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+    <div>
+      <h1 class="md-h md-h1" style="margin-bottom:4px">Review dashboard</h1>
+      <p class="md-p" style="margin-top:2px">${total} item${total !== 1 ? 's' : ''} across the vault</p>
+    </div>
+    <div class="review-filter-bar" style="flex-wrap:wrap">${chips}</div>
+  </div>`;
+
+  // ── Band 1 — needs your decision ─────────────────────────────────
+  {
+    const collapsed = rvIsCollapsed('band1', counts.band1);
+    let body = '';
+    if (show('escalation') && state.escalatedItems.length) {
+      body += '<div class="rv-sub-head">Escalated — to Administrator</div>';
+      state.escalatedItems.forEach(it => {
+        const qi = queue.push({ type: 'escalation', url: it.url, name: it.name, opts: { idx: it.idx } }) - 1;
+        body += `<div class="backlink-item" style="cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">
+          <span style="flex:1">🚨 ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.comment.body.slice(0, 80))}</span></span>
+        </div>`;
+      });
+    }
+    // S15 — one row per FILE, never one per change. A file can hold a new
+    // heading and three edits and a deletion; that is one walk, one
+    // approval, one line in the log, and one item in the counter.
+    if (show('vaultchange') && state.vaultChanges.length) {
+      body += '<div class="rv-sub-head" style="color:var(--co-orange-txt)">Vault changes — edited in Obsidian</div>';
+      state.vaultChanges.forEach(it => {
+        const qi = queue.push({ type: 'vaultchange', url: it.url, name: it.name, opts: { delta: it.delta } }) - 1;
+        body += `<div class="backlink-item" style="border-left:4px solid var(--co-orange-bd);cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">
+          <span style="flex:1">✏️ ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(rvAuditBlurb(it))}</span></span>
+          ${rvAuditTicks(it.counts)}
+        </div>`;
+      });
+    }
+    if (show('question') && state.questionItems.length) {
+      body += '<div class="rv-sub-head">Questions</div>';
+      state.questionItems.forEach(it => {
+        const qi = queue.push({ type: 'question', url: it.url, name: it.name, opts: { idx: it.idx } }) - 1;
+        body += `<div class="backlink-item" style="cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">
+          <span style="flex:1">❓ ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.comment.body.slice(0, 80))}</span></span>
+        </div>`;
+      });
+    }
+    if (show('change') && state.reviewChanges.length) {
+      body += '<div class="rv-sub-head">Content changes</div>';
+      state.reviewChanges.forEach((r, ri) => {
+        const head = headOpenIdx(r.entries);
+        const qi = queue.push({ type: 'change', url: r.url, name: r.name, opts: { headIdx: head } }) - 1;
+        body += `<div class="rv-file">
+          <div class="rv-file-head">
+            <span class="rv-file-name" style="cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">${escHtml(r.name)}</span>
+            <button class="rv-mark-btn" onclick="event.stopPropagation();markReviewed(${ri})">Accept all</button>
+          </div>`;
+        r.entries.forEach((e, ei) => {
+          if (e.reviewed !== 'no') return; // accepted + rejected are resolved — see Previous
+          const actions = ei === head
+            ? `<button class="rv-accept-btn" style="border:1px solid var(--co-green-bd);border-radius:var(--radius);cursor:pointer" onclick="inboxEntryAction(${ri},${ei},'yes')">Accept</button>
+               <button class="rv-reject-btn" style="border:1px solid var(--co-red-bd);border-radius:var(--radius);cursor:pointer" onclick="inboxEntryAction(${ri},${ei},'rejected')">Reject</button>`
+            : '<span style="font-size:11px;color:var(--text-muted)">⏳ queued — resolve the change above first</span>';
+          body += `<div class="rv-entry">
+            <div class="rv-meta" style="display:flex;gap:8px;align-items:center">
+              <span style="flex:1">${escHtml(e.author)} · ${escHtml(e.ts.replace('T', ' '))}</span>
+              ${actions}
+            </div>
+            <pre class="rv-diff">${renderDiffBody(e.body)}</pre>
+          </div>`;
+        });
+        body += '</div>';
+      });
+    }
+    if (!body) body = '<div class="rv-empty">Nothing needs a decision.</div>';
+    html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
+      ${rvBandHead('band1', 'Needs your decision', counts.band1, collapsed)}
+      <div class="rv-band-body">${body}</div>
+    </div>`;
   }
 
-  let html = '<h1 class="md-h" style="font-size:22px;margin:24px 0 16px">All changes</h1>';
-  if (!hasChanges) {
-    html += '<p class="md-p" style="color:var(--text-muted);margin-bottom:24px">No pending changes.</p>';
+  // ── Band 2 — needs acknowledgement ───────────────────────────────
+  {
+    const collapsed = rvIsCollapsed('band2', counts.band2);
+    let body = '';
+    // S15 — a file whose ONLY change is new headings. Nothing was altered
+    // and nothing was lost, so it needs acknowledging rather than deciding,
+    // and the band 2 bulk button covers it.
+    if (show('newsection') && state.newSections.length) {
+      body += '<div class="rv-sub-head" style="color:var(--co-yellow-txt)">New sections</div>';
+      state.newSections.forEach(it => {
+        const qi = queue.push({ type: 'newsection', url: it.url, name: it.name, opts: { delta: it.delta } }) - 1;
+        body += `<div class="backlink-item" style="border-left:4px solid var(--co-yellow-bd)">
+          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🧩 ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(rvAuditBlurb(it))}</span></span>
+          <button class="rv-ov-btn" onclick="event.stopPropagation();rvApproveAudit('${escHtml(it.url)}')">Approve</button>
+        </div>`;
+      });
+    }
+    if (show('flagged') && state.flaggedFiles.length) {
+      body += '<div class="rv-sub-head">Flagged for review</div>';
+      state.flaggedFiles.forEach(it => {
+        const qi = queue.push({ type: 'flagged', url: it.url, name: it.name, opts: {} }) - 1;
+        body += `<div class="backlink-item">
+          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🚩 ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.status || 'Needs Review')}</span></span>
+          <button class="rv-ov-btn" onclick="event.stopPropagation();rvApproveFlagged('${escHtml(it.url)}')">Approve</button>
+        </div>`;
+      });
+    }
+    if (show('due') && state.dueItems.length) {
+      body += '<div class="rv-sub-head">Due for re-review</div>';
+      state.dueItems.forEach(it => {
+        const qi = queue.push({ type: 'due', url: it.url, name: it.name, opts: {} }) - 1;
+        body += `<div class="backlink-item">
+          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">⏰ ${escHtml(it.name)} <span style="color:var(--text-muted)">— due ${escHtml(it.due)}</span></span>
+          <button class="rv-ov-btn" onclick="event.stopPropagation();rvClearDue('${escHtml(it.url)}')">Clear due date</button>
+        </div>`;
+      });
+    }
+    if (!body) {
+      body = '<div class="rv-empty">Nothing to acknowledge.</div>';
+    } else {
+      body += `<div class="rv-bulk-row"><button class="rv-mark-btn" onclick="rvAcknowledgeAllBand2()">Acknowledge all (${counts.band2})</button></div>`;
+    }
+    html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
+      ${rvBandHead('band2', 'Needs acknowledgement', counts.band2, collapsed)}
+      <div class="rv-band-body">${body}</div>
+    </div>`;
   }
-  state.reviewChanges.forEach((r, ri) => {
-    html += `<div class="rv-file">
-      <div class="rv-file-head">
-        <span class="rv-file-name" data-wb-open="${escHtml(r.url)}" data-wb-name="${escHtml(r.name)}">${escHtml(r.name)}</span>
-        <button class="rv-mark-btn" onclick="markReviewed(${ri})">Accept all</button>
-      </div>`;
-    const head = headOpenIdx(r.entries);
-    r.entries.forEach((e, ei) => {
-      if (e.reviewed !== 'no') return; // accepted + rejected are resolved
-      const actions = ei === head
-        ? `<button class="rv-accept-btn" style="border:1px solid var(--co-green-bd);border-radius:var(--radius);cursor:pointer" onclick="inboxEntryAction(${ri},${ei},'yes')">Accept</button>
-           <button class="rv-reject-btn" style="border:1px solid var(--co-red-bd);border-radius:var(--radius);cursor:pointer" onclick="inboxEntryAction(${ri},${ei},'rejected')">Reject</button>`
-        : '<span style="font-size:11px;color:var(--text-muted)">⏳ queued — resolve the change above first</span>';
-      html += `<div class="rv-entry">
-        <div class="rv-meta" style="display:flex;gap:8px;align-items:center">
-          <span style="flex:1">${escHtml(e.author)} · ${escHtml(e.ts.replace('T', ' '))}</span>
-          ${actions}
-        </div>
-        <pre class="rv-diff">${renderDiffBody(e.body)}</pre>
-      </div>`;
-    });
-    html += '</div>';
-  });
 
-  html += '<h1 class="md-h" style="font-size:22px;margin:32px 0 16px">New Files</h1>';
-  if (!hasAudit) {
-    html += '<p class="md-p" style="color:var(--text-muted)">No new files found — every file has WikiBase properties.</p>';
-  } else {
-    html += '<p class="md-p" style="color:var(--text-secondary);margin-bottom:12px">Files with no WikiBase properties block — likely added outside the app. Open one to review it, then Update to fill in its properties.</p>';
-    state.unauditedFiles.forEach((f, fi) => {
-      html += `<div class="rv-file">
-        <div class="rv-file-head">
-          <span class="rv-file-name" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(f.name)}">${escHtml(f.name)}</span>
-          <button class="rv-mark-btn" onclick="approveNewFile(${fi})">Update</button>
-        </div>
-      </div>`;
-    });
+  // ── Band 3 — needs completion ────────────────────────────────────
+  {
+    const collapsed = rvIsCollapsed('band3', counts.band3);
+    let body = '';
+    if (show('newfile') && state.unauditedFiles.length) {
+      body += '<div class="rv-sub-head">New files</div>';
+      state.unauditedFiles.forEach(it => {
+        const qi = queue.push({ type: 'newfile', url: it.url, name: it.name, opts: {} }) - 1;
+        body += `<div class="backlink-item">
+          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🆕 ${escHtml(it.name)}</span>
+          <button class="rv-ov-btn" onclick="event.stopPropagation();rvUpdateFile('${escHtml(it.url)}')">Update</button>
+        </div>`;
+      });
+    }
+    if (show('missing') && state.missingProps.length) {
+      body += '<div class="rv-sub-head">Missing properties</div>';
+      state.missingProps.forEach(it => {
+        const qi = queue.push({ type: 'missing', url: it.url, name: it.name, opts: {} }) - 1;
+        const optNote = it.optional.length ? ` · also missing (optional): ${it.optional.join(', ')}` : '';
+        body += `<div class="backlink-item" style="align-items:flex-start">
+          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">📋 ${escHtml(it.name)}<br>
+            <span style="color:var(--text-muted);font-size:11px">missing: ${escHtml(it.required.join(', '))}${escHtml(optNote)}</span></span>
+          <button class="rv-ov-btn" onclick="event.stopPropagation();rvUpdateFile('${escHtml(it.url)}')">Fill in</button>
+        </div>`;
+      });
+    }
+    if (!body) {
+      body = '<div class="rv-empty">Nothing to complete.</div>';
+    } else {
+      body += `<div class="rv-bulk-row"><button class="rv-mark-btn" onclick="rvFillAllBand3()">Fill all (${counts.band3})</button></div>`;
+    }
+    html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
+      ${rvBandHead('band3', 'Needs completion', counts.band3, collapsed)}
+      <div class="rv-band-body">${body}</div>
+    </div>`;
   }
+
+  state.rvFlatQueue = queue;
+
+  // ── Previous — resolved items ─────────────────────────────────────
+  const prevAll  = rvPrevFiltered();
+  const prevOpen = state.rvPrevOpen;
+  html += `<div class="rv-prev-toggle" onclick="rvTogglePrev()">
+    <span class="rv-band-caret">${prevOpen ? '▼' : '▶'}</span>
+    <span>Previous</span>
+    <span class="rv-band-count">${prevAll.length}</span>
+    <span style="flex:1"></span>`;
+  if (prevOpen) {
+    html += `<span class="rv-prev-window">
+      <button class="review-chip${!state.rvPrevAll ? ' active' : ''}" onclick="event.stopPropagation();rvSetPrevWindow(false)">Last 30 days</button>
+      <button class="review-chip${state.rvPrevAll ? ' active' : ''}" onclick="event.stopPropagation();rvSetPrevWindow(true)">Everything</button>
+    </span>`;
+  }
+  html += '</div>';
+  if (prevOpen) {
+    if (!prevAll.length) {
+      html += `<div class="rv-empty">Nothing resolved yet${state.rvPrevAll ? '.' : ' in the last 30 days.'}</div>`;
+    } else {
+      html += '<div style="margin-top:4px">';
+      prevAll.forEach(it => {
+        html += `<div class="backlink-item" data-wb-open="${escHtml(it.url)}" data-wb-name="${escHtml(it.name)}">
+          <span style="flex:1">${it.icon} ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.label)}${it.ts ? ' · ' + escHtml(it.ts.replace('T', ' ').slice(0, 16)) : ''}</span></span>
+        </div>`;
+      });
+      html += '</div>';
+    }
+  }
+
   return html;
+}
+
+// ── Opening a dashboard row ────────────────────────────────────────
+// Click any row: open the file, then land on whichever existing tool
+// already shows that item — the diff strip for a content change, the
+// comments pane (selected) for a question/escalation, the Properties
+// flyout for anything that's a frontmatter fix. No new universal card
+// shape; each type opens into the surface that already knows how to
+// act on it.
+async function rvOpenItem(type, url, name, opts) {
+  opts = opts || {};
+  if (!guardLeaveEdit()) return;
+  auditCloseBar(); // leaving one audit item must not leave its ghosts behind
+  await openFile(url, name);
+  if (type === 'vaultchange' || type === 'newsection') {
+    // S15 — the whole point of the walk: land in the file, on the change.
+    closeDiffStrip();
+    auditOpenReview(url, opts.delta);
+  } else if (type === 'change') {
+    soloRPTab('review');
+    await renderReviewTab();
+    const entries = ($('rp-review') || {})._wbEntries || [];
+    const idx = opts.headIdx !== undefined ? opts.headIdx : headOpenIdx(entries);
+    if (idx >= 0) selectChangeCard(idx);
+  } else if (type === 'question' || type === 'escalation') {
+    soloRPTab('comments');
+    await renderCommentsTab();
+    if (opts.idx !== undefined) selectCommentCard(opts.idx);
+  } else {
+    // flagged, due, new file, missing properties — the fix lives in Properties
+    const panel = $('props-panel');
+    if (panel && panel.style.display === 'none') togglePropsPanel();
+  }
+}
+
+// ── Next-item walk ─────────────────────────────────────────────────
+// Clicking a row starts a walk through the SAME band-ordered list the
+// dashboard just rendered (state.rvFlatQueue) — Next is just an index
+// into a list already built, no re-scan or re-sort.
+async function rvQueueStart(list, idx) {
+  state.rvQueue    = list;
+  state.rvQueuePos = idx;
+  const item = list[idx];
+  if (!item) return;
+  await rvOpenItem(item.type, item.url, item.name, item.opts);
+  rvShowQueueBar();
+}
+
+async function rvQueueNext() {
+  if (!state.rvQueue || state.rvQueuePos >= state.rvQueue.length - 1) return;
+  state.rvQueuePos++;
+  const item = state.rvQueue[state.rvQueuePos];
+  await rvOpenItem(item.type, item.url, item.name, item.opts);
+  rvShowQueueBar();
+}
+
+function rvQueueExit() {
+  state.rvQueue    = null;
+  state.rvQueuePos = -1;
+  const bar = $('rv-queue-bar');
+  if (bar) bar.style.display = 'none';
+  openChangesView();
+}
+
+function rvShowQueueBar() {
+  const bar = $('rv-queue-bar');
+  if (!bar) return;
+  if (!state.rvQueue || !state.rvQueue.length) { bar.style.display = 'none'; return; }
+  const pos = state.rvQueuePos + 1, total = state.rvQueue.length;
+  const remaining = total - pos;
+  bar.innerHTML = '<span>Reviewing from the dashboard</span>' +
+    `<span class="rv-qb-pos">Item ${pos} of ${total}</span>` +
+    '<span class="rv-qb-spacer"></span>' +
+    (remaining > 0
+      ? `<button onclick="rvQueueNext()">Next (${remaining} left) →</button>`
+      : '<span class="rv-qb-pos">Last item</span>') +
+    '<button onclick="rvQueueExit()">Back to dashboard</button>';
+  bar.style.display = 'flex';
+}
+
+// ── Band 2 row + bulk actions ──────────────────────────────────────
+async function rvApproveFlagged(url) {
+  try {
+    const txt = await readVaultFile(url);
+    await spWriteFile(url, setFmKeys(txt, [['status', 'Reviewed'], ['reviewed', 'true']]));
+    await scanBadges();
+    if (state.activeUrl === url) openFile(url, state.activeName);
+    const rc = $('reader-content');
+    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not approve: ' + e.message); }
+}
+
+async function rvClearDue(url) {
+  try {
+    const txt = await readVaultFile(url);
+    await spWriteFile(url, setFmKeys(txt, [['due', '']]));
+    await scanBadges();
+    if (state.activeUrl === url) openFile(url, state.activeName);
+    const rc = $('reader-content');
+    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not clear due date: ' + e.message); }
+}
+
+async function rvAcknowledgeAllBand2() {
+  const flaggedItems = state.flaggedFiles.slice();
+  const dueList       = state.dueItems.slice();
+  const sectionList   = state.newSections.slice(); // S15
+  const total = flaggedItems.length + dueList.length + sectionList.length;
+  if (!total) return;
+  if (!confirm(`Acknowledge ${total} item${total > 1 ? 's' : ''}?\n\nFlagged files are marked Reviewed; due dates are cleared; new sections are recorded as approved in your audit log. This is a record that a person saw them, not a revert.`)) return;
+  try {
+    // S15 — one appended row per file. Bulk is allowed here and nowhere
+    // else, because everything in this band is additive: acknowledging
+    // without reading loses nothing that was not already there.
+    for (const it of sectionList) {
+      await auditRecord(it.url);
+    }
+    for (const it of flaggedItems) {
+      const txt = await readVaultFile(it.url);
+      await spWriteFile(it.url, setFmKeys(txt, [['status', 'Reviewed'], ['reviewed', 'true']]));
+    }
+    for (const it of dueList) {
+      const txt = await readVaultFile(it.url);
+      await spWriteFile(it.url, setFmKeys(txt, [['due', '']]));
+    }
+    await scanBadges();
+    if (state.activeUrl) openFile(state.activeUrl, state.activeName);
+    const rc = $('reader-content');
+    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not acknowledge: ' + e.message); }
+}
+
+// ── Band 3 row + bulk actions ──────────────────────────────────────
+async function rvUpdateFile(url) {
+  try {
+    await approveNewFileCore({ url });
+    if (state.activeUrl === url) openFile(url, state.activeName);
+    const rc = $('reader-content');
+    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not update: ' + e.message); }
+}
+
+async function rvFillAllBand3() {
+  const items = [...state.unauditedFiles, ...state.missingProps];
+  if (!items.length) return;
+  if (!confirm(`Fill missing properties on ${items.length} file${items.length > 1 ? 's' : ''}?\n\nOnly absent keys are written — nothing that already has a value is touched.`)) return;
+  try {
+    for (const it of items) await approveNewFileCore({ url: it.url }, { skipScan: true });
+    await scanBadges();
+    if (state.activeUrl) openFile(state.activeUrl, state.activeName);
+    const rc = $('reader-content');
+    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  } catch (e) { alert('Could not fill properties: ' + e.message); }
+}
+
+// ── Previous / resolved ────────────────────────────────────────────
+// Nothing here is a new store — every entry is derived from frontmatter
+// already written by a review action (status: Reviewed) or from the
+// resolvedTs/closedTs stamped onto a sidecar when a change is decided
+// or a comment is closed. Nothing is ever deleted, so "Everything" costs
+// nothing extra to keep; the 30-day default is a view, not a retention
+// limit, and it only ever applies here — never to the live bands above.
+function rvResolvedList() {
+  const R = state.rvResolved || { changes: [], comments: [], files: [] };
+  const items = [
+    ...R.files.map(f => ({ name: f.name, url: f.url, ts: f.ts, icon: '✅', label: 'Marked Reviewed' })),
+    ...R.changes.map(c => ({
+      name: c.name, url: c.url, ts: c.ts,
+      icon:  c.entry.reviewed === 'rejected' ? '✕' : '✓',
+      label: c.entry.reviewed === 'rejected' ? 'Change rejected' : 'Change accepted',
+    })),
+    ...R.comments.map(c => ({
+      name: c.name, url: c.url, ts: c.ts,
+      icon:  WB_COMMENT_ICONS[c.comment.type] || '·',
+      label: `${c.comment.type.charAt(0).toUpperCase()}${c.comment.type.slice(1)} closed`,
+    })),
+  ];
+  items.sort((a, b) => String(b.ts || '').localeCompare(String(a.ts || '')));
+  return items;
+}
+
+function rvPrevFiltered() {
+  const all = rvResolvedList();
+  if (state.rvPrevAll) return all;
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+  return all.filter(it => it.ts && it.ts >= cutoff);
+}
+
+function rvTogglePrev() {
+  state.rvPrevOpen = !state.rvPrevOpen;
+  const rc = $('reader-content');
+  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+}
+
+function rvSetPrevWindow(all) {
+  state.rvPrevAll = all;
+  const rc = $('reader-content');
+  if (rc) rc.innerHTML = buildReviewDashboardHTML();
 }
 
 // New Files (S12 file audit): a file with no WikiBase "status" key has
@@ -7480,34 +9084,50 @@ function buildChangesHTML() {
 // from the standard property set (same defaults as new-file creation)
 // WITHOUT touching keys that already exist, so it can never clobber
 // properties or tags someone already set directly in Obsidian.
+// Session 42 — the declared property schema. Required: file is broken for
+// the app's purposes without these, and it's what defines a "New file" (no
+// status key) vs a "Missing properties" file (status present, something else
+// absent). Optional: incomplete but never blocking — must-read/onboarding
+// arrived with What's New (S35/0.23.0) and were never added here, which is
+// the drift this schema declaration closes. `section` was decided out in
+// Session 37 and is dropped for good, here and in the Properties flyout.
+const REQUIRED_PROPS = ['status', 'reviewed', 'created', 'author'];
+const OPTIONAL_PROPS = ['tags', 'aliases', 'due', 'must-read', 'onboarding'];
+
 // Shared write: injects only the frontmatter keys actually missing (same
 // defaults as new-file creation), then rescans. Never touches a key that's
 // already there, so it can't clobber tags/properties set outside the app.
-async function approveNewFileCore(f) {
+//
+// Session 42 — no edited-by/edited-at stamp. This used to stamp both
+// unconditionally, which is fine for a single deliberate "Update" on one
+// file but is wrong for a bulk property sweep across many files: it would
+// mark every file in the vault as edited by one person today, polluting
+// the exact signal review depends on. A property fill writes the missing
+// keys and nothing else.
+// opts.skipScan — Session 42's "Fill all" bulk sweep calls this once per
+// file; scanBadges() is a full vault re-read, so doing it after every file
+// in a loop of N would mean N full vault scans for one sweep. The caller
+// runs one scanBadges() itself after the loop instead.
+async function approveNewFileCore(f, opts) {
   const text = await readVaultFile(f.url);
   const fm = parseFm(text);
   const defaults = {
-    tags: '[]', aliases: '[]', status: 'Needs Review', reviewed: 'false',
-    created: new Date().toISOString().slice(0, 10), due: '', section: '',
+    status: 'Needs Review', reviewed: 'false',
+    created: new Date().toISOString().slice(0, 10),
     author: wbAuthor(),
+    tags: '[]', aliases: '[]', due: '',
+    'must-read': 'false', onboarding: 'false',
   };
   const flags = Object.entries(defaults).filter(([k]) => !(k in fm));
-  flags.push(['edited-by', wbAuthor()], ['edited-at', new Date().toISOString().slice(0, 16)]);
   await spWriteFile(f.url, setFmKeys(text, flags));
-  await scanBadges();
-}
-
-// From the reader's All changes screen.
-async function approveNewFile(idx) {
-  const f = state.unauditedFiles[idx];
-  if (!f) return;
-  try {
-    await approveNewFileCore(f);
-    if (state.activeUrl === f.url) openFile(f.url, f.name); // re-render if it's the open file
-    $('reader-content').innerHTML = buildChangesHTML();
-  } catch (e) {
-    alert('Could not update: ' + e.message);
-  }
+  // S15 — stamping a new file is the moment it starts being audited, so it
+  // needs a baseline now. A file dropped into the vault AFTER the first-run
+  // seed has none, and without this it would never produce a vault change
+  // no matter how often it was edited afterwards. Frontmatter is stripped
+  // before hashing, so writing the property block does not itself move the
+  // baseline — only real content does.
+  try { await auditRecord(f.url, text); } catch (_) {}
+  if (!(opts && opts.skipScan)) await scanBadges();
 }
 
 async function inboxEntryAction(fileIdx, entryIdx, value) {
@@ -7522,7 +9142,7 @@ async function inboxEntryAction(fileIdx, entryIdx, value) {
     }
     await maybeFlipFileReviewed(r.url, r.changesUrl);
     await scanBadges();
-    $('reader-content').innerHTML = buildChangesHTML();
+    $('reader-content').innerHTML = buildReviewDashboardHTML();
   } catch (e) {
     alert('Could not update: ' + e.message);
   }
@@ -7533,7 +9153,9 @@ async function inboxEntryAction(fileIdx, entryIdx, value) {
 async function markReviewedCore(fileUrl, changesUrl) {
   const chTxt = await readVaultFileOrNull(changesUrl);
   if (chTxt !== null) {
-    await spWriteFile(changesUrl, chTxt.replace(/(<!-- WBCH [^>]*?)reviewed="no"/g, '$1reviewed="yes"'));
+    const out = chTxt.replace(/<!-- WBCH ([^>]*?)reviewed="no"([^>]*?)-->/g,
+      (m, pre, post) => `<!-- WBCH ${stampResolved(pre + 'reviewed="yes"' + post)}-->`);
+    await spWriteFile(changesUrl, out);
   }
   await maybeFlipFileReviewed(fileUrl, changesUrl);
   await scanBadges();
@@ -7545,7 +9167,7 @@ async function markReviewed(idx) {
   if (!r) return;
   try {
     await markReviewedCore(r.url, r.changesUrl);
-    $('reader-content').innerHTML = buildChangesHTML();
+    $('reader-content').innerHTML = buildReviewDashboardHTML();
   } catch (e) {
     alert('Could not mark reviewed: ' + e.message);
   }
@@ -7555,8 +9177,8 @@ async function markReviewed(idx) {
 // Vault-wide overview — always at the top of the Review tab, in two
 // subsections ("File changes" / "New files"), so you can browse and act
 // on either list while the reader shows whatever file you're actually
-// looking at. This is the same data as the All changes reader screen
-// (buildChangesHTML) — just laid out as a compact right-panel list
+// looking at. This is the same data as the Review dashboard reader screen
+// (buildReviewDashboardHTML) — just laid out as a compact right-panel list
 // instead of taking over the reader.
 function renderReviewOverview() {
   const hasChanges = !!state.reviewChanges.length;
@@ -7705,6 +9327,16 @@ function scrollToBlock(el) {
   try { reader.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); } catch (_) {}
 }
 
+// Session 42 — stamps resolvedTs alongside reviewed. parseChanges already
+// reads attrs generically, so this rides along the same way closedTs does
+// on comments: old entries read '' and fall back to their post date, new
+// ones carry a real "when was this decided" for the Previous section.
+function stampResolved(attrs) {
+  return /resolvedTs="[^"]*"/.test(attrs)
+    ? attrs.replace(/resolvedTs="[^"]*"/, `resolvedTs="${new Date().toISOString().slice(0, 16)}"`)
+    : attrs.trimEnd() + ` resolvedTs="${new Date().toISOString().slice(0, 16)}" `;
+}
+
 // Flip one entry's reviewed attribute in the sidecar (no content change).
 async function setEntryReviewed(changesUrl, idx, value) {
   const txt = await readVaultFileOrNull(changesUrl);
@@ -7715,7 +9347,7 @@ async function setEntryReviewed(changesUrl, idx, value) {
     if (n !== idx) return m;
     if (/reviewed="[^"]*"/.test(attrs)) attrs = attrs.replace(/reviewed="[^"]*"/, `reviewed="${value}"`);
     else attrs = attrs.trimEnd() + ` reviewed="${value}" `;
-    return `<!-- WBCH ${attrs}-->`;
+    return `<!-- WBCH ${stampResolved(attrs)}-->`;
   });
   await spWriteFile(changesUrl, out);
 }
@@ -7746,7 +9378,7 @@ async function rejectChangeCore(fileUrl, changesUrl, idx) {
   const out = txt.replace(/<!-- WBCH ([^>]*?)-->/g, (m, attrs) => {
     n++;
     if (n < idx || !/reviewed="no"/.test(attrs)) return m;
-    return `<!-- WBCH ${attrs.replace(/reviewed="no"/, 'reviewed="rejected"')}-->`;
+    return `<!-- WBCH ${stampResolved(attrs.replace(/reviewed="no"/, 'reviewed="rejected"'))}-->`;
   });
   await spWriteFile(changesUrl, out);
   return true;
@@ -8199,7 +9831,6 @@ async function submitCreate() {
         'reviewed: false',
         `created: ${new Date().toISOString().slice(0, 10)}`,
         'due: ',
-        'section: ',
         `author: ${wbAuthor()}`,
         `edited-by: ${wbAuthor()}`,
         `edited-at: ${new Date().toISOString().slice(0, 16)}`,
@@ -8404,10 +10035,6 @@ async function togglePropsPanel() {
       <input class="pp-input" type="date" id="pp-due" value="${escHtml(fm.due || '')}"${ro}>
     </div>
     <div class="pp-row">
-      <div class="pp-label">Section</div>
-      <input class="pp-input" id="pp-section" value="${escHtml(fm.section || '')}"${ro}>
-    </div>
-    <div class="pp-row">
       <div class="pp-label">Author</div>
       <input class="pp-input" id="pp-author" value="${escHtml(fm.author || '')}"${ro}>
     </div>
@@ -8434,7 +10061,6 @@ async function togglePropsPanel() {
     };
     wire('pp-status',   'status');
     wire('pp-due',      'due');
-    wire('pp-section',  'section');
     wire('pp-author',   'author');
     wire('pp-reviewed', 'reviewed', el => el.checked ? 'true' : 'false');
     wire('pp-tags',     'tags',     el => `[${fmListToArr(el.value).join(', ')}]`);
@@ -9435,6 +11061,11 @@ const WB_TOOLS = [
     icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>' },
   { id: 'review', label: 'Review', home: 'right', countId: 'review-count', gated: true,
     icon: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>' },
+  // S45 — the first tool gated ABOVE Contributor. `tier` is explicit rather
+  // than a second boolean beside `gated`, because two booleans would encode a
+  // ladder position as a pair of flags and the next rung would need a third.
+  { id: 'usage', label: 'Usage', home: 'right', tier: 'admin',
+    icon: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>' },
 ];
 
 const RP_TABS   = WB_TOOLS.map(t => t.id);
@@ -9452,13 +11083,16 @@ function isToolOpen(id) { return !!dockOf(id); }
 // visibility rule the registry carries, and it is the SAME reviewAllowed()
 // the panes themselves use — not a second gate that could drift out of step
 // with the first (see the canEdit()/Properties hole closed in 0.27.0).
-function toolVisible(t) { return !t.gated || reviewAllowed(); }
+function toolVisible(t) {
+  if (t.tier) return atLeast(t.tier);   // S45 — explicit rung, e.g. Usage at Administrator
+  return !t.gated || reviewAllowed();
+}
 
 function dockBody(side) { return side === 'left' ? $('left-body') : $('rp-body'); }
 function dockRail(side) { return side === 'left' ? $('left-rail') : $('right-rail'); }
 
 function rpRenderFns() {
-  return { files: null, outline: renderOutlineTab, bookmarks: renderBookmarksTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null };
+  return { files: null, outline: renderOutlineTab, bookmarks: renderBookmarksTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null, usage: renderUsageTab };
 }
 
 function persistDocks() {
@@ -9520,7 +11154,7 @@ const PANE_FOOT_COMMENTS =
 const PANE_FOOT_REVIEW =
   '<div class="pane-foot"><button class="pane-foot-btn" id="btn-review-inbox" onclick="openChangesView()">' +
   '<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>' +
-  'All changes</button></div>';
+  'Review dashboard</button></div>';
 
 let rpClickTimers = {};
 const RP_DBLCLICK_MS = 220;
@@ -9879,6 +11513,109 @@ function makeStackResizable(handle, aboveEl, belowEl, aboveTab, belowTab, side) 
 function refreshRightPanel() {
   const fns = rpRenderFns();
   [...state.docks.left, ...state.docks.right].forEach(tab => { const fn = fns[tab]; if (fn) fn(); });
+}
+
+// ── Usage tab (S45) ──────────────────────────────────────────────
+//
+// Three lists, and the middle one is the point. Most read tells you what the
+// wiki is for; Never opened tells you what to delete or what nobody can find;
+// Gone quiet catches a page that used to earn its place and stopped, which is
+// almost always a page that went out of date.
+//
+// Top 5 shown, up to 25 behind "Show more" — Jayson's shape. The cap is real
+// and not a render trick: a list of 400 rows is not a report, it is the raw
+// data with extra steps.
+//
+// NO NAMES ANYWHERE IN HERE. usageAggregate() already dropped them, so this
+// function could not show one if it tried. That is deliberate: the rule is
+// enforced by the data shape rather than by every render remembering it.
+const USAGE_TOP     = 25;
+const USAGE_PREVIEW = 5;
+const USAGE_QUIET_DAYS = 30;
+let usageExpanded = {};   // section id → showing all 25
+
+function usageToggleSection(id) {
+  usageExpanded[id] = !usageExpanded[id];
+  renderUsageTab();
+}
+
+function usageSection(id, title, rows, render, emptyMsg) {
+  const capped = rows.slice(0, USAGE_TOP);
+  const open   = !!usageExpanded[id];
+  const shown  = open ? capped : capped.slice(0, USAGE_PREVIEW);
+  if (!capped.length) {
+    return `<div class="usage-sect"><div class="usage-sect-head">${escHtml(title)}</div>` +
+           `<div class="rp-empty usage-none">${escHtml(emptyMsg)}</div></div>`;
+  }
+  const more = capped.length > USAGE_PREVIEW
+    ? `<button class="usage-more" data-wb-usage-more="${escHtml(id)}">` +
+      (open ? 'Show less' : `Show more (${capped.length - USAGE_PREVIEW})`) + '</button>'
+    : '';
+  return `<div class="usage-sect">` +
+         `<div class="usage-sect-head">${escHtml(title)}<span class="usage-count">${capped.length}${rows.length > USAGE_TOP ? '+' : ''}</span></div>` +
+         shown.map(render).join('') + more + '</div>';
+}
+
+function usageRowBar(r, max) {
+  const pct = max > 0 ? Math.max(3, Math.round((r.opens / max) * 100)) : 3;
+  return `<div class="usage-row" data-wb-usage-open="${escHtml(r.path)}" title="${escHtml(r.path)}">` +
+         `<div class="usage-row-top"><span class="usage-name">${escHtml(usageLabel(r.path))}</span>` +
+         `<span class="usage-val">${r.opens}</span></div>` +
+         `<div class="usage-track"><div class="usage-fill" style="width:${pct}%"></div></div></div>`;
+}
+function usageRowPlain(r) {
+  return `<div class="usage-row" data-wb-usage-open="${escHtml(r.path)}" title="${escHtml(r.path)}">` +
+         `<div class="usage-row-top"><span class="usage-name">${escHtml(usageLabel(r.path))}</span>` +
+         `<span class="usage-meta">${escHtml(r.note || '')}</span></div></div>`;
+}
+function usageLabel(p) { return displayFileName(String(p).split('/').pop() || p); }
+
+// The log stores vault-relative paths, not mode urls — that is what lets a log
+// written in local mode still resolve if the vault ever moves to SharePoint.
+// So a row has to be matched back to a live file rather than opened directly.
+// A path with no match is a page that has since been deleted or renamed, which
+// is a perfectly ordinary thing for a usage log to remember; it just does
+// nothing rather than erroring.
+function usageOpenPath(key) {
+  const f = allMdFiles().find(x => auditPathKey(x.url) === key);
+  if (f) openFile(f.url, f.name);
+}
+
+async function renderUsageTab() {
+  const pane = $('rp-usage');
+  if (!pane) return;
+  if (!atLeast('admin')) { pane.innerHTML = ''; return; } // absent, not disabled
+  if (!vaultReady) { pane.innerHTML = paneHead('usage') + '<div class="rp-empty">Open a vault to see usage.</div>'; return; }
+
+  pane.innerHTML = paneHead('usage') + '<div class="rp-empty">Reading the logs…</div>';
+  let agg;
+  try { agg = await usageAggregate(); } catch (_) { agg = { rows: [], logCount: 0 }; }
+
+  const read = new Map(agg.rows.map(r => [r.path, r]));
+  const all  = allMdFiles().map(f => auditPathKey(f.url));
+
+  const mostRead = agg.rows.slice().sort((a, b) => b.opens - a.opens || a.path.localeCompare(b.path));
+  const never    = all.filter(p => !read.has(p)).sort().map(p => ({ path: p, note: 'never opened' }));
+
+  // "Gone quiet" is deliberately not "low count". A page with two opens that
+  // both happened last week is fine; a page with sixty opens and none this
+  // month is the one worth looking at.
+  const cutoff = usageDay(new Date(Date.now() - USAGE_QUIET_DAYS * 86400000));
+  const quiet  = agg.rows.filter(r => r.last < cutoff && r.opens >= 3)
+                         .sort((a, b) => b.opens - a.opens)
+                         .map(r => ({ path: r.path, note: `last read ${r.last}` }));
+
+  const max = mostRead.length ? mostRead[0].opens : 0;
+  const foot = agg.logCount
+    ? `<div class="usage-foot">Totals across ${agg.logCount} monthly log${agg.logCount === 1 ? '' : 's'}. No names are shown or stored in this view.</div>`
+    : `<div class="usage-foot">Nothing recorded yet. Reading is written to the vault when you leave the tab.</div>`;
+
+  pane.innerHTML = paneHead('usage', { count: mostRead.length || '' }) +
+    '<div class="usage-body">' +
+    usageSection('most',  'Most read',   mostRead, r => usageRowBar(r, max), 'Nothing recorded yet.') +
+    usageSection('never', 'Never opened', never,   usageRowPlain, 'Every page has been opened at least once.') +
+    usageSection('quiet', `Gone quiet (${USAGE_QUIET_DAYS}+ days)`, quiet, usageRowPlain, 'Nothing has gone quiet.') +
+    foot + '</div>';
 }
 
 // ── Outline tab ──────────────────────────────────────────────────
@@ -10711,20 +12448,36 @@ document.addEventListener('keydown', e => {
 //   Body text.
 //   <!-- /WB -->
 
+// Session 42 — attrs parsed generically (same pattern as parseChanges),
+// rather than four fixed capture groups. That's what lets closedTs ride
+// along as a fifth, optional attribute without a format migration: old
+// comments with no closedTs just read as '', new ones written by
+// closeComment() carry it. closedTs is when Previous/resolved needs a real
+// "when was this closed" instead of falling back to the post date.
 function parseComments(text) {
   const comments = [];
-  const re = /<!-- WB type="([^"]*)" status="([^"]*)" ts="([^"]*)" author="([^"]*)" -->\n?([\s\S]*?)<!-- \/WB -->/g;
+  const re = /<!-- WB ([^>]*?)-->\n?([\s\S]*?)<!-- \/WB -->/g;
   let m;
   while ((m = re.exec(text)) !== null) {
-    comments.push({ type: m[1], status: m[2], ts: m[3], author: m[4], body: m[5].trim() });
+    const attrs = {};
+    m[1].replace(/(\w[\w-]*)="([^"]*)"/g, (_, k, v) => { attrs[k] = v; return ''; });
+    comments.push({
+      type:     attrs.type     || 'note',
+      status:   attrs.status   || 'open',
+      ts:       attrs.ts       || '',
+      author:   attrs.author   || '?',
+      closedTs: attrs.closedTs || '',
+      body:     m[2].trim(),
+    });
   }
   return comments;
 }
 
 function serializeComments(comments) {
-  return comments.map(c =>
-    `<!-- WB type="${c.type}" status="${c.status}" ts="${c.ts}" author="${c.author}" -->\n${c.body}\n<!-- /WB -->\n\n`
-  ).join('');
+  return comments.map(c => {
+    const closed = c.closedTs ? ` closedTs="${c.closedTs}"` : '';
+    return `<!-- WB type="${c.type}" status="${c.status}" ts="${c.ts}" author="${c.author}"${closed} -->\n${c.body}\n<!-- /WB -->\n\n`;
+  }).join('');
 }
 
 const RP_HEADER_COMMENTS = () => paneHead('comments');
@@ -10748,13 +12501,14 @@ async function renderCommentsTab() {
   pane._wbComments    = comments;
   pane._wbCommentsUrl = commentsUrl;
 
-  const ICONS = { note: '📝', question: '❓', action: '✅', flag: '🚩' };
   let html = '<div class="comment-list">';
 
   if (comments.length) {
     comments.forEach((c, i) => {
-      const icon = ICONS[c.type] || '·';
+      const icon = WB_COMMENT_ICONS[c.type] || '·';
       const date = c.ts.replace('T', ' ').slice(0, 16);
+      const closedNote = (c.status === 'closed' && c.closedTs)
+        ? `<span style="color:var(--text-muted)"> · closed ${escHtml(c.closedTs.replace('T', ' '))}</span>` : '';
       const closeBtn = c.status === 'open'
         ? `<button class="comment-close-btn" onclick="event.stopPropagation();closeComment(${i})">Mark closed</button>`
         : '';
@@ -10762,7 +12516,7 @@ async function renderCommentsTab() {
       html += `<div class="comment-card wb-sel type-${escHtml(c.type)} status-${escHtml(c.status)}" data-ci="${i}" onclick="selectCommentCard(${i})">
         <div class="comment-meta">
           <span class="comment-type-badge">${icon} ${escHtml(c.type)}</span>
-          <span>${escHtml(c.author)} · ${escHtml(date)}</span>
+          <span>${escHtml(c.author)} · ${escHtml(date)}${closedNote}</span>
         </div>
         <div class="comment-body">${escHtml(c.body)}</div>
         ${closeBtn}
@@ -10774,13 +12528,18 @@ async function renderCommentsTab() {
 
   html += '</div>';
 
-  // Post form
+  // Post form. Escalate (S42) is Contributor+ only — it's a comment type
+  // that reuses this same panel rather than a walled-off channel, but the
+  // option itself only appears for the tier that can actually raise one.
+  // It always routes to Administrator; there's no per-person roster
+  // because tiers are shared passwords, not tied to identity.
   html += `<div class="comment-form">
     <select class="comment-select" id="comment-type-sel">
       <option value="note">📝 Note</option>
       <option value="question">❓ Question</option>
       <option value="action">✅ Action</option>
       <option value="flag">🚩 Flag</option>
+      ${reviewAllowed() ? '<option value="escalation">🚨 Escalate (to Administrator)</option>' : ''}
     </select>
     <textarea class="comment-textarea" id="comment-body-txt" placeholder="Add a comment…"></textarea>
     <button class="comment-submit" onclick="postComment()">Post</button>
@@ -10885,7 +12644,7 @@ async function closeComment(idx) {
   if (!comments || idx >= comments.length) return;
 
   const commentsUrl = pane._wbCommentsUrl;
-  comments[idx]     = { ...comments[idx], status: 'closed' };
+  comments[idx]     = { ...comments[idx], status: 'closed', closedTs: new Date().toISOString().slice(0, 16) };
 
   try {
     await spWriteFile(commentsUrl, serializeComments(comments));
@@ -10893,6 +12652,24 @@ async function closeComment(idx) {
     scanBadges(); // S14 — refresh comment badges
   } catch (e) {
     alert('Could not update comment: ' + e.message);
+  }
+}
+
+// Same close action, for the Session 42 review dashboard — its rows aren't
+// backed by a cached pane or state.reviewData, so re-read, patch, write.
+async function closeCommentAt(commentsUrl, idx) {
+  try {
+    const text = await readVaultFileOrNull(commentsUrl);
+    if (text === null) return false;
+    const comments = parseComments(text);
+    if (!comments[idx]) return false;
+    comments[idx] = { ...comments[idx], status: 'closed', closedTs: new Date().toISOString().slice(0, 16) };
+    await spWriteFile(commentsUrl, serializeComments(comments));
+    await scanBadges();
+    return true;
+  } catch (e) {
+    alert('Could not update comment: ' + e.message);
+    return false;
   }
 }
 
@@ -10947,7 +12724,7 @@ async function openReviewView() {
 function buildReviewHTML(data, filter) {
   if (!data) return '<p class="md-p" style="color:var(--text-muted);padding-top:40px">No data loaded.</p>';
 
-  const ICONS_TYPE = { note: '📝', question: '❓', action: '✅', flag: '🚩' };
+  const ICONS_TYPE = WB_COMMENT_ICONS;
 
   // Apply status filter
   const filtered = data.map(file => ({
@@ -11025,7 +12802,7 @@ async function closeCommentInReview(commentsUrl, fileName, idx) {
   const fileData = state.reviewData && state.reviewData.find(f => f.commentsUrl === commentsUrl);
   if (!fileData || idx >= fileData.comments.length) return;
 
-  fileData.comments[idx] = { ...fileData.comments[idx], status: 'closed' };
+  fileData.comments[idx] = { ...fileData.comments[idx], status: 'closed', closedTs: new Date().toISOString().slice(0, 16) };
 
   try {
     await spWriteFile(commentsUrl, serializeComments(fileData.comments));
@@ -11230,6 +13007,10 @@ document.addEventListener('visibilitychange', async () => {
     scanBadges();        // vault-wide comment + review counts
   } catch (e) { /* silent — the file's own error state will show on next explicit open */ }
 });
+
+// S45 — anything a hard browser close left behind is picked up here and goes
+// out with the next flush, rather than being lost or double-counted.
+usageLoadBuf();
 
 boot();
 initReaderScrollHandling();
