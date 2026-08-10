@@ -891,9 +891,10 @@
     /* Review diff strip (S14+) */
     #diff-bar, #audit-bar, #rvd-bar {
       flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-      padding: 4px 14px; border-top: 1px solid var(--border-strong);
+      padding: 7px 14px 4px; border-top: 1px solid var(--border-strong);
       background: var(--bg-sidebar); cursor: row-resize; user-select: none;
       font-size: 11.5px; color: var(--text-muted);
+      position: relative; /* anchors the ::before grab bead */
     }
     #rvd-bar .rvd-spacer { flex: 1; }
     #rvd-bar #rvd-title { font-weight: 600; color: var(--text-primary); }
@@ -2360,12 +2361,37 @@
     .rv-prev-toggle:hover { color: var(--text-primary); }
     .rv-prev-window { display: flex; gap: 4px; }
     /* v0.32.1 — moved out of the reader to the top of the bottom stack, so
-       the border that separates it from the reader is now above it. */
+       the border that separates it from the reader is now above it.
+       v0.32.2 — and it resizes the stack, so it gets the same cursor and the
+       same grab affordance as the detail bars below it. */
     #rv-queue-bar {
       display: none; align-items: center; gap: 10px; padding: 7px 16px;
       background: var(--accent-bg); border-top: 1px solid var(--accent);
       font-size: 12.5px; color: var(--text-primary); flex-shrink: 0;
+      cursor: row-resize; user-select: none; position: relative;
     }
+
+    /* Grab affordance for every bar in the bottom stack (v0.32.2). These bars
+       have carried cursor:row-resize since S14 and nothing else — a cursor
+       change you only discover by hovering the exact right row is not an
+       affordance, it is a secret. A short centred bead at the top edge says
+       "this edge moves" before the pointer gets there. Drawn on ::before so it
+       cannot disturb the flex row's own layout, and pointer-events:none so it
+       never becomes the mousedown target. */
+    #diff-bar::before, #audit-bar::before, #rvd-bar::before, #rv-queue-bar::before {
+      content: '';
+      position: absolute;
+      top: 2px; left: 50%;
+      width: 32px; height: 3px;
+      margin-left: -16px;
+      border-radius: 2px;
+      background: var(--text-muted);
+      opacity: 0.35;
+      pointer-events: none;
+      transition: opacity 0.15s;
+    }
+    #diff-bar:hover::before, #audit-bar:hover::before,
+    #rvd-bar:hover::before, #rv-queue-bar:hover::before { opacity: 0.85; }
     #rv-queue-bar button {
       padding: 3px 10px; font-size: 12px; font-family: inherit; cursor: pointer;
       border: 1px solid var(--accent); border-radius: var(--radius);
@@ -2688,7 +2714,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.32.1</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.32.2</button>
     </aside>
 
   </div>
@@ -4166,14 +4192,85 @@ async function writeClipboard(text) {
   } catch (_) { return false; }
 }
 
+// Two-flavour clipboard write (v0.32.2). The same copy carries text/html and
+// text/plain, so the destination picks: Forma, Outlook, Word and Teams take
+// the HTML and keep bold, italics, bullets, numbering and real hyperlinks; a
+// plain-text field takes the text and gets exactly what it got before.
+//
+// Three paths, narrowest first, because each one is unavailable somewhere the
+// app actually runs:
+//   1. ClipboardItem — the only API that can write two flavours at once.
+//      Needs a secure context, so absent on file://, and absent in older
+//      embedded WebViews.
+//   2. A contenteditable staging div + execCommand('copy'). Copying a
+//      SELECTION rather than a string is what makes this carry formatting;
+//      the textarea path below cannot, by construction, because a textarea
+//      has no formatting to carry.
+//   3. writeClipboard(plain) — the original path, unchanged.
+//
+// Returns true if anything landed. A failed copy stays silent rather than
+// breaking the click, same as before.
+async function writeClipboardRich(htmlStr, plain) {
+  try {
+    if (w_ClipboardItem() && navigator.clipboard && navigator.clipboard.write) {
+      const CI = w_ClipboardItem();
+      await navigator.clipboard.write([new CI({
+        'text/html':  new Blob([htmlStr], { type: 'text/html'  }),
+        'text/plain': new Blob([plain],   { type: 'text/plain' }),
+      })]);
+      return true;
+    }
+  } catch (_) { /* fall through */ }
+
+  try {
+    const host = document.createElement('div');
+    host.setAttribute('contenteditable', 'true');
+    host.innerHTML = htmlStr;
+    // Off-screen rather than display:none or opacity:0 — an element with no
+    // layout box cannot be selected, and a selection is the whole mechanism
+    // here. Left at -9999px so nothing flashes and nothing scrolls.
+    host.style.position = 'fixed';
+    host.style.left     = '-9999px';
+    host.style.top      = '0';
+    host.style.whiteSpace = 'pre-wrap';
+    document.body.appendChild(host);
+    const sel   = window.getSelection();
+    const saved = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+    const range = document.createRange();
+    range.selectNodeContents(host);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    let okLegacy = false;
+    try { okLegacy = document.execCommand('copy'); } catch (_) {}
+    sel.removeAllRanges();
+    if (saved) sel.addRange(saved); // put the user's own selection back
+    document.body.removeChild(host);
+    if (okLegacy) return true;
+  } catch (_) { /* fall through */ }
+
+  return await writeClipboard(plain);
+}
+
+// ClipboardItem is referenced through a lookup rather than named directly:
+// jsdom does not define it, and a bare reference to an undefined global throws
+// on evaluation rather than reading as falsy.
+function w_ClipboardItem() {
+  return (typeof window !== 'undefined' && window.ClipboardItem) ? window.ClipboardItem : null;
+}
+
 // [!copy] button (v0.19.2). Confirmation is on the button itself rather
 // than the floating tip used by folder links — the button is already the
 // thing the eye is on, and a tooltip that covers the first line of the
 // text you just copied is worse than useless here.
 async function copyCalloutBlock(idx, btn) {
-  const text = mdCopyBlocks[Number(idx)];
+  const payload = mdCopyBlocks[Number(idx)];
+  if (!payload) return;
+  // 0.32.2 — entries are {text, html}. Older shape was a bare string; kept
+  // readable so a half-applied update cannot make the button do nothing.
+  const text = typeof payload === 'string' ? payload : payload.text;
+  const rich = typeof payload === 'string' ? ''      : payload.html;
   if (typeof text !== 'string') return;
-  const okCopy = await writeClipboard(text);
+  const okCopy = rich ? await writeClipboardRich(rich, text) : await writeClipboard(text);
   const prev = btn.textContent;
   btn.textContent = okCopy ? 'Copied' : 'Press Ctrl+C';
   btn.classList.toggle('copied', okCopy);
@@ -4508,6 +4605,176 @@ function calloutPlainText(blocks) {
     }
   });
   return out.filter(s => s !== '').join('\n\n');
+}
+
+// ── [!copy] rich-text serializer (v0.32.2) ───────────────────────
+// The plain-text serializer above is unchanged and still ships as the
+// clipboard's text/plain flavour. This adds the text/html flavour beside it.
+//
+// Why both, rather than replacing one with the other: the two flavours answer
+// two different destinations, and the original v0.19.2 decision was right
+// about its own case and wrong about the general one. Pasting `**Bold**` into
+// an email is the outcome that feature exists to avoid — but throwing the
+// formatting away is only one way to avoid it, and it is the lossy way. A
+// rich-text destination (Forma, Outlook, Word, Teams) takes the HTML and keeps
+// the bold; a plain destination takes the text and gets exactly what it got
+// before. Nothing anywhere ever sees a Markdown marker.
+//
+// Deliberately NOT the rendered callout: no box, no tint, no title, no
+// WikiBase classes. What gets pasted is body content that inherits the
+// destination's own font, because a block of someone else's CSS dropped into
+// an email is the other way this feature could be annoying.
+//
+// Built from the same parsed blocks as the plain version, for the same reason
+// stated there: it does not depend on layout, on innerText, or on the reader
+// having painted.
+
+// Tags kept in the inline pass. Everything else is unwrapped to its own text,
+// which is what turns an internal wikilink (rendered as a dead <span>) into
+// plain words: there is no URL that would mean anything outside this app, so
+// carrying the link would produce a href nobody can follow.
+const CP_KEEP_INLINE = new Set(['STRONG', 'B', 'EM', 'I', 'DEL', 'S', 'U', 'CODE', 'BR', 'MARK', 'SUP', 'SUB']);
+
+function cpInlineHtml(md) {
+  const d = document.createElement('div');
+  d.innerHTML = renderInline(md || '');
+  cpCleanNode(d);
+  return d.innerHTML.trim();
+}
+
+// Depth-first, because unwrapping a node moves its children up into the parent
+// and they still have to be visited. Iterating a live childNodes list while
+// mutating it is how half a document silently survives a clean like this, so
+// the child list is snapshotted first.
+function cpCleanNode(node) {
+  [...node.childNodes].forEach(child => {
+    if (child.nodeType === 3) return; // text, nothing to do
+    if (child.nodeType !== 1) { child.remove(); return; }
+    cpCleanNode(child);
+
+    // An external link keeps its href and nothing else. Only http(s) and
+    // mailto survive — the same refusal the reader applies to a link scheme
+    // it will not follow, and a clipboard is not the place to relax it.
+    if (child.tagName === 'A') {
+      const href = child.getAttribute('href') || '';
+      if (/^(https?:|mailto:)/i.test(href)) {
+        [...child.attributes].forEach(a => { if (a.name !== 'href') child.removeAttribute(a.name); });
+        return;
+      }
+      cpUnwrap(child);
+      return;
+    }
+
+    if (!CP_KEEP_INLINE.has(child.tagName)) { cpUnwrap(child); return; }
+    [...child.attributes].forEach(a => child.removeAttribute(a.name));
+  });
+}
+
+function cpUnwrap(el) {
+  const parent = el.parentNode;
+  while (el.firstChild) parent.insertBefore(el.firstChild, el);
+  parent.removeChild(el);
+}
+
+// Markdown list markers carry the nesting in their indent, so the HTML has to
+// rebuild it. Two spaces per level is the reader's own rule; the ordered-vs-
+// unordered decision is per level, taken from the first item at that level.
+function cpListHtml(lines) {
+  const items = (lines || []).map(l => {
+    const m = l.match(/^(\s*)(?:([-*+]) \[([ xX])\] |([-*+]) |(\d+)[.)] )?([\s\S]*)$/);
+    if (!m) return { depth: 0, ordered: false, task: null, text: l };
+    return {
+      depth:   Math.floor((m[1] || '').replace(/\t/g, '  ').length / 2),
+      ordered: !!m[5],
+      task:    m[3] === undefined ? null : /[xX]/.test(m[3]),
+      text:    m[6] || '',
+    };
+  }).filter(it => it.text !== '');
+  if (!items.length) return '';
+
+  let html = '', depth = -1;
+  const stack = [];
+  items.forEach(it => {
+    while (depth > it.depth) { html += `</li></${stack.pop()}>`; depth--; }
+    if (depth === it.depth) html += '</li>';
+    while (depth < it.depth) {
+      const tag = it.ordered ? 'ol' : 'ul';
+      stack.push(tag);
+      html += `<${tag}>`;
+      depth++;
+    }
+    // A task checkbox becomes a box glyph rather than an <input>: a disabled
+    // input pastes as nothing in most editors, and the tick is the content.
+    const box = it.task === null ? '' : (it.task ? '☑ ' : '☐ ');
+    html += `<li>${box}${cpInlineHtml(it.text)}`;
+  });
+  while (stack.length) { html += `</li></${stack.pop()}>`; }
+  return html;
+}
+
+function calloutRichHtml(blocks) {
+  const out = [];
+  (blocks || []).forEach(b => {
+    switch (b.type) {
+      // Hard line breaks become <br>, the same decision the plain serializer
+      // makes for the same reason: in a copy block the author typed those
+      // breaks into text they mean to paste as-is.
+      case 'para': {
+        const lines = (b.lines && b.lines.length ? b.lines : [b.content]).map(cpInlineHtml);
+        out.push(`<p>${lines.join('<br>')}</p>`);
+        break;
+      }
+
+      // Real heading tags. A rich-text editor applies its own heading style,
+      // which is what someone pasting a heading is asking for.
+      case 'heading': {
+        const lvl = Math.min(Math.max(Number(b.level) || 2, 1), 6);
+        out.push(`<h${lvl}>${cpInlineHtml(b.content)}</h${lvl}>`);
+        break;
+      }
+
+      // Verbatim, escaped — a fenced block is the one place where the
+      // characters ARE the content, so no inline pass over it.
+      case 'code':
+        out.push(`<pre><code>${escHtml(b.content || '')}</code></pre>`);
+        break;
+
+      case 'hr':
+        out.push('<hr>');
+        break;
+
+      case 'list':
+        out.push(cpListHtml(b.lines));
+        break;
+
+      case 'table': {
+        const isSep = l => {
+          const parts = splitTableCells(l);
+          return parts.length > 0 && parts.every(c => /^:?-+:?$/.test(c));
+        };
+        const rows = (b.lines || []).filter(l => l.trim() && !isSep(l));
+        if (!rows.length) break;
+        // First row as <th>, matching how the reader renders it and how every
+        // destination expects a pasted table to arrive.
+        const body = rows.map((l, i) => {
+          const cell = i === 0 ? 'th' : 'td';
+          return '<tr>' + splitTableCells(l)
+            .map(c => `<${cell}>${cpInlineHtml(c)}</${cell}>`).join('') + '</tr>';
+        }).join('');
+        out.push(`<table border="1" cellspacing="0" cellpadding="4">${body}</table>`);
+        break;
+      }
+
+      case 'blockquote':
+      case 'callout':
+        out.push(calloutRichHtml(b.body));
+        break;
+
+      default:
+        break;
+    }
+  });
+  return out.filter(s => s !== '').join('\n');
 }
 
 // ── Table row splitter ───────────────────────────────────────────
@@ -5056,9 +5323,13 @@ function renderSingleBlock(block, seenIds) {
       // button that copies nothing.
       let copyBtn = '';
       if (block.cType === 'COPY') {
+        // 0.32.2 — both flavours are built here, at render time, and parked
+        // together. The plain one still decides whether there is anything to
+        // copy at all: an empty body gets no button rather than a button that
+        // copies nothing, and emptiness is a question about text, not markup.
         const text = calloutPlainText(block.body);
         if (text) {
-          const idx = mdCopyBlocks.push(text) - 1;
+          const idx = mdCopyBlocks.push({ text, html: calloutRichHtml(block.body) }) - 1;
           copyBtn = `<button type="button" class="md-callout-copy-btn" data-wb-copyblk="${idx}" title="Copy this text">Copy</button>`;
         }
       }
@@ -9704,36 +9975,85 @@ function highlightChangedLines(entry) {
 // matching. Buttons inside the bar are excluded from the drag, not just the
 // close button: the bar is a control row that happens to also be a grip, and
 // a mousedown that starts on Accept must never turn into a resize.
-function makeStripResizable(barId, stripId, storageKey) {
+//
+// v0.32.2: and the grip was in the wrong place, which made the whole thing
+// read as broken. The bottom stack renders in a fixed order —
+//
+//     reader
+//     #rv-queue-bar     the walk bar, shown while walking the dashboard queue
+//     #diff-bar / #audit-bar / #rvd-bar   whichever detail surface is open
+//     the strip
+//
+// so when a walk is in progress the boundary between the reader and the review
+// area is the WALK BAR, and that is the edge anyone reaches for. It had no
+// resize behaviour, and the real grip sat one row lower on a bar that does not
+// look like a divider. Reported, correctly, as "I cannot adjust the height".
+//
+// Every bar in the stack is a grip now, and each one resolves the visible
+// strip at mousedown rather than being bound to one at wiring time — the walk
+// bar sits above whichever surface is open and cannot know which that is until
+// the drag starts. `resolve` returns { el, key } or null.
+function makeStripResizable(barId, resolve) {
   const bar = $(barId);
   if (!bar) return;
-  let dragging = false, startY = 0, startH = 0;
+  let dragging = false, startY = 0, startH = 0, target = null;
   bar.addEventListener('mousedown', e => {
-    if (e.target.closest('button, input, label, select')) return;
-    dragging = true; startY = e.clientY; startH = $(stripId).offsetHeight;
+    if (e.target.closest('button, input, label, select, a')) return;
+    target = resolve();
+    if (!target || !target.el) return; // nothing open below — nothing to size
+    dragging = true; startY = e.clientY; startH = target.el.offsetHeight;
     e.preventDefault();
   });
   document.addEventListener('mousemove', e => {
-    if (!dragging) return;
+    if (!dragging || !target) return;
     const h = Math.min(Math.max(startH + (startY - e.clientY), 60), window.innerHeight * 0.6);
-    $(stripId).style.height = h + 'px';
+    target.el.style.height = h + 'px';
   });
   document.addEventListener('mouseup', () => {
     if (!dragging) return;
     dragging = false;
-    persist(storageKey, $(stripId).offsetHeight);
+    if (target && target.el) persist(target.key, target.el.offsetHeight);
+    target = null;
   });
-  // Restore the height this strip was last dragged to. The diff strip never
-  // did this — it persisted a height on every drag and read it back nowhere,
-  // so the setting existed and did nothing for four releases.
-  const saved = localStorage.getItem(storageKey);
-  if (saved) {
-    const h = parseInt(JSON.parse(saved), 10);
-    if (h > 0) $(stripId).style.height = Math.min(h, window.innerHeight * 0.6) + 'px';
-  }
 }
-makeStripResizable('diff-bar', 'diff-strip', 'wb_diff_h');
-makeStripResizable('rvd-bar',  'rvd-strip',  'wb_rvd_h');
+
+// The one strip currently on screen, or null. Order matches the markup, and
+// only one detail surface is ever open at a time — rvOpenItem closes the
+// others before it opens one.
+function visibleBottomStrip() {
+  const strips = [['diff-strip', 'wb_diff_h'], ['rvd-strip', 'wb_rvd_h']];
+  for (const [id, key] of strips) {
+    const el = $(id);
+    if (el && el.style.display !== 'none' && el.offsetParent !== null) return { el, key };
+  }
+  // Nothing painted yet (a wiring-time or headless call) — fall back to the
+  // first one whose display says it is open, so this is still answerable
+  // before layout exists.
+  for (const [id, key] of strips) {
+    const el = $(id);
+    if (el && el.style.display === 'block') return { el, key };
+  }
+  return null;
+}
+
+// Restore each strip to the height it was last dragged to. The diff strip
+// never did this — it persisted a height on every drag and read it back
+// nowhere, so the setting existed and did nothing for four releases.
+function restoreStripHeights() {
+  [['diff-strip', 'wb_diff_h'], ['rvd-strip', 'wb_rvd_h']].forEach(([id, key]) => {
+    const el = $(id);
+    if (!el) return;
+    const saved = localStorage.getItem(key);
+    if (!saved) return;
+    const h = parseInt(JSON.parse(saved), 10);
+    if (h > 0) el.style.height = Math.min(h, window.innerHeight * 0.6) + 'px';
+  });
+}
+
+makeStripResizable('diff-bar',     () => ({ el: $('diff-strip'), key: 'wb_diff_h' }));
+makeStripResizable('rvd-bar',      () => ({ el: $('rvd-strip'),  key: 'wb_rvd_h'  }));
+makeStripResizable('rv-queue-bar', visibleBottomStrip);
+restoreStripHeights();
 
 // ── Review detail strip (v0.32.1) ─────────────────────────────────
 // The bottom surface for the frontmatter item types — flagged, due, new file,

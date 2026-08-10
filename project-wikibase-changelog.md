@@ -10,6 +10,46 @@
 
 ---
 
+## 0.32.2 — 2026-08-10
+
+**Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/review-bugfix-0321.test.js`, `supporting/tests/README.md`, `README.md`, `help.md`, `help-edit.md`
+
+*Two follow-ups from using 0.32.1. The Copy callout now puts formatted text on the clipboard, and the review strip's resize grip moved to the edge people actually grab.*
+
+### The Copy button carries formatting
+
+Reported as "it's not taking the bold and returns, it wraps the text." The plain-text serializer was doing exactly what v0.19.2 built it to do, and the line breaks were in fact intact in the payload — what looked like wrapping was the destination reflowing plain text, because plain text carries no structure for Outlook, Word or a web editor to respect.
+
+The v0.19.2 decision was right about its own case and too narrow about the general one. Pasting `**Bold**` into an email is the outcome that feature exists to avoid, but discarding the formatting is only one way to avoid it, and it is the lossy way.
+
+**The clipboard now carries two flavours from one copy.** `text/html` for destinations that can take it — Autodesk Forma, Outlook, Word, Teams — with bold, italics, bullet lists, numbered lists, tables, headings, task glyphs and real hyperlinks. `text/plain` for everything else, byte-for-byte what it produced before. **No destination anywhere sees a Markdown marker**, which was the original point and is preserved.
+
+What the rich flavour deliberately does not carry: the callout's box, tint or title. It is body content that inherits the destination's own font, because a block of someone else's CSS dropped into an email is the other way this feature could be annoying.
+
+Two smaller calls inside it. **An internal wikilink becomes plain words**, not a link — there is no URL that means anything outside the app, so carrying one would produce a href nobody can follow; an external `[text](url)` keeps its real href and loses everything else. **A task checkbox becomes a ☐/☑ glyph** rather than an `<input>`, because a disabled input pastes as nothing in most editors and the tick is the content.
+
+Three write paths, narrowest first, because each is unavailable somewhere the app runs: `ClipboardItem` (the only API that writes two flavours at once, and it needs a secure context, so absent on `file://`); a contenteditable staging element with `execCommand`, which carries formatting because it copies a *selection* rather than a string; then the original plain write. **The old textarea fallback could never have carried formatting** — a textarea has none to carry — which is why the middle path had to be added rather than reused.
+
+Underline is still not available. That is a WikiBase limit rather than a Markdown one: the app escapes all raw HTML, so Obsidian's `<u>text</u>` shows as literal text here. Left alone this release.
+
+### The resize grip moved to the edge you grab
+
+The strip was resizable in 0.32.1 and tested green, and it still could not be resized in practice. The bottom stack renders reader → walk bar → detail bar → strip, so while you are walking the review queue **the visual boundary between the reader and the review area is the walk bar** — and that is the edge anyone reaches for. It had no resize behaviour, and the real grip sat one row lower on a bar that does not look like a divider.
+
+Every bar in the stack is a grip now. The walk bar resolves whichever strip is open **at mousedown** rather than being bound to one when it is wired, because it sits above a surface that changes with the item type and cannot know which is open until the drag starts.
+
+Each bar also draws a short centred bead at its top edge. These bars have carried `cursor: row-resize` and nothing else since S14, and **a cursor change you only discover by hovering the exact right row is not an affordance, it is a secret.**
+
+Heights are remembered per strip, which 0.32.1 wrote and this release fixes the reading of — `restoreStripHeights()` now applies both on load.
+
+### Testing
+
+`copy-callout.test.js` 57 → 81 checks; the existing plain-text assertions are untouched, which is half the claim: neither flavour may move the other. `review-bugfix-0321.test.js` 68 → 77, driving a **real drag from the walk bar** against faked geometry, then switching which detail surface is open and dragging the same bar again — binding it to one strip at wiring time would pass the first check and fail the second.
+
+Both fixes were reverted in a scratch copy and confirmed to turn their suites red: the rich payload takes 14 checks with it, the walk-bar grip 3.
+
+---
+
 ## 0.32.1 — 2026-08-10
 
 **Changed:** `index.html`, `supporting/tests/review-bugfix-0321.test.js` (new), `supporting/tests/docks.test.js`, `supporting/tests/README.md`, `README.md`, `help.md`, `help-edit.md`
