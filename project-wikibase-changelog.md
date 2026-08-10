@@ -10,6 +10,60 @@
 
 ---
 
+## 0.32.1 — 2026-08-10
+
+**Changed:** `index.html`, `supporting/tests/review-bugfix-0321.test.js` (new), `supporting/tests/docks.test.js`, `supporting/tests/README.md`, `README.md`, `help.md`, `help-edit.md`
+
+*Four reported defects. Three of them had been failing silently for releases — a measurement that always returned its own maximum, a badge painted only by a code path that ran once per scan, and a property check whose result was computed and thrown away.*
+
+### Double-click on a resize handle now fits to the content
+
+Double-clicking a handle is supposed to widen the panel to its longest visible row. It widened to the cap instead, every time, on both sides.
+
+The measurement asked each row for its `scrollWidth` while the panel was temporarily set to maximum. But every row class in that list is a block or a flex container, so it stretches to whatever it is given: the answer was always the panel's width, which was always the maximum. Rows are now measured at `width: max-content`, which is the only phrasing of the question that means *how wide do you want to be*, and restored in the same frame.
+
+The right panel looked like a different bug and was the same one plus a second miss. Dragging a panel wide resets the opposite panel to its default first, so the reader-minimum ceiling is computed against a sane neighbour. Double-click skipped that reset, so with the left panel already expanded the ceiling for the right one landed just above the snap threshold and the panel appeared to collapse rather than fit. Same reset, both gestures.
+
+The cap moved from 480 to 720 for headroom. The reader minimum was always the real limit; this only raises what the limit is allowed to use.
+
+Also found while checking the row list against the markup: `.ot-row` has never existed. The Outline pane's row is `.rp-outline-item`, so the Outline has been fitting to nothing but its own header since the feature shipped. **A selector that matches nothing is silent** — the same failure shape as the three bugs above.
+
+### One bottom stack for every review item type
+
+Clicking an item on the Review dashboard put a single line at the *top* of the reader — the walk bar — and, for four of the eight item types, nothing at the bottom at all. Flagged, Due, New file and Missing properties opened the Properties flyout in the opposite corner instead. So the review surface was a one-line strip in the wrong place.
+
+The walk bar moved out of the reader to the top of the bottom stack. Those four types now get a bottom detail strip: the file's whole property block, the absent keys named as **not set** rather than left as blank cells, and that type's one action. The flyout is still one button away for actually editing a value.
+
+Both strips are wired by one `makeStripResizable()` rather than two copies of a closure — a copy is how two things that must match stop matching. It also fixed two things the diff strip had on its own: a mousedown starting on Accept could turn into a resize, and the dragged height was persisted on every drag and read back nowhere.
+
+Walking the queue used to `soloRPTab()` the Review pane, silently tearing down the user's pane layout one item at a time. It opens the tool now.
+
+### The highlight says what it found
+
+`highlightChangedLines()` returns its hit count and the strip title reports it. There are two legitimate reasons nothing lights up — the change was a pure deletion, so the text is no longer in the file to highlight, and a rewritten line that no longer matches any rendered block — and both used to be indistinguishable from a broken feature. The changed-block tint also gained the gutter bar the vault-audit markers use; a bare wash of `--co-green-bg` on a light theme is almost the reader background.
+
+### The Review pane shows the board, and the badge stops disappearing
+
+S41 made the pane per-file and moved the vault-wide list to the "All changes" page. With no file open the pane read *"Open a file to see its changes"* while the dashboard said nineteen items were waiting, so a tool with a **19** on its icon opened onto an empty panel. The vault-wide board is back at the top of the pane, the open file's own changes sit beneath it.
+
+The badge itself: `renderRails()` rebuilds the count spans hidden and reading `0`, and the only thing that ever wrote a real number into them was the end of a full vault scan. So the count was correct right after a scan and blank after **any** dock action in between. Counts are derived state; the render that builds the element they live in is the render that fills it. `paintRailCounts()` is now that one place, called by both.
+
+`renderReviewOverview()` and its two action helpers are deleted. S41 left a comment saying the function was "still called by the All changes page." It was not — nothing had called it since, and a suite asserted it existed, so a test was keeping ninety lines of unreachable code alive.
+
+### Every declared property gap is reported
+
+`OPTIONAL_PROPS` was filtered, attached to the row, and only ever *seen* on a file that was already failing on a required key. A file carrying all four required keys and none of the optional ones was reported nowhere. Since `must-read` and `onboarding` arrived with What's New in 0.23.0, that is every file predating it — exactly the population the check exists to find. It is loud on first run by design, and **Fill all** answers the whole list in one action.
+
+The check is now **independent of the cause chain, the same exception Due already gets**, and this is the load-bearing part. The obvious fix is to widen the required-key branch to include the optional ones. That branch is also where the vault audit takes its delta and where Flagged is decided, and on a vault that has never been swept every file has an optional gap — so widening it would have taken the whole vault out of the audit on the one run where the audit matters most. Incompleteness is a fact about a file, not a decision about it, so it does not compete for the file's one cause. New file rows now name their absent keys too, still as one row and one cause.
+
+### Testing
+
+`review-bugfix-0321.test.js`, 68 checks. jsdom does no layout, so a sizing function tested against it passes whatever it returns; the suite fakes `getBoundingClientRect` on the rows under test and asserts the panel comes out **364px** wide, not that the function ran. **Each of the four fixes was reverted in a scratch copy and the suite confirmed to go red for that fix alone** — the point being that three of these bugs were silent wrong answers, and a suite that only proves the fix is present would not have caught any of them in the first place.
+
+Two assertions in `docks.test.js` were rewritten. They searched the whole file with a character-distance window (`getReaderMin()` within 1400 characters of `fitPanelToContent`), so adding comments to the function broke a passing test without changing a behaviour. They read the function's own source now.
+
+---
+
 ## 0.32.0 — 2026-08-07
 
 **Changed:** `index.html`, `supporting/tests/usage-analytics.test.js` (new), `supporting/tests/README.md`, `help.md`

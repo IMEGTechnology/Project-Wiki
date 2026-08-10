@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.32.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.32.1**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 

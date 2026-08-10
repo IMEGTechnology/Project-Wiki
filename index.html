@@ -889,12 +889,27 @@
       min-height: 0;
     }
     /* Review diff strip (S14+) */
-    #diff-bar, #audit-bar {
+    #diff-bar, #audit-bar, #rvd-bar {
       flex-shrink: 0; display: flex; align-items: center; gap: 8px;
       padding: 4px 14px; border-top: 1px solid var(--border-strong);
       background: var(--bg-sidebar); cursor: row-resize; user-select: none;
       font-size: 11.5px; color: var(--text-muted);
     }
+    #rvd-bar .rvd-spacer { flex: 1; }
+    #rvd-bar #rvd-title { font-weight: 600; color: var(--text-primary); }
+    #rvd-strip {
+      flex-shrink: 0; height: 180px; overflow-y: auto;
+      padding: 10px 16px; background: var(--bg-sidebar);
+      font-size: 12.5px; color: var(--text-secondary);
+    }
+    /* Property table inside the detail strip. A missing key is stated as
+       missing rather than left blank — a blank cell and an absent key look
+       identical, and the whole point of this strip is telling them apart. */
+    .rvd-props { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; align-items: baseline; }
+    .rvd-key   { font-weight: 600; color: var(--text-primary); }
+    .rvd-val   { color: var(--text-secondary); word-break: break-word; }
+    .rvd-gap   { color: var(--co-red-txt); font-style: italic; }
+    .rvd-note  { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11.5px; line-height: 1.6; }
     #audit-bar .audit-dim { color: var(--text-muted); font-weight: 400; }
     #audit-bar .audit-ghost-toggle { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-left: 4px; }
     #diff-bar .diff-close, #audit-bar .diff-close {
@@ -906,7 +921,15 @@
       flex-shrink: 0; height: 180px; overflow-y: auto;
       padding: 8px 16px; background: var(--bg-sidebar);
     }
-    .wb-changed { background: var(--co-green-bg); border-radius: 3px; box-shadow: 0 0 0 3px var(--co-green-bg); }
+    /* v0.32.1 — was a bare tint with a 3px bleed, which on a light theme is
+       almost the reader background and read as "nothing happened". Now it
+       carries the same gutter bar the vault-audit markers use, so a changed
+       block is identifiable at a glance and by the same visual language. */
+    .wb-changed {
+      background: var(--co-green-bg); border-radius: 3px;
+      box-shadow: inset 3px 0 0 var(--co-green-bd), 0 0 0 3px var(--co-green-bg);
+      scroll-margin-top: 60px;
+    }
 
     /* S15 — vault audit marking. Three kinds, three colours, and the
        gutter glyph repeats the colour so this still reads on a screen
@@ -2175,18 +2198,14 @@
     .backlink-item:hover { background: var(--hover); color: var(--accent); }
     .backlink-note { padding: 8px 12px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 4px; line-height: 1.5; }
 
-    /* Review tab — vault-wide overview (File changes / New files), always
-       on top of the per-file card list. Rows reuse .backlink-item. */
+    /* Review pane — the vault-wide board that sits above the per-file card
+       list. Rows reuse .backlink-item. v0.32.1 dropped .rv-ov-name,
+       .rv-ov-count, .rv-ov-accept and .rv-ov-reject along with the dead
+       renderReviewOverview() that was their only writer. */
     .rv-ov-label {
       padding: 10px 12px 4px;
       font-size: 10px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .rv-ov-name {
-      flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .rv-ov-count {
-      font-size: 11px; color: var(--text-muted); flex-shrink: 0;
     }
     .rv-ov-btn {
       flex-shrink: 0; padding: 2px 7px; font-size: 11px; font-family: inherit;
@@ -2194,8 +2213,11 @@
       background: transparent; color: var(--text-secondary); cursor: pointer;
     }
     .rv-ov-btn:hover { color: var(--text-primary); }
-    .rv-ov-accept:hover { border-color: var(--co-green-bd); color: var(--co-green-txt); }
-    .rv-ov-reject:hover { border-color: var(--co-red-bd); color: var(--co-red-txt); }
+    /* Board rows in the pane. Long note names wrap onto the gap line rather
+       than widening the pane, and double-clicking the resize handle is what
+       expands it to the full name (see FIT_ROW_SEL). */
+    .rvp-row { cursor: pointer; }
+    .rvp-row:hover { background: var(--hover); }
 
     /* Vault-wide entry points (S41). These used to be an "inbox strip" that
        sat OUTSIDE the panes — first above them (where showing it pushed every
@@ -2337,9 +2359,11 @@
     }
     .rv-prev-toggle:hover { color: var(--text-primary); }
     .rv-prev-window { display: flex; gap: 4px; }
+    /* v0.32.1 — moved out of the reader to the top of the bottom stack, so
+       the border that separates it from the reader is now above it. */
     #rv-queue-bar {
       display: none; align-items: center; gap: 10px; padding: 7px 16px;
-      background: var(--accent-bg); border-bottom: 1px solid var(--accent);
+      background: var(--accent-bg); border-top: 1px solid var(--accent);
       font-size: 12.5px; color: var(--text-primary); flex-shrink: 0;
     }
     #rv-queue-bar button {
@@ -2548,8 +2572,6 @@
       <div id="reader-fade" aria-hidden="true"></div>
       <main id="reader">
         <div class="reader-empty" id="reader-empty">Select a file to read</div>
-        <!-- S42 Review dashboard — Next-item walk bar -->
-        <div id="rv-queue-bar" style="display:none"></div>
         <div id="reader-content"></div>
         <!-- S9 Editor mode -->
         <div id="editor" style="display:none">
@@ -2565,6 +2587,15 @@
           </div>
         </div>
       </main>
+      <!-- Review bottom stack (v0.32.1). Everything the review flow shows
+           about the item you clicked lives below the reader, in one column,
+           in a fixed order: the walk bar first, then whichever detail surface
+           that item type uses. It used to be split — the walk bar pinned to
+           the TOP of the reader as a single line, the diff at the bottom, and
+           three of the eight item types showing nothing at the bottom at all
+           (they opened the Properties flyout in the opposite corner instead).
+           One place to look, and every one of them drag-resizable. -->
+      <div id="rv-queue-bar" style="display:none"></div>
       <!-- S14+ Review diff strip (adjustable) -->
       <div id="diff-bar" style="display:none">
         <span id="diff-title">Change</span>
@@ -2586,6 +2617,21 @@
         <label class="audit-ghost-toggle"><input type="checkbox" checked onchange="auditToggleGhosts(this.checked)"> Show deleted</label>
         <button class="diff-close" onclick="auditCloseBar()" title="Close" aria-label="Close review bar">✕</button>
       </div>
+
+      <!-- v0.32.1 — the bottom surface for the four item types that had none:
+           flagged, due, new file, missing properties. All four are frontmatter
+           fixes, so the strip lists the keys and their current values and
+           carries that type's one action. The Properties flyout still exists
+           and still edits; this is the read-and-act view the walk needs, in
+           the same corner as every other review detail. -->
+      <div id="rvd-bar" style="display:none">
+        <span id="rvd-title">Review item</span>
+        <span class="rvd-spacer"></span>
+        <button class="ed-btn rv-accept-btn" id="rvd-action" onclick="rvdAction()"></button>
+        <button class="ed-btn" id="rvd-props" onclick="rvdOpenProps()">Edit properties</button>
+        <button class="diff-close" onclick="closeRvDetail()" title="Close" aria-label="Close review detail">✕</button>
+      </div>
+      <div id="rvd-strip" style="display:none"></div>
     </div>
 
     <!-- Right panel resize handle -->
@@ -2642,7 +2688,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.32.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.32.1</button>
     </aside>
 
   </div>
@@ -2948,6 +2994,7 @@ const state = {
   rvPrevOpen:      false,   // Previous/resolved section collapsed by default
   rvPrevAll:       false,   // false = last 30 days, true = everything
   rvFlatQueue:     [],      // band-ordered items, built fresh each dashboard render
+  rvPaneQueue:     [],      // the same list as rendered in the right-panel Review pane (v0.32.1)
   rvQueue:         null,    // active Next-item walk, or null when not navigating from the dashboard
   rvQueuePos:      -1,
   user:            null,  // S15 — {name, email, bookmarks, favorites} once identity is
@@ -5496,7 +5543,8 @@ function updateBackButtons() {
 // ── Open file ────────────────────────────────────────────────────
 async function openFile(url, name) {
   if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
-  if (state.activeUrl !== url) closeDiffStrip(); // S14+ — diff belongs to the old file
+  // S14+ — the bottom stack describes the file being left, so it goes with it.
+  if (state.activeUrl !== url) { closeDiffStrip(); closeRvDetail(); }
 
   // Back/forward history (session-only, resets on reload) — same rules as
   // a browser tab. A Back click moves the page being left onto the
@@ -5672,6 +5720,30 @@ function fitToolbarLabel(containerId, labelSel, groupId) {
 // Measured against a temporarily-widened panel because every row in here
 // ellipsises at the panel's current width — asking a clipped row how wide it
 // wants to be always answers "exactly as wide as I already am".
+//
+// v0.32.1: and widening the panel is not enough on its own. Every row class
+// below is a BLOCK or a FLEX container, so it stretches to whatever it is
+// given — its scrollWidth is the panel's width, not its text's width, and the
+// answer came back "exactly the maximum" every single time. That is the bug
+// behind "it expands fully instead of to the content". Each candidate is now
+// measured at `width: max-content`, which is the only question that actually
+// means "how wide do you want to be": the flex row shrinks to icon + label +
+// badge and reports that. Restored immediately afterwards, inside the same
+// frame, so nothing reflows visibly.
+//
+// FIT_ROW_SEL is shared with nothing else on purpose — it is the list of
+// things that carry a NAME a person could be trying to read in full. Adding a
+// container to it re-introduces the bug above.
+// Every entry below was checked against the markup. `.ot-row` used to be in
+// this list and has never existed — the outline's row is `.rp-outline-item`.
+// A selector that matches nothing is silent, so the Outline pane has been
+// fitting to nothing but its header this whole time.
+const FIT_ROW_SEL = [
+  '.file-row', '.folder-row', '.rp-outline-item', '.bm-row', '.search-hit',
+  '.backlink-item', '.comment-card', '.rv-file-name', '.rvp-row',
+  '.ph-label', '.sbt-label', '.wn-row', '.usage-row',
+].join(', ');
+
 function fitPanelToContent(panel, side, max) {
   const prevW    = panel.style.width;
   const prevMinW = panel.style.minWidth;
@@ -5681,16 +5753,21 @@ function fitPanelToContent(panel, side, max) {
   panel.style.minWidth = max + 'px';
 
   const panelLeft = panel.getBoundingClientRect().left;
+  const rows = [...panel.querySelectorAll(FIT_ROW_SEL)]
+    .filter(el => el.offsetParent || el.offsetWidth);
+  const prevRowW = rows.map(el => el.style.width);
+  rows.forEach(el => { el.style.width = 'max-content'; });
+
   let widest = 0;
-  panel.querySelectorAll(
-    '.folder-name, .file-name, .file-row, .folder-row, .ot-row, .bm-row, .search-hit, .backlink-item, .ph-label, .sbt-label'
-  ).forEach(el => {
-    if (!el.offsetParent && el.offsetWidth === 0) return; // not rendered
+  rows.forEach(el => {
     const r = el.getBoundingClientRect();
-    const w = (r.left - panelLeft) + (el.scrollWidth || r.width);
+    // Natural width plus the row's own indent, so a file three folders deep
+    // measures from the panel edge rather than from where it happens to start.
+    const w = (r.left - panelLeft) + Math.max(r.width, el.scrollWidth);
     if (w > widest) widest = w;
   });
 
+  rows.forEach((el, i) => { el.style.width = prevRowW[i]; });
   panel.style.width    = prevW;
   panel.style.minWidth = prevMinW;
   panel.style.transition = prevTran;
@@ -5700,7 +5777,19 @@ function fitPanelToContent(panel, side, max) {
   w = Math.min(max, w);
 
   // Never push the reader below its minimum — same ceiling the drag enforces.
+  // v0.32.1: and the same courtesy the drag already extends, which this used
+  // to skip. Dragging one panel wide first resets the OTHER panel to default
+  // so the ceiling below is computed against a sane neighbour. Double-click
+  // did not, so with the left panel already expanded the ceiling for the right
+  // one landed a few pixels above the snap threshold and the panel appeared to
+  // collapse rather than fit. Same reset, same reason, both gestures.
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
+  const otherKey   = side === 'left' ? 'wb_rp_width'   : 'wb_sb_width';
+  if (!otherPanel.classList.contains('closed') && otherPanel.offsetWidth > DEFAULT_PANEL_W) {
+    otherPanel.style.width    = DEFAULT_PANEL_W + 'px';
+    otherPanel.style.minWidth = DEFAULT_PANEL_W + 'px';
+    persist(otherKey, DEFAULT_PANEL_W);
+  }
   const bodyWidth  = $('body').offsetWidth;
   const otherWidth = otherPanel.classList.contains('closed') ? 0 : otherPanel.offsetWidth;
   w = Math.min(w, bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin());
@@ -5710,7 +5799,13 @@ function fitPanelToContent(panel, side, max) {
   panel.style.minWidth = w + 'px';
 }
 
-function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max = 480, onResize) {
+// v0.32.1: was 480. A long note name three folders deep needs more room than
+// that before fit-to-content stops being clipped by its own cap, and the
+// reader-minimum ceiling below is the real limit anyway — it always was. This
+// only raises the headroom the ceiling is allowed to use.
+const PANEL_MAX_W = 720;
+
+function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max = PANEL_MAX_W, onResize) {
   const handle     = $(handleId);
   const panel      = $(panelId);
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
@@ -6998,7 +7093,14 @@ async function scanBadges() {
           auditNow[auditPathKey(f.url)] = { hash: rec.hash, sections: rec.sections || [] };
         }
         if (!fm.status) {
-          audit.push({ name: displayFileName(f.name), url: f.url });
+          // v0.32.1 — a New file row used to be a bare name. It stays one row
+          // and one cause, but it now says WHICH properties are absent, so the
+          // row answers "what is wrong with this file" without opening it.
+          audit.push({
+            name: displayFileName(f.name), url: f.url,
+            required: REQUIRED_PROPS.filter(k => !(k in fm)),
+            optional: OPTIONAL_PROPS.filter(k => !(k in fm)),
+          });
         } else if (reviewAllowed()) {
           // Session 42 fields are Contributor+ data, same gate as content
           // changes above — not rendered below Contributor, so no reason to
@@ -7009,8 +7111,30 @@ async function scanBadges() {
           // New file or a Flagged item — one row per file per cause.
           const reqMissing = REQUIRED_PROPS.filter(k => !(k in fm));
           const optMissing = OPTIONAL_PROPS.filter(k => !(k in fm));
-          if (reqMissing.length) {
+          // v0.32.1 — an incomplete property block is now reported whether the
+          // absent key is required or optional, and it is checked INDEPENDENTLY
+          // of the cause chain below, the same exception Due already gets.
+          //
+          // Both halves of that matter. optMissing was computed, attached to
+          // the row, and only ever seen on a file that was already failing on a
+          // required key, so a file carrying all four required keys and none of
+          // the optional ones was reported nowhere — and since must-read and
+          // onboarding arrived with What's New, that is every file predating
+          // it, which is exactly the population this check exists to find.
+          //
+          // Independent, because the obvious fix — widening the `if` below to
+          // include optMissing — silently costs far more than it looks. That
+          // branch is also where the vault audit takes its delta and where
+          // Flagged is decided. On a vault that has never been swept EVERY file
+          // has an optional gap, so widening the branch would have taken the
+          // whole vault out of the audit on the one run where the audit matters
+          // most. Incompleteness is a fact about a file, not a decision about
+          // it, so it does not compete for the file's one cause.
+          if (reqMissing.length || optMissing.length) {
             missingProps.push({ name: displayFileName(f.name), url: f.url, required: reqMissing, optional: optMissing });
+          }
+          if (reqMissing.length) {
+            /* structurally incomplete for the app — no audit delta to take */
           } else {
             const st  = (fm.status   || '').toLowerCase();
             const rev = (fm.reviewed || '').toLowerCase();
@@ -7140,19 +7264,16 @@ function updateBadges() {
     if (side) { state.docks[side].splice(state.docks[side].indexOf(t.id), 1); dropped = true; }
   });
   if (dropped) persistDocks();
-  renderDocks();
+  renderDocks(); // v0.32.1 — this now paints the counts itself, via paintRailCounts
 
-  const n = state.cmtOpenCount;
-  ['cmt-tab-count', 'cmt-inbox-count'].forEach(id => {
-    const el = $(id);
-    if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
-  });
-  const total = reviewDashboardTotal(); // Session 42 — all six item types, not just content changes
-  const rc = $('review-count');
-  if (rc) {
-    rc.textContent   = total;
-    rc.style.display = total ? '' : 'none';
-  }
+  // Belt and braces: renderDocks paints from the same function, but a caller
+  // that only wants the numbers refreshed should not have to know that.
+  paintRailCounts();
+
+  // The pane headers carry the same numbers, and they are rendered by their
+  // own pane, not by the rail. A scan that changes a count has to reach both.
+  const rp = $('rp-review');
+  if (rp && rp.classList.contains('active')) renderReviewTab();
 }
 
 // S41: updateInboxStrip() is gone. The two vault-wide buttons are no longer a
@@ -8647,6 +8768,21 @@ function rvAuditBlurb(it) {
   return bits.join(' · ');
 }
 
+// One line naming a file's absent properties. Required keys first and named
+// plainly; optional ones tagged, because "missing" without that distinction
+// makes a file that cannot work look the same as one that merely has not been
+// tagged yet. Used by the dashboard rows, the Review pane rows and the bottom
+// detail strip, so all three say the same thing in the same words.
+function rvGapNote(it) {
+  const req = it.required || [];
+  const opt = it.optional || [];
+  if (!req.length && !opt.length) return '';
+  const bits = [];
+  if (req.length) bits.push(`missing: ${req.join(', ')}`);
+  if (opt.length) bits.push(`also missing (optional): ${opt.join(', ')}`);
+  return bits.join(' · ');
+}
+
 function rvAuditTicks(c) {
   c = c || {};
   let h = '';
@@ -8818,20 +8954,21 @@ function buildReviewDashboardHTML() {
       body += '<div class="rv-sub-head">New files</div>';
       state.unauditedFiles.forEach(it => {
         const qi = queue.push({ type: 'newfile', url: it.url, name: it.name, opts: {} }) - 1;
-        body += `<div class="backlink-item">
-          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🆕 ${escHtml(it.name)}</span>
+        body += `<div class="backlink-item" style="align-items:flex-start">
+          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🆕 ${escHtml(it.name)}<br>
+            <span style="color:var(--text-muted);font-size:11px">${escHtml(rvGapNote(it))}</span></span>
           <button class="rv-ov-btn" onclick="event.stopPropagation();rvUpdateFile('${escHtml(it.url)}')">Update</button>
         </div>`;
       });
     }
     if (show('missing') && state.missingProps.length) {
-      body += '<div class="rv-sub-head">Missing properties</div>';
+      body += '<div class="rv-sub-head">Missing properties</div>' +
+        '<div class="rv-empty" style="padding:2px 4px 6px">Checked independently, so a file listed here may also appear above under its own cause.</div>';
       state.missingProps.forEach(it => {
         const qi = queue.push({ type: 'missing', url: it.url, name: it.name, opts: {} }) - 1;
-        const optNote = it.optional.length ? ` · also missing (optional): ${it.optional.join(', ')}` : '';
         body += `<div class="backlink-item" style="align-items:flex-start">
           <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">📋 ${escHtml(it.name)}<br>
-            <span style="color:var(--text-muted);font-size:11px">missing: ${escHtml(it.required.join(', '))}${escHtml(optNote)}</span></span>
+            <span style="color:var(--text-muted);font-size:11px">${escHtml(rvGapNote(it))}</span></span>
           <button class="rv-ov-btn" onclick="event.stopPropagation();rvUpdateFile('${escHtml(it.url)}')">Fill in</button>
         </div>`;
       });
@@ -8892,26 +9029,41 @@ async function rvOpenItem(type, url, name, opts) {
   opts = opts || {};
   if (!guardLeaveEdit()) return;
   auditCloseBar(); // leaving one audit item must not leave its ghosts behind
+  closeRvDetail(); // and one item's property strip must not survive into the next
   await openFile(url, name);
   if (type === 'vaultchange' || type === 'newsection') {
     // S15 — the whole point of the walk: land in the file, on the change.
     closeDiffStrip();
     auditOpenReview(url, opts.delta);
   } else if (type === 'change') {
-    soloRPTab('review');
+    ensureToolOpen('review');
     await renderReviewTab();
     const entries = ($('rp-review') || {})._wbEntries || [];
     const idx = opts.headIdx !== undefined ? opts.headIdx : headOpenIdx(entries);
     if (idx >= 0) selectChangeCard(idx);
   } else if (type === 'question' || type === 'escalation') {
-    soloRPTab('comments');
+    ensureToolOpen('comments');
     await renderCommentsTab();
     if (opts.idx !== undefined) selectCommentCard(opts.idx);
   } else {
-    // flagged, due, new file, missing properties — the fix lives in Properties
-    const panel = $('props-panel');
-    if (panel && panel.style.display === 'none') togglePropsPanel();
+    // flagged, due, new file, missing properties — all frontmatter fixes.
+    // v0.32.1: these used to open the Properties flyout in the reader's top
+    // corner and put nothing in the bottom stack, which is why clicking one
+    // looked like the review surface was a single line pinned to the top.
+    // They get the same bottom strip every other type has; the flyout is
+    // still one button away for actually editing a value.
+    closeDiffStrip();
+    await openRvDetail(type, url, name);
   }
+}
+
+// Open a tool without closing everything else in its dock. rvOpenItem used
+// soloRPTab, which is the double-click "show this alone" gesture — walking a
+// queue silently tore down the user's pane layout, one item at a time. Opening
+// is what the walk actually needs; soloing was never part of the ask.
+function ensureToolOpen(id) {
+  if (isToolOpen(id)) { ensureDockOpen(dockOf(id)); return; }
+  toggleRPTab(id);
 }
 
 // ── Next-item walk ─────────────────────────────────────────────────
@@ -9173,108 +9325,92 @@ async function markReviewed(idx) {
   }
 }
 
-// ── Review tab (right panel, per-file — mirrors the comments tab) ─
-// Vault-wide overview — always at the top of the Review tab, in two
-// subsections ("File changes" / "New files"), so you can browse and act
-// on either list while the reader shows whatever file you're actually
-// looking at. This is the same data as the Review dashboard reader screen
-// (buildReviewDashboardHTML) — just laid out as a compact right-panel list
-// instead of taking over the reader.
-function renderReviewOverview() {
-  const hasChanges = !!state.reviewChanges.length;
-  const hasAudit    = !!state.unauditedFiles.length;
-  if (!hasChanges && !hasAudit) return '';
+// ── Review tab (right panel) ──────────────────────────────────────
+// v0.32.1 removed renderReviewOverview() and its two action helpers,
+// inboxEntryActionOverview() and approveNewFileFromOverview(). S41 moved the
+// vault-wide list out of this pane and left a comment saying the function was
+// "still called by the All changes page." It was not — nothing had called it
+// since S41, and a suite asserted it existed, so a test was guarding ninety
+// lines of code that could not run. rvPaneBoardHTML() below is the list those
+// lines were for, and it renders from the same state on the same rows.
+//
+// S41 made this pane per-file and moved the vault-wide list out to the "All
+// changes" page. v0.32.1 puts the vault-wide list back at the TOP of the pane,
+// with the open file's own changes beneath it, because the split had a cost
+// S41 did not anticipate: with no file open the pane said "Open a file to see
+// its changes" while the dashboard said nineteen items were waiting, so the
+// tool with a 19 on its icon opened onto an empty panel. The pane is the
+// standing view of the queue; the PAGE is still where you work through it.
+const RP_HEADER_REVIEW = () => paneHead('review', { count: reviewDashboardTotal() || '' });
 
-  let html = '<div class="rv-ov-label">File changes</div>';
-  if (!hasChanges) {
-    html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No pending changes.</div>';
-  } else {
-    state.reviewChanges.forEach((r, ri) => {
-      const head = headOpenIdx(r.entries);
-      const openCount = r.entries.filter(e => e.reviewed === 'no').length;
-      html += `<div class="backlink-item">
-        <span class="rv-ov-name" data-wb-open="${escHtml(r.url)}" data-wb-name="${escHtml(r.name)}">${escHtml(r.name)}</span>
-        <span class="rv-ov-count" title="${openCount} pending change${openCount > 1 ? 's' : ''}">${openCount}</span>
-        <button class="rv-ov-btn rv-ov-accept" title="Accept" onclick="event.stopPropagation();inboxEntryActionOverview(${ri},${head},'yes')">✓</button>
-        <button class="rv-ov-btn rv-ov-reject" title="Reject" onclick="event.stopPropagation();inboxEntryActionOverview(${ri},${head},'rejected')">✕</button>
-      </div>`;
-    });
-  }
+// The pane's own copy of the walk list. Separate from state.rvFlatQueue, which
+// the dashboard page rebuilds on every render — sharing one array would mean a
+// pane row's index pointing into a list the page had since re-sorted.
+function rvPaneRow(icon, name, url, sub, type, opts) {
+  const qi = state.rvPaneQueue.push({ type, url, name, opts: opts || {} }) - 1;
+  return `<div class="backlink-item rvp-row" style="align-items:flex-start"` +
+    ` onclick="rvQueueStart(state.rvPaneQueue,${qi})" title="${escHtml(name)}">` +
+    `<span style="flex:1;min-width:0">${icon} ${escHtml(name)}` +
+    (sub ? `<br><span style="color:var(--text-muted);font-size:11px">${escHtml(sub)}</span>` : '') +
+    '</span></div>';
+}
 
-  html += '<div class="rv-ov-label">New files</div>';
-  if (!hasAudit) {
-    html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No new files found.</div>';
-  } else {
-    state.unauditedFiles.forEach((f, fi) => {
-      html += `<div class="backlink-item">
-        <span class="rv-ov-name" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(f.name)}">${escHtml(f.name)}</span>
-        <button class="rv-ov-btn" onclick="event.stopPropagation();approveNewFileFromOverview(${fi})">Update</button>
-      </div>`;
-    });
-  }
+function rvPaneBoardHTML() {
+  state.rvPaneQueue = [];
+  const S = state;
+  const groups = [
+    ['Needs your decision', [
+      ...S.escalatedItems.map(it => ['⚠️', it.name, it.url, 'Escalated', 'escalation', { idx: it.idx }]),
+      ...S.vaultChanges.map(it => ['📝', it.name, it.url, rvAuditBlurb(it), 'vaultchange', { delta: it.delta }]),
+      ...S.questionItems.map(it => ['❓', it.name, it.url, 'Question', 'question', { idx: it.idx }]),
+      ...S.reviewChanges.map(r => ['✏️', r.name, r.url, `${r.unreviewed} pending change${r.unreviewed === 1 ? '' : 's'}`, 'change', {}]),
+    ]],
+    ['Needs acknowledgement', [
+      ...S.newSections.map(it => ['🧩', it.name, it.url, rvAuditBlurb(it), 'newsection', { delta: it.delta }]),
+      ...S.flaggedFiles.map(it => ['🚩', it.name, it.url, it.status || 'Needs Review', 'flagged', {}]),
+      ...S.dueItems.map(it => ['⏰', it.name, it.url, `due ${it.due}`, 'due', {}]),
+    ]],
+    ['Needs completion', [
+      ...S.unauditedFiles.map(it => ['🆕', it.name, it.url, rvGapNote(it), 'newfile', {}]),
+      ...S.missingProps.map(it => ['📋', it.name, it.url, rvGapNote(it), 'missing', {}]),
+    ]],
+  ];
+
+  let html = '';
+  groups.forEach(([label, rows]) => {
+    if (!rows.length) return;
+    html += `<div class="rv-ov-label">${escHtml(label)} · ${rows.length}</div>`;
+    rows.forEach(r => { html += rvPaneRow(r[0], r[1], r[2], r[3], r[4], r[5]); });
+  });
+  if (!html) html += '<div class="rp-empty" style="text-align:left">Nothing waiting for review.</div>';
   return html;
 }
 
-// Same core actions as the reader's All changes screen, but these
-// refresh the right panel (and the open file, if it's the one touched)
-// instead of overwriting reader-content — the overview never hijacks
-// whatever you're actually reading.
-async function inboxEntryActionOverview(fileIdx, entryIdx, value) {
-  const r = state.reviewChanges[fileIdx];
-  if (!r) return;
-  try {
-    if (value === 'rejected') {
-      const done = await rejectChangeCore(r.url, r.changesUrl, entryIdx);
-      if (!done) return;
-    } else {
-      await setEntryReviewed(r.changesUrl, entryIdx, value);
-    }
-    await maybeFlipFileReviewed(r.url, r.changesUrl);
-    await scanBadges();
-    if (state.activeUrl === r.url) openFile(r.url, state.activeName);
-    else renderReviewTab();
-  } catch (e) {
-    alert('Could not update: ' + e.message);
-  }
-}
-
-async function approveNewFileFromOverview(idx) {
-  const f = state.unauditedFiles[idx];
-  if (!f) return;
-  try {
-    await approveNewFileCore(f);
-    if (state.activeUrl === f.url) openFile(f.url, f.name);
-    else renderReviewTab();
-  } catch (e) {
-    alert('Could not update: ' + e.message);
-  }
-}
-
-// S41: the vault-wide overview no longer renders inside this pane. The pane is
-// per-file; the vault-wide list is the "All changes" page reached from the
-// footer button. renderReviewOverview() is still called by that page.
-const RP_HEADER_REVIEW = () => paneHead('review');
-
 async function renderReviewTab() {
   const pane = $('rp-review');
+  if (!pane) return;
+  const board = rvPaneBoardHTML();
 
   if (!state.activeUrl) {
-    pane.innerHTML = RP_HEADER_REVIEW() + '<div class="rp-empty">Open a file to see its changes.</div>' + PANE_FOOT_REVIEW;
+    pane._wbEntries = [];
+    pane.innerHTML = RP_HEADER_REVIEW() + board + PANE_FOOT_REVIEW;
     return;
   }
   const changesUrl = changesUrlFor(state.activeUrl);
-  pane.innerHTML = RP_HEADER_REVIEW() + '<div class="rp-empty">Loading…</div>' + PANE_FOOT_REVIEW;
   const txt = await readVaultFileOrNull(changesUrl);
   const entries = txt ? parseChanges(txt) : [];
   pane._wbEntries = entries;
 
+  const thisFile = '<div class="rv-ov-label">This file</div>';
   if (!entries.length) {
-    pane.innerHTML = RP_HEADER_REVIEW() + '<div class="rp-empty">No recorded changes for this file.</div>' + PANE_FOOT_REVIEW;
+    pane.innerHTML = RP_HEADER_REVIEW() + board + thisFile +
+      '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No recorded changes for this file.</div>' +
+      PANE_FOOT_REVIEW;
     return;
   }
   const open = entries.filter(e => e.reviewed === 'no').length;
   const head = headOpenIdx(entries);
-  let html = '';
+  let html = thisFile;
   if (open > 1) {
     html += `<div style="padding:10px 12px;border-bottom:1px solid var(--border)">
       <button class="rv-mark-btn" style="width:100%" onclick="markReviewedFromTab()">Accept all (${open})</button>
@@ -9302,7 +9438,7 @@ async function renderReviewTab() {
     </div>`;
   });
   html += '</div>';
-  pane.innerHTML = RP_HEADER_REVIEW() + html + PANE_FOOT_REVIEW;
+  pane.innerHTML = RP_HEADER_REVIEW() + board + html + PANE_FOOT_REVIEW;
   // keep the selection in sync with an already-open diff strip
   if (diffEntryIdx >= 0) {
     const sel = pane.querySelector(`.comment-card[data-ci="${diffEntryIdx}"]`);
@@ -9438,14 +9574,13 @@ async function markReviewedFromTab() {
 let diffEntryIdx = -1;
 
 function showDiffStrip(entryIdx) {
-  const entries = $('rp-review')._wbEntries || [];
+  const entries = ($('rp-review') || {})._wbEntries || [];
   const e = entries[entryIdx];
   if (!e) return;
   diffEntryIdx = entryIdx;
   const head   = headOpenIdx(entries);
   const suffix = e.reviewed === 'yes' ? ' · reviewed'
     : (e.reviewed === 'rejected' ? ' · rejected' : (entryIdx !== head ? ' · queued' : ''));
-  $('diff-title').textContent = `Change by ${e.author} · ${e.ts.replace('T', ' ')}${suffix}`;
   $('diff-body').innerHTML = renderDiffBody(e.body);
   // sequential review: only the queue head is actionable from the strip
   const actionable = (e.reviewed === 'no' && entryIdx === head) ? '' : 'none';
@@ -9453,7 +9588,15 @@ function showDiffStrip(entryIdx) {
   $('diff-reject').style.display = actionable;
   $('diff-bar').style.display   = 'flex';
   $('diff-strip').style.display = 'block';
-  highlightChangedLines(e);
+  // After the strip is visible, so ensureVisible/scroll measure against the
+  // layout the user is actually looking at rather than the one before it.
+  const hits    = highlightChangedLines(e);
+  const removes = e.body.split('\n').filter(l => l.startsWith('- ')).length;
+  const mark = hits
+    ? ` · ${hits} block${hits === 1 ? '' : 's'} highlighted`
+    : (removes ? ' · deleted text, nothing left in the file to highlight'
+               : ' · could not locate this change in the rendered page');
+  $('diff-title').textContent = `Change by ${e.author} · ${e.ts.replace('T', ' ')}${suffix}${mark}`;
 }
 
 function closeDiffStrip() {
@@ -9522,46 +9665,147 @@ function normalizeMdLine(l) {
     .trim();
 }
 
+// Returns how many blocks it lit up, so the caller can say so. A silent zero
+// is what "content is not highlighted when I click one" actually looked like:
+// there are two legitimate reasons nothing lights up — the change was a pure
+// deletion, so the text is no longer in the file to highlight, and a rewritten
+// line that no longer matches any rendered block. Both used to look identical
+// to a broken feature. The strip now names which one it is.
 function highlightChangedLines(entry) {
   clearChangeHighlights();
   const added = entry.body.split('\n')
     .filter(l => l.startsWith('+ '))
     .map(l => normalizeMdLine(l.slice(2)))
     .filter(t => t.length > 6); // was > 3 — very short lines matched almost any block
-  if (!added.length) return;
+  if (!added.length) return 0;
   // No h1 here on purpose: the file's own title is short and generic enough
   // that it kept winning the substring fallback above instead of the actual
   // changed row — body edits essentially never touch the title anyway.
   const blocks = document.querySelectorAll(
     '#reader-content p, #reader-content h2, #reader-content h3, #reader-content h4, #reader-content h5, #reader-content h6, #reader-content li, #reader-content .md-callout, #reader-content blockquote, #reader-content td'
   );
+  let hits = 0;
   added.forEach(text => {
     const el = findMatchingBlock(blocks, text);
     if (el) {
       el.classList.add('wb-changed');
       ensureVisible(el);
+      hits++;
     }
   });
+  return hits;
 }
 
-// Drag the diff bar to resize the strip.
-(function () {
-  const bar = $('diff-bar');
+// Drag a bottom bar to resize the strip under it.
+//
+// v0.32.1: was one closure hard-wired to #diff-bar/#diff-strip. There are two
+// strips now and the second one has to feel identical, so the wiring is a
+// function rather than a copy — a copy is how two things that must match stop
+// matching. Buttons inside the bar are excluded from the drag, not just the
+// close button: the bar is a control row that happens to also be a grip, and
+// a mousedown that starts on Accept must never turn into a resize.
+function makeStripResizable(barId, stripId, storageKey) {
+  const bar = $(barId);
+  if (!bar) return;
   let dragging = false, startY = 0, startH = 0;
   bar.addEventListener('mousedown', e => {
-    if (e.target.closest('.diff-close')) return;
-    dragging = true; startY = e.clientY; startH = $('diff-strip').offsetHeight;
+    if (e.target.closest('button, input, label, select')) return;
+    dragging = true; startY = e.clientY; startH = $(stripId).offsetHeight;
     e.preventDefault();
   });
   document.addEventListener('mousemove', e => {
     if (!dragging) return;
     const h = Math.min(Math.max(startH + (startY - e.clientY), 60), window.innerHeight * 0.6);
-    $('diff-strip').style.height = h + 'px';
+    $(stripId).style.height = h + 'px';
   });
   document.addEventListener('mouseup', () => {
-    if (dragging) { dragging = false; persist('wb_diff_h', $('diff-strip').offsetHeight); }
+    if (!dragging) return;
+    dragging = false;
+    persist(storageKey, $(stripId).offsetHeight);
   });
-})();
+  // Restore the height this strip was last dragged to. The diff strip never
+  // did this — it persisted a height on every drag and read it back nowhere,
+  // so the setting existed and did nothing for four releases.
+  const saved = localStorage.getItem(storageKey);
+  if (saved) {
+    const h = parseInt(JSON.parse(saved), 10);
+    if (h > 0) $(stripId).style.height = Math.min(h, window.innerHeight * 0.6) + 'px';
+  }
+}
+makeStripResizable('diff-bar', 'diff-strip', 'wb_diff_h');
+makeStripResizable('rvd-bar',  'rvd-strip',  'wb_rvd_h');
+
+// ── Review detail strip (v0.32.1) ─────────────────────────────────
+// The bottom surface for the frontmatter item types — flagged, due, new file,
+// missing properties. Every one of them is answered by looking at the file's
+// properties and doing one thing, so the strip is exactly that: the property
+// block as it stands, the gaps named, and that type's single action.
+let rvdItem = null; // { type, url, name, fm } — what the strip is currently showing
+
+const RVD_ACTION = {
+  flagged: { label: 'Approve',         fn: it => rvApproveFlagged(it.url) },
+  due:     { label: 'Clear due date',  fn: it => rvClearDue(it.url) },
+  newfile: { label: 'Fill properties', fn: it => rvUpdateFile(it.url) },
+  missing: { label: 'Fill properties', fn: it => rvUpdateFile(it.url) },
+};
+
+const RVD_TITLE = {
+  flagged: 'Flagged for review',
+  due:     'Due for re-review',
+  newfile: 'New file',
+  missing: 'Missing properties',
+};
+
+async function openRvDetail(type, url, name) {
+  const act = RVD_ACTION[type];
+  if (!act) return;
+  let fm = {};
+  try { fm = parseFm(await readVaultFile(url)) || {}; } catch (_) {}
+  rvdItem = { type, url, name, fm };
+
+  $('rvd-title').textContent = `${RVD_TITLE[type]} · ${name}`;
+  const btn = $('rvd-action');
+  btn.textContent   = act.label;
+  btn.style.display = '';
+
+  // Every declared key, in schema order, present or not — the absent ones are
+  // the whole message, so listing only what is there would hide the answer.
+  const rows = [...REQUIRED_PROPS, ...OPTIONAL_PROPS].map(k => {
+    const has = (k in fm);
+    const val = has ? String(fm[k] ?? '') : '';
+    return `<span class="rvd-key">${escHtml(k)}</span>` +
+      (has
+        ? `<span class="rvd-val">${escHtml(val === '' ? '(empty)' : val)}</span>`
+        : '<span class="rvd-val rvd-gap">not set</span>');
+  }).join('');
+
+  const gaps = [...REQUIRED_PROPS, ...OPTIONAL_PROPS].filter(k => !(k in fm));
+  const note = gaps.length
+    ? `${gaps.length} propert${gaps.length === 1 ? 'y is' : 'ies are'} not set: ${escHtml(gaps.join(', '))}. ` +
+      '“Fill properties” writes defaults for the absent keys only — nothing that already has a value is touched.'
+    : 'Every declared property is set on this file.';
+
+  $('rvd-strip').innerHTML = `<div class="rvd-props">${rows}</div><div class="rvd-note">${note}</div>`;
+  $('rvd-bar').style.display   = 'flex';
+  $('rvd-strip').style.display = 'block';
+}
+
+function closeRvDetail() {
+  rvdItem = null;
+  $('rvd-bar').style.display   = 'none';
+  $('rvd-strip').style.display = 'none';
+}
+
+function rvdAction() {
+  if (!rvdItem) return;
+  const act = RVD_ACTION[rvdItem.type];
+  if (act) act.fn(rvdItem);
+}
+
+function rvdOpenProps() {
+  const panel = $('props-panel');
+  if (panel && panel.style.display === 'none') togglePropsPanel();
+}
 
 // ── S14 access tier UI ───────────────────────────────────────────
 // Locked surfaces are not rendered at all — no greyed-out controls in a
@@ -11368,6 +11612,33 @@ function renderRails() {
              `<svg class="rp-tab-ic" viewBox="0 0 24 24">${t.icon}</svg>${count}</button>`;
     }).join('');
   });
+  // v0.32.1 — and repaint the counts, because the line above just destroyed
+  // them. The count spans are created by this render, hidden and reading "0",
+  // and until now the only thing that ever wrote a real number into them was
+  // the end of a full vault scan. So the badge was correct right after a scan
+  // and blank after ANY dock action in between — opening a tool, closing one,
+  // dragging a pane to the other side. That is why the Review bell showed
+  // nothing while the dashboard said 19. Counts are derived state; the render
+  // that builds the element they live in is the render that must fill it.
+  paintRailCounts();
+}
+
+// The one place counts are written into the rails. Called by renderRails (so a
+// re-render never loses them) and by updateBadges (so a completed scan updates
+// them without a re-render). Every lookup is null-guarded: a gated tool's span
+// does not exist at User, and reading it blind used to throw.
+function paintRailCounts() {
+  const set = (id, n) => {
+    const el = $(id);
+    if (!el) return;
+    el.textContent   = n;
+    el.style.display = n ? '' : 'none';
+  };
+  set('cmt-tab-count',   state.cmtOpenCount);
+  set('cmt-inbox-count', state.cmtOpenCount);
+  set('review-count',    reviewAllowed() ? reviewDashboardTotal() : 0);
+  // bm-tab-count is declared in WB_TOOLS and has never had a writer. Left
+  // alone deliberately — wiring it is a bookmarks change, not a review fix.
 }
 
 // Lays out both docks — rail highlight, pane visibility and flex share, DOM
