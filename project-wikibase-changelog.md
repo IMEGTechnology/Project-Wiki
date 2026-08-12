@@ -10,6 +10,116 @@
 
 ---
 
+## 0.33.0 — 2026-08-12
+
+**Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/fold-consolidation.test.js`, `supporting/tests/usage-analytics.test.js`, `supporting/tests/review-dashboard.test.js`, `supporting/tests/review-bugfix-0321.test.js`, `README.md`, `help.md`, `help-edit.md`
+
+*Four things reported after living with 0.32.3. Two are fixes, two add capability, which is why this is a MINOR and not a fourth patch.*
+
+### Nested bullets survive an editor that does not understand nesting
+
+0.32.3 fixed the markup and this is not a regression of it. The clipboard HTML is structurally correct at every indent style and every depth, and Word pastes it correctly — that is what pins this one on the destination rather than on us. Autodesk Forma's editor parses `<ul>` and `<li>` but has no schema for a list inside a list, so it keeps every `<li>` and throws the wrapper away. Every level then lands flat.
+
+Nothing in the markup can stop that editor discarding the wrapper. What it cannot discard is an indent written on the `<li>` itself, so that is where the indent lives now, with the nested list's own `padding-left` zeroed so the same 24px is never applied twice where the nesting **is** honoured. The result in Word is unchanged; the result in an editor that flattens is a second level instead of no second level.
+
+Per level, not cumulative. Under real nesting that is exact at any depth; under an editor that flattens, depth three and beyond arrive looking like depth two. Two levels is what this feature is used for.
+
+The reported extra blank line after the last nested item had two causes, both removed. A nested `<ul>` carries a default vertical margin, which paints as a gap between the end of a nested run and the next top-level item — every level now sets `margin:0`. And the legacy fallback copy path set `white-space:pre-wrap` on its hidden host, which made the newlines the serializer joins blocks with into **real** blank lines in whatever was pasted. Nothing needed it: hard breaks were already `<br>` and a fenced block is already `<pre>`.
+
+The `text/html` flavour also goes out as a whole small document with a charset declaration rather than a bare fragment. Editors that roll their own parser tend to be the ones that mishandle a fragment.
+
+### List fold memory is a setting
+
+Lists were the one thing that remembered a fold between visits — headings deliberately forget, and the reasoning for that asymmetry stands (a long checklist you collapsed is usually meant to stay collapsed). It is a preference, so it is a toggle now: **Settings → Navigation → Remember collapsed lists.**
+
+**Default is on.** Turning the default off would take a behaviour away from everyone who never asked about it, which is a much larger change than adding a switch.
+
+Both halves are gated, not just one. Gating only the write would leave yesterday's folds replaying for as long as they sat in storage; gating only the read would keep writing a store nothing reads. Turning it off also clears what is already stored rather than parking it, because a fold set weeks ago springing back the moment someone re-enables the setting is exactly the invisible-state problem that got heading persistence deleted.
+
+### Usage rows say who, and the Session 45 rule is reversed
+
+Most read rows now expand to a per-person breakdown with each reader's own count.
+
+This reverses decision 3 from Session 45, and the reasoning is worth keeping because the reversal is not a change of appetite. The rule was that names were dropped inside `usageAggregate()` so no render downstream could show one. **The rule only ever applied to this pane.** The logs themselves live at `zSystem/Analytics/YYYY-MM-<person>.md`, in the vault, in plain Markdown, named after their owner, and every member of staff has always been able to open any of them in Obsidian. Hiding the attribution in the pane bought privacy from nobody while costing the one question the pane exists to answer: who is reading, and who is not, when someone asks about something already written down.
+
+The gate this rests on is the Administrator tier, which is unchanged and is *absent* rather than disabled below that rung. If the pane ever opens lower, this has to be re-argued.
+
+Totals did not move. The breakdown is opt-in per row and collapsed by default, and the other two lists stay unnamed on purpose — Never opened has nobody to name, and putting names on Gone quiet would turn a prompt to check whether a page is out of date into a list of who stopped reading it.
+
+Logs now carry the reader's display name in a `WBUSER` comment. The filename has always identified the person but by *slug* — an email with its `@` and dots mangled to hyphens — and a slug is not a name you put in a report. Self-healing by construction: a usage file is rewritten in full on every flush, so an existing log picks the line up on its owner's next sitting, and until then the slug is tidied as a fallback. No migration.
+
+The footer no longer claims that no names are shown or stored. It says how many people have contributed, that reading is logged for everyone, where it is stored, and that the pane is Administrator only.
+
+### Every file is checked against the property list, not just the ones the app has touched
+
+Reported as "I'm still not seeing the Missing properties section, I know we added some and it should list all." That was exactly right, and the cause was a scope the fix in 0.32.1 stopped one step short of.
+
+0.32.1 pulled the completeness check out of the cause chain so an optional-only gap would be reported — but left it inside the `else` branch that only files carrying a `status` key ever reach. A file with no frontmatter at all was called a New file and stopped there, never measured against the property list. **The one population most in need of the check was the one population excluded from it.**
+
+The check now runs over every file, before the cause chain, so a brand new file appears under both New files and Missing properties. That is not a double-count: "nobody has looked at this yet" and "these keys are absent" are two different review questions with two different resolutions, one closed by looking and one closed by writing a key. One-file-one-cause still holds inside the cause chain, which is where it was protecting the audit delta; it was never a rule about a completeness check.
+
+`Fill all` dedupes by file. The second write would have been harmless — only absent keys are ever injected — but the **count** would not: it would tell someone they were about to touch more files than exist, and that is the number they read before pressing it.
+
+### The help files were a release behind, and one of them was lying
+
+Caught by asking what actually differed between `deploy/` and the previous archive: `help.md` and `help-edit.md` had been version-stamped and nothing else, which is the normal case and was wrong this time.
+
+`help.md` still told the team, about the Usage pane: *"No names, no per-person counts, no way to see who read what. The report cannot show that, because the totals it reads have already had the names dropped out of them."* **Shipping that beside a pane that names people is worse than never having had the rule** — it is a guarantee the app stopped honouring, in the file people go to when they want to know what the app does. It now describes what is recorded, that the Usage tool is Administrator only, and that the per-person log files in the vault are readable by anyone who can open the vault. That last part was always true and was never written down anywhere the team would see it.
+
+`help-edit.md`'s copy-callout section was older still — it predated 0.32.2 and described the clipboard as plain text only, three releases after it stopped being. Rewritten to cover both flavours and the nesting behaviour, including the honest limit: two levels come through everywhere tried, three or more may flatten to two in an editor that builds its own paste handling.
+
+Also newly documented: the **Remember collapsed lists** setting and its settings-table row, the reader breakdown on Most read, the corrected claim that the folder tree is "the one fold that is saved", and an entire **Missing properties** section in `help-edit.md`, which had covered New files since Session 42 and never covered the list beside it.
+
+**The general lesson: a release that changes what the app promises has to check what the docs promise.** `release.sh` stamps the version line in both help files and reads it back, which is exactly enough to make them look attended to.
+
+### Testing
+
+1,477 → 1,526 checks across twenty suites, plus `smoke6-reopen.js` at 8/8. All green.
+
+Every one of the four fixes was reverted in a scratch copy, thirteen reverts in all, and each was required to turn its own suite red. **Four of them did not, and each silent revert was a real hole:** the clipboard document wrapper was proven correct but nothing asserted it was *called*; the fold purge was tested by calling the helper directly rather than through the toggle; the flush was never asserted to pass a name to the serializer; and `rvFillAllBand3` could be reverted to the raw concatenation with every check on the deduping helper still green. All four now assert the call site, not just the callee. Proving a helper works says nothing about whether anything uses it.
+
+`fold-consolidation.test.js` also crashed rather than failed on its first revert run, because the scratch copy was missing a file the suite reads — and a crashed suite reports zero failures, which read as green. That is the S35 lesson (`smoke6-reopen.js`) arriving from a new direction: a suite that cannot run does not fail, it just stops telling you anything. The revert harness copies the full tree now.
+
+`review-dashboard.test.js` had the same shape in miniature: `state.missingProps.find(...).required` throws on an empty list, so reverting the fix under test killed the run before the summary. Every lookup goes through a null-safe helper now, the same guard `review-bugfix-0321.test.js` already recorded for the same reason.
+
+Structural assertions on the copy serializer compare style-stripped markup, so the new inline styling could not turn nesting checks into styling checks by accident. Two claims, two sets of checks.
+
+---
+
+## 0.32.3 — 2026-08-10
+
+**Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/README.md`, `README.md`, `help.md`, `help-edit.md`
+
+*Nested bullets and numbers survive a Copy. Two independent faults behind one symptom, and the second one had been in the reader since callouts shipped.*
+
+### The copy serializer reimplemented the reader's list model and got it wrong
+
+0.32.2 built the clipboard's list HTML with its own indent arithmetic — `floor(spaces / 2)` — and opened one list container per level of *jump*. An item that skipped a level therefore produced `<ul><ul>` with no `<li>` between them. That is invalid, and rich-text editors quietly drop or flatten it, so the nesting vanished on paste.
+
+**Obsidian's default indent is four spaces, which the reader reads as two levels, so ordinary nesting hit this on the very first indented line.** The 0.32.2 suite only ever tested two-space indents, which is the one style that happens to work.
+
+The reader had always been right about the same input. It parses list lines with `listIndentDepth()` and builds a tree with a depth stack, and that stack has the property the copy version lacked: a jump of more than one level nests by exactly one, because it only ever appends to the nearest shallower node. There is no arithmetic in it and nothing to get wrong.
+
+Both halves are now extracted as `mdListItems()` and `mdListTree()`, shared by the renderer and the copy serializer. **This is the rule `cpInline` already recorded for inline markers** — it runs text through the real `renderInline` rather than a parallel stripper, because "a parallel stripper would drift from the renderer the first time either changed." The list levels were the one place that rule was not followed, and that is exactly where the two drifted. Same lesson, arrived at twice.
+
+### A tab straight after `>` was being eaten
+
+Second, unrelated fault, found while reproducing the first. The callout and blockquote body strip was `/^>\s?/`, and `\s` matches a tab — so a line written `>\t- nested` arrived with its indent gone, and the first level of nesting inside a callout disappeared.
+
+**This was never a copy bug.** The reader flattened that line too, and had done since callouts shipped; the clipboard was faithfully reproducing what the reader already showed. The marker is now `/^> ?/`: a literal single optional space. Only that space is punctuation, everything after it is content, which is what carries the indent through to `listIndentDepth()`.
+
+### Testing
+
+`copy-callout.test.js` 81 → 95. Every indent style is checked explicitly — two spaces, four spaces, a tab, and a tab with no space after the quote marker — because the bug was invisible at the single style the previous suite used. There is also a check that no level container is ever emitted without an `<li>` to hold it, which is the actual defect rather than one of its symptoms, plus three-level nesting with a dedent, mixed ordered-inside-unordered, and a nested task.
+
+The tab fix gets a **behavioural** check on the reader as well as on the constant, because it was a rendering bug first and fixing only the clipboard would have left the callout still eating a level.
+
+Both fixes were reverted in a scratch copy and confirmed to turn the suite red: the shared list model takes 7 checks with it, the quote marker 4.
+
+One note on the suite itself. The reader check reported a false pass twice while being written: a parent `<li>` contains its children's text, so finding items by `textContent` returned the same element for both lookups and compared a depth against itself. It reads the row's own `.md-li-text` now. **A test that cannot fail is worse than one that does**, and this one was reporting equal depths against correct markup.
+
+---
+
 ## 0.32.2 — 2026-08-10
 
 **Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/review-bugfix-0321.test.js`, `supporting/tests/README.md`, `README.md`, `help.md`, `help-edit.md`

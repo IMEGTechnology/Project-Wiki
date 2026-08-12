@@ -1,7 +1,7 @@
 # WikiBase Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.32.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.33.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -164,6 +164,19 @@ The oldest unresolved change on a file is the only one you can act on. Later one
 A second section of the review screen lists files WikiBase has never touched — usually notes added straight from Obsidian, which have no `status` property because only this app writes one.
 
 Clicking one opens it alongside its Properties so you can fill them in. **Update** adds only the property keys that are actually missing and never overwrites what is already there. Nothing is written automatically.
+
+### Missing properties
+
+Beside it, under the same *Needs completion* heading, is a list of every file with a gap in its property block — any of the nine keys absent, required or optional.
+
+**A file can be in both lists, and that is not a mistake.** They are two different questions. *New file* asks whether anyone has looked at this note yet, and you answer it by looking. *Missing properties* asks which keys are absent, and you answer it by writing them. A note dropped in from Obsidian fails both, so it appears twice, once per thing you have to do about it.
+
+Each row names what is actually missing, so you can tell a note short of one optional key from one with no property block at all without opening either.
+
+**Fill all** at the foot of the section writes the missing keys across every file listed, in one pass. It counts *files*, not rows, so a note appearing in both lists is written once and counted once — the number on the button is the number of files it will touch.
+
+> [!NOTE] Why this list may be long the first time
+> `must-read` and `onboarding` arrived after most vaults were already written, so every note predating them is missing at least those two. That is the population this list exists to find. One **Fill all** clears it.
 
 ### Changes made in Obsidian
 
@@ -391,7 +404,7 @@ Callouts nest — `>>` and `>>>` work to any depth:
 
 ### The copy callout
 
-`[!copy]` is WikiBase's own type, not one of Obsidian's. It renders like any other callout but adds a **Copy** button to its title row, which puts the block's text on the clipboard as plain text.
+`[!copy]` is WikiBase's own type, not one of Obsidian's. It renders like any other callout but adds a **Copy** button to its title row, which puts the block on the clipboard.
 
 ```md
 > [!copy] Standard reply
@@ -401,7 +414,11 @@ Callouts nest — `>>` and `>>>` work to any depth:
 
 Use it for text people are meant to paste somewhere else: a standard reply, a mailing address, a form of words that has to be exact. It's deliberately opt-in — no other callout gets a button, so the affordance only shows up where you asked for it.
 
-What lands on the clipboard is what you see, not the Markdown source. `**Bold**` copies as `Bold`, `[[Some Note|this note]]` copies as `this note`, and the leading `>` is never included. Bullet and number markers are kept, since a list should still look like a list when it's pasted. Tables come across tab-separated, which is what a spreadsheet or a mail client expects. Fenced code is copied exactly as written, markers and all.
+**What lands on the clipboard is what you see, never the Markdown source.** `**Bold**` copies as bold text, `[[Some Note|this note]]` copies as `this note`, and the leading `>` is never included. **No destination anywhere sees a Markdown marker** — that is the whole point of the feature.
+
+One copy carries two versions and the destination picks. Somewhere that understands formatting — Outlook, Word, Teams, most web editors — takes the formatted one, with real bold, real bullet and numbered lists, real headings, real tables and working links. Somewhere plain takes plain text, with bullet and number markers kept as characters and tables tab-separated, which is what a spreadsheet expects. Fenced code is copied exactly as written either way, markers and all.
+
+**On nesting.** Indented bullets and numbers keep their levels. A few editors build their own paste handling and understand a list but not a list inside a list — Autodesk Forma is the one we know of — so each nested item also carries its own indent, which those editors keep even when they discard the nesting. Two levels come through correctly everywhere we have tried. Three or more may arrive flattened to two in an editor of that kind; every mainstream one handles the full depth.
 
 **On line breaks.** Your hard line breaks are preserved. Press Enter and you get a new line in the clipboard; leave a `>` on its own for a blank line and you get a paragraph gap. A line that simply looks wrapped on screen is not a break and costs you nothing, so write a paragraph as one long line and let it wrap. Note that a rendered callout still joins consecutive lines into one paragraph, exactly as Obsidian does — only the copied text keeps your breaks.
 

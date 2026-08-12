@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.32.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.33.0**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
@@ -109,7 +109,7 @@ When a panel is collapsed its tab stays permanently lit so you can find it. Clic
 - **Fold control** — one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed. It hides if you narrow the panel enough to crowd the label.
 - **Vault Files is always available.** It is the one tool that cannot be closed or moved to the other side. You can reorder it against Search and Bookmarks, but it is always somewhere.
 - **New and Move** sit at the bottom of whichever panel holds Vault Files, and only appear at Contributor or above.
-- **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine. This is the one fold in WikiBase that is saved — notes, outlines and callouts all open fresh every time. A closed folder is obviously a closed folder, so remembering it can never mislead you the way a silently collapsed heading could.
+- **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine. Headings, outlines and callouts never do — those open fresh every time. A closed folder is obviously a closed folder, so remembering it can never mislead you the way a silently collapsed heading could. Folds inside a list are the other saved kind, and those you can switch off; see [[#Folding lists]].
 - **Sort order** — folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
 - **File counts** — the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
 - **Strip folder prefixes** — hides the `NN_` from folder names on screen without touching the actual folder. Settings, off by default.
@@ -147,6 +147,8 @@ Nested lists get their own chevrons. Click one to fold that item's children, or 
 **Hover anywhere over a list** and a small **All** control appears at the end of its first row, folding or unfolding that entire list. It does nothing Alt-click cannot; it is there so you can find it. Lists with no nesting have nothing to collapse and get no control.
 
 Unlike headings, **list folds are remembered per note.** The asymmetry is on purpose: headings are scaffolding you did not write, lists are content the author shaped, and a long checklist you collapsed is usually meant to stay collapsed. The "N hidden" badge is what makes that safe — a bullet that reopens reading "12 hidden" tells you exactly what it is holding.
+
+If you would rather every note opened fully expanded, turn off **Remember collapsed lists** (Settings → Navigation, on by default). Folds then last only while you are on the page. Turning it off also clears the folds already saved, rather than leaving them to spring back if you switch it on again later — a fold you set weeks ago and cannot remember setting is exactly what this app tries not to do to you.
 
 ### Folding callouts
 
@@ -313,9 +315,13 @@ Two lists for the open note:
 
 Each list shows the top five with a **Show more** for up to twenty-five. Click any row to open that page.
 
-**This reports on files, not on people.** No names, no per-person counts, no way to see who read what. The report cannot show that, because the totals it reads have already had the names dropped out of them.
+**Who read it.** Each Most read row carries a reader count — *3 readers* — and clicking it opens a breakdown naming each person and how many times they opened that page. It is collapsed until you ask for it, and it is the answer to "is anyone but me actually using this" when someone asks a question the wiki already answers.
+
+Only Most read has this. **Never opened** has nobody to name, and **Gone quiet** is deliberately left anonymous: that list exists to prompt "has this page gone out of date", and turning it into a list of who stopped reading answers a different and less useful question.
 
 **What is recorded, and when.** WikiBase notes which page you are on once it has loaded, and how long you stayed. Nothing is written while you read. When you switch away from the tab or close it, that sitting is written to a hidden file in the vault under `zSystem/Analytics/`, one file per person per month, one line per page per day. That file is safe to delete at any time; it will simply start again.
+
+**Recording happens for everyone; reading the report does not.** The Usage tool is Administrator only and is not merely hidden below that tier, it is not built at all. But the log files themselves are ordinary Markdown in the vault, named after the person they belong to, so anyone who can open the vault in Obsidian can open them. **Nothing here is secret from the team, and it is not meant to be.** If that matters to you, the honest place to raise it is the folder, not the report.
 
 Because the write happens when you leave, your own reading appears quickly and other people's lags by up to one sitting, plus however long OneDrive takes to sync. It is near-live, not live.
 
@@ -392,7 +398,7 @@ Dark vs light is **not** included in a shared theme. That stays personal, and it
 
 #### Elsewhere
 
-**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset. There's also a 14th type WikiBase adds itself, `[!copy]`, which carries a **Copy** button that puts its text on your clipboard as plain text — see [Editing and Markdown](help-edit.md) for how to write one.
+**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset. There's also a 14th type WikiBase adds itself, `[!copy]`, which carries a **Copy** button that puts its contents on your clipboard with the formatting intact and no Markdown markers — see [Editing and Markdown](help-edit.md) for how to write one.
 
 ### Settings
 
@@ -403,6 +409,7 @@ Open with **initials badge → Settings**.
 | Open last note | On | Reopens the note you were reading, expanding the folders to reach it |
 | Strip folder prefixes | Off | Hides the `NN_` prefix from folder names on screen |
 | Show file counts | On | The file-count badge on each folder |
+| Remember collapsed lists | On | Keeps folded list items folded next time you open that note. Off clears what is already saved |
 
 **Advanced Settings**, collapsed by default, holds one thing: **Access**.
 
@@ -522,6 +529,7 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Bookmark a heading | Ribbon icon on that heading's Outline row |
 | Search | `⌘K` / `Ctrl+K`, or the magnifier tab |
 | Which pages get read, and which never do | **Usage** tool. Administrator only |
+| Who read a particular page | **Usage** → click the reader count on a Most read row |
 | Version and changelog | The version button at the bottom of the right panel |
 | How to write Markdown | [Help — Editing and Markdown](help-edit.md) |
 

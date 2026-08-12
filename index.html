@@ -1969,6 +1969,16 @@
       color: var(--text-muted); font-size: 11.5px; font-family: inherit; text-align: left;
     }
     .usage-more:hover { color: var(--accent); text-decoration: underline; }
+    .usage-who   {
+      flex: 0 0 auto; margin-left: auto; padding: 0 6px 0 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-muted); font-size: 11px; font-family: inherit; white-space: nowrap;
+    }
+    .usage-who:hover { color: var(--accent); }
+    .usage-by      { margin: 5px 0 2px 10px; padding-left: 8px; border-left: 1px solid var(--border); }
+    .usage-by-row  { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; padding: 2px 0; color: var(--text-muted); }
+    .usage-by-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .usage-by-val  { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
     .usage-foot { padding: 12px 12px 0; margin-top: 6px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11px; line-height: 1.5; }
     .rp-stack-handle {
       height: 4px; flex-shrink: 0; cursor: row-resize;
@@ -2714,7 +2724,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.32.2</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.33.0</button>
     </aside>
 
   </div>
@@ -2830,6 +2840,21 @@
         Show file counts
         <label class="toggle">
           <input type="checkbox" id="tgl-badges" checked>
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <!-- v0.33.0. Lists were the one thing that remembered a fold between
+           visits (headings deliberately forget; see the fold model note by
+           persistLiFoldState). That is still the default, because a long
+           checklist you collapsed is usually meant to stay collapsed and the
+           whole team has been living with it. It is a toggle now because it
+           is a preference, and turning it off also throws the stored folds
+           away rather than parking them to reappear later. -->
+      <div class="toggle-row">
+        Remember collapsed lists
+        <label class="toggle">
+          <input type="checkbox" id="tgl-list-folds" checked>
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
         </label>
@@ -2971,6 +2996,10 @@ const state = {
   cmtOpenCount: 0,     // S14 — vault-wide open comments (badges)
   stripPfx:     false,
   showBadges:   true,
+  // v0.33.0 — list fold memory as a preference. Defaults to on: this is how
+  // the app has always behaved and changing the default would silently take
+  // a behaviour away from everyone to answer one person's dislike of it.
+  keepListFolds: true,
   // theme/headers/bgColor/h2Underline removed in S32 — all four are
   // fields on state.themePrefs now (mode, preset, underlines[1]). The
   // resolved dark/light value lives on body[data-theme] as before.
@@ -4215,8 +4244,8 @@ async function writeClipboardRich(htmlStr, plain) {
     if (w_ClipboardItem() && navigator.clipboard && navigator.clipboard.write) {
       const CI = w_ClipboardItem();
       await navigator.clipboard.write([new CI({
-        'text/html':  new Blob([htmlStr], { type: 'text/html'  }),
-        'text/plain': new Blob([plain],   { type: 'text/plain' }),
+        'text/html':  new Blob([cpClipboardDoc(htmlStr)], { type: 'text/html'  }),
+        'text/plain': new Blob([plain],                   { type: 'text/plain' }),
       })]);
       return true;
     }
@@ -4232,7 +4261,12 @@ async function writeClipboardRich(htmlStr, plain) {
     host.style.position = 'fixed';
     host.style.left     = '-9999px';
     host.style.top      = '0';
-    host.style.whiteSpace = 'pre-wrap';
+    // v0.33.0 — white-space:pre-wrap was here and had to go. The blocks in
+    // this fragment are joined with a newline for readability, and under
+    // pre-wrap the browser copies those joins as REAL blank lines, which is
+    // the other half of the reported extra spacing. Nothing here needs it:
+    // hard breaks are already <br> and a fenced block is already <pre>, which
+    // carries its own white-space rule.
     document.body.appendChild(host);
     const sel   = window.getSelection();
     const saved = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
@@ -4340,6 +4374,12 @@ function wbDelegatedClick(e) {
   // section, and a row match would swallow it.
   const uMore = e.target.closest('[data-wb-usage-more]');
   if (uMore) { e.preventDefault(); e.stopPropagation(); usageToggleSection(uMore.dataset.wbUsageMore); return; }
+  // Tested BEFORE the open target, because the reader-count button sits inside
+  // the same row: the nested target has to be asked about first or the row
+  // swallows it and the pane opens the file instead of expanding. Same
+  // ordering rule the rest of this delegated handler follows.
+  const uWho = e.target.closest('[data-wb-usage-who]');
+  if (uWho) { e.preventDefault(); e.stopPropagation(); usageToggleRow(uWho.dataset.wbUsageWho); return; }
   const uOpen = e.target.closest('[data-wb-usage-open]');
   if (uOpen) { e.preventDefault(); e.stopPropagation(); usageOpenPath(uOpen.dataset.wbUsageOpen); return; }
 
@@ -4676,40 +4716,76 @@ function cpUnwrap(el) {
   parent.removeChild(el);
 }
 
-// Markdown list markers carry the nesting in their indent, so the HTML has to
-// rebuild it. Two spaces per level is the reader's own rule; the ordered-vs-
-// unordered decision is per level, taken from the first item at that level.
+// Lists are read off the reader's own model — mdListItems + mdListTree, the
+// exact pair the 'list' render case uses — and this function only turns that
+// tree into clipboard HTML.
+//
+// v0.32.3 rewrote it for that reason. It previously did its own indent
+// arithmetic (`floor(spaces / 2)`) and opened one container per level of jump,
+// so an item that skipped a level emitted <ul><ul> with no <li> between them.
+// Obsidian's default indent is four spaces, which is two levels by the
+// reader's rule, so ORDINARY nesting hit it immediately: invalid markup that
+// rich-text editors quietly drop or flatten, reported as "second level bullets
+// and numbers don't come through". The reader had always been right about the
+// same input, which is the tell that the second implementation was the
+// problem — the same lesson cpInline records for inline markers, arrived at
+// twice.
+//
+// Level type follows the first child at that level, matching renderListLevel:
+// ordered if it is an `ol`, otherwise a bullet list. A `plain` node (a
+// tab-indented line with no marker, which this app treats as its own row) is
+// carried as a list item too, because in the reader it IS one.
 function cpListHtml(lines) {
-  const items = (lines || []).map(l => {
-    const m = l.match(/^(\s*)(?:([-*+]) \[([ xX])\] |([-*+]) |(\d+)[.)] )?([\s\S]*)$/);
-    if (!m) return { depth: 0, ordered: false, task: null, text: l };
-    return {
-      depth:   Math.floor((m[1] || '').replace(/\t/g, '  ').length / 2),
-      ordered: !!m[5],
-      task:    m[3] === undefined ? null : /[xX]/.test(m[3]),
-      text:    m[6] || '',
-    };
-  }).filter(it => it.text !== '');
-  if (!items.length) return '';
+  const root = mdListTree(mdListItems(lines).filter(it => (it.content || '').trim() !== ''));
+  return root.length ? cpListLevel(root) : '';
+}
 
-  let html = '', depth = -1;
-  const stack = [];
-  items.forEach(it => {
-    while (depth > it.depth) { html += `</li></${stack.pop()}>`; depth--; }
-    if (depth === it.depth) html += '</li>';
-    while (depth < it.depth) {
-      const tag = it.ordered ? 'ol' : 'ul';
-      stack.push(tag);
-      html += `<${tag}>`;
-      depth++;
-    }
+// v0.33.0 — the nesting is unchanged and was never wrong; what changed is
+// that a nested level now carries its indent on the <li> instead of relying
+// on the nested <ul> for it. Two different symptoms, one cause each:
+//
+//   * "second level pastes at level one" — some editors (Autodesk Forma's is
+//     the reported one; Word is fine) parse <ul> and <li> but have no schema
+//     for a list inside a list, so they keep every <li> and throw the wrapper
+//     away. Every level then lands flat. Nothing in the markup can stop that
+//     editor discarding the wrapper, but an indent written on the <li> itself
+//     survives it, so the level still reads as a level. The nested list keeps
+//     padding-left:0 so the same 24px is not applied twice where the nesting
+//     IS honoured — the result is identical in Word either way.
+//
+//   * "extra space after the last second level bullet" — a nested <ul> gets a
+//     default vertical margin, which paints as a blank line between the end of
+//     a nested run and the next top-level item. margin:0 removes it.
+//
+// Per level, not cumulative. Under real nesting that is correct at any depth;
+// under an editor that flattens, depth 3 and beyond arrive looking like depth
+// 2. Two levels is what this feature is used for and it is exact for two.
+const CP_LIST_INDENT = 24;
+
+function cpListLevel(nodes, nested) {
+  const isOl = nodes[0].kind === 'ol';
+  const tag  = isOl ? 'ol' : 'ul';
+  const lSty = nested ? ' style="margin:0;padding-left:0"' : ' style="margin:0"';
+  const iSty = nested ? ` style="margin-left:${CP_LIST_INDENT}px"` : '';
+  const body = nodes.map(n => {
     // A task checkbox becomes a box glyph rather than an <input>: a disabled
     // input pastes as nothing in most editors, and the tick is the content.
-    const box = it.task === null ? '' : (it.task ? '☑ ' : '☐ ');
-    html += `<li>${box}${cpInlineHtml(it.text)}`;
-  });
-  while (stack.length) { html += `</li></${stack.pop()}>`; }
-  return html;
+    const box  = n.kind === 'task' ? (n.done ? '☑ ' : '☐ ') : '';
+    const kids = n.children && n.children.length ? cpListLevel(n.children, true) : '';
+    return `<li${iSty}>${box}${cpInlineHtml(n.content)}${kids}</li>`;
+  }).join('');
+  return `<${tag}${lSty}>${body}</${tag}>`;
+}
+
+// The text/html clipboard flavour goes out as a whole small document rather
+// than a bare fragment. A fragment is legal and most editors cope, but the
+// ones that build their own parser around a document tend to be the same ones
+// that mishandle a fragment, and a charset declaration is the difference
+// between an em dash and a mojibake pair in a destination that guesses.
+// The legacy contenteditable fallback below still gets the bare fragment,
+// because that path assigns to innerHTML and a full document cannot be.
+function cpClipboardDoc(fragment) {
+  return '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>' + fragment + '</body></html>';
 }
 
 function calloutRichHtml(blocks) {
@@ -4941,14 +5017,14 @@ function parseBlocks(lines) {
         const bodyLines   = [];
         i++;
         while (i < lines.length && lines[i].startsWith('>')) {
-          bodyLines.push(lines[i].replace(/^>\s?/, ''));
+          bodyLines.push(lines[i].replace(QUOTE_MARKER, ''));
           i++;
         }
         blocks.push({ type: 'callout', cType, customTitle, startFolded, body: parseBlocks(bodyLines) });
       } else {
         const quoteLines = [];
         while (i < lines.length && lines[i].startsWith('>')) {
-          quoteLines.push(lines[i].replace(/^>\s?/, ''));
+          quoteLines.push(lines[i].replace(QUOTE_MARKER, ''));
           i++;
         }
         blocks.push({ type: 'blockquote', body: parseBlocks(quoteLines) });
@@ -5078,6 +5154,16 @@ function renderBlockTree(blocks, seenIds) {
   return html;
 }
 
+// One ">" plus at most one SPACE. Not `\s?`, which is what this was until
+// v0.32.3 — `\s` matches a tab, so a line written ">\t- nested" in Obsidian
+// arrived here as "- nested" with its indent eaten, and the first level of
+// nesting inside a callout silently vanished. It looked like a copy bug and
+// was not: the reader flattened it too, and had done since callouts shipped.
+// A tab is content here; only the single optional space after the marker is
+// punctuation. Every other leading space survives, which is what carries the
+// indent through to listIndentDepth.
+const QUOTE_MARKER = /^> ?/;
+
 // ── Nested list rendering (S3, Reader panel) ───────────────────────
 // Depth per item — a tab counts one level, and every run of 2 spaces
 // counts one level. No distinction by marker type (bullet/number/
@@ -5091,6 +5177,53 @@ function listIndentDepth(ws) {
     else if (ch === ' ') { spaces++; if (spaces === 2) { depth++; spaces = 0; } }
   }
   return depth;
+}
+
+// One line of a list block → a depth-tagged item. Extracted v0.32.3 from the
+// 'list' render case so the [!copy] serializer can read the SAME items the
+// reader draws, rather than a second parse that agrees with it until it does
+// not. This is the rule cpInline already followed for inline markers; the list
+// levels were the one place it was not followed, and that is precisely where
+// the two drifted.
+function mdListItems(lines) {
+  const items = [];
+  (lines || []).forEach(l => {
+    const tM = l.match(/^(\s*)[-*+] \[([ xX])\] (.*)/);
+    const uM = l.match(/^(\s*)[-*+] (.*)/);
+    const oM = l.match(/^(\s*)\d+\. (.*)/);
+    if (tM) { items.push({ kind: 'task', done: tM[2].toLowerCase() === 'x', content: tM[3], depth: listIndentDepth(tM[1]), cont: [] }); return; }
+    if (uM) { items.push({ kind: 'ul',   content: uM[2], depth: listIndentDepth(uM[1]), cont: [] }); return; }
+    if (oM) { items.push({ kind: 'ol',   content: oM[2], depth: listIndentDepth(oM[1]), cont: [] }); return; }
+    const wsMatch = l.match(/^([\t ]*)(.*)$/);
+    items.push({ kind: 'plain', content: wsMatch[2], depth: listIndentDepth(wsMatch[1]), cont: [] });
+  });
+  return items;
+}
+
+// Flat depth-tagged items → a tree. A stack of "current open ancestor at each
+// depth", same approach the heading outline uses.
+//
+// The property that matters, and the one the [!copy] serializer's own version
+// did not have: **a depth jump of more than one nests by exactly one level.**
+// An item at depth 2 directly under an item at depth 0 becomes that item's
+// child, because the stack only ever appends to the nearest shallower node —
+// there is no arithmetic and nothing to get wrong. Obsidian's default indent
+// is four spaces, which listIndentDepth reads as two levels, so ordinary
+// Obsidian nesting hits this on the very first indented line. The copy
+// serializer opened one container per level of jump instead, producing
+// <ul><ul> with no <li> between them; invalid, and rich-text editors quietly
+// drop or flatten it, which is why nesting vanished on paste.
+function mdListTree(items) {
+  const root = [];
+  const stack = [{ depth: -1, children: root }];
+  (items || []).forEach(it => {
+    while (stack.length && stack[stack.length - 1].depth >= it.depth) stack.pop();
+    const parent = stack[stack.length - 1].children;
+    const node = { ...it, children: [] };
+    parent.push(node);
+    stack.push({ depth: it.depth, children: node.children });
+  });
+  return root;
 }
 
 // One container per level (root or nested) — a level becomes a task
@@ -5421,32 +5554,14 @@ function renderSingleBlock(block, seenIds) {
       // below the first line) render correctly. If this turns out to
       // be the wrong trade-off, the old behavior was: push onto
       // `items[items.length - 1].cont` instead of `items` directly.
-      const items = [];
-      block.lines.forEach(l => {
-        const tM = l.match(/^(\s*)[-*+] \[([ xX])\] (.*)/);
-        const uM = l.match(/^(\s*)[-*+] (.*)/);
-        const oM = l.match(/^(\s*)\d+\. (.*)/);
-        if (tM) { items.push({ kind: 'task', done: tM[2].toLowerCase() === 'x', content: tM[3], depth: listIndentDepth(tM[1]), cont: [] }); return; }
-        if (uM) { items.push({ kind: 'ul',   content: uM[2], depth: listIndentDepth(uM[1]), cont: [] }); return; }
-        if (oM) { items.push({ kind: 'ol',   content: oM[2], depth: listIndentDepth(oM[1]), cont: [] }); return; }
-        const wsMatch = l.match(/^([\t ]*)(.*)$/);
-        items.push({ kind: 'plain', content: wsMatch[2], depth: listIndentDepth(wsMatch[1]), cont: [] });
-      });
-
+      // v0.32.3 — the parse and the tree build moved out to mdListItems()
+      // and mdListTree(). They were inline here, and the [!copy] rich
+      // serializer reimplemented both with its own arithmetic, which got
+      // 4-space indents wrong while the reader got them right. One model,
+      // two consumers; see mdListTree for the whole argument.
+      const items = mdListItems(block.lines);
       if (!items.length) return '';
-
-      // Build a tree from the flat depth-tagged items — a stack of
-      // "current open ancestor at each depth", same approach as the
-      // heading outline uses.
-      const root = [];
-      const stack = [{ depth: -1, children: root }];
-      items.forEach(it => {
-        while (stack.length && stack[stack.length - 1].depth >= it.depth) stack.pop();
-        const parent = stack[stack.length - 1].children;
-        const node = { ...it, children: [] };
-        parent.push(node);
-        stack.push({ depth: it.depth, children: node.children });
-      });
+      const root = mdListTree(items);
 
       // Block index prefixes the path so two separate list blocks in the
       // same file never collide on the same position-path (e.g. two
@@ -5534,7 +5649,27 @@ function setHiddenCountBadge(host, section, folded) {
 // toggle is simpler and can't drift out of sync with what's on screen.
 function liFoldStateKey(url) { return 'wb_li_folds:' + url; }
 
+// v0.33.0 — both halves of the memory are gated on one preference, and they
+// are gated SEPARATELY rather than at the one call site each, because a fold
+// is written on toggle and read on open and those are far apart. Gating only
+// the write would leave yesterday's folds replaying for as long as they sat
+// in storage; gating only the read would keep writing a store nothing uses.
+function liFoldMemoryOn() { return state.keepListFolds !== false; }
+
+// Turning the preference off clears what is already stored. Parking it would
+// mean a fold set weeks ago springs back the moment someone turns the setting
+// on again, which is exactly the invisible-state problem that got heading
+// persistence deleted in the first place.
+function purgeLiFoldState() {
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.indexOf('wb_li_folds:') === 0)
+      .forEach(k => localStorage.removeItem(k));
+  } catch (_) {}
+}
+
 function persistLiFoldState() {
+  if (!liFoldMemoryOn()) return;
   if (!state.activeUrl) return; // help / no file open — nothing to key it to
   const key = liFoldStateKey(state.activeUrl);
   const paths = [...document.querySelectorAll('#reader-content .md-li.folded[data-li-path]')]
@@ -5544,6 +5679,7 @@ function persistLiFoldState() {
 }
 
 function applyLiFoldState(url) {
+  if (!liFoldMemoryOn()) return;
   let paths = [];
   try { paths = JSON.parse(localStorage.getItem(liFoldStateKey(url))) || []; } catch (e) { paths = []; }
   if (!paths.length) return;
@@ -6536,6 +6672,15 @@ $('tgl-badges').addEventListener('change', e => {
   renderSidebar();
 });
 
+$('tgl-list-folds').addEventListener('change', e => {
+  state.keepListFolds = e.target.checked;
+  persist('wb_li_fold_memory', state.keepListFolds);
+  // Turning it OFF purges. Turning it on stores nothing yet — the next fold
+  // writes the first entry, so the setting starts from a clean sheet in both
+  // directions and never restores a fold the person cannot remember making.
+  if (!state.keepListFolds) purgeLiFoldState();
+});
+
 // ── Theme (S7) — Dark/Light via header sun/moon icon, Header colors via Settings select ──
 // ================================================================
 // Section 9 — Editor mode
@@ -7363,6 +7508,35 @@ async function scanBadges() {
         if (auditOn) {
           auditNow[auditPathKey(f.url)] = { hash: rec.hash, sections: rec.sections || [] };
         }
+        // v0.33.0 — the property check now runs over EVERY file, before the
+        // cause chain, instead of only over files the app has already stamped.
+        //
+        // What it was: a file with no status key was called a New file and
+        // stopped there, so it was never measured against the property list at
+        // all. Jayson's report was that files he had just added never appeared
+        // under Missing properties no matter what they were missing, and that
+        // was exactly right — the section could only ever describe files that
+        // had already been through the app once.
+        //
+        // Why both sections is correct and not a double-count: "this file has
+        // never been seen by the app" and "this file is missing property X"
+        // are two different review questions with two different answers. One
+        // is acknowledged by looking at it; the other is closed by writing a
+        // key. One-file-one-cause still holds inside the cause chain below,
+        // which is where it was protecting the audit delta. It was never a
+        // rule about a completeness check, which is a fact about a file rather
+        // than a decision about it — the same reasoning v0.32.1 used to pull
+        // this check out of the chain in the first place, carried the one step
+        // further it should have gone then.
+        //
+        // Still Contributor-gated, like every other row in this dashboard.
+        if (reviewAllowed()) {
+          const reqAll = REQUIRED_PROPS.filter(k => !(k in fm));
+          const optAll = OPTIONAL_PROPS.filter(k => !(k in fm));
+          if (reqAll.length || optAll.length) {
+            missingProps.push({ name: displayFileName(f.name), url: f.url, required: reqAll, optional: optAll });
+          }
+        }
         if (!fm.status) {
           // v0.32.1 — a New file row used to be a bare name. It stays one row
           // and one cause, but it now says WHICH properties are absent, so the
@@ -7381,7 +7555,6 @@ async function scanBadges() {
           // keys missing → Missing properties, and it never also becomes a
           // New file or a Flagged item — one row per file per cause.
           const reqMissing = REQUIRED_PROPS.filter(k => !(k in fm));
-          const optMissing = OPTIONAL_PROPS.filter(k => !(k in fm));
           // v0.32.1 — an incomplete property block is now reported whether the
           // absent key is required or optional, and it is checked INDEPENDENTLY
           // of the cause chain below, the same exception Due already gets.
@@ -7401,9 +7574,9 @@ async function scanBadges() {
           // whole vault out of the audit on the one run where the audit matters
           // most. Incompleteness is a fact about a file, not a decision about
           // it, so it does not compete for the file's one cause.
-          if (reqMissing.length || optMissing.length) {
-            missingProps.push({ name: displayFileName(f.name), url: f.url, required: reqMissing, optional: optMissing });
-          }
+          // v0.33.0 — the push that used to live here moved above the cause
+          // chain so it could cover unstamped files too. reqMissing is still
+          // computed here because the audit delta below turns on it.
           if (reqMissing.length) {
             /* structurally incomplete for the app — no audit delta to take */
           } else {
@@ -8601,12 +8774,42 @@ const USAGE_BUF_KEY  = 'wb_usage_buf';
 // dwell per visit keeps one forgotten tab from drowning out a week of real
 // use. Opens are the honest signal; seconds are the supporting one.
 const USAGE_MAX_DWELL = 1800;
-const USAGE_HEAD = [
-  '<!-- WikiBase usage log. One row per page per day. Written by the app; safe to delete. -->',
-  '',
-  '| day | path | opens | seconds |',
-  '|---|---|---|---|',
-].join('\n');
+// v0.33.0 — the log now carries the reader's display name in a comment line.
+// The filename has always identified the person, but it identifies them by
+// SLUG (an email with its @ and dots mangled into hyphens), and a slug is not
+// a name you can put in a report. Deriving one back out of the slug is
+// guesswork; writing it down once is not.
+//
+// Self-healing by construction: a usage file is rewritten in full on every
+// flush, so an existing log picks the line up on its owner's next sitting.
+// Until then usageLogPerson() falls back to tidying the slug, which is why
+// this could be added without a migration.
+function usageHead(who) {
+  const name = String(who || '').replace(/-->/g, '--');
+  return [
+    '<!-- WikiBase usage log. One row per page per day. Written by the app; safe to delete. -->',
+    `<!-- WBUSER name="${name}" -->`,
+    '',
+    '| day | path | opens | seconds |',
+    '|---|---|---|---|',
+  ].join('\n');
+}
+
+// Best effort, and only reached for a log written before v0.33.0 or by hand.
+// "2026-08-jayson.stickrod-company.com.md" is all the information there is, so
+// the email domain is dropped and the separators become spaces.
+function usagePrettySlug(fileName) {
+  const stem = String(fileName || '').replace(/\.md$/i, '').replace(/^\d{4}-\d{2}-/, '');
+  const local = stem.split('-')[0] || stem;      // drop the mangled @domain
+  return local.split(/[._]+/).filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || stem;
+}
+
+function usageLogPerson(fileName, txt) {
+  const m = String(txt || '').match(/<!--\s*WBUSER\s+name="([^"]*)"\s*-->/);
+  const named = m && m[1].trim();
+  return named || usagePrettySlug(fileName);
+}
 
 function usageDirUrl() { return LOCAL.on ? USAGE_SUBDIR : `${CONFIG.vaultRelPath}/${USAGE_SUBDIR}`; }
 function usageMonth(d) { return (d || new Date()).toISOString().slice(0, 7); }
@@ -8665,9 +8868,20 @@ function usageParseLog(txt) {
   });
   return rows;
 }
-function usageSerialize(rows) {
+function usageSerialize(rows, who) {
   const sorted = rows.slice().sort((a, b) => (a.day === b.day ? a.path.localeCompare(b.path) : a.day.localeCompare(b.day)));
-  return USAGE_HEAD + '\n' + sorted.map(r => `| ${r.day} | ${r.path} | ${r.opens} | ${r.secs} |`).join('\n') + '\n';
+  return usageHead(who) + '\n' + sorted.map(r => `| ${r.day} | ${r.path} | ${r.opens} | ${r.secs} |`).join('\n') + '\n';
+}
+
+// The name written into the log. Identity is optional in this app, so this
+// falls back through the same ladder the rest of the app uses and ends at the
+// slug — never at a blank, which would make an anonymous reader look like a
+// missing name rather than an unnamed one.
+function usageMyName() {
+  const u = state.user || {};
+  return (u.name && String(u.name).trim())
+      || (u.email && String(u.email).trim())
+      || wbAuthor();
 }
 function usageMergeRows(existing, incoming) {
   const by = new Map();
@@ -8706,7 +8920,7 @@ async function usageFlush() {
     const existing = await readVaultFileOrNull(url);
     const merged   = usageMergeRows(usageParseLog(existing), Object.values(sending));
     await ensureUsageDir();
-    await spWriteFile(url, usageSerialize(merged));
+    await spWriteFile(url, usageSerialize(merged, usageMyName()));
     // Only cleared once the write has actually returned. A read-only vault or
     // a denied permission leaves the buffer intact for the next attempt
     // rather than quietly throwing the sitting away.
@@ -8738,28 +8952,52 @@ async function usageListLogs() {
   return out;
 }
 
-// Everyone's logs, summed per path. THE NAMES ARE DROPPED HERE, on purpose
-// and in one place: this function reads per-person files and returns totals
-// with no person attached, so no caller downstream is in a position to show
-// one. Decision 3 above is enforced by there being nothing to leak.
+// Everyone's logs, summed per path, and as of v0.33.0 the per-person split is
+// KEPT rather than dropped.
+//
+// This reverses the Session 45 rule, deliberately and with Jayson's reasoning
+// on the record, so the old rule is written here rather than deleted: names
+// used to be discarded inside this function so that no render downstream was
+// in a position to show one. What changed is not the appetite for surveillance
+// but the discovery that the rule only ever applied to this view. The logs
+// themselves live at zSystem/Analytics/YYYY-MM-<person>.md, in the vault, in
+// plain Markdown, named after their owner — every member of staff has always
+// been able to open any of them in Obsidian. The pane was the only place the
+// attribution was hidden, and hiding it there bought privacy from nobody while
+// costing the one question the pane exists to answer: who is reading, and who
+// is not, when someone asks about something that is already written down.
+//
+// The Usage pane is Administrator-only and is absent, not disabled, below that
+// tier — see the tier field on the usage entry in WB_TOOLS. If that ever
+// changes, this decision has to be re-argued, because it was made on the
+// assumption of that gate.
+//
+// `by` is a Map of person → opens so a row can be expanded. Totals stay
+// exactly what they were; nothing about the numbers moved.
 let usageAggCache = { at: 0, data: null };
 async function usageAggregate(force) {
   if (!force && usageAggCache.data && (Date.now() - usageAggCache.at) < 60000) return usageAggCache.data;
   const logs = await usageListLogs();
-  const byPath = new Map(); // path → { opens, secs, days:Set, last }
+  const byPath = new Map(); // path → { opens, secs, days:Set, last, by:Map }
+  const people = new Set();
   for (const f of logs) {
     const txt = await readVaultFileOrNull(f.url);
     if (!txt) continue;
+    const who = usageLogPerson(f.name, txt);
+    people.add(who);
     usageParseLog(txt).forEach(r => {
-      const e = byPath.get(r.path) || { path: r.path, opens: 0, secs: 0, days: new Set(), last: '' };
+      const e = byPath.get(r.path) || { path: r.path, opens: 0, secs: 0, days: new Set(), last: '', by: new Map() };
       e.opens += r.opens;
       e.secs  += r.secs;
       e.days.add(r.day);
       if (r.day > e.last) e.last = r.day;
+      // One person can have several monthly logs, so this accumulates rather
+      // than assigning — otherwise August would quietly replace July.
+      e.by.set(who, (e.by.get(who) || 0) + r.opens);
       byPath.set(r.path, e);
     });
   }
-  const data = { rows: [...byPath.values()], logCount: logs.length };
+  const data = { rows: [...byPath.values()], logCount: logs.length, peopleCount: people.size };
   usageAggCache = { at: Date.now(), data };
   return data;
 }
@@ -9234,7 +9472,7 @@ function buildReviewDashboardHTML() {
     }
     if (show('missing') && state.missingProps.length) {
       body += '<div class="rv-sub-head">Missing properties</div>' +
-        '<div class="rv-empty" style="padding:2px 4px 6px">Checked independently, so a file listed here may also appear above under its own cause.</div>';
+        '<div class="rv-empty" style="padding:2px 4px 6px">Every file is checked against the full property list, so a file listed here may also appear above under New files. Those are two different checks and a file can fail both.</div>';
       state.missingProps.forEach(it => {
         const qi = queue.push({ type: 'missing', url: it.url, name: it.name, opts: {} }) - 1;
         body += `<div class="backlink-item" style="align-items:flex-start">
@@ -9247,7 +9485,11 @@ function buildReviewDashboardHTML() {
     if (!body) {
       body = '<div class="rv-empty">Nothing to complete.</div>';
     } else {
-      body += `<div class="rv-bulk-row"><button class="rv-mark-btn" onclick="rvFillAllBand3()">Fill all (${counts.band3})</button></div>`;
+      // The count on the button is the number of FILES that will be written,
+      // not the number of rows above it. Those two stopped being the same
+      // number in v0.33.0, when a new file started appearing under both
+      // sub-heads, and the button has to name what it is about to do.
+      body += `<div class="rv-bulk-row"><button class="rv-mark-btn" onclick="rvFillAllBand3()">Fill all (${rvBand3Files().length})</button></div>`;
     }
     html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
       ${rvBandHead('band3', 'Needs completion', counts.band3, collapsed)}
@@ -9444,8 +9686,23 @@ async function rvUpdateFile(url) {
   } catch (e) { alert('Could not update: ' + e.message); }
 }
 
+// v0.33.0 — deduplicated by url. A new file now legitimately appears in both
+// sub-lists of this band, so the raw concatenation would count it twice in the
+// confirm and write it twice in the loop. The second write is harmless (only
+// absent keys are ever injected, so the second pass finds nothing to do) but
+// the COUNT is not: it would tell someone they are about to touch more files
+// than exist, which is the number they use to decide whether to press it.
+function rvBand3Files() {
+  const seen = new Set();
+  return [...state.unauditedFiles, ...state.missingProps].filter(it => {
+    if (seen.has(it.url)) return false;
+    seen.add(it.url);
+    return true;
+  });
+}
+
 async function rvFillAllBand3() {
-  const items = [...state.unauditedFiles, ...state.missingProps];
+  const items = rvBand3Files();
   if (!items.length) return;
   if (!confirm(`Fill missing properties on ${items.length} file${items.length > 1 ? 's' : ''}?\n\nOnly absent keys are written — nothing that already has a value is touched.`)) return;
   try {
@@ -11475,6 +11732,12 @@ function loadPersistedState() {
       $('tgl-badges').checked = state.showBadges;
     }
 
+    const liFoldMem = localStorage.getItem('wb_li_fold_memory');
+    if (liFoldMem !== null) {
+      state.keepListFolds = JSON.parse(liFoldMem);
+      $('tgl-list-folds').checked = state.keepListFolds;
+    }
+
     const sidebar = localStorage.getItem('wb_sidebar');
     if (sidebar !== null) {
       state.sidebarOpen = JSON.parse(sidebar);
@@ -12117,13 +12380,23 @@ function refreshRightPanel() {
 // and not a render trick: a list of 400 rows is not a report, it is the raw
 // data with extra steps.
 //
-// NO NAMES ANYWHERE IN HERE. usageAggregate() already dropped them, so this
-// function could not show one if it tried. That is deliberate: the rule is
-// enforced by the data shape rather than by every render remembering it.
+// v0.33.0 — Most read rows expand to a per-person breakdown. See the long note
+// on usageAggregate for why the no-names rule was reversed and what it turned
+// out to have been protecting (nothing: the logs were always named and always
+// readable by everyone). The other two lists stay unnamed, and not by
+// oversight — "never opened" has nobody to name, and putting names on "gone
+// quiet" would turn a prompt to check whether a page is out of date into a
+// list of who stopped reading it.
 const USAGE_TOP     = 25;
 const USAGE_PREVIEW = 5;
 const USAGE_QUIET_DAYS = 30;
 let usageExpanded = {};   // section id → showing all 25
+let usageOpenRows = {};   // path → showing that row's per-person breakdown
+
+function usageToggleRow(path) {
+  usageOpenRows[path] = !usageOpenRows[path];
+  renderUsageTab();
+}
 
 function usageToggleSection(id) {
   usageExpanded[id] = !usageExpanded[id];
@@ -12147,12 +12420,32 @@ function usageSection(id, title, rows, render, emptyMsg) {
          shown.map(render).join('') + more + '</div>';
 }
 
+// The row keeps its existing click-to-open behaviour; the reader count is a
+// separate control beside it, because opening the page and asking who read it
+// are two different intentions and one click cannot serve both.
 function usageRowBar(r, max) {
-  const pct = max > 0 ? Math.max(3, Math.round((r.opens / max) * 100)) : 3;
+  const pct   = max > 0 ? Math.max(3, Math.round((r.opens / max) * 100)) : 3;
+  const by    = r.by ? [...r.by.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])) : [];
+  const open  = !!usageOpenRows[r.path];
+  const who   = by.length
+    ? `<button class="usage-who" data-wb-usage-who="${escHtml(r.path)}" ` +
+      `title="${open ? 'Hide who read this' : 'Show who read this'}">` +
+      `${by.length} reader${by.length === 1 ? '' : 's'} ${open ? '▾' : '▸'}</button>`
+    : '';
+  const list = open && by.length
+    ? '<div class="usage-by">' + by.map(([name, n]) =>
+        `<div class="usage-by-row"><span class="usage-by-name">${escHtml(name)}</span>` +
+        `<span class="usage-by-val">${n}</span></div>`).join('') + '</div>'
+    : '';
+  // One data-wb-usage-open, on the row, exactly as before. The reader-count
+  // button sits inside it and is a nested target the delegated handler asks
+  // about first, which is the established pattern here and is why the row does
+  // not need to give up its own click to make room for it.
   return `<div class="usage-row" data-wb-usage-open="${escHtml(r.path)}" title="${escHtml(r.path)}">` +
          `<div class="usage-row-top"><span class="usage-name">${escHtml(usageLabel(r.path))}</span>` +
-         `<span class="usage-val">${r.opens}</span></div>` +
-         `<div class="usage-track"><div class="usage-fill" style="width:${pct}%"></div></div></div>`;
+         `${who}<span class="usage-val">${r.opens}</span></div>` +
+         `<div class="usage-track"><div class="usage-fill" style="width:${pct}%"></div></div>` +
+         list + '</div>';
 }
 function usageRowPlain(r) {
   return `<div class="usage-row" data-wb-usage-open="${escHtml(r.path)}" title="${escHtml(r.path)}">` +
@@ -12197,8 +12490,18 @@ async function renderUsageTab() {
                          .map(r => ({ path: r.path, note: `last read ${r.last}` }));
 
   const max = mostRead.length ? mostRead[0].opens : 0;
+  // v0.33.0 — the old line here read "No names are shown or stored in this
+  // view", which stopped being true the moment a row could be expanded, and
+  // was only ever half true anyway: the logs have always been stored under
+  // their owner's name in the vault. It now says where the data comes from and
+  // who can see this pane, which is what someone reading a report about their
+  // colleagues should be told.
+  const people = agg.peopleCount || 0;
   const foot = agg.logCount
-    ? `<div class="usage-foot">Totals across ${agg.logCount} monthly log${agg.logCount === 1 ? '' : 's'}. No names are shown or stored in this view.</div>`
+    ? `<div class="usage-foot">Totals across ${agg.logCount} monthly log${agg.logCount === 1 ? '' : 's'} from ` +
+      `${people} ${people === 1 ? 'person' : 'people'}. ` +
+      (people === 1 ? 'Only your own reading has reached the vault so far. ' : '') +
+      `Reading is logged for everyone and stored per person in zSystem/Analytics. This pane is Administrator only.</div>`
     : `<div class="usage-foot">Nothing recorded yet. Reading is written to the vault when you leave the tab.</div>`;
 
   pane.innerHTML = paneHead('usage', { count: mostRead.length || '' }) +
