@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.33.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.34.0**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
@@ -112,7 +112,9 @@ When a panel is collapsed its tab stays permanently lit so you can find it. Clic
 - **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine. Headings, outlines and callouts never do — those open fresh every time. A closed folder is obviously a closed folder, so remembering it can never mislead you the way a silently collapsed heading could. Folds inside a list are the other saved kind, and those you can switch off; see [[#Folding lists]].
 - **Sort order** — folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
 - **File counts** — the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
-- **Strip folder prefixes** — hides the `NN_` from folder names on screen without touching the actual folder. Settings, off by default.
+- **Trim number prefixes** — hides a two-digit prefix from folder AND file names on screen without touching anything on disk. `00_Home` reads as `Home`, `05-File Name` reads as `File Name`. The numbers still do their job: they order the vault, they are what you see in Obsidian, and they are what a `[[link]]` is matched against. On by default; Settings.
+  - The rule is deliberately narrow: **exactly two digits, then one `_` or `-`**. A file called `2024-Q1 Review` or `007-Report` keeps its name in full, because a wider rule would eat part of a real title with nothing on screen to say it had.
+  - Links work either way. `[[05-Safety Plan]]` and `[[Safety Plan]]` both find the same note, whether or not this setting is on.
 
 **What the tree never shows:** anything ending `.comments.md` or `.changes.md`, anything starting with `.`, the `zSystem` folder (comments, change logs, profiles, shared theme), your Obsidian attachments subfolder, the `/config/`, `/themes/` and `/assets/` folders, and this help page.
 
@@ -298,6 +300,12 @@ Organise mode is off by default on purpose: with it off there is nothing to drag
 
 Bookmarks are **yours**, stored against your email in the vault, so they follow you to another PC rather than living in one browser.
 
+**Renaming a page does not break your bookmarks.** Every scan compares the vault against what it saw last time. A path that disappeared alongside a path that appeared carrying the same contents is the same page under a new name, and your bookmarks, favourites and last-opened note are moved across to it. The same is true of a page moved to a different folder. Nothing is asked of you and nothing needs re-adding.
+
+There is one case it cannot catch: **renaming a page and editing it before anyone next opens WikiBase**. With both the name and the contents changed at once, there is nothing left to match on, and bookmarks to that page do break. If you are reorganising the vault, rename first and let it settle before editing.
+
+Comments and change logs are a separate matter — those are files of their own, named after the page, and a rename does leave them behind. Renaming a page that has comments on it is worth avoiding for now.
+
 ### Links
 
 Two lists for the open note:
@@ -407,7 +415,7 @@ Open with **initials badge → Settings**.
 | Setting | Default | What it does |
 |---|---|---|
 | Open last note | On | Reopens the note you were reading, expanding the folders to reach it |
-| Strip folder prefixes | Off | Hides the `NN_` prefix from folder names on screen |
+| Trim number prefixes | On | Hides a two-digit `NN_` or `NN-` prefix from folder and file names on screen |
 | Show file counts | On | The file-count badge on each folder |
 | Remember collapsed lists | On | Keeps folded list items folded next time you open that note. Off clears what is already saved |
 

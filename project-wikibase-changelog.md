@@ -10,6 +10,46 @@
 
 ---
 
+## 0.34.0 — 2026-08-13
+
+**Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/rename-and-trim.test.js` (new), `README.md`, `help.md`, `help-edit.md`
+
+*Three things reported after living with 0.33.0. One is a corrected diagnosis, two are new capability.*
+
+### Nested bullets in a copy block: 0.33.0's fix was the cause
+
+0.33.0 read the report as "Forma drops the nested wrapper, Word is fine" and answered it by zeroing each nested list's `padding-left` and putting a 24px margin on each nested `<li>` instead. It then flattened in Word, Outlook **and** Forma, while the same three levels copied out of OneNote pasted into Forma perfectly.
+
+When every destination fails and a different source succeeds into one of them, the bug is in what we emit. `padding-left:0` **is** an instruction to sit at the parent's indent — it is precisely the reported symptom, written into the clipboard on purpose. The margin meant to compensate sits on the `<li>`, which is the one element Word, Outlook and Forma all discard, because each rebuilds list items as its own paragraph type and reads the level from nesting depth alone.
+
+So the markup goes back to plain nested `<ul>`/`<li>` with no indent instructions at all — what OneNote sends, and what every editor already knows how to indent. Depth is unlimited again rather than exact-for-two.
+
+The one thing kept from 0.33.0 is the vertical-margin fix that closed the extra blank line, now written as `margin-top` and `margin-bottom` specifically. The `margin:0` shorthand was doing that job and zeroing the left margin in the same stroke, which is the second half of the same bug in any editor that indents with margin rather than padding.
+
+The three checks that pinned 0.33.0's behaviour are replaced by six that assert the absence of any indent-suppressing style. Reverting the fix turns them red.
+
+### A rename no longer breaks bookmarks
+
+What's New has detected renames since 0.25.0: each scan keeps every path plus a content fingerprint, and a path that vanished beside a path that arrived carrying the same bytes is the same file under a new name. It kept that answer to itself. Bookmarks, favourites, list fold memory and the last-opened note all remember a file by its path, and all four went on breaking on every rename for nine releases, because nothing ever told them one had happened.
+
+The detection was never the missing piece. Publishing it was. One pairing is now built once per scan and handed to every store keyed by a path, so reorganising the vault stops costing everybody their bookmarks. A store added later is repaired by being listed in one place rather than by rediscovering the same bug.
+
+Two supporting details. The pairs are **queued** rather than applied on the spot, because the scan fires from boot alongside the identity load and usually wins the race — applying immediately would absorb the rename and drop it, leaving the bookmark broken with nothing left to show why. The queue also makes a chain (A→B this scan, B→C the next) come out right. And a second pairing pass matches on filename for whatever the fingerprint pass left over, which covers a file that was **moved and edited** in the same window; it refuses to guess when two files share a name, because sending a bookmark to the wrong page is worse than leaving it broken.
+
+Renaming and editing a file in the same window remains unmatchable. That is the honest limit of inferring identity from content, and the suite asserts it rather than leaving a passing run to imply otherwise.
+
+### Number prefixes are trimmed on screen
+
+A numbered vault — `00_Home`, `01_Gates`, `05-File Name` — sorts and stays findable on disk and in Obsidian. The numbers have done their whole job before WikiBase renders anything, so they are now trimmed on screen: the tree, the reader title, search results, bookmarks, What's New and the review queue.
+
+The rule is **exactly two digits then one underscore or hyphen**, not "one or more digits". A wider rule quietly eats real titles — `2024-Q1 Review` becomes `Q1 Review` with nothing on screen to say it was wrong. Three characters is the promise the setting makes, so three characters is what is coded.
+
+The setting existed for folders only, matched `^\d+_`, and defaulted off. It now covers files, accepts `-` as well as `_`, and **defaults on**.
+
+Display and resolution are kept strictly apart, which is the whole safety of the feature: the wikilink index, sidecar filenames and every file-exists check key off the untrimmed name and do not move when the setting moves. On top of that, the trimmed name is registered as an **alias**, so `[[Safety Plan]]` finds `05-Safety Plan.md` as well as `[[05-Safety Plan]]` does. Aliases live in their own map so an exact filename always wins, and they are registered whether or not the trim is on — how a link resolves must never depend on a display preference, or the same note renders live for half the team and dead for the rest. Backlinks look up both keys for the same reason.
+
+**Not changed:** comment and change-log sidecars are still named after their note, so a rename still orphans them. Repairing that means writing and deleting files in the vault on a scan, which is a different decision from repairing device state, and is left for its own session.
+
 ## 0.33.0 — 2026-08-12
 
 **Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/fold-consolidation.test.js`, `supporting/tests/usage-analytics.test.js`, `supporting/tests/review-dashboard.test.js`, `supporting/tests/review-bugfix-0321.test.js`, `README.md`, `help.md`, `help-edit.md`

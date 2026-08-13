@@ -2724,7 +2724,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.33.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.34.0</button>
     </aside>
 
   </div>
@@ -2829,9 +2829,9 @@
         </label>
       </div>
       <div class="toggle-row">
-        Strip folder prefixes
+        Trim number prefixes
         <label class="toggle">
-          <input type="checkbox" id="tgl-strip">
+          <input type="checkbox" id="tgl-strip" checked>
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
         </label>
@@ -2994,7 +2994,10 @@ const state = {
   authLoaded:   false, // false until the read has been attempted at least once
   reviewChanges: [],   // S14 — [{name,url,changesUrl,entries,unreviewed}]
   cmtOpenCount: 0,     // S14 — vault-wide open comments (badges)
-  stripPfx:     false,
+  // v0.34.0 — was false and folder-only. Now covers files too and defaults ON:
+  // the numbering exists to order the vault on disk, and a reader who wanted to
+  // see "05-" in front of every title would not have numbered anything.
+  stripPfx:     true,
   showBadges:   true,
   // v0.33.0 — list fold memory as a preference. Defaults to on: this is how
   // the app has always behaved and changing the default would silently take
@@ -3004,6 +3007,9 @@ const state = {
   // fields on state.themePrefs now (mode, preset, underlines[1]). The
   // resolved dark/light value lives on body[data-theme] as before.
   fileIndex:    {},    // { [lc-name-without-ext]: serverRelativeUrl } — for link resolution
+  fileAlias:    {},    // v0.34.0 — same, but keyed by the name with its ##_ / ##-
+                       // prefix trimmed off. Consulted only when fileIndex misses,
+                       // so an exact filename always wins over a trimmed one.
   fileFolder:   {},    // { [url]: folderId|null } — populated alongside fileIndex, used to
                         // expand the right folder chain when restoring the last-opened file
   // Docks (S41, replaces openRPTabs/rpFlex). Two stacks, each in top-to-bottom
@@ -3082,12 +3088,56 @@ const state = {
 // ── Helpers ──────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
-function displayFolderName(raw) {
-  return state.stripPfx ? raw.replace(/^\d+_/, '') : raw;
+// ── Numbering prefixes, v0.34.0 ──────────────────────────────────
+// The vault is numbered so it sorts and stays findable on disk and in
+// Obsidian: 00_Home, 01_Gates, 02_Process at folder level, 05-File Name at
+// file level. Those numbers do their whole job before WikiBase renders
+// anything, so they are trimmed on screen and nowhere else.
+//
+// EXACTLY two digits, then one underscore or hyphen, then the rest. Two and
+// not "one or more" because a wider rule quietly eats real titles — "2024-Q1
+// Review" is a filename someone will write, and `^\d+[_-]` turns it into "Q1
+// Review" with no way to tell it was wrong. Three characters is also the
+// promise made to the person turning this on, so the promise is what is coded.
+//
+// The setting itself is older than this: it shipped for FOLDERS only, matching
+// `^\d+_`, and defaulted off. Files are what people actually read, so this
+// extends it to files, tightens the pattern to accept `-` as well as `_`, and
+// switches the default on.
+const NUM_PREFIX = /^\d\d[_-]/;
+
+function stripNumPrefix(s) {
+  return String(s).replace(NUM_PREFIX, '');
 }
 
+// The RESOLUTION name — filename with .md gone and nothing else touched.
+// Wikilink lookup, sidecar filenames and every file-exists check key off this,
+// and none of them may move because of a display preference. Keeping the two
+// jobs in two functions is the entire safety of this feature: the display one
+// is free to change, this one is not.
+function fileStem(raw) {
+  return String(raw).replace(/\.md$/i, '');
+}
+
+function displayFolderName(raw) {
+  return state.stripPfx ? stripNumPrefix(raw) : raw;
+}
+
+// The DISPLAY name — the tree, the reader title, search results, bookmarks,
+// What's New, the review queue. Never used to find a file.
 function displayFileName(raw) {
-  return raw.replace(/\.md$/i, '');
+  return state.stripPfx ? stripNumPrefix(fileStem(raw)) : fileStem(raw);
+}
+
+// The trim happens EXACTLY ONCE, at the boundary where a path or a raw
+// filename first becomes something a person reads. Anything already stored as
+// a display name (a bookmark's label, state.activeName) is finished and must
+// not pass through again — stripNumPrefix removes one prefix per call, so a
+// second pass over "05-10-Thing" would eat a second one and there would be no
+// way to tell it had happened. This helper is that boundary: give it a URL or
+// a filename, never a name that has already been displayed.
+function displayNameOf(pathOrName) {
+  return displayFileName(String(pathOrName || '').split('/').pop());
 }
 
 function numericSort(arr, key) {
@@ -3110,9 +3160,28 @@ function isIgnored(name) {
 }
 
 function indexFile(f, folderId = null) {
-  const key = displayFileName(f.name).toLowerCase();
+  const key = fileStem(f.name).toLowerCase();
   state.fileIndex[key]  = f.url;
+  // v0.34.0 — the trimmed name is registered as an ALIAS in a second map, so
+  // [[Safety Plan]] finds 05-Safety Plan.md and [[05-Safety Plan]] still does
+  // too. Registered whether or not the trim setting is on, because how a link
+  // resolves must never depend on a display preference — otherwise the same
+  // note renders as a live link for half the team and a dead one for the rest.
+  //
+  // A SECOND map rather than more entries in the first, for two reasons: an
+  // exact filename must always beat an alias no matter which file was indexed
+  // first, and one place iterates fileIndex by value expecting one entry per
+  // file. First alias wins; the losers are still reachable by full name.
+  const alias = stripNumPrefix(fileStem(f.name)).toLowerCase();
+  if (alias !== key && !(alias in state.fileAlias)) state.fileAlias[alias] = f.url;
   state.fileFolder[f.url] = folderId;
+}
+
+// Exact name first, trimmed alias second. Every wikilink, embed and link
+// lookup goes through here so there is one answer to "which file is this",
+// rather than six call sites each remembering to check the alias map.
+function resolveNoteUrl(lcKey) {
+  return state.fileIndex[lcKey] || state.fileAlias[lcKey];
 }
 
 // Change-log sidecars live in a hidden "zSystem" subfolder next to
@@ -3223,6 +3292,7 @@ function resetVaultState(fresh) {
   state.folderKids   = {};
   state.folderStale  = {};
   state.fileIndex    = {}; // stale entries here would resolve [[links]] into the old vault
+  state.fileAlias    = {}; // same reason — a trimmed alias is still a resolution path
   state.fileFolder   = {};
 
   // Badge sources. scanBadges() refills these from the new vault, but it's
@@ -4056,9 +4126,14 @@ function renderInline(text) {
       anchor = a !== undefined ? '#' + (a || '').trim() : '';
       // Display text should never carry the raw "#" — that's link syntax,
       // not something a reader should see. Same-page (no target) shows
-      // just the heading name; a target file still shows just its name,
-      // unchanged from before.
-      display = target || (a || '').trim();
+      // just the heading name; a target file still shows just its name.
+      //
+      // v0.34.0 — and that name gets the same prefix trim the tree gets, or a
+      // vault with the trim on reads "Safety Plan" in the sidebar and
+      // "05-Safety Plan" in the sentence pointing at it. Only when the author
+      // wrote no alias: [[05-Safety Plan|the plan]] means the author chose the
+      // words, and a display setting does not get to edit an author's words.
+      display = target ? (state.stripPfx ? stripNumPrefix(target) : target) : (a || '').trim();
     }
 
     // Same-page anchor. headingId() must see the DECODED heading text —
@@ -4070,12 +4145,12 @@ function renderInline(text) {
     }
 
     const key = unescHtml(target).toLowerCase().replace(/\.md$/,'');
-    const url = state.fileIndex[key];
+    const url = resolveNoteUrl(key);
     if (url) {
       const anchorAttr = anchor ? ` data-anchor="${anchor}"` : '';
       // url comes from the file index, not from the escaped markdown, so
       // it still needs escaping here.
-      return slot(`<a class="md-ilink" data-wb-open="${escHtml(url)}" data-wb-name="${target}"${anchorAttr}>${display}</a>`);
+      return slot(`<a class="md-ilink" data-wb-open="${escHtml(url)}" data-wb-name="${state.stripPfx ? stripNumPrefix(target) : target}"${anchorAttr}>${display}</a>`);
     }
     // Unresolved — note may be in an unexpanded folder
     return slot(`<span class="md-ilink-dead" title="Note not yet loaded or not found">${display}</span>`);
@@ -4095,10 +4170,10 @@ function renderInline(text) {
       } catch (_) {
         noteName = unescHtml(path).replace(/\.md$/i,'').split('/').pop();
       }
-      const url = state.fileIndex[noteName.toLowerCase()];
+      const url = resolveNoteUrl(noteName.toLowerCase());
       if (url) {
         const anchorAttr = frag ? ` data-anchor="#${frag}"` : '';
-        return slot(`<a class="md-ilink" data-wb-open="${escHtml(url)}" data-wb-name="${escHtml(noteName)}"${anchorAttr}>${text}</a>`);
+        return slot(`<a class="md-ilink" data-wb-open="${escHtml(url)}" data-wb-name="${escHtml(displayNameOf(noteName))}"${anchorAttr}>${text}</a>`);
       }
     }
     // Same-page anchor
@@ -4539,7 +4614,7 @@ document.addEventListener('click', wbDelegatedClick);
 // the inline and block paths normalise to raw before calling.
 function buildEmbedStub(name, inline) {
   const key = name.toLowerCase().replace(/\.md$/,'');
-  const url = state.fileIndex[key];
+  const url = resolveNoteUrl(key);
   const tag = inline ? 'span' : 'div';
   if (url) {
     return `<${tag} class="md-embed-stub" data-wb-open="${escHtml(url)}" data-wb-name="${escHtml(name)}">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note</span><span class="md-embed-stub-open">Open →</span></${tag}>`;
@@ -4740,39 +4815,43 @@ function cpListHtml(lines) {
   return root.length ? cpListLevel(root) : '';
 }
 
-// v0.33.0 — the nesting is unchanged and was never wrong; what changed is
-// that a nested level now carries its indent on the <li> instead of relying
-// on the nested <ul> for it. Two different symptoms, one cause each:
+// v0.34.0 — v0.33.0's indent scheme is removed. It set padding-left:0 on every
+// nested <ul> and put a 24px margin on each nested <li> instead, on the theory
+// that an editor which discards the nested wrapper would still honour a margin
+// written on the item.
 //
-//   * "second level pastes at level one" — some editors (Autodesk Forma's is
-//     the reported one; Word is fine) parse <ul> and <li> but have no schema
-//     for a list inside a list, so they keep every <li> and throw the wrapper
-//     away. Every level then lands flat. Nothing in the markup can stop that
-//     editor discarding the wrapper, but an indent written on the <li> itself
-//     survives it, so the level still reads as a level. The nested list keeps
-//     padding-left:0 so the same 24px is not applied twice where the nesting
-//     IS honoured — the result is identical in Word either way.
+// The theory was built on a wrong diagnosis. It was reported as a Forma-only
+// problem with Word unaffected; it then flattened in Word, Outlook AND Forma,
+// while OneNote → Forma with the same three levels pasted perfectly. When every
+// destination fails and a different source succeeds into one of them, the bug
+// is in what we emit, not in what they accept.
 //
-//   * "extra space after the last second level bullet" — a nested <ul> gets a
-//     default vertical margin, which paints as a blank line between the end of
-//     a nested run and the next top-level item. margin:0 removes it.
+// padding-left:0 IS the flattening. It tells a rich-text editor that a sub-list
+// sits at its parent's indent, which is precisely the reported symptom, and the
+// margin meant to compensate is on the <li> — the one place Word, Outlook and
+// Forma all ignore, because each rebuilds list items as its own paragraph type
+// and derives the level from nesting depth alone.
 //
-// Per level, not cumulative. Under real nesting that is correct at any depth;
-// under an editor that flattens, depth 3 and beyond arrive looking like depth
-// 2. Two levels is what this feature is used for and it is exact for two.
-const CP_LIST_INDENT = 24;
-
-function cpListLevel(nodes, nested) {
+// So the markup goes back to plain nested <ul>/<li> with no indent instructions
+// at all, which is what OneNote sends and what every editor already knows how
+// to indent. Depth is unlimited again rather than exact-for-two.
+//
+// The one thing kept from v0.33.0 is the vertical margin fix: a nested <ul>
+// carries a default top/bottom margin that paints as a blank line between the
+// end of a nested run and the next top-level item. Zeroed with margin-top and
+// margin-bottom SPECIFICALLY — the `margin:0` shorthand was doing this job and
+// zeroing margin-left in the same stroke, which is the second half of the same
+// bug in any editor that indents with margin rather than padding.
+function cpListLevel(nodes) {
   const isOl = nodes[0].kind === 'ol';
   const tag  = isOl ? 'ol' : 'ul';
-  const lSty = nested ? ' style="margin:0;padding-left:0"' : ' style="margin:0"';
-  const iSty = nested ? ` style="margin-left:${CP_LIST_INDENT}px"` : '';
+  const lSty = ' style="margin-top:0;margin-bottom:0"';
   const body = nodes.map(n => {
     // A task checkbox becomes a box glyph rather than an <input>: a disabled
     // input pastes as nothing in most editors, and the tick is the content.
     const box  = n.kind === 'task' ? (n.done ? '☑ ' : '☐ ') : '';
-    const kids = n.children && n.children.length ? cpListLevel(n.children, true) : '';
-    return `<li${iSty}>${box}${cpInlineHtml(n.content)}${kids}</li>`;
+    const kids = n.children && n.children.length ? cpListLevel(n.children) : '';
+    return `<li>${box}${cpInlineHtml(n.content)}${kids}</li>`;
   }).join('');
   return `<${tag}${lSty}>${body}</${tag}>`;
 }
@@ -6563,6 +6642,10 @@ async function checkIdentity() {
       try {
         state.user = JSON.parse(text);
         normalizeUserBookmarkData();
+        // v0.34.0 — the scan is fired from bootVault alongside this call and
+        // usually wins the race, so any rename it found is sitting in the queue
+        // waiting for a record to apply it to. This is that moment.
+        wbDrainRenameQueue();
         updateUserBadge();
         updateBookmarkTabBadge();
         return;
@@ -6608,6 +6691,7 @@ async function submitIdentity() {
     // to close, same as the Session 26 "new PC" simulation.
     state.user = record;
     normalizeUserBookmarkData();
+    wbDrainRenameQueue(); // same reason as checkIdentity — see v0.34.0 note there
     persist('wb_user_email', email);
     updateUserBadge();
     updateBookmarkTabBadge();
@@ -7028,7 +7112,7 @@ async function acUpdate() {
     let heads = [];
     if (!fpart) heads = acHeadingsOf(ta.value);
     else {
-      const url = state.fileIndex[fpart.toLowerCase()];
+      const url = resolveNoteUrl(fpart.toLowerCase());
       if (url) { const t = await readVaultFileOrNull(url); if (t) heads = acHeadingsOf(t); }
     }
     items = heads.filter(h => h.toLowerCase().includes(hfrag))
@@ -7931,7 +8015,162 @@ function wnDetectRenames(oldIdx, curIdx) {
     const pool = byHash[wnSig(curIdx[u])];
     if (pool && pool.length) map[u] = pool.shift(); // newUrl -> oldUrl
   });
+
+  // Second pass, v0.34.0. A file that MOVED between folders and was also
+  // edited before the next scan has no matching fingerprint, but it still
+  // carries the same filename — pair on that for whatever the hash pass left
+  // over. Only when the name is unique on BOTH sides: if two folders each hold
+  // a "Notes.md" the pairing is a coin toss, and a wrong pairing silently
+  // moves someone's bookmark to a different page, which is worse than leaving
+  // it broken. Renaming and editing in the same window stays unmatchable, and
+  // that is the honest limit of inferring identity from content and name.
+  const stem = u => u.slice(u.lastIndexOf('/') + 1).toLowerCase();
+  const leftGone = gone.filter(u => !Object.values(map).includes(u));
+  const leftNew  = arrived.filter(u => !(u in map));
+  if (leftGone.length && leftNew.length) {
+    const count = (arr, u) => arr.filter(x => stem(x) === stem(u)).length;
+    leftNew.forEach(u => {
+      if (count(leftNew, u) !== 1) return;
+      const hit = leftGone.filter(x => stem(x) === stem(u));
+      if (hit.length === 1) map[u] = hit[0];
+    });
+  }
   return map;
+}
+
+// ── Rename repair, v0.34.0 ───────────────────────────────────────
+// What's New has detected renames since 0.25.0 and kept the answer to itself.
+// Every OTHER store that remembers a file by its path — bookmarks, favourites,
+// list fold memory, the last-opened note — went on breaking on every rename for
+// another nine releases, because nothing ever told them a rename had happened.
+// The detection was never the missing piece; publishing it was.
+//
+// One pairing, applied in one place. A store added later is repaired by being
+// listed here, rather than by rediscovering the same bug and growing its own
+// half-answer to it.
+//
+// Queued rather than applied on the spot because of boot order: the scan is
+// fired from bootVault alongside checkIdentity, so the first scan of a session
+// routinely lands BEFORE the user record exists. Applying immediately would
+// absorb the rename into the index and drop it, and the bookmark would stay
+// broken forever with nothing left to show why. The queue holds the pairs until
+// identity arrives, which also makes a chain (A→B this scan, B→C the next) come
+// out right, since the pairs drain in the order they were found.
+const WB_RENAME_Q_KEY = 'wb_rename_queue';
+
+function wbRecordRenames(renames) {
+  const pairs = Object.entries(renames).map(([to, from]) => ({ from, to }));
+  if (!pairs.length) return;
+  // Device-local prefs need no identity, so they are repaired at once.
+  wbRemapLocalPrefs(pairs);
+  try { wnWrite(WB_RENAME_Q_KEY, wnRead(WB_RENAME_Q_KEY, []).concat(pairs)); } catch (_) {}
+  wbDrainRenameQueue();
+}
+
+// Safe to call at any time and from anywhere — it is a no-op until there is a
+// user record to repair, which is exactly what makes it callable from the two
+// places identity can arrive without either needing to know about the other.
+function wbDrainRenameQueue() {
+  if (!state.user) return;
+  let q = [];
+  try { q = wnRead(WB_RENAME_Q_KEY, []) || []; } catch (_) { q = []; }
+  if (!q.length) return;
+  let touched = 0;
+  q.forEach(p => { if (p && p.from && p.to) touched += wbRemapUserRecord(p.from, p.to); });
+  wnWrite(WB_RENAME_Q_KEY, []);
+  if (!touched) return;
+  saveUserRecord();
+  // The repair is already done in memory and already on its way to the vault.
+  // Redrawing is the cosmetic half, and a panel that is not currently mounted
+  // must not be able to throw the repair away — the queue has been emptied by
+  // this point, so an exception here would lose the pairing for good.
+  try {
+    updateBookmarkTabBadge();
+    renderOutlineTab();
+    if (isToolOpen('bookmarks')) renderBookmarksTab();
+  } catch (_) { /* redrawn on next open either way */ }
+}
+
+// Per-device prefs, all in localStorage. Nothing here is worth a failed boot,
+// so the whole thing is wrapped rather than each store guarding itself.
+function wbRemapLocalPrefs(pairs) {
+  try {
+    pairs.forEach(({ from, to }) => {
+      const fk = liFoldStateKey(from);
+      const saved = localStorage.getItem(fk);
+      if (saved !== null) { localStorage.setItem(liFoldStateKey(to), saved); localStorage.removeItem(fk); }
+
+      const last = getLastFile();
+      if (last && last.url === from) {
+        const dirOf = u => u.slice(0, u.lastIndexOf('/'));
+        localStorage.setItem('wb_last_file', JSON.stringify({
+          url: to,
+          name: displayNameOf(to),
+          // The folder id is a path of folder ids, so it only survives a
+          // rename that stayed put. A move gets null: the note still opens,
+          // the tree just does not pre-expand to it, which beats expanding
+          // to a folder that no longer holds it.
+          folderId: dirOf(from) === dirOf(to) ? last.folderId : null,
+        }));
+      }
+    });
+  } catch (_) { /* a full or disabled localStorage must not break a scan */ }
+}
+
+// Bookmarks and favourites, which live in the user's vault record. Returns the
+// number of entries touched so the caller can skip a write nobody needs.
+//
+// Both sections carry the same three shapes: a keyed map, a flat `top` order of
+// {k, id} tokens, and named groups whose `order` holds bare ids. All three hold
+// the path, so all three have to move or the tab renders a bookmark it cannot
+// find. Missing any one of them is why this is written once here instead of at
+// each of the call sites that already know how to add and remove a token.
+function wbRemapUserRecord(from, to) {
+  if (!state.user || from === to) return 0;
+  let n = 0;
+  const newName = displayNameOf(to);
+
+  const bm = state.user.bookmarks;
+  if (bm && bm.files && bm.files[from]) {
+    const rec = bm.files[from];
+    rec.name = newName;
+    // Merge rather than clobber: the destination path can already hold
+    // bookmarks if someone renamed A to B while B existed and was then
+    // deleted. Dropping either set silently loses bookmarks.
+    if (bm.files[to]) bm.files[to].items = bm.files[to].items.concat(rec.items);
+    else bm.files[to] = rec;
+    delete bm.files[from];
+    n++;
+  }
+  if (bm) {
+    (bm.top || []).forEach(t => { if (t.k === 'f' && t.id === from) { t.id = to; n++; } });
+    Object.values(bm.groups || {}).forEach(g => {
+      (g.order || []).forEach((id, i) => { if (id === from) { g.order[i] = to; n++; } });
+    });
+  }
+
+  const fav = state.user.favorites;
+  if (fav && fav.items) {
+    // A favourite is keyed by file + heading, so the rename rewrites the file
+    // half of every key that starts with the old path. Collected first, then
+    // rewritten — mutating a map while iterating its own keys is how half of
+    // them get missed.
+    const pre = from + '::';
+    Object.keys(fav.items).filter(k => k.indexOf(pre) === 0).forEach(k => {
+      const nk  = to + '::' + k.slice(pre.length);
+      const rec = fav.items[k];
+      rec.file = to;
+      rec.fileName = newName;
+      fav.items[nk] = rec;
+      delete fav.items[k];
+      (fav.top || []).forEach(t => { if (t.k === 'i' && t.id === k) t.id = nk; });
+      Object.values(fav.groups || {}).forEach(g => {
+        (g.order || []).forEach((id, i) => { if (id === k) g.order[i] = nk; });
+      });
+      n++;
+    });
+  }
+  return n;
 }
 
 // Stage 2. Builds the current index from the enumerated files, reading and
@@ -8010,6 +8249,11 @@ async function wnScan() {
       delete seen[oldUrl]; delete sect[oldUrl];
       delete meta.surfaced[oldUrl]; delete meta.lapsed[oldUrl];
     });
+
+    // v0.34.0 — and now so does everything else that remembers a path. This is
+    // the whole change: the pairing above was already correct and already ran
+    // on every scan, it was just never handed to anyone but What's New.
+    wbRecordRenames(renames);
 
     // Deletions drop out of every store. A path that comes back later is
     // genuinely new again, which is the honest answer.
@@ -10642,7 +10886,7 @@ async function submitCreate() {
         btn.disabled = false;
         return;
       }
-      const title = name.replace(/\.md$/i, '');
+      const title = displayNameOf(name);
       // Full S13 properties set — Obsidian shows these in its Properties UI.
       const content = [
         '---',
@@ -12827,8 +13071,7 @@ function expandHeadingSubtree(id) {
 // whichever surface triggered the jump.
 async function jumpToBookmark(file, id) {
   if (state.activeUrl !== file) {
-    const name = file.split('/').pop().replace(/\.md$/i, '');
-    await openFile(file, name);
+    await openFile(file, displayNameOf(file));
   }
   expandHeadingSubtree(id);
   revealHeading(id);
@@ -12859,7 +13102,7 @@ function renderFavRowBm(fid, indent) {
   return `<div class="bm-row" style="padding-left:${indent}px"${drag} data-wb-bmjump="${escHtml(f.file)}" data-wb-bmjumpid="${escHtml(f.id)}">
     ${grip}
     <span class="bm-label">${escHtml(f.custom || f.text)}</span>
-    <span class="bm-sub">${escHtml((f.fileName || f.file).replace(/\.md$/i, ''))}</span>
+    <span class="bm-sub">${escHtml(f.fileName || displayNameOf(f.file))}</span>
     <button class="bm-action" data-wb-favrename="${escHtml(fid)}" title="Rename" aria-label="Rename">${ICON.pencil}</button>
   </div>`;
 }
@@ -12877,7 +13120,7 @@ function renderBmFileBlock(file, indent) {
   let html = `<div class="bm-group-hd" style="padding-left:${indent}px"${drag} data-wb-bmcollapsefile="${escHtml(file)}">
     ${grip}
     <span style="display:flex;transform:rotate(${isCollapsed ? '-90deg' : '0deg'})">${ICON.foldChevron}</span>
-    <span class="bm-group-name">${escHtml((f.name || file).replace(/\.md$/i, ''))}</span>
+    <span class="bm-group-name">${escHtml(f.name || displayNameOf(file))}</span>
     <span class="bm-count">${f.items.length}</span>
   </div>`;
   if (!isCollapsed) {
@@ -13075,7 +13318,7 @@ function extractLinksForDisplay(rawMd) {
     if (seen.has(dedupeKey)) return;
     seen.add(dedupeKey);
     const lc  = target.toLowerCase();
-    const url = state.fileIndex[lc];
+    const url = resolveNoteUrl(lc);
     if (url) out.md.push({ name: display || target, url });
     else if (isFolderName(lc)) out.folder.push({ name: display || target });
     else out.other.push({ name: display || target });
@@ -13155,8 +13398,19 @@ function renderBacklinksTab() {
     html += '<div class="rp-empty">No links in this file.</div>';
   }
 
-  const currentKey = state.activeUrl.split('/').pop().replace(/\.md$/i, '').toLowerCase();
-  const backlinks  = state.backlinksMap[currentKey] || [];
+  // Backlinks are keyed by the words the AUTHOR typed inside [[ ]], so a file
+  // reached by its trimmed alias is filed under the trimmed key while this page
+  // knows itself by its full filename. Both are looked up and merged, or every
+  // [[Safety Plan]] pointing at 05-Safety Plan.md would go uncounted — the same
+  // aliasing that makes the link resolve has to make the backlink resolve, or
+  // the feature is half-built and silently wrong in the quiet direction.
+  const currentKey = fileStem(state.activeUrl.split('/').pop()).toLowerCase();
+  const aliasKey   = stripNumPrefix(currentKey);
+  const backlinks  = (state.backlinksMap[currentKey] || []).concat(
+    aliasKey === currentKey ? [] :
+    (state.backlinksMap[aliasKey] || []).filter(b =>
+      !(state.backlinksMap[currentKey] || []).some(x => x.url === b.url))
+  );
   html += '<div class="rv-ov-label">Backlinks</div>';
   if (backlinks.length) {
     html += backlinks.map(l =>
