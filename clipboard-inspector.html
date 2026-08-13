@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Clipboard inspector</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+         max-width: 900px; margin: 40px auto; padding: 0 20px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 24px; opacity: .7; }
+  ol { padding-left: 20px; }
+  li { margin: 6px 0; }
+  #drop { border: 2px dashed #999; border-radius: 8px; min-height: 120px;
+          padding: 14px; margin: 16px 0; }
+  #drop:focus { outline: 2px solid #2563a8; border-color: transparent; }
+  #drop:empty::before { content: "Click here, then press Ctrl+V"; opacity: .5; }
+  textarea { width: 100%; height: 260px; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace;
+             padding: 10px; border-radius: 6px; border: 1px solid #999;
+             background: transparent; color: inherit; white-space: pre; }
+  button { font: inherit; padding: 6px 14px; border-radius: 6px; cursor: pointer;
+           border: 1px solid #999; background: transparent; color: inherit; }
+  .row { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
+  .note { font-size: 13px; opacity: .75; }
+</style>
+</head>
+<body>
+
+<h1>Clipboard inspector</h1>
+<p class="sub">Shows the exact HTML an app put on the clipboard. Nothing is sent anywhere; this page has no network access of any kind.</p>
+
+<ol>
+  <li>In <b>OneNote</b>, type a three-level bulleted list. The one you already know pastes into Forma correctly.</li>
+  <li>Select it and copy it.</li>
+  <li>Click the dashed box below and press <b>Ctrl+V</b>.</li>
+  <li>Press <b>Copy the result</b> and paste that into the chat.</li>
+</ol>
+
+<div id="drop" contenteditable="true"></div>
+
+<div class="row">
+  <button id="copy">Copy the result</button>
+  <span class="note" id="status"></span>
+</div>
+
+<textarea id="out" readonly placeholder="The HTML will appear here after you paste."></textarea>
+
+<script>
+  var drop = document.getElementById('drop');
+  var out = document.getElementById('out');
+  var status = document.getElementById('status');
+
+  drop.addEventListener('paste', function (e) {
+    var dt = e.clipboardData;
+    if (!dt) return;
+    e.preventDefault();
+    var html  = dt.getData('text/html')  || '';
+    var plain = dt.getData('text/plain') || '';
+    var types = (dt.types ? Array.prototype.slice.call(dt.types) : []).join(', ');
+
+    // Pretty-printed only by inserting newlines between tags. The BYTES matter
+    // here, so nothing is parsed, normalised or re-serialised on the way out.
+    var pretty = html.replace(/></g, '>\n<');
+
+    out.value =
+      'FLAVOURS ON THE CLIPBOARD\n' + types +
+      '\n\nTEXT/HTML (' + html.length + ' chars)\n' + (pretty || '(none)') +
+      '\n\nTEXT/PLAIN (' + plain.length + ' chars)\n' + (plain || '(none)');
+
+    drop.textContent = 'Pasted. The HTML is in the box below.';
+    status.textContent = '';
+  });
+
+  document.getElementById('copy').addEventListener('click', function () {
+    out.select();
+    var okCopy = false;
+    try { okCopy = document.execCommand('copy'); } catch (_) {}
+    status.textContent = okCopy ? 'Copied. Paste it into the chat.' : 'Select the text below and copy it manually.';
+  });
+</script>
+
+</body>
+</html>
