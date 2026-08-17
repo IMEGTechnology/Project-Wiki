@@ -1,7 +1,7 @@
 # WikiBase Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.34.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.34.2**.
 
 **This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
@@ -286,6 +286,10 @@ The **Bookmarks tab** has two sections:
 **Promote to Favorites** — hover a bookmark row and click the star. It stays in both places.
 
 **Rename a favorite** — hover it and click the pencil. Favorites are the only place renaming is possible.
+
+**Remove one** — hover any row and click the **×**. On a bookmark it removes that heading; on a file header it removes every bookmark in that file; on a favourite it removes the favourite and leaves the bookmark. Removing here is the same as un-clicking the ribbon in the Outline, and it is the only way to reach a bookmark whose file has gone.
+
+**Bookmarks pointing at nothing** show struck through and marked *file not found*, and clicking them does nothing. A **Remove all** bar appears above the list when there are any. This happens when a file was renamed before WikiBase learned to follow renames, or when a file was deleted outright — there is no way to work out where those bookmarks were meant to point, so clearing and re-adding them is the fix.
 
 **Clicking any bookmark** opens that file, scrolls to that heading, unfolds anything hiding it, and unfolds the section itself. If the Outline is also open, it follows along.
 

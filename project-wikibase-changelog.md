@@ -10,6 +10,63 @@
 
 ---
 
+## 0.34.2 — 2026-08-13
+
+**Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `README.md`, `help.md`, `help-edit.md`
+
+*The copy fix, from evidence instead of inference.*
+
+### Each list level declares its own bullet type
+
+The clipboard inspector shipped in 0.34.1 did its job on the first use. A real OneNote clipboard — the one known to paste into Forma correctly — writes an explicit `type` on every level:
+
+```
+<ul type=disc> … <ul type=circle> … <ul type=disc>
+```
+
+0.34.1 had already arrived at OneNote's sibling structure, and the inspector confirms that half was right. What was missing is the attribute. It is deprecated HTML and it is doing real work: it states what a level **looks like** rather than leaving it to be derived from nesting depth. Nesting says where an item sits; `type` says how to draw it, and only the second survives a parser that gets the first one wrong.
+
+Now `disc` → `circle` → `square`, cycling — the browser's own progression, and one better than OneNote, whose HTML drops back to `disc` at level three even though its own text flavour shows a third glyph there. Numbered lists get `1` → `a` → `i` on the same rule.
+
+**Not a bug in WikiBase, recorded because it looked like one:** the last top-level bullet in OneNote's own plain-text flavour comes out with no bullet and no indent. That is OneNote's text serializer losing its depth after a sibling sub-list closes, in output OneNote produced itself. The `text/html` flavour beside it is correct, and WikiBase's own plain-text flavour indents with leading spaces and does not have the fault.
+
+## 0.34.1 — 2026-08-13
+
+**Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/rename-and-trim.test.js`, `supporting/clipboard-inspector.html` (new), `supporting/release.sh`, `README.md`, `help.md`, `help-edit.md`
+
+*Two reports against 0.34.0, same day.*
+
+### Copy: the nested list is now a sibling of its item, not a child
+
+0.34.0 fixed the styling and left the structure alone. It pastes into OneNote correctly and still fails in Forma, where levels two and three arrive merged into the first bullet or stripped of their markers — while a three-level list built by hand in OneNote and copied into Forma is perfect.
+
+Text merging **up** into the parent bullet is the signature of a parser that does not accept a list inside a list item: it drops the tags it does not expect and the orphaned text joins the item it was sitting in. Nothing written on the inner list can prevent that, because the inner list is the thing being discarded — which is also why 0.33.0's per-item indent could never have worked.
+
+What prevents it is not putting a list inside a list item:
+
+```
+spec    <ul><li>one<ul><li>two</li></ul></li></ul>
+office  <ul><li>one</li><ul><li>two</li></ul></ul>
+```
+
+The second form is what Word, OneNote and Outlook have emitted for twenty years, so every editor that handles paste at all has been made to accept it, including those that never implemented the first. Browsers render them identically. It is technically invalid and it is the more compatible of the two.
+
+A **clipboard inspector** ships alongside, in `supporting/`. Paste into it from any app and it shows the exact bytes that app put on the clipboard. Three releases have now been spent inferring what a destination does from how it renders; one paste into this ends that.
+
+### Bookmarks can be removed from the Bookmarks tab
+
+A bookmark could only ever be removed from the Outline of the file it points at — which stops being possible the moment the file is renamed or deleted. **The one state that needs cleaning up was the one state with no way to clean it up.**
+
+Every row now carries a **×**. On a heading it removes that bookmark, on a file header it removes all of that file's, on a favourite it removes the favourite and leaves the bookmark underneath. Each is tested before the row-level jump in the click handler, or every removal would open a file instead.
+
+Bookmarks pointing at a file that is no longer in the vault show struck through and marked *file not found*, are no longer clickable, and get a **Remove all** bar above the list. The check reads the What's New index rather than the loaded file tree, because folders load lazily and a bookmark in a collapsed folder would otherwise be flagged broken on a perfectly healthy vault. Before the first scan there is no index, and nothing is flagged at all: a false "broken" badge is worse than the silence it replaces.
+
+**Why these exist rather than a better repair:** 0.34.0's rename repair cannot help a file renamed *before* it shipped. That scan found the pairing, handed it to What's New and discarded it, and nothing is left to reconstruct where the bookmark was meant to point. Those are unrecoverable, and the honest answer is to make them visible and easy to clear.
+
+### release.sh reports what to upload
+
+The changed-file list is now computed by hashing every file in `deploy/` against the same file in the previous release's archive, and printed at the end of the run. It had been recited from memory, and 0.33.0 is the release where reciting it was wrong: two help files carried a stamped version line and nothing else, and only being asked directly caught it.
+
 ## 0.34.0 — 2026-08-13
 
 **Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `supporting/tests/rename-and-trim.test.js` (new), `README.md`, `help.md`, `help-edit.md`

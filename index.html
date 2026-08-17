@@ -2147,6 +2147,22 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .bm-sub { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+    /* v0.34.1 — a bookmark whose file is gone. Dimmed rather than hidden: a
+       bookmark that silently vanished would be its own bug report. */
+    .bm-row.bm-broken .bm-label, .bm-group-hd.bm-broken .bm-group-name { opacity: .55; text-decoration: line-through; }
+    .bm-row.bm-broken, .bm-group-hd.bm-broken { cursor: default; }
+    .bm-row.bm-broken .bm-sub, .bm-group-hd.bm-broken .bm-sub { color: var(--danger, #d9534f); opacity: 1; }
+    .bm-action.bm-remove { font-size: 15px; line-height: 1; }
+    .bm-broken-bar {
+      display: flex; align-items: center; gap: 8px; justify-content: space-between;
+      margin: 2px 10px 6px; padding: 5px 8px; border-radius: 5px;
+      background: var(--hover); font-size: 11px; color: var(--text-muted);
+    }
+    .bm-broken-clear {
+      background: none; border: 1px solid var(--border); color: var(--text-primary);
+      border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;
+    }
+    .bm-broken-clear:hover { border-color: var(--accent); color: var(--accent); }
     .bm-group-hd {
       display: flex; align-items: center; gap: 6px;
       padding: 7px 10px 7px 8px; cursor: pointer;
@@ -2724,7 +2740,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.34.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.34.2</button>
     </aside>
 
   </div>
@@ -4569,6 +4585,17 @@ function wbDelegatedClick(e) {
   }
   const favRename = e.target.closest('[data-wb-favrename]');
   if (favRename) { e.preventDefault(); startRenameFav(favRename.dataset.wbFavrename); return; }
+  // v0.34.1 removals. Each sits INSIDE a row that is itself a jump or collapse
+  // target, so all three have to be tested before those rows — same ordering
+  // rule the star and the pencil already follow.
+  const favRemove = e.target.closest('[data-wb-favremove]');
+  if (favRemove) { e.preventDefault(); e.stopPropagation(); removeFavoriteBm(favRemove.dataset.wbFavremove); return; }
+  const bmRemove = e.target.closest('[data-wb-bmremove]');
+  if (bmRemove) { e.preventDefault(); e.stopPropagation(); removeBookmarkHeading(bmRemove.dataset.wbBmremove, bmRemove.dataset.wbBmremoveid); return; }
+  const bmRemoveFile = e.target.closest('[data-wb-bmremovefile]');
+  if (bmRemoveFile) { e.preventDefault(); e.stopPropagation(); removeBookmarkFile(bmRemoveFile.dataset.wbBmremovefile); return; }
+  const bmRemoveBroken = e.target.closest('[data-wb-bmremovebroken]');
+  if (bmRemoveBroken) { e.preventDefault(); removeAllBrokenBm(); return; }
   const bmDelGroup = e.target.closest('[data-wb-bmdeletegroup]');
   if (bmDelGroup) {
     e.preventDefault();
@@ -4842,18 +4869,62 @@ function cpListHtml(lines) {
 // margin-bottom SPECIFICALLY — the `margin:0` shorthand was doing this job and
 // zeroing margin-left in the same stroke, which is the second half of the same
 // bug in any editor that indents with margin rather than padding.
-function cpListLevel(nodes) {
-  const isOl = nodes[0].kind === 'ol';
-  const tag  = isOl ? 'ol' : 'ul';
-  const lSty = ' style="margin-top:0;margin-bottom:0"';
-  const body = nodes.map(n => {
+// v0.34.1 — the nested list is emitted as a SIBLING of its list item rather
+// than a child of it. Office style, not spec style:
+//
+//   spec   <ul><li>one<ul><li>two</li></ul></li></ul>
+//   office <ul><li>one</li><ul><li>two</li></ul></ul>
+//
+// 0.34.0 fixed the styling and left the spec structure in place. It then pasted
+// correctly into OneNote and still failed in Forma, where the second and third
+// levels arrive merged into the first bullet or stripped of their markers —
+// while a list built by hand in OneNote and copied into Forma is perfect. Two
+// sources, one destination, one works: the difference has to be the markup.
+//
+// Text merging UP into the parent bullet is the signature of a parser that does
+// not accept a list inside a list item. It drops the tags it does not expect
+// and the orphaned text joins the item it was sitting in. Nothing written on
+// the inner list can prevent that, because the inner list is the thing being
+// discarded — which is why 0.33.0's per-item indent could not have worked
+// either. What CAN prevent it is not putting a list inside a list item.
+//
+// The Office form is what Word, OneNote and Outlook have emitted for twenty
+// years, so every editor that handles paste at all has been made to accept it,
+// including the ones that never implemented the spec form. Browsers render the
+// two identically. It is technically invalid and it is the more compatible of
+// the two, which is an unsatisfying sentence and still the right call.
+// v0.34.2 — the missing piece, read off a real OneNote clipboard rather than
+// inferred. OneNote writes an explicit `type` on every level:
+//
+//   <ul type=disc> … <ul type=circle> … <ul type=disc>
+//
+// It is the deprecated HTML attribute, and it is why OneNote's output survives
+// a destination that ours does not. The attribute states the level's bullet
+// outright instead of leaving it to be derived from nesting depth, so an editor
+// that mishandles depth still renders three visibly different levels. Nesting
+// says where an item sits; `type` says what it looks like — and only the second
+// one survives a parser that gets the first one wrong.
+//
+// disc → circle → square, cycling, which is the browser's own progression and
+// one better than OneNote: OneNote's own HTML drops back to `disc` at level
+// three even though its text flavour shows a third glyph there.
+const CP_UL_TYPES = ['disc', 'circle', 'square'];
+const CP_OL_TYPES = ['1', 'a', 'i'];
+
+function cpListLevel(nodes, depth) {
+  const d     = depth || 0;
+  const isOl  = nodes[0].kind === 'ol';
+  const tag   = isOl ? 'ol' : 'ul';
+  const type  = isOl ? CP_OL_TYPES[d % CP_OL_TYPES.length] : CP_UL_TYPES[d % CP_UL_TYPES.length];
+  const lAttr = ` type="${type}" style="margin-top:0;margin-bottom:0"`;
+  const body  = nodes.map(n => {
     // A task checkbox becomes a box glyph rather than an <input>: a disabled
     // input pastes as nothing in most editors, and the tick is the content.
     const box  = n.kind === 'task' ? (n.done ? '☑ ' : '☐ ') : '';
-    const kids = n.children && n.children.length ? cpListLevel(n.children) : '';
-    return `<li>${box}${cpInlineHtml(n.content)}${kids}</li>`;
+    const kids = n.children && n.children.length ? cpListLevel(n.children, d + 1) : '';
+    return `<li>${box}${cpInlineHtml(n.content)}</li>${kids}`;
   }).join('');
-  return `<${tag}${lSty}>${body}</${tag}>`;
+  return `<${tag}${lAttr}>${body}</${tag}>`;
 }
 
 // The text/html clipboard flavour goes out as a whole small document rather
@@ -13077,6 +13148,111 @@ async function jumpToBookmark(file, id) {
   revealHeading(id);
 }
 
+// ── Bookmark cleanup, v0.34.1 ────────────────────────────────────
+// A bookmark could only ever be removed from the Outline of the file it points
+// at, which works right up until the moment it stops working: if the file has
+// been renamed or deleted, there is no Outline to open and no way to reach the
+// bookmark at all. The one state you cannot clean up is the one that needs
+// cleaning. So removal moves to the Bookmarks tab, where the bookmark is.
+//
+// This also covers the case the rename repair cannot: a file renamed BEFORE
+// v0.34.0 shipped. The pairing that would have fixed it was found, used by
+// What's New and discarded on that scan, and there is no record left of what
+// the old path became. Those bookmarks are unrecoverable and the honest answer
+// is to make them visible and easy to clear, not to pretend they can be healed.
+
+// The vault's full file list, from the What's New index — the one store that
+// enumerates EVERY file rather than only the folders currently expanded.
+// state.fileFolder would be the obvious source and is the wrong one: folders
+// load lazily, so a bookmark in a collapsed folder would read as missing and
+// get flagged broken on a perfectly healthy vault.
+//
+// Returns null before the first scan has ever run. Null means "cannot tell",
+// and nothing is flagged — a false "broken" badge on a good bookmark would be
+// worse than the silence it replaces.
+function bmVaultPaths() {
+  const idx = wnRead(WN_INDEX_KEY, null);
+  if (!idx || typeof idx !== 'object') return null;
+  const keys = Object.keys(idx);
+  return keys.length ? new Set(keys) : null;
+}
+
+function bmIsBroken(file, known) {
+  return !!known && !known.has(file);
+}
+
+function bmBrokenFiles() {
+  const known = bmVaultPaths();
+  if (!known || !state.user) return [];
+  const out = new Set();
+  Object.keys(state.user.bookmarks.files).forEach(f => { if (!known.has(f)) out.add(f); });
+  Object.values(state.user.favorites.items).forEach(r => { if (r && !known.has(r.file)) out.add(r.file); });
+  return [...out];
+}
+
+// Removing one heading. Mirrors the Outline toggle's own cleanup: the last
+// heading gone takes the file entry and its order token with it, and a removed
+// bookmark cannot stay favourited.
+function removeBookmarkHeading(file, id) {
+  if (!state.user) return;
+  const bm = state.user.bookmarks;
+  const f  = bm.files[file];
+  if (f) {
+    f.items = f.items.filter(h => h.id !== id);
+    if (!f.items.length) { delete bm.files[file]; removeToken('bm', 'f', file); }
+  }
+  const fid = file + '::' + id;
+  if (state.user.favorites.items[fid]) { delete state.user.favorites.items[fid]; removeToken('fav', 'i', fid); }
+  bmAfterRemoval();
+}
+
+function removeBookmarkFile(file) {
+  if (!state.user) return;
+  const bm = state.user.bookmarks;
+  const f  = bm.files[file];
+  if (f) (f.items || []).forEach(h => {
+    const fid = file + '::' + h.id;
+    if (state.user.favorites.items[fid]) { delete state.user.favorites.items[fid]; removeToken('fav', 'i', fid); }
+  });
+  delete bm.files[file];
+  removeToken('bm', 'f', file);
+  bmAfterRemoval();
+}
+
+function removeFavoriteBm(fid) {
+  if (!state.user || !state.user.favorites.items[fid]) return;
+  delete state.user.favorites.items[fid];
+  removeToken('fav', 'i', fid);
+  bmAfterRemoval();
+}
+
+// Bulk clear, offered only when there is something to clear. Confirmed because
+// it is the one action here that removes more than the row under the cursor,
+// and it names the count so the number is checkable before the click lands.
+function removeAllBrokenBm() {
+  const broken = bmBrokenFiles();
+  if (!broken.length) return;
+  if (!confirm(`Remove ${broken.length} bookmark${broken.length === 1 ? '' : 's'} pointing at files that are no longer in the vault?`)) return;
+  broken.forEach(f => {
+    const bm = state.user.bookmarks;
+    if (bm.files[f]) { delete bm.files[f]; removeToken('bm', 'f', f); }
+    Object.keys(state.user.favorites.items).forEach(k => {
+      if (state.user.favorites.items[k].file === f) {
+        delete state.user.favorites.items[k];
+        removeToken('fav', 'i', k);
+      }
+    });
+  });
+  bmAfterRemoval();
+}
+
+function bmAfterRemoval() {
+  saveUserRecord();
+  updateBookmarkTabBadge();
+  renderBookmarksTab();
+  try { renderOutlineTab(); } catch (_) { /* Outline may not be mounted */ }
+}
+
 function renderBmSectionIcons(section) {
   const on = state.bmOrganizeMode;
   return `<div class="bm-hd-icons">
@@ -13099,11 +13275,17 @@ function renderFavRowBm(fid, indent) {
   const grip = state.bmOrganizeMode
     ? `<span class="bm-grip" data-wb-bmgrip="1"><span></span><span></span><span></span><span></span><span></span><span></span></span>`
     : '';
-  return `<div class="bm-row" style="padding-left:${indent}px"${drag} data-wb-bmjump="${escHtml(f.file)}" data-wb-bmjumpid="${escHtml(f.id)}">
+  // A broken row is not a jump target — clicking it would try to open a file
+  // that is not there. It keeps its Remove button, which is the only thing
+  // left worth doing to it.
+  const broken = bmIsBroken(f.file, bmVaultPaths());
+  const jump = broken ? '' : ` data-wb-bmjump="${escHtml(f.file)}" data-wb-bmjumpid="${escHtml(f.id)}"`;
+  return `<div class="bm-row${broken ? ' bm-broken' : ''}" style="padding-left:${indent}px"${drag}${jump}>
     ${grip}
     <span class="bm-label">${escHtml(f.custom || f.text)}</span>
-    <span class="bm-sub">${escHtml(f.fileName || displayNameOf(f.file))}</span>
+    <span class="bm-sub">${broken ? 'file not found' : escHtml(f.fileName || displayNameOf(f.file))}</span>
     <button class="bm-action" data-wb-favrename="${escHtml(fid)}" title="Rename" aria-label="Rename">${ICON.pencil}</button>
+    <button class="bm-action bm-remove" data-wb-favremove="${escHtml(fid)}" title="Remove from favorites" aria-label="Remove from favorites">&times;</button>
   </div>`;
 }
 
@@ -13117,18 +13299,23 @@ function renderBmFileBlock(file, indent) {
   const grip = state.bmOrganizeMode
     ? `<span class="bm-grip" data-wb-bmgrip="1"><span></span><span></span><span></span><span></span><span></span><span></span></span>`
     : '';
-  let html = `<div class="bm-group-hd" style="padding-left:${indent}px"${drag} data-wb-bmcollapsefile="${escHtml(file)}">
+  const broken = bmIsBroken(file, bmVaultPaths());
+  let html = `<div class="bm-group-hd${broken ? ' bm-broken' : ''}" style="padding-left:${indent}px"${drag} data-wb-bmcollapsefile="${escHtml(file)}">
     ${grip}
     <span style="display:flex;transform:rotate(${isCollapsed ? '-90deg' : '0deg'})">${ICON.foldChevron}</span>
     <span class="bm-group-name">${escHtml(f.name || displayNameOf(file))}</span>
+    ${broken ? '<span class="bm-sub">file not found</span>' : ''}
     <span class="bm-count">${f.items.length}</span>
+    <button class="bm-action bm-remove" data-wb-bmremovefile="${escHtml(file)}" title="Remove all bookmarks for this file" aria-label="Remove all bookmarks for this file">&times;</button>
   </div>`;
   if (!isCollapsed) {
     f.items.forEach(h => {
       const fav = isFavorited(file, h.id);
-      html += `<div class="bm-row" style="padding-left:${indent + 22}px" data-wb-bmjump="${escHtml(file)}" data-wb-bmjumpid="${escHtml(h.id)}">
+      const jump = broken ? '' : ` data-wb-bmjump="${escHtml(file)}" data-wb-bmjumpid="${escHtml(h.id)}"`;
+      html += `<div class="bm-row${broken ? ' bm-broken' : ''}" style="padding-left:${indent + 22}px"${jump}>
         <span class="bm-label">${escHtml(h.text)}</span>
         <button class="bm-action${fav ? ' bm-fav-on' : ''}" data-wb-favtoggle="${escHtml(file)}" data-wb-favtoggleid="${escHtml(h.id)}" data-wb-favtoggletext="${escHtml(h.text)}" title="${fav ? 'Remove from favorites' : 'Add to favorites'}" aria-label="${fav ? 'Remove from favorites' : 'Add to favorites'}">${fav ? ICON.starFilled : ICON.star}</button>
+        <button class="bm-action bm-remove" data-wb-bmremove="${escHtml(file)}" data-wb-bmremoveid="${escHtml(h.id)}" title="Remove bookmark" aria-label="Remove bookmark">&times;</button>
       </div>`;
     });
   }
@@ -13169,6 +13356,15 @@ function renderBmSection(section, title) {
   const data = bmSectionData(section);
   const count = section === 'fav' ? Object.keys(state.user.favorites.items).length : totalBookmarksCount();
   let html = `<div class="bm-sec-hd"><span class="bm-sec-title">${title}${count ? ` <span class="bm-count">${count}</span>` : ''}</span>${renderBmSectionIcons(section)}</div>`;
+  // Offered once, under Bookmarks only, and only when there is something to
+  // clear — a permanently visible "clean up" control on a healthy list is an
+  // invitation to wonder what is wrong.
+  if (section === 'bm') {
+    const nBroken = bmBrokenFiles().length;
+    if (nBroken) {
+      html += `<div class="bm-broken-bar">${nBroken} file${nBroken === 1 ? '' : 's'} no longer in the vault<button class="bm-broken-clear" data-wb-bmremovebroken="1">Remove all</button></div>`;
+    }
+  }
   if (state.bmNewGroupDraft === section) {
     html += `<div class="bm-row" style="padding-left:12px;cursor:default"><input class="bm-newgroup-input" id="bm-newgroup-input" data-section="${section}" placeholder="Group name"></div>`;
   }
