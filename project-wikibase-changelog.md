@@ -10,6 +10,821 @@
 
 ---
 
+## 0.49.0 — 2026-09-05
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`; new `supporting/tests/p10-vault-check.test.js`; updated `supporting/tests/section18-shell.test.js`, `session2-reading.test.js` and `supporting/tests/README.md`
+
+*P10. Vault check: content-quality checking behind the Admin door, a shared dismissal file, and one quiet notice for the reader.*
+
+### The fourth tab
+
+**Vault check** joins Review, Usage and Access inside Admin, gated at Administrator like the other two. The door on Home still opens at Contributor and its sub-line now names all four. Seven checks in three bands:
+
+- **Hard failure** — a link that resolves to nothing.
+- **Warning** — two pages covering the same ground; the same heading twice in one page.
+- **Information** — a page nothing links to; a page nobody has touched in a year; a page long enough to be several pages.
+
+A run reads every page through the search index that already exists, works everything out in the browser, and **stores nothing**. A stored result set would be wrong the moment somebody fixed a page.
+
+### Two checks that already existed, counted rather than listed twice
+
+A page with no author is already Review's **Missing properties**, and a page past its `due` date is already Review's **Due** list. Vault check reports the missing-author count as one row that opens Review, instead of drawing a second list of the same files. `Stale` is deliberately the different question nothing else asks: nobody has edited this page at all, whether or not a due date was ever set.
+
+### Near-duplicate detection
+
+Two passes, both over the search index: shared headings and close titles first, then body-term overlap. A pair has to clear both, or clear body terms alone by a wide margin. Pairs are named, never merged, and the list is capped so a first run on a large vault cannot bury everything else.
+
+### Dismiss with a note
+
+Some overlap is deliberate, so a dismissal **requires** a reason and is shared: it is written to `zSystem/vaultcheck.json` beside the vault list and the app settings, carries who wrote it and when, and the next person to run the check inherits it. A failed write dismisses nothing and says so. Dismissals can be brought back.
+
+### What a reader sees
+
+One quiet notice under the byline, on a page carrying a broken link, naming the link. It is worked out **live from that page's own text** rather than read off a stored run, which is what makes it right the moment the link is fixed, and it honours a dismissal — an admin saying "this one is fine" means it everywhere.
+
+### The Admin slide got wider
+
+Found by rendering it rather than by any check: at the 290px a companion pane gets, a vault-check row wrapped a page name onto three lines and the severity tallies onto two. The Admin slide alone now opens at 560px, because Admin is the one destination in there pretending to be a companion. Review and Usage get the room too.
+
+---
+
+## 0.48.0 — 2026-09-05
+
+**Changed:** `index.html`; new `supporting/tests/p9-admin.test.js`; updated `supporting/tests/access-tiers.test.js`, `b2-home.test.js`, `install-setup-health.test.js`, `session-a-shell.test.js` and `supporting/tests/README.md`
+
+*P9. The Admin screen goes in behind the tier, the S38 correction that put editing at Contributor gets reversed back to Administrator, and zero-result searches start logging.*
+
+### New file, Move file, Edit — back to Administrator
+
+S38 moved these to Contributor on the reasoning that Review and editing were "one rung" of trust. Real use said otherwise: Contributor is the review tier, not the change tier, and letting a Contributor create, move or rewrite a page put every one of them one click from doing something only an Administrator should undo. `editingAllowed()` now returns `atLeast('admin')` instead of `atLeast('contributor')`; `reviewAllowed()` — genuinely a different permission — is untouched, so Contributor keeps the review tools it already had. Edit follows New and Move's own rule while it's at it: **hidden, not greyed,** when the tier isn't there.
+
+### Admin: one door, three tabs, gated individually
+
+The ghost **Admin** door from B2 — always there, never clickable, "designed properly when the admin work lands" — is real now. Unlike the tools inside it, **the door itself opens for Contributor**: something has to be reachable below Administrator or a User has no way to see there's anywhere to climb toward, and the tier-climbing dropdown in Settings was never hidden for the same reason.
+
+Inside, three tabs: **Review** (Contributor, since reviewing was always Contributor's own tool), **Usage** and **Access** (Administrator, locked with a plain "needs Administrator" message rather than removed). Vault-change and new-section items turned out to already live inside Review's own queue, not a separate destination, so the screen is three tabs, not the four the concept mockup carried.
+
+Review and Usage are the same panes the old shell has always had, not copies — `renderAdminTab()` parks whichever tab isn't showing in `#beta-pane-park` and reparents the requested one into the tab body, so `getElementById('rp-review')` always resolves to one real node, never a rebuilt one. Access is new: a tier-password changer, deliberately separate from the tier-climbing dropdown in Settings, which keeps doing that one job. Usage's own path out of the account menu now opens through the Admin screen in the new shell, closes over Review in `BETA_MORE_TOOLS`, and the account-menu Usage item hides itself once the new shell is on, since Admin is where it lives there now.
+
+### Zero-result searches start logging
+
+Capture only, per the tracker — no viewer this session. Mirrors Usage Analytics' own shape exactly: buffered in memory and to `localStorage`, one file per person per month under `zSystem/SearchLog`, rewritten in full and merged by day+query on each flush rather than appended, flushed on `pagehide`. Hooked into both places a query can come back empty — the command palette and the docked search pane — behind the same 2-character floor both already enforce before searching at all.
+
+**Tests:** 34 suites, **2,395 checks measured**, all green except the two pre-existing `usage-analytics` failures open since 0.43.0; `release-integrity` runs last, once the release itself exists. New: `p9-admin.test.js` (33 checks) — the tab lock re-evaluates on tier change rather than on last render, panes survive repeated tab switching without detaching, and the zero-result log's parse/serialize/merge round-trip. Four suites updated to the new intent per the project's own rule: `access-tiers.test.js` (the S38 reversal, New/Move/Edit hidden below Administrator again), `b2-home.test.js` (Admin door is live, not a ghost), `install-setup-health.test.js` (Usage's path through Admin in the new shell), and `session-a-shell.test.js` (Review left `BETA_MORE_TOOLS`, Contributor no longer sees Review or Edit there).
+
+---
+
+## 0.47.0 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/b2-home.test.js`, `reconnect-vault.test.js`, `saved-list.test.js`, `section18-shell.test.js` and `supporting/tests/README.md`
+
+*Quick pass — four small asks handled ahead of P9, plus one thing a render caught that none of the four asked for.*
+
+### Browse the vault takes a default page
+
+Settings gains **Default page** (Admin only), the same `<select>`-from-`allMdFiles()` shape as Move file rather than a new picker. Set it and **Browse the vault** opens straight to that page, app-wide, for everyone, with a light-grey **(Default)** tag on the door so it's visible without saying how many pages the vault holds. Leave it unset and Browse still opens the tree, exactly as before.
+
+### Saved becomes a flyout off the door
+
+Saved no longer leaves Home for the full slide-over. It opens a small anchored flyout instead — capped, scrollable, with **See everything saved** through to the full pane for anything that doesn't fit. Reuses `betaAnchorPanel()` (generalized from the search palette's own anchoring, jsdom-zero-rect fallback included) rather than a second positioning system.
+
+### File and section, one line
+
+What's New and Recently opened both used to stack a file above its changed sections or its folder. Both now read on one line — file, then section or folder, ellipsis if it doesn't fit — on the full What's New page and on Home's own What's New and Recently opened lists.
+
+### Saved rows: file, then section, colour-coded
+
+Saved drops its header-plus-children shape for one flat row per save — file name, then a colour-coded dot (accent for a whole page, muted for a section) and the section title when there is one, nothing extra when there isn't. One renderer, `savedItemRowHTML()`, feeds the new flyout, the full Saved pane, *and* — found only by rendering Home and looking, not by reasoning about the diff — **Home's own Saved rail**, which the first three surfaces missed and was still drawing the old grouped markup. All three now read alike.
+
+Two bugs the render pass also caught and fixed on the way: the new Default-page modal had no CSS at all (`#dp-overlay`/`#dp-modal` were never joined to the shared `#create-overlay, #move-overlay` / `#create-modal, #move-modal` rules, so it rendered as an unstyled block at the foot of the page instead of a centered dialog), and the harness itself needed `exitConsoleHome()` to see the full What's New page at all — a gap in the test setup, not the app.
+
+**Tests:** 34 suites, **2,384 checks measured**, all green except the two pre-existing `usage-analytics` failures open since 0.43.0. Four suites updated to the new intent rather than the new strings, per the project's own rule: `b2-home.test.js` (Home's Saved rail is flat rows now, not grouped), `saved-list.test.js` (the full pane's per-row markup), `section18-shell.test.js` (Browse's default-page branch, Saved's flyout), and `reconnect-vault.test.js` (seven dropdown items, not six, with Default page added).
+
+---
+
+## 0.46.0 — 2026-09-05
+
+**Changed:** `index.html`; new `supporting/tests/b2-home.test.js`; updated `supporting/tests/multi-vault.test.js`, `section18-shell.test.js`, `session-b-shell.test.js`, `session-d-fixes.test.js` and `supporting/tests/README.md`
+
+*Session B2. The Home screen rebuilt around one width, and the right column given a rule that removes four separate reports at once.*
+
+### Home is one width, not four
+
+The landing stacked four measures inside one page: the heading and its note at 34rem, the search button at 34rem, the two lists at 790px and the doors at 790px, all inside a 940px column. Nothing lined up with anything, which is what read as unfinished. Every element is now full width or a declared share of it.
+
+The opening paragraph runs the full width in two shorter blocks, and carries one underlined action, **leave a comment on the page**, because a wiki nobody corrects goes stale and commenting is the correction path.
+
+### Vaults moved up, doors rebuilt
+
+The vault chips sit directly under the search now, where they answer "what am I looking at" before anything else on the page asks for attention. A vault that is listed but not on this machine is clickable and **explains what is missing rather than pretending it can reconnect** — in phase 1 every vault lives inside the one folder already granted, so there is nothing separate to reconnect. At phase 2, when each vault has its own grant, that same click becomes the reconnect and the markup does not change. A greyed **+ Connect a vault** advertises that phase rather than hiding it.
+
+Six doors in six equal cells. **Browse the vault was one door doing two jobs**, so **Continue reading** took the second one: it opens the last page you had open, which survives closing the browser or the app, and Browse keeps the tree. Every door carries live state under its name except **How Folio works**, which has none to carry. **Admin** occupies a cell as a greyed placeholder, so the widths are identical whether or not you are an admin; it gets designed properly when the admin work lands.
+
+### Two panels, and what you owe
+
+Left is the vault, what changed and what you were reading. Right is you. Both stretch to one height, which is what stops the screen looking lopsided.
+
+**Must read** and **Onboarding** meters, both reading numbers Folio already stored — the frontmatter tags plus what this device has seen — so nothing new is written anywhere. They expand on a click, they hide themselves when there is nothing owed, and they come back the moment something arrives. **They never read zero while they are showing**: onboarding counts the setup already finished at first run, must-read counts against everything ever assigned rather than what is outstanding, and the fill has a floor so a real but tiny fraction still draws.
+
+**Saved is grouped.** Sections nest under the page they were taken from, which is how the data was always stored — the flat list this replaces was the wrong drawing of it. Whole-page saves are marked, and Show all expands in place rather than sending you somewhere else to read four more rows.
+
+### The search panel lands on the bar
+
+Jayson: *"it opens a window below the search to type, defeating the purpose of the search bar."* Correct, and the cause was geometry rather than machinery. The header search is a button, and the panel opened at a fixed point 60 pixels down the screen no matter what summoned it, which put it just under the bar — carrying an input of its own. Two boxes doing one job.
+
+The panel is now measured onto whatever opened it: same left, same top, same width, so the bar reads as having expanded. Home's full-width search gets the same treatment, which is why nothing on that page is pushed down any more. Ctrl+K and anything with no measurable anchor fall back to the centred panel as before.
+
+### The right column: companions and destinations
+
+One rule settles four reports. **A page companion describes the page you are reading and belongs beside it. A vault destination is a place you go.** Outline, Comments and Backlinks are companions and now share the right column, one at a time, with a tab strip that appears only when there is a choice. Comments and Backlinks are summoned from the page tools and **leave the moment a different page opens**, so a pane can no longer sit over the next file describing the last one.
+
+Everything still using the slide-over — Saved, Review, Usage, search results — now **stands the companion column down instead of covering it**, and closes itself on navigation.
+
+The column is drawn only when it has something to show. No "open a page to see its outline" message, and no manual toggle.
+
+### A file:// failure says so
+
+`loadAppDoc()` detects that Folio was opened straight off the disk, where a browser will not let a page fetch another file at all, and says that. It was telling people the file had been left out of a push while the file sat beside `index.html`. Same lesson as 0.45.5, one layer further down.
+
+### Fixed while looking rather than measuring
+
+The "Later" tag inside the Admin door stretched edge to edge, drawing its border as a rule under the word, because a door is a column flex container. Timestamps in Recently opened wrapped to two lines and pulled their rows out of alignment. Both were invisible to every check in the suite and obvious in a render.
+
+**Tests:** 34 suites, **2,380 checks measured**, all green except the two pre-existing `usage-analytics` failures open since 0.43.0. `b2-home.test.js` carries revert checks for the three mechanisms that can regress without a symptom: the palette's anchor, the companion routing, and the reset on navigation. Two real regressions were caught by the sweep and fixed — `openConsoleHome()` reset the column before the old-shell guard rather than after it, and the walkthrough's Comments callout still anchored to the slide-over, which `frTourRect()` would have dropped silently.
+
+---
+
+## 0.45.5 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/help-split.test.js`, `supporting/tests/walkthrough.test.js` and `supporting/tests/session2-reading.test.js`
+
+*The last of Jayson's walkthrough notes, plus the real reason two of his reports could not be acted on.*
+
+### Comments marks the button, not the column
+
+Ringing the whole Outline column as a secondary marker read as noise beside the one real subject. The panel keeps the spotlight, the button that opens it keeps its marker, and the copy still says the per-heading counts appear in the Outline.
+
+### Help and the changelog now say what actually went wrong
+
+Jayson reported the full guide and the Help button broken twice, and neither report could be acted on from what the app said, because the app said the same thing for every possible failure: *"Help file not found. Add help.md to the app folder."* That is a guess, not a diagnosis, and it was wrong in two different ways.
+
+**The fetch and the render were inside one `try`.** A file that downloaded perfectly and then failed to render was reported as missing — sending you to look in the folder, where the file was sitting exactly where it should be. And a genuine 404 never said **which address** it had tried, so a wrong path looked identical to a missing file.
+
+Both docs load through one function now. Fetch and parse are separate, the fallback to a copy in the connected folder is tried only on a real fetch failure, and the message names the status the server gave and the exact address tried. A render failure says so plainly and says the file is where it should be. **The app can now tell you which of the two it is, from the screen, without anybody having to guess at it from a distance.**
+
+### Also
+
+A test that pinned a literal slab of source (including a message that happened to sit near the call it cared about) went red for a refactor that did not change the behaviour it was testing. Rewritten to assert the order it actually cares about, which is this project's own standing rule.
+
+### Verification
+
+33 suites, 2,293 checks measured, all green except the two pre-existing `usage-analytics.test.js` failures open since S66. Reconnect smoke 8 of 8. New checks cover the status and address appearing in a failed load, and that a render failure is never reported as a missing file.
+
+---
+
+## 0.45.4 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/walkthrough.test.js`
+
+*Jayson's fourth review pass on the walkthrough: the tour order, and tying the three places comments live into one step.*
+
+### The order walks the app now
+
+It used to walk the code. New order: the top bar, then the left column, then the page you are reading, then the right column, then the account cluster **last**, because it is the one step that is not about reading the vault.
+
+**Comments moved to ninth, after everything that mentions commenting has been introduced** — the button in the page tools, the comment entry in the section tools, and the per-heading counts in the Outline. The panel now arrives as the place all three lead to, instead of appearing before any of them.
+
+Two of those positions are load-bearing rather than taste, so the suite pins them: comments after section tools and after the Outline, and the account cluster last.
+
+### One callout, three places
+
+The Comments step now marks all three at once. The panel is the subject and keeps the spotlight; **the button that opens it and the Outline column that counts them per heading get their own dashed markers**, so the link between them is something you see rather than something you read.
+
+This also answers where the standalone Comments-button callout went: it is not gone, it is part of this step. Pointing at the button on its own, several steps before the panel it opens, was the thing that read as disconnected.
+
+Secondary markers are deliberately drawn without the dimming spread the main ring carries — a second element with a full-screen shadow would simply re-cover the first one's hole. They are outlines over the dim instead, which reads as "and here, and here" rather than as a competing subject. A marker whose element is missing or collapsed is skipped rather than drawn at zero size; unlike a callout, a marker is allowed to fail quiet.
+
+### Verification
+
+33 suites, 2,287 checks measured, all green except the two pre-existing `usage-analytics.test.js` failures open since S66. Reconnect smoke 8 of 8.
+
+---
+
+## 0.45.3 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/walkthrough.test.js` and `supporting/tests/p8-first-run.test.js`
+
+*Jayson's third review pass. Four notes, all taken. The biggest of them turns the walkthrough from a fixed six screens into a run that only asks for what this machine has not already got.*
+
+### A run only asks what it needs to
+
+The health check is no longer a screen you read, it is the shape of the run. Connected, identified and installed each drop their own screen. A fresh device fails all three and walks the full six. **A replay on a set-up, installed machine gets welcome, the tour and the last screen, and nothing it can already answer for itself.**
+
+The list is computed once when a run starts and held on the run, never recomputed per screen — connecting on screen 2 would otherwise delete screen 2 from under itself and renumber everything after it. Nothing in the flow names the next screen directly any more; each button asks the run what comes next, which is what lets a screen be dropped without every other screen needing to know.
+
+### The install screen installs
+
+It used to describe the action and hand it off, which made a screen out of a sentence. The button is on the screen now and it is always there, whether or not the browser offers a one-click prompt — `tryInstall()` already picks between the native prompt and the written steps, so there is still one install path and no second copy of the decision.
+
+**Choose Not now and the banner goes away for the rest of the run.** It was sitting over the tour repeating an offer that had just been turned down. This is not a dismissal: nothing is stored, and the next launch offers again exactly as before.
+
+### Section tools, laid out wide
+
+The callout was tall enough to dominate the screen, so the ringed buttons it was describing got lost behind it. That step now draws its four tools as columns in a short, wide panel placed under the heading, leaving the highlight above it in plain sight.
+
+### Comments opens the panel
+
+Rather than describing a panel, the step opens it, rings it, and explains it: what it is for, that a comment can be anchored to the whole page or one heading, and that comments are questions and corrections rather than edits. It opens through the button's own action, so the tour cannot drift from what the button does, and it always closes again — a panel the tour opened is never left behind on the app.
+
+That needed a general mechanism, and it caught the same silent bug a third time: a step that opens its own target measures zero when the tour is deciding which callouts to run, so it was quietly dropped. Steps that open their own target are now trusted through that filter.
+
+### Verification
+
+33 suites, 2,279 checks measured, all green except the two pre-existing `usage-analytics.test.js` failures open since S66. Reconnect smoke 8 of 8. The suites now assert the three skip rules and their exact resulting sequences, that the run's screen list is fixed at the start rather than recomputed, that the install action is offered with or without a native prompt, that declining hides the banner without dismissing it and that it returns when the run ends, and that a self-opening step survives the callout filter.
+
+---
+
+## 0.45.2 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/walkthrough.test.js`
+
+*Jayson's second review pass on the walkthrough. Four notes, all taken, plus one correction of mine.*
+
+### The help page is the backdrop again
+
+He asked for it twice, and he is right: an arbitrary file out of a live vault is not what a brand-new reader should be shown first. 0.45.1 had moved off help for a real reason — opening help clears the active page, and the app hides Copy link, Save, Comments and More whenever that is true, so the backdrop was hiding the very tools the tour teaches.
+
+That is now solved directly rather than by changing the backdrop. **`body.fr-touring` holds those four open for the length of the tour** and comes off the moment it ends. This is honest rather than a mock-up: the tour overlay swallows every click, so nothing in the app is operable while it is up. The tour is a diagram of the interface, and a diagram has to show the parts. A vault page survives only as a rescue, used when help genuinely will not render — which is what happened on his machine.
+
+### Section tools, one step, drawn
+
+Hovering any heading reveals four buttons on the heading itself, and the tour never mentioned them. They get one step with a legend: the real icon beside what each one does, lifted out of the buttons themselves at render so the picture cannot drift from the interface.
+
+Two of the four — **comment on this section** and **highlight** — are built as visibly disabled buttons rather than left out, so the tour says **Not built yet** on those two rather than implying they work or pretending they do not exist. The comment row points at the way to do it today instead.
+
+Those tools are hover-only by design, and there is nothing to hover during a tour that eats clicks, so they are held open the same way the page tools are.
+
+### The other two places you can save from
+
+The Save step now says there are three: the page button itself, the save button on any heading, and the one on every row of the Outline. The Outline step names its own.
+
+### You and Settings are one stop
+
+They were two callouts on the same button. Now one, with two paragraphs.
+
+### Verification
+
+33 suites, 2,270 checks measured, all green except the two pre-existing `usage-analytics.test.js` failures open since S66. Reconnect smoke 8 of 8. `walkthrough.test.js` gained the section-tools legend checks, including that exactly two rows are marked not built and that those two are the same two the app itself ships disabled — so the tour cannot quietly start promising a feature that has not landed. It also pins the backdrop ordering (help first, vault page as rescue) and the two forcing rules, and it now measures visibility in the state the tour actually runs in rather than a boot state no real run ever sees.
+
+---
+
+## 0.45.1 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/walkthrough.test.js`
+
+*Jayson's review pass on 0.45.0, same day. Four notes, all taken. The one that mattered explains two of the others.*
+
+### The tour was pointing at the wrong backdrop, and it cost four callouts
+
+Jayson reported Help, Comments, Copy link and Save missing from the tour, and the Outline missing too, and separately that the help page said it could not be found. Those are one problem, not three.
+
+Copy link, Save and Comments are hidden whenever no real page is open — the reader header has nothing to copy, save or comment on, so it hides them. **The help page is exactly that state:** opening it clears the active page. So opening help behind the tour hid three of the very buttons the tour exists to teach, and the zero-size filter dropped them without saying a word. When help failed to load on top of that, the Outline had no headings either, the right column auto-collapsed, and that callout went the same way. **The tour reported itself as running normally throughout.**
+
+**The backdrop is now a real vault page**, chosen from what boot has already listed (no extra directory reads), preferring one whose headings give the Outline something to show. `help.md` is kept only as the last resort. The Help *callout* still points at the help button in the header, and the last screen still offers the full guide, so nothing Jayson asked for on the first pass is lost.
+
+### Four callouts added
+
+The tour is twelve now: Home, Search, the vault tree, Back and forward, **Copy link**, **Save**, **Comments**, Outline, light and dark, **Help**, you, and Settings.
+
+### The install screen points at the real banner
+
+It described a banner the opaque welcome overlay was covering. On that screen the overlay now turns see-through, the real banner is ringed exactly the way the tour rings a control, and the card gets a ground of its own so the dimmed app does not read through it. An already-installed app has no banner, and the ring clears itself rather than highlighting nothing.
+
+### Screen 1 trimmed
+
+The line counting the screens is gone.
+
+### Verification
+
+33 suites, 2,252 checks measured, all green except the two pre-existing `usage-analytics.test.js` failures open since S66. Reconnect smoke 8 of 8. `walkthrough.test.js` gained the four new callouts, a check that the buttons behind the backdrop decision really are hidden with no page open (so the rule cannot rot), a check that the tour opens a real page with help only as a fallback, and six checks on the install spotlight including that it declines to ring an absent banner.
+
+---
+
+## 0.45.0 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/p8-first-run.test.js` (rewritten for the six-screen flow) and added `supporting/tests/walkthrough.test.js`
+
+*The first run, rebuilt. Three reported bugs fixed first, then the flow itself grew from three screens to six with a guided tour, and gained a way to run it again from Settings. New shell only; the frozen old shell keeps its own connect message in the file tree, untouched.*
+
+### Three bugs in the old flow, all fixed
+
+**The top bar painted over the welcome screen.** `#header` sits at `z-index: 100` and the welcome overlay was at `55`, and both are direct children of `<body>`, so the whole header stayed visible and clickable on top of a screen that was meant to be the only thing on it. Clicking Home or search there drove the app *behind* an overlay that never moved, which reads as the app being broken and refusing to connect. The overlay is now at `300`, above the header and above the header-anchored dropdowns.
+
+**The returning-device answer was computed and dropped.** The flow worked out whether this device already had a remembered folder, handed the answer to screen 1, and screen 1's own button called screen 2 with no argument at all. So a device with a folder already remembered was sent through the full operating-system folder chooser on every launch instead of the one-click re-grant that was already built and never rendered. The flow's context now lives on the flow (`firstRunCtx`) rather than being passed screen to screen, which also keeps values out of the inline handler strings.
+
+**There was no returning path at all.** The flow only skipped itself when the browser still held the folder permission, and off an installed app a browser drops that permission every launch, so essentially every launch fell through to "1 of 3 · Welcome". A known device with a lapsed permission now goes straight to a single Reconnect screen: no welcome, no step counter, and no repeat of install or identity afterwards.
+
+### The walkthrough, six screens
+
+1. **Welcome** — what Folio is and what it is for, in plain terms.
+2. **Connect** — points at the team lead for which folder to choose and how to get it syncing, and says one folder is all it needs for now. Names no folder and no company: the Pages repo is public and everything before the folder gate is world-readable.
+3. **Who you are** — name and email drawn into the card rather than the account-setup modal popping over it, so all six screens read as one thing. The save is that modal's own function, lifted out and shared rather than copied, and the account menu still opens the modal for editing later.
+4. **Install** — with Later, and a note that the banner keeps offering. Aware of an already-installed app.
+5. **The tour** — its own overlay over the real interface, with the help page opened behind it so the reading column, the Outline and the back/forward arrows actually exist to point at. Eight callouts: Home, Search, the vault tree, Back and forward, Outline, light and dark, you, and Settings. One at a time, with Back, Next and Skip tour.
+6. **All set** — with a way into the full guide instead of Home.
+
+Every callout anchors to a real control rather than a drawing of one, so the tour cannot fall out of date the next time the layout moves. Anything measuring zero is dropped from the run rather than pointed at. A callout on a whole column puts its bubble beside that column instead of on top of it.
+
+### Run it again, from Settings
+
+**Settings → New look → Walkthrough → Run again.** It checks setup health first, reading the same three checks the account menu already shows, so there is one definition of "is this machine set up" in the app rather than two. Installed is reported but never counts as a failure: a browser tab is a supported state.
+
+A healthy machine replays straight away with nothing to answer, and each screen is aware of what is already true — a replay says "Already connected" rather than asking for the folder again. A failing check stops and reports what is wrong, then offers a replay or a full reset. **Folio never takes the reset on its own judgement:** it drops the folder connection, and doing that on a guess costs more than the problem it would fix. A reset forgets the remembered folder and the name and email on this computer only, and touches nothing in the vault.
+
+### Verification
+
+33 suites, 2,239 checks measured, plus the reconnect smoke at 8 of 8, all green except the two pre-existing `usage-analytics.test.js` failures open since S66 (confirmed unrelated again). `p8-first-run.test.js` was rewritten to assert the new intent rather than the old strings. The new `walkthrough.test.js` carries a revert test for each of the three bugs — putting any one of them back turns it red — plus a check that no callout points at something the new shell hides, which is the trap the first version of the tour fell into.
+
+---
+
+## 0.44.2 — 2026-09-05
+
+**Changed:** `index.html`; updated `supporting/tests/whats-new.test.js` (a coincidental string match, no behavior change) and `supporting/tests/review-dashboard.test.js` (now asserts the reversed Fill properties behavior below)
+
+*Bug-fix pass, items 2 to 4 of 4 (B1b). New shell only. Item 1 shipped as 0.44.1. The one open layout question the pass surfaced, a real show/hide control for the right column, is carried into the dedicated B2 layout session rather than built here.*
+
+### Outline column auto-hides when it has nothing to show
+
+The right column is hardwired to Outline in the new shell and nothing ever closed it, so it sat open at full width on What's New, on Home, and on any page with no headings. There is also no manual toggle for this column anywhere in the new shell today (the resize handle and rail that would do it are both hidden by the shell's own CSS), so this is an automatic fix rather than a control: the column now collapses on its own the moment Outline has nothing to render, and the reading column takes the freed space. It reopens the moment a page with headings is active. What's New also gets its own message ("No outline for What's New") instead of the generic "Open a file" text.
+
+### Saved slide-over stopped going stale while open
+
+The refresh checks that repaint an already-open Saved list only ever looked at `state.docks`, and the Saved slide-over never touches `state.docks`, it moves the pane into its own overlay instead. So a save or removal made anywhere else in the app never showed up in an already-open Saved list, only at the moment it was reopened. That read as "I can add but not remove," which was the wrong diagnosis: the S18 session 3 call to remove only from where you saved stands unchanged, this was a refresh bug sitting on top of it.
+
+### Properties flyout gained must-read and onboarding; Fill properties stopped guessing false
+
+The flyout was missing the two newest optional properties entirely, editable nowhere except by hand-editing frontmatter or running Fill properties. Both are now checkboxes in the panel, wired the same way Reviewed already is.
+
+Fill properties also stopped writing `must-read: false` / `onboarding: false` on every file it touches. These two are an editorial call an admin makes deliberately on the handful of pages that need them, not a value every page in the vault is expected to hold an opinion on, and absence already reads as false everywhere the app checks them. Stamping `false` on write only made "never considered" and "deliberately not a must-read" look identical. Since a fill can no longer close that gap, the Review dashboard's Missing properties check no longer counts these two against a file, it now gates only on status, reviewed, created, author, tags, aliases and due. They are still listed as gaps on any file already flagged for another reason.
+
+## 0.44.1 — 2026-09-05
+
+**Changed:** `index.html`, one new test suite (`supporting/tests/home-isolation.test.js`)
+
+*Bug-fix pass, item 1 of 4: on Home, only Home shows. New shell only. Items 2 to 4 of the pass (the Outline column's own visibility, the Saved slide-over refresh, and the Properties/Review audit) are defined and queued, not built.*
+
+### The two side columns stayed on Home
+
+Pressing Home left the Vault Files column and the Outline column standing on either side of the landing page. The rule that collapses them has been there since Section 18 session 1 and was correct; it was being overridden. `setPanelOpen()` writes `width` and `min-width` INLINE every time a panel opens, since that is where a saved width is restored, and an inline value beats a plain stylesheet rule no matter how specific it is. So opening either panel once, anywhere in a session, left it on Home from then on. Fixed with `!important`, which the `#reader-content` rule two declarations below has carried since day one for the identical reason.
+
+### The review bottom stack followed you Home
+
+A review walk in progress kept its bar pinned below the landing page — "Reviewing from the dashboard, item 3 of 17" on a screen with nothing being reviewed. All six surfaces of that stack (walk bar, diff bar, diff strip, audit bar, detail bar, detail strip) are now hidden on Home. Hidden, not exited: the walk keeps its position and comes back the moment a page is open again, so pressing Home never costs anyone their place in the queue.
+
+### The Outline held the last page's headings
+
+Nothing on the `openConsoleHome()` path re-rendered the Outline pane, so it kept whatever the previous page put there, heading count and all. It now repaints to its own empty state, which is what `state.activeUrl` being null already meant.
+
+The old shell is untouched: every rule involved is scoped to `.beta-shell`, and `openConsoleHome()` still refuses to run when the new layout is off.
+
+---
+
+## 0.44.0 — 2026-09-05
+
+**Changed:** `index.html`, one new test suite (`supporting/tests/p8-first-run.test.js`), one pinned (`supporting/tests/theme.test.js`, now explicitly `setBetaShell(false)` — see its own comment)
+
+*P8, Section 18 session 4: theme cut to five, and the three-screen first-run flow. Old shell untouched and frozen throughout — both changes are new-shell-only, gated on `betaShellOn()`.*
+
+### Theme panel cut to five, new shell only
+
+The beta shell's Theme panel now shows exactly five controls: Mode (dark/light/system, unchanged), Preset (Things and Minimal only — the other six, Default/Ocean/Frost/Clay/Mica/Marble, were exploration that never made it into the locked project spec), Reading width, Text size, and Line spacing. Accent, body font, the full Headings editor (six colors, caps, underlines, scale), Navigation icons, Interface chrome and Share are all gone from the beta panel, frozen at today's shipped defaults — nobody's current look changes, only the ability to change those six things going forward. The old shell keeps the complete six-section panel exactly as it has always worked; `theme.test.js`'s 136 checks are pinned to `setBetaShell(false)` to keep testing that panel specifically, and a new `p8-first-run.test.js` covers the cut.
+
+The **Show page title** toggle, previously buried in the now-gone Headings section, moves to Settings → New look (visible only when the new layout is on); still off by default. The header's light/dark toggle is brightened at rest — two people independently missed it entirely because every header icon shared one muted tone.
+
+### Three-screen first-run flow, new shell only
+
+Replaces three separate, disconnected first-run touches — a connect message drawn inside the file tree like a status line, an ambient install icon nobody was ever pointed at, and an identity modal that could appear with no warning — with one full-window sequence: what this is, connect, install, then identity. Connect and install and identity are not rebuilt; the flow calls the exact same `pickLocalVault()`/`reopenLocalVault()`, `tryInstall()` and `checkIdentity()` this app already shipped, it only owns the order. Pre-connect copy names no vault or company specifics on purpose — the Pages repo is public. A returning device with an already-granted folder permission skips the whole flow, same as today. A hashed setup code unlocking a more detailed version of this screen was considered and deliberately not built — obfuscation, not security, solving a problem this team size doesn't have.
+
+### Still open
+
+`release.sh` still cannot run on this mount, packaged by hand again. The Session 62 opens not covered here — the zero-result search log (P9's) and fold behaviour (never tied to a specific session) — are unchanged; help figures are stale against this release and are due a reshoot now that P8 has shipped, not before.
+
+---
+
+## 0.43.0 — 2026-09-05
+
+**Changed:** `index.html`, one new test suite (`supporting/tests/comment-anchor.test.js`), one more (`supporting/tests/saved-list.test.js`), plus updates to `session-a-shell.test.js`, `session-b-shell.test.js`, `session-d-fixes.test.js` and `rename-and-trim.test.js` for the new shapes below
+
+*P7, Section 18 session 3: Comments and Saved. Section-anchored comment threads with a live count, and one Saved list holding page rows and section rows, which retires the favourites/bookmarks split.*
+
+### Comments can be anchored to a section
+
+A comment optionally carries the heading it was posted against (`hid`, additive — a pre-P7 `.comments.md` with no `hid` anywhere still parses and re-serializes byte for byte). The composer shows exactly where the next comment will land — the heading in view, or an explicit override — with one link to change it. The Outline gets a small comment-count badge per heading, open comments only, shown only when there's at least one. The reader-head Comments badge, which used to read the vault-wide count by mistake, now reads this page's own open total.
+
+### One Saved list, not two
+
+Bookmarks and Favourites are gone; both were always heading-scoped, and neither had a way to save a whole page. Saved replaces them: a **Save this page** button joins Copy link and Comments in the reader head, and the Outline's bookmark toggle now saves a section into the same list. "Pinned" is not a third action — it's simply what a page with a whole-page save looks like once it's listed, so a page can never appear twice. No manual order, no groups, no rename: every row is a plain label, added or removed at its source (the page itself, or the Outline), never from the list — see `supporting/p7-saved-list-sample.html` for the four rounds of review that got here. An existing bookmark becomes a saved section; an existing favourite becomes a saved section **and** marks its page saved-as-a-whole (that's what promotes it to Pinned) — its custom name is dropped, the heading text takes over.
+
+## 0.42.0 — 2026-09-04
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, one new test suite (`supporting/tests/multi-vault.test.js`)
+
+*Folio can now read more than one vault. Nothing changes until a list of vaults is added to the vault, which is what lets this ship on one day and the folders move on another.*
+
+### More than one vault
+
+A vault is now a named thing rather than just the folder Folio was pointed at. The list lives in the vault itself, at `zSystem/vaults.json`, so an administrator publishes it once and it reaches everybody the way the pages do. **With no such file nothing changes at all** — one vault, one tree, no group headers, exactly as before.
+
+Once the list is there, each vault is a top-level folder inside the folder that is already connected. **Nobody reconnects anything and the browser is never asked for a new folder.** Later, after 1.0, the same names can point at links of their own instead; a vault listed with a link that does not work yet is shown as coming rather than hidden, and is never searched.
+
+### Search covers every vault at once
+
+Results group under the vault they came from, in vault-name order, and **the ranking inside a group is unchanged**: pages whose name matches first, then pages whose text matches, with the line they matched on. Rows now name the folder inside the vault, because the group header says which vault and two vaults can hold a page with the same name. A vault that is not connected yet says so under the results rather than quietly not being there.
+
+### The tree, the breadcrumb and the page strap say which vault
+
+The vault is the tree's top level and its own folder row disappears. **Anything the list does not name is still shown, under General**, so a folder nobody thought to list can never vanish. The breadcrumb's first crumb is the vault, and the strap at the top of a page names it too.
+
+### Links that were sent before any of this still work
+
+An address written when the vault was flat no longer matches once the pages move, so **an address that does not resolve is retried inside each vault, and then by page name**. Links already pasted into chats keep opening the right page, and nobody is told anything.
+
+### One banner, and install is the loud one
+
+The new look has a single banner slot under the header with three states and a strict order: **connect beats install beats update**. Install is full width, because without it your browser asks permission for the folder on every single launch, and that is what the banner says rather than "install the app". Connect is the same size in a warning tone. An available update stays the small line it was. **Not now** hides the install banner until the next launch, never for good.
+
+### Settings lists the vaults
+
+Read only: what Folio is reading, and where each one comes from. The list is a file in the vault, so it is edited there rather than per person.
+
+### Wiki became Folio
+
+The app and both help pages now say Folio or the vault rather than "the wiki". `wikilink` is unchanged — that is Obsidian's word for a `[[link]]` and the vault is shared with Obsidian.
+
+---
+
+## 0.41.1 — 2026-09-04
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, one test suite updated (`supporting/tests/section18-shell.test.js`)
+
+*Jayson's first pass over 0.41.0, six notes. Polish and cuts, plus one real bug that turned out to be older than this session, so a patch rather than a minor.*
+
+### The landing is centred
+
+It was anchored to the left edge, which read as a fragment of a page rather than a front door, and left the right half of a wide screen empty. It now sits in the middle of the window with more room above it.
+
+### Install and Update sit on the right again
+
+Both buttons had been landing on the **left** of the header, next to Home, whenever they appeared. The account cluster was being pushed to the right edge by a margin hung on the theme button, which only worked while that button was the first one in the cluster; Install and Update come before it and are hidden until they are relevant, so the moment either showed up it fell on the wrong side of the gap. A spacer now holds the cluster to the right edge, and it does not care which icons are visible. **This has been wrong since Install shipped in 0.39.0**, not since this session.
+
+### One bar instead of three
+
+The page header no longer draws a rule under itself or a tone of its own, so it sits on the page rather than dividing it. **Copy link and Comments are icons now**, each naming itself on hover, with the comment count still showing beside its icon because the count is the half that does the work. The panel show-and-hide button is gone: the panel flexes with the window, so there was nothing left for it to fix.
+
+**The you-are-here section bar (0.40.0) retires in the new look.** The breadcrumb sits directly above it naming the same page, so it was a third bar saying most of what the second one already said. It stays in the old look, which has no breadcrumb of its own and still earns it.
+
+### Copy link finally tells you it worked
+
+The confirmation after a copy called a function that does not exist anywhere in the app and never has. The copy itself always worked, but the confirmation failed silently inside a promise, so **Copy link has produced no feedback at all since 0.36.0**. It now shows a brief confirmation that says whether a page link or a section link was copied. Found while making the button an icon, where the absence of any feedback would have been worse.
+
+---
+
+## 0.41.0 — 2026-09-04
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, one new test suite (`supporting/tests/section18-shell.test.js`), two existing suites updated (`session-a-shell`, `session2-reading`)
+
+*Session 1 of Section 18, the console shell. Folio now has a front door. New capability, hence a minor bump. The old look is untouched and still opens exactly as it did.*
+
+### Home is a console
+
+Pressing **Home** now lands on a landing page instead of What's New: a headline, one search box, the connected vault, two short lists — what you opened recently and what changed in the vault — and four doors: browse, saved, what's new, and how Folio works. It shows no folder rail, no side panel and no page header, so arriving deliberately does not look like reading.
+
+Everything on it opens something that already existed. The search box is the same palette the top bar opens, with the same favourites and recent list inside it. Saved opens the favourites and bookmarks pane. What's new opens the surface built in 0.23.0. Nothing behind the landing is a second copy of anything.
+
+Opening the app with no link now lands here rather than reopening the last page you read, because the last page is one click away in Recently opened and the vault is not. **A link still beats everything**, unchanged since 0.36.0: follow an address to a page and you get that page.
+
+### Three columns, and no lines between them
+
+Away from home, the app is folder rail, page, side panel. The hairlines between those three columns are gone: each column already sits at its own background tone, so the line was the same boundary drawn twice.
+
+**Columns are fixed now, so the two drag handles retire in the new look.** Neither job is lost. The rail's show and hide moves to a button at the far left of the top bar, and the panel's to a button in the page header beside Comments. The side panel also stops being a fixed 220 pixels: it takes a share of the window, with a floor so it can never squeeze to nothing and a ceiling so it can never end up wider than the page you are reading.
+
+### A summary line above the page strap
+
+The byline from 0.40.0 becomes a ruled strap, and gains the date the page was last updated, read from the index the app already maintains rather than a fresh look at the disk. Above it, a page can now carry a one-line **summary**, written as `summary:` (or `description:`) in its properties. A page without one renders nothing, exactly as the byline already behaved. Neither key has been added to the declared property schema; the app reads it if it is there.
+
+---
+
+## 0.40.0 — 2026-08-31
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, one new test suite (`supporting/tests/session2-reading.test.js`)
+
+*Session 2 of the six agreed at the UX review (see the tracker's Road to 1.0). Four reading-column pieces, all reaching both shells at once: a byline under the title, a "you are here" section bar, table headers that pin while you scroll through them, and column alignment. New capability, hence a minor bump.*
+
+### A byline under every title
+
+The title now carries a line naming the page's **owner** (the existing `author` property) and, if a **due** date is set, a status flag — green for on schedule, amber for due soon (within 14 days), red for overdue. Reuses the vault's existing property schema and the exact `due < today` comparison the vault-wide Due list already used; nothing new to fill in unless a page wants to opt in to being tracked this way. A page with neither field renders no byline at all.
+
+### A "you are here" bar while you scroll
+
+A thin bar under the header tracks whichever heading you're currently reading, in both shells, so a long page never leaves you unsure where you are. Its own `IntersectionObserver`, independent of the Outline panel's — the Outline's only exists while that panel is open, and this needed to work whether or not anyone ever opens it.
+
+### Table headers that pin, and stop clipping when they do
+
+A table's header row now stays visible while you scroll through it and releases on its own once you pass the last row — no setting, it's just how a sticky header behaves inside its own scroll container. Fixed two things found only by looking at the rendered result, not by reading the CSS: `.md-table-wrap`'s `overflow-x: auto` was forcing the wrapper into being its own vertical scrollport (a table only gets horizontal scroll now if it's actually measured wider than its column), and `border-collapse: collapse` was painting a visible seam on the sticky header during a scroll in Chromium (switched to `border-collapse: separate`, invisible at rest since this table only ever draws bottom borders).
+
+### Column alignment
+
+The table separator row's `:---`, `:---:`, and `---:` syntax — always accepted, always silently discarded — is now read and applied. Same syntax Obsidian itself uses; nothing changes about how a table is written, including the padding-with-extra-dashes habit already documented as surviving unaffected.
+
+---
+
+## 0.39.0 — 2026-08-30
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, one new test suite (`supporting/tests/install-setup-health.test.js`), four existing suites updated for the new default (`supporting/tests/session-a-shell.test.js`, `docks.test.js`, `reconnect-vault.test.js`, `fold-consolidation.test.js` unchanged, resolved by this entry)
+
+*Session 1 of the six agreed at the UX review (see the tracker's Road to 1.0). Four pieces, all reached from the account menu: the install offer itself, a new-look default for anyone with nothing stored, a setup health row, and a way into Usage from the beta shell, which had none. New capability, hence a minor bump.*
+
+### Folio can now offer to install itself
+
+Nothing before this handled the browser's install signal at all — the manifest and service worker shipped complete and were never offered. There's now an icon in the header, next to the dark/light toggle, and a matching item in the account menu; both call the same `tryInstall()`. Where the browser offers a native prompt (Chrome, Edge), it's used directly. Where it doesn't — Firefox never fires the event, and Safari can't run Folio at all without the File System Access API — the click opens help.md's own "Installing it" section instead, which already documented the browser's own address-bar route. Both icons hide themselves the moment `isInstalled()` (`display-mode: standalone`, or `navigator.standalone` on old iOS Safari) reads true.
+
+`isInstalled()` fails closed if `matchMedia` itself is missing or throws — not just a defensive habit, this is what let the new test suite boot the app at all, since jsdom doesn't implement it, and the same guard protects against older embedded WebViews doing the same.
+
+### New-look default, for a device with nothing stored only
+
+`readShellPref()` used to read a missing `wb_shell` key as off. It now reads it as on. Every other case on that function — a real off, a real on, a stale or future generation stamp, a corrupt value — is untouched; only true absence (nobody has ever touched the switch on this device) moves. This is also why several existing test suites needed a one-line update: a fresh boot with nothing stored now starts in the beta shell, and a couple of suites were leaning on the old default implicitly rather than pinning their own shell mode.
+
+### Setup health, in the account menu
+
+Three checks under your name — Connected, Identified, Installed — each red or green with its own fix. Computed fresh every time the menu opens rather than kept live, the same choice already made for "Reconnect to vault." Built once, reused on Start Here once that page exists (Session 3) rather than a second copy.
+
+### Usage had no way into the beta shell
+
+The beta shell's right dock deliberately hides Usage along with Comments, Links and Review (`BETA_HIDDEN_RIGHT`) — but where those three moved to the slide-over, Usage was never given anywhere to go. It's now in the account menu, Administrator-gated the same way the dock registry already gates it. Opens through `betaOpenTool('usage')` in the beta shell, or the same `toggleRPTab('usage')` the old shell's own rail icon already calls — no new opening mechanism either way.
+
+While in there: help.md's "Usage" section still claimed the tool "is not built at all," left over from before it was. Corrected to say where to open it.
+
+## 0.38.1 — 2026-08-30
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, `supporting/tests/session-b-shell.test.js`, `supporting/tests/session-d-fixes.test.js`, `supporting/tests/props-flyout.test.js`, `supporting/tests/docks.test.js`
+
+*Jayson tried 0.38.0 live and immediately sent back four more notes: the resize handle redesign had three real bugs, Properties still would not show from the beta Tools menu, and some UI text still used British spelling. This entry is the fix-up round on the same beta shell pass 0.38.0 shipped, not new capability — hence a patch bump rather than a new minor version.*
+
+### The resize handle: three bugs in the redesign
+
+Clicking the new centred grip did not collapse the panel — only dragging did. Cause: the handle's existing wide invisible hover strip sits on top of the smaller, centred grip now drawn inside it, so a click there always resolves to the handle itself, never to the grip specifically. The click-to-collapse check now asks "is this click inside the grip's own drawn shape" directly, rather than asking what element the browser says was clicked.
+
+Reopening a collapsed panel could snap to an unreasonable width. Cause: reopening always restored whatever width had last been saved, with no check against how much room is actually available right now — a width saved from a wider window, or from fitting to a long heading, could come back oversized. Reopening now caps the restored width the same way dragging already does.
+
+Double-clicking the handle looked like it expanded fully and then shrank back down. Cause: two things stacked — first, the same grip/hover-strip mixup above meant a double-click's two individual clicks were being read as collapse-then-reopen before the fit-to-content action ran; second, the fit-to-content action itself briefly re-enabled the panel's normal resize animation before jumping to its final width, so even a correct fit could visibly glide. Double-click now moves straight to the fitted width, once, with no flicker.
+
+### Properties still would not show from the beta Tools menu
+
+0.38.0 fixed the click that was closing the panel the instant it opened, but that turned out not to be the only problem. The panel lives inside a wrapper the beta shell hides entirely, for unrelated reasons — old-shell-only corner buttons that shell doesn't use. Hiding a wrapper hides everything inside it, so the panel was staying invisible regardless of its own open/closed state. It's been moved out of that wrapper; same on-screen position, now unaffected by it.
+
+### British spelling
+
+"Favourites" read as "Favorites" everywhere in the UI text; a few leftover spots still had the British spelling. Corrected.
+---
+
+## 0.38.0 — 2026-08-30
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`, `docs/project-wikibase-tracker.html`, `supporting/tests/session-b-shell.test.js`, one new test suite
+
+*Jayson tried the Session B beta shell live and sent back eight numbered notes. This session works through them: two real bugs, one settled decision, one real gap, and a redesigned resize handle. The other three (home page, Open Last Note, a first look at the review dashboard question) are explicitly carried to the future Start Here session, not folded in here.*
+
+### The right dock was still showing Comments and Review
+
+Session B moved Comments, Links and Review into the slide-over and hid the right rail's own tab switcher, but the underlying dock-rendering code was untouched and unfiltered — a right dock that had those three pinned from before the beta shell existed kept rendering them anyway. Fixed at render time, not by rewriting the saved layout: a device's saved dock list is left exactly as it was, so switching the beta shell back off restores the old right-hand pane untouched.
+
+### Properties would not stay open from the beta menu
+
+The click-outside listener that closes the Properties flyout only recognised the old shell's own icon button. The beta shell opens Properties through its Tools menu instead, so that same opening click always read as "elsewhere" and closed the panel it had just opened. The listener now recognises both triggers.
+
+### The Comments/Links/Review panel comparison is settled
+
+Session B shipped a Settings toggle so Jayson could compare a scrim-and-dismiss presentation against one that stays open beside the page while reading. He picked the second, permanently. The toggle, the scrim element, and the comparison are all removed — the slide-over now only ever closes by its own Close button, its trigger, or Escape.
+
+### Favourites and Bookmarks had no way in
+
+The full Bookmarks pane — rename, remove, reorder, broken-link cleanup, all of it — already existed, but the beta shell hid the left rail's tab switcher that used to reach it. The only favourites a person could see were the top 5 in the search palette's empty state. That list now ends with a "See all favourites and bookmarks" row that opens the real pane in the slide-over. No new management logic; the pane just needed a door.
+
+### The resize handle, redesigned
+
+Simulated three options against real resizable-panel patterns from other apps before building anything, with Jayson picking between them at each step. The old flare-shaped hover mark is now a small grip (three dots) centred on the visible screen rather than tied to panel height — so it's still where you'd look for it on a tall monitor, or a second one, even with the panel fully collapsed. Collapsed, the same mark becomes a chevron pointing the way to reopen. Applied to both the sidebar and the right panel, mirrored. The drag-to-resize, click-to-collapse and double-click-to-fit gestures underneath were not touched — the new mark sits in the same functional slot the old one did, on purpose.
+
+### Not done, on purpose
+
+Home defaulting to a real Start Here page and surfacing "last note opened" there, and a first look at whether the Review dock item is now redundant with the review dashboard — both explicitly deferred by Jayson to a future session focused on the home page, rather than folded into this one.
+
+
+## 0.37.0 — 2026-08-30
+
+**Changed:** `index.html`, `README.md`, `docs/project-wikibase-tracker.html`, one new test suite
+
+*The top bar control does what it says now, and the maintainer panels get a real presentation instead of the container Session A shipped.*
+
+### The top bar control
+
+Was a redirect to the docked Search pane since Session A shipped its container. Now it opens a real palette: empty, it lists Favourites then Recent; typed, it searches the vault with the same two rules the docked Search pane uses — filename match first, then content match with a snippet. Ctrl+K opens the same palette. Favourites reuses the exact ordered list the Bookmarks pane already reads, one row per bookmarked heading, not deduped to one row per file. Recent is new: `state.user.recent`, capped at 5, deduped by file, most-recent-first — stored in `state.user` and written to the vault the same way a favourite is, not a device-only list, because it was asked to sit in "the same retainer."
+
+### The slide-over
+
+Comments, Links and Review now open in a right-edge panel over the reader rather than stacking into the (hidden-in-beta) right dock. The panel reuses the SAME pane node the dock model already renders into — moving `#rp-comments` and friends between the slide-over and a parked, off-screen holder is the whole mechanism, so `renderCommentsTab()` and its siblings never had to change. `paneHead()` now returns nothing for whichever tool is currently in the slide-over, since its own move/close buttons would be a second, non-working control set. Properties and Edit are untouched — the flyout and full edit mode they already had.
+
+**A comparison toggle, not a permanent decision.** Settings → Beta gained "Comments panel stays open while reading," off by default (matches the mockup: a scrim dims the reader and a click outside closes the panel). On, there's no scrim — the reader stays live underneath and the panel closes only by its own Close button, its trigger, or Escape. Checked against two design-system sources rather than guessed: a panel meant to be read *alongside* what you're doing should be non-modal, a self-contained task should be modal — which is also why the palette itself stays modal regardless of this setting. Whether the toggle stays permanently or gets removed once a behaviour is picked is undecided; tracked in the Backlog.
+
+### One real bug caught before shipping, one design flaw before writing any HTML
+
+`refreshRightPanel()` only ever refreshed tools sitting in `state.docks` — with Comments/Links/Review moved into the slide-over instead, navigating to a new page while one was open would have kept showing the page you left. One line fixes it, alongside the existing dock refresh. And the palette's row rendering originally escaped every name twice — once at the call site, once inside the shared row helper — which would have double-encoded any favourite or note title containing an ampersand or quote. Caught writing the test suite, not by a user.
+
+### Not done, on purpose
+
+The palette's search (`betaPaletteSearchHTML()`) is a sibling of the docked Search pane's `runSearch()`, not a shared call — the two now duplicate the same ranking rules rather than being merged into one parameterised function. `runSearch()` is wired to the Search pane's own DOM ids and old-shell behaviour it was safer not to touch for a beta-only feature. Worth consolidating later if the two drift.
+
+---
+
+## 0.36.0 — 2026-08-30
+
+**Changed:** `index.html`, `README.md`, four test suites, one new suite
+
+*Every page has an address, and there is a new shell you can try.*
+
+### The thing that was missing
+
+Until today `index.html` contained no URL handling of any kind. No hash was
+read, none was written, no history was pushed. The consequence had never been
+written down but it shaped everything: **there had never been a way to send
+anyone a link to a page.** Every answer to a question stayed in the chat where
+it was asked, which is the largest structural reason a wiki does not get
+visited.
+
+Two forms now exist:
+
+- `#note=01_Projects/Site A/Scope.md` — the page
+- `#note=01_Projects/Site A/Scope.md&h=h-risks` — a heading on the page
+
+The heading id is the one the renderer already puts in the page, so nothing new
+is minted and nothing has to be kept in step. Folder separators stay as
+separators rather than being percent-encoded, because these get pasted into
+chat messages and read by people.
+
+**A link beats "open last note" at boot, always.** Somebody followed an address
+to a specific page; showing them a different one is the single outcome that
+makes the link worthless.
+
+**A heading that has been renamed breaks its own links.** That is accepted, not
+solved: GitHub, Notion and Confluence all have it and none of them solved it
+either. An anchor that does not resolve opens the page at the top, so it
+degrades to the page link rather than erroring.
+
+### One history instead of two
+
+The in-page back/forward stacks are gone. Every navigation now pushes a real
+browser history entry and the arrows call the browser's own Back and Forward,
+so the two cannot disagree — which they previously did, because the browser
+knew nothing about the in-page stack.
+
+**Back stays disabled until Folio has pushed an entry of its own.** In the
+installed app there is no browser Back button to fall back on, so an arrow that
+walked out of the app would read as Folio crashing.
+
+This also explains why Copy link and the arrows cannot be trimmed later. Folio
+installs as a standalone app, which has **no address bar and no browser Back**.
+In that app Copy link is the only way to get an address out, and the arrows are
+the only way back.
+
+### On every heading
+
+Point at a heading and two controls appear: copy a link to that section, and
+bookmark it. Both already existed elsewhere — the bookmark is the same
+per-heading bookmark the Outline has had since 0.15 — so this is the same
+feature in a second place rather than a new one. The section link also appears
+on Outline rows, for grabbing a section you are not currently sitting in.
+
+Comment and Highlight are drawn beside them and disabled. Per-section comments
+change how comments are stored, and a highlight is private to one person and
+has nowhere to live yet. They are shown rather than omitted because a disabled
+control says "not yet" where a missing one says "never".
+
+**The rule that decided the shape:** a control that only appears on hover is
+learned by daily users and invisible to everyone else, which is the same
+failure as a keyboard shortcut. So hover carries the actions, and any permanent
+signal that there is something there has to sit outside the hover group. That
+is why Comments in the new shell is a button with a visible count rather than a
+line in a menu.
+
+### Copy link in the old shell too
+
+**The freeze is on chrome, not on the reading column.** Copy link, section
+links, back and forward and the heading controls all live in the reading
+column, which both shells share, so they are built once and appear in both. One
+button had to be placed by hand in the old shell's corner, because that corner
+does not exist in the new one. Copy link is available to everyone including
+Users: sending somebody a page is a reading act, not an editing one.
+
+### The new shell, behind a switch
+
+**Settings → New look → Try the new layout.** Off by default, opt-in, and it
+only changes the computer you turn it on at. Switching either way is instant
+and needs no reload.
+
+- Home, as a real labelled button and the only accent-filled control in the
+  app. It opens What's New for now; Session C replaces that destination with a
+  Start here page. The button does not change, only where it goes.
+- One search control in the middle of the top bar, with a visible boundary
+  rather than an icon on a rail plus a keyboard shortcut.
+- A reader header with the folder path, back and forward, Copy link, and
+  **Comments as its own button carrying its count.**
+- Links, Review, Properties and Edit behind one unlabelled overflow button.
+  It used to be called Tools, which is the name you reach for when a menu holds
+  things that do not belong together. **Usage moved to the account menu**: it is
+  about the whole vault rather than the page you are reading, and it rendered
+  an empty panel for anyone who is not an administrator.
+- Edit is **hidden** rather than greyed when you cannot use it.
+
+**The switch carries a generation stamp inside its stored value.** When the new
+shell becomes the default, the switch turns off for everyone and is reused for
+the next round. Without the stamp, anyone who left it on in round one would be
+silently enrolled in round two having never opted in. Anything unexpected in
+that value — an older generation, a hand-edit, a half-written write — reads as
+off. Failing closed is right here: the cost of wrongly reading "off" is one
+toggle click, and the cost of wrongly reading "on" is moving somebody to a new
+interface they did not ask for.
+
+**Nothing is forked.** The new shell is one class on the body over the same
+panels, the same reader, the same Outline and the same tools. That is what lets
+"the old shell is frozen" mean something other than "the old shell rots": a fix
+to any shared part lands in both at once.
+
+### Verification
+
+1,725 checks across 22 suites, plus the 8-check reopen smoke, all green —
+1,733 in total, against 1,639 at 0.35.0. The new suite is 94 of them, and it is
+a **measured** count, not an incremented one. **Every fix was reverted
+one at a time to confirm the suite goes red**, and one of them did not:
+`stopPropagation` in the section-link handler turned out to be inert, because
+the heading row's own inline handler has already fired by the time a delegated
+handler runs. It was removed. **One guard a test can turn red beats two where
+one does nothing**, which is the same finding as the permission gate in 0.27.0
+arriving in a different place.
+
+Three existing suites needed updating rather than fixing. Two of them matched a
+CSS selector by substring and were reading `body.beta-shell #reader-corner-align`
+while reporting the untouched base rule broken; both now anchor the selector.
+**A selector test that matches a substring will eventually match somebody
+else's override.** The third asserted the nav pill's offset, which moved by one
+button width because Copy link joined the opposite corner run.
+
+Rendered and looked at in both shells, both themes, and — because it is the
+combination that erases boundaries — with panel tone set to flat and borders to
+none. That found the one real layout bug: with no borders the centred search
+control lost its edge and stopped reading as a control at all. It now uses the
+strong border tone, which is the one the "borders: none" setting already keeps
+deliberately for functional UI like toggle tracks and input outlines.
+
+---
+
+## 0.35.0 — 2026-08-29
+
+**Changed:** `index.html`, `manifest.json`, `sw.js`, `icon-192.png`, `icon-512.png`, `help.md`, `help-edit.md`, `README.md`, `help-assets/fig-01-screen-at-a-glance.svg`, `help-assets/fig-04-header-bar.svg`, four test suites
+
+*The app is called Folio.*
+
+### The name
+
+WikiBase collides with Wikimedia Deutschland's Wikibase, the software behind Wikidata. Same category, so it is a real problem if this ever leaves the building, and the old name also carried the company's name into the product. Folio is a single leaf of a book, and also the format the great collected editions were printed in: one page at a time and the whole gathered work, in the same word.
+
+Decided at Session 51 and deliberately held until a revision of its own, so the change is one clean release rather than a rider on a bug fix.
+
+### What did not change, on purpose
+
+**Every `wb_*` key in `localStorage`, `IDB_NAME`, the `zSystem` convention, the `.comments.md` and `.changes.md` suffixes, the `Project-Wiki` repository and its Pages URL, and `project-wikibase-changelog.md` itself.** Renaming any of those would have made this a migration instead of a rename. The `wb_*` keys hold every user's prefs and every ticked box in the tracker; `zSystem` and the sidecar suffixes address files already written into the vault; the repository name is the installed PWA's identity and the Teams tab's URL. The changelog filename is fetched by relative path from two places in `index.html` and is never seen by a user.
+
+The rule for the pass was: rename what a person reads, never what a machine matches on.
+
+### Two strings that land in the vault
+
+The audit log header and the usage log header both carry the product name and are written into `zSystem`. Existing logs keep the old header line and new appends carry the new one. Harmless, recorded so it is not a surprise later.
+
+### The mark
+
+Parchment `#EFE5D2`, oxblood `#7A2E1E`, fold ply `#55201A`. A sheet folded once, with the F cut out of the left leaf and the top corner of the right leaf turned like a page.
+
+Oxblood is the rubric colour, the red initial painted into a manuscript page, and it is also the one warm colour absent from the row of Microsoft apps this sits beside all day. That second reason is the load-bearing one. The old parchment-and-ink mark won attention by being the pale tile in a dark row; this mark is mostly ink, so it had to win a different way.
+
+`icon-512.png` is scaled to 90% about its centre. It is declared `any maskable`, and at full bleed the corners of the sheet fell outside the 80% safe circle a round mask cuts to. `icon-192.png` is `any` only and stays full size.
+
+### Looking at the figures caught two things measuring did not
+
+Both edited figures were rendered and inspected rather than trusted to the layout check, per the standing rule. The check compares text against text and would have passed both.
+
+- `fig-01` still showed **Version 0.23.0** in its mock right panel, twelve releases stale. Stamped to 0.35.0. It will go stale again; dropping the number from the figure entirely is the real fix and is now in the Backlog.
+- `fig-04` has a callout label overlapping the header bar. Pre-existing, unrelated to this release, left alone and recorded.
+
+Both figures also needed their `— Team Wiki` label pulled left, because Folio is a much shorter word than WikiBase and the gap the old name filled became a hole.
+
 ## 0.34.2 — 2026-08-13
 
 **Changed:** `index.html`, `supporting/tests/copy-callout.test.js`, `README.md`, `help.md`, `help-edit.md`

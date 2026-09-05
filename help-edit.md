@@ -1,11 +1,11 @@
-# WikiBase Help — Editing and Markdown
+# Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.34.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.49.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
-**For using the wiki**, panels, search, bookmarks and themes, see **[Help](help.md)**.
+**For using Folio**, panels, search, bookmarks and themes, see **[Help](help.md)**.
 
 > [!TIP] You do not need this page to leave a comment
 > Commenting works for everyone with no setup. See [Comments](help.md).
@@ -20,13 +20,13 @@
 4. [[#4. Properties]] — including the two that drive What's New
 5. [[#5. Review]] — what happens after someone edits
 6. [[#6. Writing Markdown]] — the full syntax reference
-7. [[#7. What WikiBase does not render]]
+7. [[#7. What Folio does not render]]
 
 ---
 
 ## 1. Before you start
 
-WikiBase is **read-only until you move up a tier**, per person and per PC. On the default **User** tier, nothing you click can change a file.
+Folio is **read-only until you move up a tier**, per person and per PC. On the default **User** tier, nothing you click can change a file.
 
 **Settings → Advanced Settings → Access → Contributor.** Open Settings from your initials badge, top right, expand Advanced Settings, and pick Contributor from the dropdown. You will be asked for the Contributor password. If nobody has set one yet, it lets you straight through and Settings tells you so.
 
@@ -41,7 +41,7 @@ That one change turns on all of it:
 If your name is not on the `editors` list in the app's config, these stay unavailable even with the setting on. Ask whoever manages the app to add you.
 
 > [!IMPORTANT] Two apps, one set of files
-> Your vault is the same folder Obsidian opens. Edit a note here and it is edited there, and the reverse. There is no separate WikiBase copy to reconcile.
+> Your vault is the same folder Obsidian opens. Edit a note here and it is edited there, and the reverse. There is no separate Folio copy to reconcile.
 
 ---
 
@@ -78,13 +78,13 @@ edited-at: 2026-08-03T09:14
 
 The **pencil** at the reader's top right opens the raw Markdown in a plain text editor with colour-coded syntax.
 
-It is **not** a live-preview editor. You see Markdown while editing, and rendered output when you save. This was a deliberate choice: a live-preview editor is where most of the risk in an app like this lives, and the wiki is read far more often than it is written.
+It is **not** a live-preview editor. You see Markdown while editing, and rendered output when you save. This was a deliberate choice: a live-preview editor is where most of the risk in an app like this lives, and the vault is read far more often than it is written.
 
 **Link autocomplete** — typing `[[` offers file names. `[[file#` or `[[#` offers that file's headings. Arrow keys to move, Enter or Tab to pick, Esc to dismiss.
 
 **What happens when you save:**
 
-1. WikiBase checks nobody else saved the file while you had it open. If they did, it stops and tells you rather than overwriting them.
+1. Folio checks nobody else saved the file while you had it open. If they did, it stops and tells you rather than overwriting them.
 2. The note's status is set to **Needs Review** and **reviewed** is unticked.
 3. A line-by-line record of what changed is appended to that note's `.changes.md` sidecar.
 
@@ -161,7 +161,7 @@ The oldest unresolved change on a file is the only one you can act on. Later one
 
 ### New Files
 
-A second section of the review screen lists files WikiBase has never touched — usually notes added straight from Obsidian, which have no `status` property because only this app writes one.
+A second section of the review screen lists files Folio has never touched — usually notes added straight from Obsidian, which have no `status` property because only this app writes one.
 
 Clicking one opens it alongside its Properties so you can fill them in. **Update** adds only the property keys that are actually missing and never overwrites what is already there. Nothing is written automatically.
 
@@ -180,9 +180,9 @@ Each row names what is actually missing, so you can tell a note short of one opt
 
 ### Changes made in Obsidian
 
-Most edits to your vault do not happen in WikiBase. It is a reader, and people write in Obsidian. Those edits show up too, as **Vault change** items in orange.
+Most edits to your vault do not happen in Folio. It is a reader, and people write in Obsidian. Those edits show up too, as **Vault change** items in orange.
 
-WikiBase notices them by comparing the note against the last version somebody approved. Approving does **not** mean the change was allowed through — it already happened, and nothing WikiBase does can undo it. It means a competent person has seen it.
+Folio notices them by comparing the note against the last version somebody approved. Approving does **not** mean the change was allowed through — it already happened, and nothing Folio does can undo it. It means a competent person has seen it.
 
 Clicking a Vault change row opens the note with the change marked where it actually sits, and a bar at the bottom of the reader:
 
@@ -190,7 +190,7 @@ Clicking a Vault change row opens the note with the change marked where it actua
 |---|---|
 | **Green, NEW SECTION** | This heading was not there last time. |
 | **Amber, CHANGED** | This section's text is different. |
-| **Red, dashed, REMOVED** | This section is **gone**. WikiBase draws it back in so you can see what went. It is not part of the file and is never written back. |
+| **Red, dashed, REMOVED** | This section is **gone**. Folio draws it back in so you can see what went. It is not part of the file and is never written back. |
 
 Use **↑ prev** and **↓ next** to walk the changes, then:
 
@@ -214,7 +214,7 @@ Each person writes their own file at `zSystem/audit/YYYY-MM-<your email>.md`. Ro
 Anyone on Contributor can approve anything, including their own edits. That is a deliberate choice for a small team: the log makes a careless approval findable afterwards, which is the honest trade when there may only be two of you.
 
 > [!TIP] The first run is quiet on purpose
-> The first time someone opens WikiBase on Contributor, the whole vault is recorded as approved. Otherwise day one would open with every note in the queue, which tells you nothing.
+> The first time someone opens Folio on Contributor, the whole vault is recorded as approved. Otherwise day one would open with every note in the queue, which tells you nothing.
 
 ---
 
@@ -252,7 +252,7 @@ A blank line starts a new one.
 
 **Every line break you type is kept.** Press Enter once and the next line starts on its own line, exactly as it looks while you are writing it in Obsidian. You do not need two trailing spaces or `Shift+Enter`, though both still work.
 
-This is deliberate, and it is not what standard Markdown does. Most Markdown renderers merge consecutive lines into one flowing paragraph, and WikiBase did too before version 0.24.0. The change was made because pages here are written in Obsidian's editor, so the shape you see while typing is the shape you meant.
+This is deliberate, and it is not what standard Markdown does. Most Markdown renderers merge consecutive lines into one flowing paragraph, and Folio did too before version 0.24.0. The change was made because pages here are written in Obsidian's editor, so the shape you see while typing is the shape you meant.
 
 **One thing to watch.** Text pasted from an email or a PDF often arrives already wrapped at someone else's line width, and it will render with those wraps intact, giving short ragged lines. Join those lines back together after pasting and it flows normally.
 
@@ -269,11 +269,11 @@ This is deliberate, and it is not what standard Markdown does. Most Markdown ren
 | Image, vault | `![[image.png]]`, or `![[image.png\|600]]` to set width |
 | Image, external | `![alt](https://example.com/image.jpg)` |
 
-Typing `[[` in the editor offers completion for all of the wiki forms, so you rarely have to type a note name in full.
+Typing `[[` in the editor offers completion for all of the wikilink forms, so you rarely have to type a note name in full.
 
 ### Images
 
-Put the image in the **attachments subfolder beside the note**, not in one shared folder for the whole vault. WikiBase follows Obsidian's **"in subfolder under current folder"** setting, so `![[image.png]]` looks in that subfolder of the current note's own folder. Obsidian creates it for you when you paste an image into a note.
+Put the image in the **attachments subfolder beside the note**, not in one shared folder for the whole vault. Folio follows Obsidian's **"in subfolder under current folder"** setting, so `![[image.png]]` looks in that subfolder of the current note's own folder. Obsidian creates it for you when you paste an image into a note.
 
 The filename must match exactly, including case.
 
@@ -295,9 +295,9 @@ Nesting works with real tabs or 2-space indents, matching Obsidian's own rule. T
 ### Tab trees under a bullet
 
 > [!INFO] A deliberate difference from Obsidian
-> This is one place WikiBase does not match Obsidian's reading view, on purpose.
+> This is one place Folio does not match Obsidian's reading view, on purpose.
 
-One real `-` (or `1.`, or `- [ ]`) on the **first line** makes WikiBase treat everything tab-indented below it as a list, even where none of those lines have their own marker:
+One real `-` (or `1.`, or `- [ ]`) on the **first line** makes Folio treat everything tab-indented below it as a list, even where none of those lines have their own marker:
 
 ```md
 - Project Directory/
@@ -339,7 +339,7 @@ This needs a citation[^1].
 
 `%% text %%` is visible only in the raw file. It never renders in the reader, by design. Use it for notes to yourself or to a future editor.
 
-This is different from a WikiBase **comment**, which is a threaded note posted from the Comments tab and stored in a sidecar file. See [Comments](help.md).
+This is different from a Folio **comment**, which is a threaded note posted from the Comments tab and stored in a sidecar file. See [Comments](help.md).
 
 ### Tables
 
@@ -349,7 +349,7 @@ This is different from a WikiBase **comment**, which is a threaded note posted f
 | a | b | c |
 ```
 
-Tables are content-width and left-justified, matching Obsidian, and only wrap when they would otherwise overflow the column.
+Tables are content-width, matching Obsidian, and only wrap when they would otherwise overflow the column. Column alignment follows the separator row exactly as shown above — `:--` left, `:--:` center, `--:` right, plain `--` left (the default) — the same syntax Obsidian itself reads, so nothing changes about how you write these.
 
 ### Properties, frontmatter
 
@@ -363,7 +363,7 @@ due: 2026-11-15
 ---
 ```
 
-A YAML block at the **very top** of the file, before anything else. WikiBase reads all of it. Six fields are editable through the Properties panel — Status, Section, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched. `must-read` and `onboarding` are read here but have no panel field yet, see [[#Flagging a page in What's New]].
+A YAML block at the **very top** of the file, before anything else. Folio reads all of it. Six fields are editable through the Properties panel — Tags, Status, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched. Author and Due are also what the reader's byline reads, right under the title. `must-read` and `onboarding` are read here but have no panel field yet, see [[#Flagging a page in What's New]].
 
 ### Callouts
 
@@ -389,7 +389,7 @@ A YAML block at the **very top** of the file, before anything else. WikiBase rea
 | `quote` | `cite` | ❝ |
 | `copy` | — | 📄 |
 
-`copy` is WikiBase's own addition and behaves differently from the rest — see below.
+`copy` is Folio's own addition and behaves differently from the rest — see below.
 
 Add `-` after the type for collapsed-by-default, `+` for expanded-but-foldable: `> [!faq]-`.
 
@@ -404,7 +404,7 @@ Callouts nest — `>>` and `>>>` work to any depth:
 
 ### The copy callout
 
-`[!copy]` is WikiBase's own type, not one of Obsidian's. It renders like any other callout but adds a **Copy** button to its title row, which puts the block on the clipboard.
+`[!copy]` is Folio's own type, not one of Obsidian's. It renders like any other callout but adds a **Copy** button to its title row, which puts the block on the clipboard.
 
 ```md
 > [!copy] Standard reply
@@ -426,11 +426,11 @@ Opening the same note in Obsidian is safe. Obsidian doesn't recognise the type, 
 
 ### Tags
 
-`#tag` for a flat tag, `#parent/child` for a nested one. They render as coloured chips and are display-only in WikiBase — no click-to-filter yet, though Obsidian will still index them normally.
+`#tag` for a flat tag, `#parent/child` for a nested one. They render as coloured chips and are display-only in Folio — no click-to-filter yet, though Obsidian will still index them normally.
 
 ---
 
-## 7. What WikiBase does not render
+## 7. What Folio does not render
 
 | | Why |
 |---|---|
@@ -443,7 +443,7 @@ Opening the same note in Obsidian is safe. Obsidian doesn't recognise the type, 
 
 ## Further reading
 
-WikiBase follows Obsidian's own Markdown syntax, so Obsidian's documentation applies directly:
+Folio follows Obsidian's own Markdown syntax, so Obsidian's documentation applies directly:
 
 - [Basic formatting syntax](https://obsidian.md/help/syntax)
 - [Advanced formatting syntax](https://obsidian.md/help/advanced-syntax)

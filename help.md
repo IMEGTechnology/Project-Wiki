@@ -1,13 +1,13 @@
-# WikiBase Help
+# Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.34.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.49.0**.
 
-**This page covers using the wiki** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
+**This page covers using Folio** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
 
 **Writing and editing notes is a separate page: [Help — Editing and Markdown](help-edit.md).** Go there for turning on editing, creating and moving files, the editor, properties, review, and the full Markdown reference.
 
-New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is enough to use the wiki.
+New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is enough to use Folio.
 
 ---
 
@@ -15,7 +15,7 @@ New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is
 
 1. [[#1. Start here]] — what this is, installing it, your first launch
 2. [[#2. Getting around]] — the header, the panels, Vault Files, moving between notes
-3. [[#3. Reading a note]] — folding, links, images, tables, checkboxes
+3. [[#3. Reading a note]] — folding, sending someone a link, images, tables, checkboxes
 4. [[#4. Finding things]] — What's New, Outline, Search, Bookmarks, Links
 5. [[#5. Making it yours]] — the Theme panel and Settings
 6. [[#6. Comments]] — leaving and answering comments
@@ -26,30 +26,32 @@ New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is
 
 ## 1. Start here
 
-### What WikiBase is
+### What Folio is
 
-WikiBase reads a folder of Markdown notes and presents it as a team wiki. It is a reader first: you can browse, search and comment without ever changing a file. Editing is off until you turn it on.
+Folio reads a folder of Markdown notes and presents it as one shared reference for the team. It is a reader first: you can browse, search and comment without ever changing a file. Editing is off until you turn it on.
 
-The notes are ordinary `.md` files in a OneDrive-synced folder. Obsidian and WikiBase are two windows onto the same files — edit a note in Obsidian and it is there in WikiBase on the next load, and the reverse. Nothing is locked into this app.
+The notes are ordinary `.md` files in a OneDrive-synced folder. Obsidian and Folio are two windows onto the same files — edit a note in Obsidian and it is there in Folio on the next load, and the reverse. Nothing is locked into this app.
 
 ### Installing it
 
-WikiBase is a web app at a link, not a file to copy around. Installing it as an app rather than bookmarking the page matters: that is what lets your browser remember your vault folder permanently instead of asking every launch.
+Folio is a web app at a link, not a file to copy around. Installing it as an app rather than bookmarking the page matters: that is what lets your browser remember your vault folder permanently instead of asking every launch.
 
 **One-time setup:**
 
-1. Open the WikiBase link in **Chrome or Edge**. Safari does not support the folder access this needs.
-2. Install it: address bar → the install icon (a small monitor with an arrow), or **⋯ menu → Apps → Install this site as an app**.
+1. Open the Folio link in **Chrome or Edge**. Safari does not support the folder access this needs.
+2. Install it: click the **install icon in Folio's own header**, next to the dark/light toggle, and confirm. If that icon isn't there, use the browser's own route instead — address bar → the install icon (a small monitor with an arrow), or **⋯ menu → Apps → Install this site as an app**.
 3. Click **Open vault folder…** and pick your local OneDrive-synced copy of the vault. Pick the folder that *directly* contains your notes and note folders, not a parent of it.
 4. When the browser asks **Allow this time / Allow on every visit / Don't allow**, choose **Allow on every visit**. This is the step that stops it asking again.
 
-**Daily use:** open it from wherever you installed it, Start menu, taskbar or desktop. It should load straight to your vault with no prompt.
+**Daily use:** open it from wherever you installed it, Start menu, taskbar or desktop. It should load straight to your vault with no prompt. Folio's own install icon disappears once you're running the installed copy — if you still see it, you're in a browser tab, not the installed app.
 
-**Teams tab:** your team lead can add WikiBase to a channel via **+ Add a tab → Website**, pasting the same link.
+**Teams tab:** your team lead can add Folio to a channel via **+ Add a tab → Website**, pasting the same link.
+
+*On the new layout (see [Trying the new layout](#trying-the-new-layout)), a brand new device walks steps 3–4 above, installing, and your first launch below as one connected sequence instead of three separate prompts — the steps themselves are unchanged, just presented together.*
 
 ### Your first launch
 
-The first time you open WikiBase it asks for your **name and email**. This is not a login and there is no password. The wiki inherits whatever access you already have to the folder. The name is what appears on comments you post; the email is the key your bookmarks and favorites are filed under.
+The first time you open Folio it asks for your **name and email**. This is not a login and there is no password. Folio inherits whatever access you already have to the folder. The name is what appears on comments you post; the email is the key your bookmarks and favorites are filed under.
 
 Your profile is stored in the vault itself, so typing the same email on a different PC brings your saved name and bookmarks back. You will see a "Recognized" note and one more click to confirm.
 
@@ -61,7 +63,7 @@ Three columns. The **reader** in the middle is the note you are on. Either side 
 
 Out of the box the left panel holds the tools for getting somewhere — **Vault Files**, **Search**, **Bookmarks** — and the right holds the tools about what you are reading — **Outline**, **Comments**, **Links**, and **Review** if you have it. You can move any tool to either side. Either panel collapses out of the way.
 
-![The WikiBase screen, annotated](help-assets/fig-01-screen-at-a-glance.svg)
+![The Folio screen, annotated](help-assets/fig-01-screen-at-a-glance.svg)
 
 ---
 
@@ -75,11 +77,12 @@ Out of the box the left panel holds the tools for getting somewhere — **Vault 
 |---|---|
 | **+** | New file or folder at the vault root. Needs editing on, see [Help — Editing and Markdown](help-edit.md) |
 | **⇄** | Move a file to another folder. Same gate |
-| *WikiBase — vault name* | Just a label |
+| *Folio — vault name* | Just a label |
 | **☀ / ☾** | Flip Dark ↔ Light straight away, no menu |
 | **↑** | Only appears when a newer version of the app is ready. Click to reload into it |
 | **?** | This help page |
-| **Your initials** | Account menu: **Theme**, **Settings**, **Switch user** |
+| **⭳** (only when not installed) | Installs Folio — see [[#Installing it]] |
+| **Your initials** | Account menu: **Theme**, **Settings**, **Switch user**, and (Administrators) **Usage** |
 
 There is no gear icon and no panel-toggle buttons in the header. Settings moved into the initials menu, and the panel toggles moved onto the panel edges themselves.
 
@@ -130,6 +133,14 @@ The reader's own top-left corner holds **Back**, **Forward** and the name of the
 
 ![The reader's own controls, annotated](help-assets/fig-06-reader-controls.svg)
 
+### Who owns this page
+
+Under the title, a line names the page's **owner** and, if a review date is set, when it's due. A green check means it's on schedule, amber means it's coming due soon, and red means it's overdue. No line at all just means nobody has set an owner or a due date on this page yet — not every page needs one.
+
+### Where you are
+
+A thin bar under the header tracks the heading you're currently reading, so a long page never leaves you unsure where you are without scrolling back up to check.
+
 ### Folding headings
 
 Every heading H1 through H6 folds. Click the **chevron** to the left of a heading to fold or unfold its section; child headings fold with their parent. **Alt-click** the chevron (Option on a Mac) to fold or unfold the entire subtree beneath it in one go.
@@ -141,6 +152,22 @@ When something *is* folded, the row says so — a small **"N hidden"** badge app
 **Clicking the heading text**, rather than the chevron, selects that heading: the row highlights and the Outline moves its marker to match, holding there until you scroll.
 
 **Collapse all and Expand all are in the Outline panel**, not the reader — see [[#Outline]] below. The reader folds one heading at a time.
+
+### Sending someone a link
+
+Every page has an address, and so does every heading on it.
+
+**Copy link** is in the top-right corner of the reader, next to Properties. It copies the address of the page you are reading, ready to paste into Teams or an email. Anyone who opens it lands on that page.
+
+**To link to one section rather than the whole page**, point at its heading. A small row of controls appears on the right: the first copies a link straight to that heading, so the person you send it to arrives at the right part of a long note instead of the top. The same control appears on Outline rows when you point at them, which is handier when the section you want is not the one you are looking at.
+
+The second control on a heading **bookmarks that section** — the same bookmark you can already add from the Outline.
+
+The two greyed-out controls beside them are not broken. Commenting on a single section and highlighting text are being built; they are shown so you can see what is coming.
+
+**If somebody renames a heading, links to it stop working** and open the page at the top instead. That is worth knowing before you paste a section link into something permanent. A link to the page itself keeps working as long as the file is not renamed.
+
+**Back and Forward** are in the opposite corner. They now match the browser's own Back button, so both do the same thing.
 
 ### Folding lists
 
@@ -184,7 +211,11 @@ Each note's images live in a subfolder next to it, named "Attachments" by defaul
 
 Tables render as written. Obsidian sizes each column to its widest cell, so the usual way to force a narrow column wider there is to add a row of periods under the header.
 
-WikiBase understands that row. **A row made entirely of periods is hidden in the reader, but still sets the column widths** — you get the layout you set up in Obsidian without the dots showing. A cell needs **five or more periods and nothing else** to count as padding.
+**Column alignment follows Obsidian's own syntax.** Put a colon on either side of the dashes in the header's separator row — `:--` for left, `:--:` for center, `--:` for right — and a plain `--` stays left-aligned. Nothing to turn on; it's read straight from the table.
+
+A table's header row stays visible while you scroll through a long one, and lets go on its own once you've scrolled past the last row.
+
+Folio understands that row. **A row made entirely of periods is hidden in the reader, but still sets the column widths** — you get the layout you set up in Obsidian without the dots showing. A cell needs **five or more periods and nothing else** to count as padding.
 
 If any cell in the row has real text in it, the whole row is treated as content and shows normally. So a cell reading `Waiting.....` is safe.
 
@@ -206,14 +237,14 @@ If any cell in the row has real text in it, the whole row is treated as content 
 
 The row above the vault tree, with a count of pages you have not seen yet. Click it for a page listing everything that has changed, newest first. The count disappears when you are up to date rather than sitting at zero.
 
-- **New vs Updated** — New means the page did not exist last time WikiBase looked. Updated means it did and its contents have changed since. New is worked out from the list of pages rather than from dates, so a page still reads as New even after its properties get filled in. Updated is worked out by comparing the page's actual text, so OneDrive touching a file without changing anything in it does not count as an edit.
+- **New vs Updated** — New means the page did not exist last time Folio looked. Updated means it did and its contents have changed since. New is worked out from the list of pages rather than from dates, so a page still reads as New even after its properties get filled in. Updated is worked out by comparing the page's actual text, so OneDrive touching a file without changing anything in it does not count as an edit.
 - **An updated page lists the sections that changed.** The headings appear under the file name. Click one and the page opens at that heading with it highlighted, the same as clicking an Outline entry. The highlight stays until you scroll. If several separate edits land before you get to the page, all of them are listed.
 - **Clicking a heading clears that heading only.** The others stay waiting. The file itself is not marked seen until the last one is done, so the count still tells you there is reading left. Opening the file name instead of a heading answers all of them at once, because you opened the page.
 - **A heading you have already read stays in the list**, greyed out, and stays clickable. That is how you get back to it if you clicked the wrong one. If it gets edited again later it goes back to unread, because clearing it answered the edit you read, not every edit it will ever get.
 - **A page with no sections listed** was changed somewhere outside a heading, or only in its properties.
 - **The date on the right is colour-coded by age** — green within the last week, amber up to a month, grey after that. It is only ever a second way of saying what the date and the group heading already say, so nothing is hidden if the colours are hard for you to tell apart.
 - **Seen happens when you leave a page, not when you open it.** Open something from the list, read it, come back, and it is marked seen. That way the highlight is still there when you return, instead of clearing the instant you click.
-- **The first time you ever open WikiBase, everything counts as seen.** You start from today rather than from a list of every page anyone has ever written.
+- **The first time you ever open Folio, everything counts as seen.** You start from today rather than from a list of every page anyone has ever written.
 - **Filters** — Unseen, New, Updated or All, and a separate 30 days / 90 days / All time window. Both are remembered, and every one of them shows the changed headings under a file, not just Unseen.
 - **Mark all seen** clears the list, and **skips anything marked as required reading**, telling you what it skipped. Required pages can only be cleared by actually opening them.
 - **Renaming or moving a page in Obsidian does not resurface it** for the whole team — it is matched by its contents, so it keeps whatever seen state it already had. Deleting one removes it from the list.
@@ -289,7 +320,7 @@ The **Bookmarks tab** has two sections:
 
 **Remove one** — hover any row and click the **×**. On a bookmark it removes that heading; on a file header it removes every bookmark in that file; on a favourite it removes the favourite and leaves the bookmark. Removing here is the same as un-clicking the ribbon in the Outline, and it is the only way to reach a bookmark whose file has gone.
 
-**Bookmarks pointing at nothing** show struck through and marked *file not found*, and clicking them does nothing. A **Remove all** bar appears above the list when there are any. This happens when a file was renamed before WikiBase learned to follow renames, or when a file was deleted outright — there is no way to work out where those bookmarks were meant to point, so clearing and re-adding them is the fix.
+**Bookmarks pointing at nothing** show struck through and marked *file not found*, and clicking them does nothing. A **Remove all** bar appears above the list when there are any. This happens when a file was renamed before Folio learned to follow renames, or when a file was deleted outright — there is no way to work out where those bookmarks were meant to point, so clearing and re-adding them is the fix.
 
 **Clicking any bookmark** opens that file, scrolls to that heading, unfolds anything hiding it, and unfolds the section itself. If the Outline is also open, it follows along.
 
@@ -306,7 +337,7 @@ Bookmarks are **yours**, stored against your email in the vault, so they follow 
 
 **Renaming a page does not break your bookmarks.** Every scan compares the vault against what it saw last time. A path that disappeared alongside a path that appeared carrying the same contents is the same page under a new name, and your bookmarks, favourites and last-opened note are moved across to it. The same is true of a page moved to a different folder. Nothing is asked of you and nothing needs re-adding.
 
-There is one case it cannot catch: **renaming a page and editing it before anyone next opens WikiBase**. With both the name and the contents changed at once, there is nothing left to match on, and bookmarks to that page do break. If you are reorganising the vault, rename first and let it settle before editing.
+There is one case it cannot catch: **renaming a page and editing it before anyone next opens Folio**. With both the name and the contents changed at once, there is nothing left to match on, and bookmarks to that page do break. If you are reorganising the vault, rename first and let it settle before editing.
 
 Comments and change logs are a separate matter — those are files of their own, named after the page, and a rename does leave them behind. Renaming a page that has comments on it is worth avoiding for now.
 
@@ -321,19 +352,19 @@ Two lists for the open note:
 
 **Administrator only.** A report on the vault, in three lists:
 
-- **Most read** — which pages the team actually opens. Usually not the pages you expected when you built the wiki.
+- **Most read** — which pages the team actually opens. Usually not the pages you expected when you built the vault.
 - **Never opened** — pages nobody has ever read. The most useful list here: either the page is dead and can go, or it is needed and nobody can find it.
 - **Gone quiet** — a page that used to get traffic and stopped for a month or more. Nearly always a page that went out of date and people gave up on.
 
 Each list shows the top five with a **Show more** for up to twenty-five. Click any row to open that page.
 
-**Who read it.** Each Most read row carries a reader count — *3 readers* — and clicking it opens a breakdown naming each person and how many times they opened that page. It is collapsed until you ask for it, and it is the answer to "is anyone but me actually using this" when someone asks a question the wiki already answers.
+**Who read it.** Each Most read row carries a reader count — *3 readers* — and clicking it opens a breakdown naming each person and how many times they opened that page. It is collapsed until you ask for it, and it is the answer to "is anyone but me actually using this" when someone asks a question the vault already answers.
 
 Only Most read has this. **Never opened** has nobody to name, and **Gone quiet** is deliberately left anonymous: that list exists to prompt "has this page gone out of date", and turning it into a list of who stopped reading answers a different and less useful question.
 
-**What is recorded, and when.** WikiBase notes which page you are on once it has loaded, and how long you stayed. Nothing is written while you read. When you switch away from the tab or close it, that sitting is written to a hidden file in the vault under `zSystem/Analytics/`, one file per person per month, one line per page per day. That file is safe to delete at any time; it will simply start again.
+**What is recorded, and when.** Folio notes which page you are on once it has loaded, and how long you stayed. Nothing is written while you read. When you switch away from the tab or close it, that sitting is written to a hidden file in the vault under `zSystem/Analytics/`, one file per person per month, one line per page per day. That file is safe to delete at any time; it will simply start again.
 
-**Recording happens for everyone; reading the report does not.** The Usage tool is Administrator only and is not merely hidden below that tier, it is not built at all. But the log files themselves are ordinary Markdown in the vault, named after the person they belong to, so anyone who can open the vault in Obsidian can open them. **Nothing here is secret from the team, and it is not meant to be.** If that matters to you, the honest place to raise it is the folder, not the report.
+**Recording happens for everyone; reading the report does not.** The Usage tool is Administrator only — open it from your initials badge → Usage. But the log files themselves are ordinary Markdown in the vault, named after the person they belong to, so anyone who can open the vault in Obsidian can open them. **Nothing here is secret from the team, and it is not meant to be.** If that matters to you, the honest place to raise it is the folder, not the report.
 
 Because the write happens when you leave, your own reading appears quickly and other people's lags by up to one sitting, plus however long OneDrive takes to sync. It is near-live, not live.
 
@@ -341,11 +372,21 @@ Because the write happens when you leave, your own reading appears quickly and o
 
 ## 5. Making it yours
 
-Two separate places. **Theme** is how the wiki looks; **Settings** is how it behaves. Both live under your initials badge, top right.
+Two separate places. **Theme** is how Folio looks; **Settings** is how it behaves. Both live under your initials badge, top right.
+
+### Trying the new layout
+
+**Settings → New look → Try the new layout.** It is off unless you turn it on, and it only changes the computer you turn it on at. Switching either way is instant, and switching back leaves everything exactly as you had it.
+
+Same vault, same pages, nothing removed. Three things move: search comes up into the top bar as a proper box you can see, the panels that are mainly for maintaining the vault move behind one button next to Comments, and the app gains a **Home** button. Comments keeps its own button with the count on it, so you can tell at a glance whether a page has any.
+
+If you try it and prefer the old one, turn it off. That is the point of it being a switch.
 
 ### Theme panel
 
 Open with **initials badge → Theme**. It is a popup, not a modal, so the note stays visible behind it and every change lands live as you make it. There is no Save button — everything writes the moment you change it. Each section has its own **Reset**, and there is a **Reset all** in the footer. One section opens at a time.
+
+**On the new layout, this panel is shorter on purpose.** It offers five controls only — Mode, Preset (Things or Minimal), Reading width, Text size, and Line spacing — described under Appearance and Reading below. Accent, body font, and the whole of Headings, Navigation icons, Interface and Share are not shown there; your existing choices in those aren't changed, there's just no way to change them further from the new layout. Switch **Settings → New look** off to reach the full panel described below. **Show page title**, previously part of Headings, moved to **Settings → New look** on the new layout.
 
 ![The Theme panel, annotated](help-assets/fig-03-theme-panel.svg)
 
@@ -404,13 +445,13 @@ Set your look up once and pass it to the rest of the team.
 
 **Copy** puts your theme into the box as a `WBTHEME1:` string. Send it to someone; they paste it into the same box and click **Apply pasted**.
 
-**Set as vault default** saves it to the vault itself, at `zSystem/theme.json`. Anyone opening WikiBase for the first time starts with that look instead of the plain default. It never overwrites a theme someone has already chosen — if you have used WikiBase before, your own settings stay exactly as they are.
+**Set as vault default** saves it to the vault itself, at `zSystem/theme.json`. Anyone opening Folio for the first time starts with that look instead of the plain default. It never overwrites a theme someone has already chosen — if you have used Folio before, your own settings stay exactly as they are.
 
 Dark vs light is **not** included in a shared theme. That stays personal, and it can be set to System, so sharing a look never forces anyone else's screen to your preference.
 
 #### Elsewhere
 
-**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset. There's also a 14th type WikiBase adds itself, `[!copy]`, which carries a **Copy** button that puts its contents on your clipboard with the formatting intact and no Markdown markers — see [Editing and Markdown](help-edit.md) for how to write one.
+**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset. There's also a 14th type Folio adds itself, `[!copy]`, which carries a **Copy** button that puts its contents on your clipboard with the formatting intact and no Markdown markers — see [Editing and Markdown](help-edit.md) for how to write one.
 
 ### Settings
 
@@ -427,7 +468,7 @@ Open with **initials badge → Settings**.
 
 ### Access tiers
 
-WikiBase has three levels, each one including everything below it. You pick yours from the dropdown in Advanced Settings.
+Folio has three levels, each one including everything below it. You pick yours from the dropdown in Advanced Settings.
 
 | Tier | What it adds |
 |---|---|
@@ -449,7 +490,7 @@ To turn the gate on: switch to **Administrator** (you will not be asked for anyt
 
 Afterwards, an Administrator can change either password from the same place.
 
-**What this is and is not.** This is an interface gate, not security. The passwords are stored as one-way hashes in your vault at `zSystem/auth.json`, never in the app, which is why an app update never wipes them. But the check runs in your browser and someone determined can get around it, and anyone who can reach the vault can edit any note in Obsidian no matter what tier they picked in WikiBase. Treat tiers as a way to keep people out of controls they do not need, not as a lock.
+**What this is and is not.** This is an interface gate, not security. The passwords are stored as one-way hashes in your vault at `zSystem/auth.json`, never in the app, which is why an app update never wipes them. But the check runs in your browser and someone determined can get around it, and anyone who can reach the vault can edit any note in Obsidian no matter what tier they picked in Folio. Treat tiers as a way to keep people out of controls they do not need, not as a lock.
 
 Both tiers above User are covered in [Help — Editing and Markdown](help-edit.md).
 
@@ -459,10 +500,10 @@ There is no reset button, and that is deliberate: a reset you could reach from t
 
 1. Open the vault in Obsidian, or in SharePoint in a browser.
 2. Delete `zSystem/auth.json`.
-3. Switch back to WikiBase. Every tier opens again with no prompt, exactly like a vault that was never set up.
+3. Switch back to Folio. Every tier opens again with no prompt, exactly like a vault that was never set up.
 4. Go to **Settings → Access**, switch to **Administrator**, and set both passwords again.
 
-You do not need to reload WikiBase. It re-reads that file whenever you come back to the tab, so tabbing out to delete it and tabbing back is all it takes.
+You do not need to reload Folio. It re-reads that file whenever you come back to the tab, so tabbing out to delete it and tabbing back is all it takes.
 
 **Nobody can be permanently locked out.** Anyone who could lose a password already has the vault access needed to undo it — the file lives in the same SharePoint folder as the notes. If that is not the answer you want, the thing to change is who can write to the vault, not the passwords.
 
@@ -527,6 +568,8 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Dark / Light | Sun-moon icon in the header |
 | Change your name or email | Initials badge → Switch user |
 | Point the app at a different folder | Initials badge → Reconnect to vault |
+| Install Folio | Header icon next to dark/light, or Initials badge → Install Folio |
+| Check what's connected, identified and installed | Initials badge → the row under your name |
 | What changed since you last looked | **What's New**, above the vault tree |
 | Open or close a side panel | Click the tab on that panel's drag line |
 | Resize a panel | Drag the line; double-click it to collapse |
@@ -553,10 +596,10 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 The browser's permission to your vault folder was reset. A Chrome or Edge update, or clearing site data, does it. Click the button and choose **Allow on every visit** again. Nothing is wrong with your notes.
 
 **"Could not load vault"**
-The folder WikiBase remembers has been moved, renamed or unsynced from OneDrive. Click **Open a different folder…** and re-pick it.
+The folder Folio remembers has been moved, renamed or unsynced from OneDrive. Click **Open a different folder…** and re-pick it.
 
 **You picked the wrong folder and it keeps loading that one**
-WikiBase remembers your choice and reuses it every launch, so this does not clear itself. Initials badge → **Reconnect to vault**, then pick the right folder. Cancelling the picker changes nothing, so a misclick costs you nothing.
+Folio remembers your choice and reuses it every launch, so this does not clear itself. Initials badge → **Reconnect to vault**, then pick the right folder. Cancelling the picker changes nothing, so a misclick costs you nothing.
 
 **The vault opens but shows no files**
 You have probably picked a parent folder. Re-pick the folder that directly contains your notes and note folders.
@@ -565,7 +608,7 @@ You have probably picked a parent folder. Re-pick the folder that directly conta
 Its target is in a folder you have not expanded yet. Open that folder in Vault Files and the link activates.
 
 **Images are not loading**
-The image must be in the attachments subfolder beside the note that references it, with the filename matching exactly, including case. If *every* image in the whole vault is broken, the attachments subfolder name configured in the app does not match what Obsidian actually created — flag it to whoever manages WikiBase.
+The image must be in the attachments subfolder beside the note that references it, with the filename matching exactly, including case. If *every* image in the whole vault is broken, the attachments subfolder name configured in the app does not match what Obsidian actually created — flag it to whoever manages Folio.
 
 **New, Move or Edit will not work**
 You are on the **User** tier. Switch to **Contributor** in **Settings → Advanced Settings → Access**. You will be asked for the Contributor password, unless nobody has set one yet. See [Help — Editing and Markdown](help-edit.md).
@@ -574,13 +617,13 @@ You are on the **User** tier. Switch to **Contributor** in **Settings → Advanc
 Those save to this browser's local storage. Clearing browser data or using a private window resets them. Your bookmarks and profile are unaffected, they live in the vault.
 
 **A note looks different here than in Obsidian**
-Most likely raw HTML, a Mermaid diagram or MathJax. See [Help — Editing and Markdown](help-edit.md) for what WikiBase deliberately does not render.
+Most likely raw HTML, a Mermaid diagram or MathJax. See [Help — Editing and Markdown](help-edit.md) for what Folio deliberately does not render.
 
 **Someone else's changes are not showing**
-The vault syncs through OneDrive, so there is a lag between their save and your copy. Check OneDrive has finished syncing, then come back to the tab — WikiBase re-reads the vault whenever it regains focus, so you should not need to reload.
+The vault syncs through OneDrive, so there is a lag between their save and your copy. Check OneDrive has finished syncing, then come back to the tab — Folio re-reads the vault whenever it regains focus, so you should not need to reload.
 
 **What's New is not picking up an edit**
-Switch to another window and back. That is when WikiBase re-reads the vault. If it still does not appear, OneDrive has not finished syncing the file to your machine yet.
+Switch to another window and back. That is when Folio re-reads the vault. If it still does not appear, OneDrive has not finished syncing the file to your machine yet.
 
 **Nobody knows the Administrator password**
 Nobody is locked out. See [Forgetting a password](#Forgetting a password) — you delete one file in the vault and set them again.

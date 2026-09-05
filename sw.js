@@ -1,10 +1,10 @@
-/* WikiBase service worker — app shell only (S11, locked 2026-07-11).
+/* Folio service worker — app shell only (S11, locked 2026-07-11).
    Caches the app itself so it opens offline / installs as a PWA.
    NEVER caches vault files, sidecars, or SharePoint API calls —
    content is always fetched live (SharePoint auth requires it anyway).
    To ship an update: bump CACHE version below. */
 
-const CACHE = 'wikibase-shell-v3';
+const CACHE = 'folio-shell-v4';
 
 // Core shell. Individual failures tolerated (e.g. /themes/ optional).
 const SHELL = [

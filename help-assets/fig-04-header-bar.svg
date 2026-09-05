@@ -20,8 +20,8 @@
   <!-- move -->
   <g class="ico" transform="translate(104,92)"><path d="M1 3.5A2 2 0 0 1 3 1.5h4L9 3.5h6a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2Z"/><line x1="6" y1="9.5" x2="12" y2="9.5"/><polyline points="10,7.5 12,9.5 10,11.5"/></g>
   <!-- title -->
-  <text x="152" y="105" fill="#C9C9CE" font-size="14" font-weight="600">WikiBase</text>
-  <text x="228" y="105" fill="#6E6E73" font-size="13">— Team Wiki</text>
+  <text x="152" y="105" fill="#C9C9CE" font-size="14" font-weight="600">Folio</text>
+  <text x="204" y="105" fill="#6E6E73" font-size="13">— Team Wiki</text>
 
   <!-- sun -->
   <g class="ico" transform="translate(742,92)"><circle cx="8" cy="8" r="3.6"/><path d="M8 1v2M8 13v2M2.4 2.4l1.4 1.4M12.2 12.2l1.4 1.4M1 8h2M13 8h2M2.4 13.6l1.4-1.4M12.2 3.8l1.4-1.4"/></g>
