@@ -8,6 +8,132 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.51.1 — 2026-09-06
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; updated `supporting/tests/b2-home.test.js`, `install-setup-health.test.js`, `p10-vault-check.test.js`, `section18-shell.test.js`, `session2-reading.test.js`
+
+*Same-day fixes to 0.51.0, off a screenshot review. Polish, not new capability.*
+
+### The version indicator now actually waits its turn
+
+It was reading the wrong flag: dismissing the "Install Folio" prompt made
+the version number appear even though the app still was not installed. It
+now checks installed state directly, so it only shows once nothing needs
+the icon -- exactly the rule it was meant to follow from the start. Moved
+to sit just left of the light/dark toggle, ahead of Help and the avatar.
+
+### The Admin door only shows to people who can use it
+
+Home showed the Admin tile to every tier, reviewer or not, and only
+refused the click after landing on a locked tab. Reversing that -- the
+door itself is now hidden below Contributor, so there is nothing to click
+that was never going to open.
+
+### The page footer moved to the bottom of the page
+
+Author, Updated, Due and the vault name were rendering as a strap right
+under the title -- a footer's worth of information reading like a
+subheading. Moved it below the body, where a footer belongs, and added a
+Report button beside it, right-justified, disabled for now with a note
+that it lands in 1.1.
+
+### Home's door row, tidied
+
+"Continue Reading" now gets enough room to sit on one line. Admin gave up
+some of that width and lost a subtext line it didn't need ("what's on the
+other four doors already tells you what's behind them"). "How Folio
+works" moved onto the same baseline as the rest of the row, with "Help
+File" as its own subtext, matching how every other door already reads.
+
+### The bookmark fill, everywhere it lives
+
+The reader's own Save button and the small bookmark icon that appears
+over a heading were not filling in on save, even though the same fill in
+the Outline panel worked correctly. Two separate causes: the Save button
+had the right icon swap but no colour change to go with it, and the
+heading icon was never told to refresh itself after a toggle -- only
+Outline was. Both now match.
+
+---
+
+---
+
+## 0.51.0 — 2026-09-06
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`
+
+*Pre-1.0 revision, round 2, the last two items: 2e and 2f. Quick pass, not a numbered session.*
+
+### The chrome stops drawing lines it doesn't need
+
+The new shell's top bar drew a hairline under itself even where the sidebar
+and right panel already sit at the header's own background tone. Dropped
+the line and made the match literal (`var(--bg-header)` instead of the
+coincidentally-equal `--bg-sidebar`), so the two can't drift apart later.
+The Saved slide-over's own head got the same treatment -- no border, header
+tone -- so it reads as a continuation of the top bar rather than a second
+block stacked under it. The boundary with the reading column is untouched:
+it was always a tone change, never a line, and stays that way.
+
+### A version indicator for the new shell
+
+The old shell has always had one, tucked in the bottom corner of the right
+panel -- but that panel collapses to nothing on Home, on any page with no
+outline, and behind every destination, so the new shell had no reliable
+place showing what build was running short of opening Settings. Added one
+to the header, in the same slot Install and Update already share: Install
+shows while the app isn't installed, Update's own notice is the banner's
+job in this shell, and the version -- click through to the changelog,
+same viewer as Help -- shows only once neither of those needs the icon.
+Its text is read from the existing button rather than a second hardcoded
+string, so there is still exactly one manual version string in `index.html`
+to bump on every ship. The old shell's own corner tag is hidden while the
+new shell is on, so the two don't show at once.
+
+---
+
+## 0.50.0 — 2026-09-06
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; new `supporting/tests/round2-destinations.test.js`; updated `supporting/tests/b2-home.test.js`, `install-setup-health.test.js`, `p9-admin.test.js`, `p10-vault-check.test.js`, `section18-shell.test.js`, `session-b-shell.test.js`, `session-d-fixes.test.js`, `session2-reading.test.js` and `supporting/tests/README.md`
+
+*Pre-1.0 revision, round 2. Two bugs off a screenshot, and the destination question B2 raised and left open.*
+
+### A place you go is not a panel beside a page
+
+Saved, search results and Admin all opened in the 290px slide-over that was drawn for things you read **alongside** a page. B2 wrote down the test that says they should not — a companion belongs beside the page, a destination replaces it — and then only applied it to the companions. P10 widened the Admin slide to 560px, which fixed one screen and left the shape wrong.
+
+**A destination now takes the reading column**, at the reading column's own width, the same way Home already does. It gets a title and a Close, and Close goes back to the page you were reading rather than dumping you on the front door.
+
+- **Admin** opens full width, with all four tabs in a row instead of stacked into a companion's measure, and **lands on the tab you asked for**. Its Home door remembers the last tab you were on and, when that tab is above your tier, opens the first one you can actually use. Opening onto a locked room is not an entry point.
+- **Saved** opens the real Saved list. **Its Home door goes straight there** rather than to the small flyout 0.47.0 added: that flyout was the better of two answers while the only alternative was the 290px slide, and it stops being so now.
+- **Search results** gained somewhere to go at all. The palette stops at 30 content matches and has never had a way to the rest; it now ends with **See all results**, which opens the full Search pane in the reading column with the query already run.
+- **What's New** needed nothing. It has rendered into the reading column since it was built, so it was already the thing the other three became.
+
+Companions are unchanged: Outline, Comments and Backlinks still belong beside the page and still open in the right-hand column.
+
+### Two fixes off one screenshot
+
+- **A table's header pins to the top of the reading panel again.** It was pinning 30px down, with live rows scrolling through the gap above it. The panel reserves that 30px for the "you are here" section bar, which this look has not drawn since 0.41.1 — the space was being held for something that is not there. Not the Chromium bug fixed at 0.40.0; that fix is intact.
+- **The Must read and Onboarding bars are visible.** The count, the name and the "2 left to read" line all drew; the coloured bar between them measured zero pixels tall and had never once been seen. It was built from inline text, and a height set on inline text is ignored by every browser.
+- Paired with the first: **content now fades as it passes under the reader bar** instead of cutting off at a hard edge. A pinned table header paints over the fade rather than through it.
+- Also, found while looking at the above: **"Save this page" no longer shows on a screen with no page.** It has been outside that rule since 0.43.0 and nobody could see it, because the only screen without a page was Home, which hides that whole bar.
+
+### Tests
+
+New suite `round2-destinations.test.js`, 62 checks, including the pair that keeps the table-header fix honest: the offset is zero **because** the bar is not drawn, so un-hiding the bar without restoring the offset goes red. Eight existing suites updated where behaviour deliberately changed, asserting the new intent rather than the new string. Two of them (`b2-home`, and the deploy checks in `release-integrity`) were already red on arrival from 0.49.1 and are green again.
+
+---
+
+## 0.49.1 — 2026-09-06
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`
+
+*Quick pass, pre-1.0 revision. Three small fixes ahead of the 1.0 readiness check.*
+
+- **First run's last tour step no longer names editing.** The "You, and your settings" callout described turning editing on, which a User-tier reader can't do and shouldn't be told about. Line now stops at the settings/walkthrough re-run mention.
+- **"Open last note" removed from Settings.** It never controlled whether a note reopened, only whether the sidebar tree pre-expanded to it at boot — a confusing name for what is now unconditional behaviour, matching Home's own "Continue reading" door. The toggle, its listener and its persisted read are gone; the tree still expands to the last-read note on boot.
+- **Home's "leave a comment on the page" line is plain text again.** It was wired to `chDoor('continue')` — clicking it opened Continue reading, not a comment composer, because no quick-comment flow exists yet (that's the 1.1 popup on the roadmap). Underline and click handler removed until that ships.
+
 ---
 
 ## 0.49.0 — 2026-09-05
