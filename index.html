@@ -679,11 +679,23 @@
        reading view. Two stages of one app, one more class on <body>,
        exactly the way the shell itself works. */
 
-    /* Fixed columns, so the two drag handles retire here. Neither job is
-       lost: the sidebar's moves to the top bar button, the right panel's
-       to the button in the reader header. They stop being a drag. */
-    body.beta-shell #rh-sidebar,
-    body.beta-shell #rh-right { display: none; }
+    /* B3 -- the drag handles come BACK here. Fixed columns were locked at
+       Session 62 ("they stop being a drag") and reversed by Jayson at B3.
+       What comes back is ADJUSTMENT ONLY, and the distinction is the whole
+       point of the rule below: he asked for the ability to adjust while
+       hide-and-show stays exactly as designed.
+
+       So the grip returns and the FLARE does not. The flare is the
+       handle's collapse affordance -- click it and the panel closes -- and
+       a second way to close the right column would contradict both B2's
+       "there is no manual open/close control for the right column" and the
+       auto-collapse shipped at 0.44.2, which is what decides whether that
+       column is there at all. Drag and double-click-to-fit are adjustment;
+       the flare is visibility, and visibility is not ours to add here.
+       makeResizable() carries the matching guards: no snap-closed, no
+       click-to-collapse, a floor instead of zero. */
+    body.beta-shell #rh-sidebar .rh-flare,
+    body.beta-shell #rh-right   .rh-flare { display: none; }
 
     /* Dividers go. The three columns already sit at three different
        background tones, so a hairline drawn on top of a tone change is
@@ -691,6 +703,24 @@
        still available to anything functional; this is decoration. */
     body.beta-shell #sidebar     { border-right: none; }
     body.beta-shell #right-panel { border-left: none; }
+
+    /* B3 -- an edge gutter. Jayson, 9 Sep: "elements seem to be a little
+       close to the edges". Once the dividers came off at 2e there was
+       nothing between a file name and the window itself, and the 12px the
+       header was built with reads as tight beside a 44px bar.
+
+       The gutter goes on the CONTENT, never on the frame: widening the
+       frame would change every width the drag ceiling, the fit and the
+       reader minimum are computed against. Only the two window edges are
+       padded -- the sidebar's right edge and the right panel's left edge
+       are internal, and a gutter there would just push the columns apart.
+       box-sizing is border-box globally (see the reset), so this comes out
+       of the column's own width and the fit measurement picks it up for
+       free: fitPanelToContent() measures each row from the PANEL's left
+       edge, so a padded row measures wider by exactly the padding. */
+    body.beta-shell #header      { padding: 0 20px; }
+    body.beta-shell #sidebar     { padding-left: 10px; }
+    body.beta-shell #right-panel { padding-right: 10px; }
 
     /* 2e -- the header's own hairline drew the same boundary a third time:
        header and sidebar/right-panel already resolve to the same
@@ -1094,7 +1124,7 @@
     /* The header's update arrow and the banner are the same news twice, so in
        the new shell the banner is the one that carries it. */
     body.beta-shell #btn-update { display: none !important; }
-    /* 2f -- superseded by #btn-version in the header for the new shell. */
+    /* 2f -- superseded by #ud-version in the account menu (0.52.0). */
     body.beta-shell #app-version { display: none !important; }
 
     /* === Body ================================================ */
@@ -1336,13 +1366,6 @@
 
     /* === S14 Review mode + badges + create flow ================ */
     .icon-btn { position: relative; }
-    .hdr-count {
-      position: absolute; top: 2px; right: 0px;
-      min-width: 14px; height: 14px; padding: 0 3px;
-      border-radius: 7px; background: var(--co-red-bd); color: #fff;
-      font-size: 9.5px; font-weight: 600; line-height: 14px; text-align: center;
-      pointer-events: none;
-    }
     .cmt-pill {
       display: inline-block; margin-left: 5px; min-width: 14px; padding: 0 4px;
       border-radius: 7px; background: var(--co-red-bd); color: #fff;
@@ -1379,16 +1402,51 @@
     .folder-row:hover .fr-add { display: block; }
     .fr-add:hover { color: var(--text-primary); }
     /* create + move + default-page modals */
-    #create-overlay, #move-overlay, #dp-overlay {
+    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay {
       position: fixed; inset: 0; z-index: 60;
       background: rgba(0,0,0,0.35);
       display: flex; align-items: center; justify-content: center;
     }
-    #create-modal, #move-modal, #dp-modal {
+    #create-modal, #move-modal, #dp-modal, #sr-modal {
       width: 380px; padding: 16px; border-radius: 10px;
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
+    /* Repair saved items (0.52.0). Wider than its siblings because every row
+       shows a page name AND the path it would be re-pointed at, and a path
+       wrapped over two lines is unreadable when you are deciding whether it
+       is the right one. Capped in height and scrolled: a vault
+       reorganisation can break a lot at once, and the confirm button must
+       stay reachable without scrolling the page behind the modal. */
+    /* 660, not the 380 its siblings use and not the 520 this shipped at in
+       draft: at 520 both the "was <old path>" line and the destination in
+       the select ellipsised, and this is the one screen whose entire job is
+       comparing two paths. A truncated path in a decision UI is not a
+       cosmetic problem. Found by rendering it, not by any check. */
+    #sr-modal { width: 660px; max-width: calc(100vw - 40px); }
+    #sr-list { max-height: 46vh; overflow-y: auto; margin: 4px 0 12px; }
+    .sr-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 0; border-bottom: 1px solid var(--border);
+    }
+    .sr-row:last-child { border-bottom: none; }
+    .sr-what { flex: 1 1 auto; min-width: 0; }
+    .sr-name { font-size: 12px; color: var(--text-primary); }
+    .sr-from {
+      font-size: 10.5px; color: var(--text-muted);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sr-pick { flex: 0 0 290px; max-width: 290px; }
+    /* A content match is the app saying "this is byte-for-byte the file you
+       saved"; a name match is a guess. They must not look alike in a list
+       someone is about to confirm in bulk. */
+    .sr-how {
+      flex: 0 0 auto; font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+      padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+    }
+    .sr-how.exact { color: var(--co-green-txt); border-color: var(--co-green-txt); }
+    .sr-none { font-size: 11px; color: var(--text-muted); padding: 10px 0; }
     .cm-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
     .cm-row { display: flex; gap: 6px; align-items: stretch; }
     .cm-type {
@@ -2818,12 +2876,6 @@
       margin: 6px 0 0;
     }
 
-    /* Two settings side by side (e.g. Header colors + Background color) —
-       halves the vertical space a stacked pair would take. */
-    .s-inline-row { display: flex; gap: 10px; }
-    .s-inline-col { flex: 1; min-width: 0; }
-    .s-inline-col .s-sublabel:first-of-type { margin-top: 2px; }
-
     /* Advanced Settings — collapsible section header */
     .s-label-collapsible {
       display: flex;
@@ -2907,14 +2959,22 @@
 
     /* 2f -- text, not an icon, so it does not borrow .icon-btn's fixed
        28x28 box; sized to the same 28px row height instead. */
-    #btn-version {
-      height: 28px; padding: 0 9px; flex-shrink: 0;
-      display: none; align-items: center; white-space: nowrap;
-      border: none; border-radius: var(--radius); background: transparent;
-      cursor: pointer; font-family: inherit; font-size: 11px;
+    /* Version row in the account menu (0.52.0). Sits directly under
+       .ud-health and shares its metrics so the two blocks read as one
+       column. A button rather than a <p> because it opens the changelog,
+       but styled flat -- it must not compete with the .ud-item actions
+       below it, which are the things you go to the menu to DO. */
+    #ud-version {
+      display: flex; align-items: center; gap: 7px; width: 100%;
+      margin: 0; padding: 7px 0 0; border: none; background: transparent;
+      cursor: pointer; font-family: inherit; font-size: 11px; text-align: left;
       color: var(--text-muted);
     }
-    #btn-version:hover { background: var(--hover); color: var(--accent); }
+    #ud-version:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    /* Aligns the label with the health rows above, whose 7px dot + 7px gap
+       indents their text by 14px. An empty span rather than a margin so the
+       two blocks stay locked together if the dot size is ever changed. */
+    #ud-version .udv-pad { width: 7px; flex-shrink: 0; }
     /* Install (S60) — dot rather than a text badge; every other header
        icon here (Theme, Help) carries no label, so a bare new icon would
        read as decoration without it. */
@@ -3228,14 +3288,6 @@
     #ot-toolbar .ot-group.hidden { display: none; }
     #ot-toolbar .icon-btn { width: 24px; height: 24px; }
     #ot-toolbar .icon { width: 14px; height: 14px; }
-    #ot-toolbar .ot-sep { width: 1px; height: 14px; background: var(--border-strong); margin: 0 3px; flex-shrink: 0; }
-    .rp-pane-header {
-      display: flex; align-items: center;
-      padding: 7px 8px 7px 12px;
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
-      flex-shrink: 0;
-    }
-
     /* Folder-link copy confirmation (S — folder link copy-to-clipboard) */
     .wb-folder-link { cursor: pointer; }
     .wb-copied-tip {
@@ -3477,6 +3529,18 @@
     .comment-post-target b { color: var(--text-primary); font-weight: 600; }
     .comment-post-target a { margin-left: auto; color: var(--accent); text-decoration: none; font-size: 10.5px; }
     .comment-post-target a:hover { text-decoration: underline; }
+    /* P7.1 — closed comments collapse by default (same fold language as
+       callouts/headings) rather than disappearing; a reply sits indented
+       under its thread root rather than getting a second composer. */
+    .comment-card.comment-reply { margin-left: 16px; border-left-style: dashed; }
+    .comment-fold-btn { background: none; border: none; padding: 0; margin-left: auto; cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; }
+    .comment-fold-btn .md-fold-icon { width: 12px; height: 12px; }
+    .comment-card.folded .comment-fold-btn .md-fold-icon { transform: rotate(-90deg); }
+    .comment-card.folded .comment-body,
+    .comment-card.folded .comment-card-actions { display: none; }
+    .comment-card-actions { display: flex; gap: 6px; margin-top: 5px; }
+    .comment-reply-btn { font-size: 10px; margin-top: 5px; background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 1px 6px; cursor: pointer; color: var(--text-muted); display: inline-block; }
+    .comment-reply-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
 
     /* Backlinks */
     .backlink-item {
@@ -3772,15 +3836,12 @@
       <span class="install-dot"></span>
     </button>
 
-    <!-- Version indicator (2f) -- new shell only, and the same slot's
-         third state: Install shows while not installed, Update's own
-         arrow is retired here in favour of the banner (see body.beta-shell
-         #btn-update above), and this shows only once neither needs the
-         icon. Sits left of the theme toggle, Jayson's placement call.
-         Click opens the changelog the same way as #app-version --
-         renderAppBanner() copies this button's text from that one, so
-         there is still only one manual version string in this file. -->
-    <button id="btn-version" title="View changelog" aria-label="View changelog" style="display:none" onclick="openChangelog()"></button>
+    <!-- Version indicator lived here from 2f until 0.52.0, as the banner
+         slot's quiet fourth state. Jayson's call at 0.52.0: it is reference,
+         not chrome, so it moved into the account menu under the setup health
+         block (#ud-version) where it shows unconditionally. The header keeps
+         only what is ACTIONABLE -- install when not installed, update when
+         one is waiting -- and neither of those changed. -->
 
     <!-- Dark/Light toggle (S7) — quick-access, direct header control -->
     <button class="icon-btn theme-toggle-btn" id="btn-theme" title="Toggle Dark/Light" aria-label="Toggle Dark/Light">
@@ -3835,6 +3896,19 @@
           <span class="health-label">Installed</span>
           <button class="health-fix" onclick="tryInstall()">Install</button>
         </div>
+
+        <!-- Version (0.52.0). ALWAYS shown, unlike the health rows above,
+             which each hide once they are fine, and unlike the header's
+             install/update controls, which each appear only when there is
+             something to do. This is reference: you come here to read what
+             you are running, so it must never be conditional. Its text is
+             read from #app-version at open time rather than hardcoded --
+             there is still exactly one manual version string in this file
+             (see that button, bottom of the old shell's right panel). -->
+        <button id="ud-version" title="View changelog" onclick="openChangelog()">
+          <span class="udv-pad" aria-hidden="true"></span>
+          <span id="ud-version-txt"></span>
+        </button>
       </div>
 
       <div class="ud-actions">
@@ -4326,7 +4400,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.51.1</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.55.0</button>
     </aside>
 
   </div>
@@ -4412,6 +4486,25 @@
         <button class="ed-btn" id="dp-clear" onclick="clearDefaultPage()" style="display:none">Clear default</button>
         <button class="ed-btn" onclick="closeDefaultPageModal()">Cancel</button>
         <button class="ed-btn ed-save" onclick="submitDefaultPage()">Set as default</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Repair saved items (0.52.0) ─────────────────────────
+       Replaces the Saved pane's old "Remove all" bar, which was the only
+       thing ever offered for a saved item whose file had moved. Deleting
+       someone's saved page because a folder was renamed is not a repair.
+       Remove all still exists, inside here, where it is a choice rather
+       than the only button. Body is built by openSavedRepair(). -->
+  <div id="sr-overlay" style="display:none" onclick="closeSavedRepair()">
+    <div id="sr-modal" role="dialog" aria-label="Repair saved items" onclick="event.stopPropagation()">
+      <div class="cm-title">Repair saved items</div>
+      <p class="id-sub" id="sr-sub"></p>
+      <div id="sr-list"></div>
+      <div class="cm-actions">
+        <button class="ed-btn" onclick="removeAllSavedBroken()">Remove all</button>
+        <button class="ed-btn" onclick="closeSavedRepair()">Cancel</button>
+        <button class="ed-btn ed-save" onclick="submitSavedRepair()">Repair</button>
       </div>
     </div>
   </div>
@@ -4702,6 +4795,8 @@ const state = {
                         // above answers "how much is there to review, vault-wide"; this
                         // answers "what's open on THIS page" — deliberately two numbers.
   commentAnchorOverride: null, // P7 — null: post to the heading in view; '': forced General
+  commentTypeOverride:   null, // P7.1 — one-shot type preset for Report/Comment-on-section, never sticky
+  replyToIdx:            null, // P7.1 — index of the comment being replied to, or null for a fresh top-level post
   // v0.34.0 — was false and folder-only. Now covers files too and defaults ON:
   // the numbering exists to order the vault on disk, and a reader who wanted to
   // see "05-" in front of every title would not have numbered anything.
@@ -5076,7 +5171,17 @@ async function startLocalVault(root, fresh = false) {
   LOCAL.dirs  = {};
   LOCAL.files = {};
   resetVaultState(fresh);
-  try { await idbSet(root); } catch (e) { /* remembering is best-effort */ }
+  // Remembering the folder is best-effort and must never block a boot, but
+  // it is not nothing: this handle is what lets the next launch reopen the
+  // vault without asking. When it fails the user is asked to reconnect every
+  // time and, until 0.52.0, nothing anywhere said why. Same rule loadAppDoc()
+  // follows -- make the failure describe itself, and name the consequence
+  // rather than the operation, because the consequence is what gets reported.
+  try {
+    await idbSet(root);
+  } catch (e) {
+    console.warn('Folio: could not remember this folder, so the next launch will ask for it again.', e);
+  }
   renderAppBanner(); // P6 — the connect banner has just stopped being true
   await bootVault();
 }
@@ -5528,6 +5633,29 @@ function renderSidebar() {
   updateWhatsNewBadge(); // S35 — keeps the pinned row's active state and count
                           // in step with the tree it sits above, so the two can
                           // never disagree about what is selected.
+
+  // B3 -- fit to the tree, once per session.
+  //
+  // The `.file-row` test is not defensive tidiness, it is the whole fix. A
+  // render pass caught this: the FIRST renderSidebar of a session draws every
+  // open folder as "Loading…" while loadFolderFiles is still away, so a fit
+  // fired on first render measured three placeholder words, found them narrow,
+  // and left the column at its default -- with the long folder name still
+  // truncated, which is the exact bug this was written to fix. Nothing in the
+  // suite could see it; the app was doing precisely what it was told.
+  //
+  // Waiting for a real row means waiting for the render that has something to
+  // measure. A vault with no files never fits, which is correct: there is
+  // nothing to fit to.
+  //
+  // Once per session, not once per render, because re-fitting on every render
+  // would widen the column under the cursor each time a folder is expanded,
+  // which is a resize in the middle of somebody else's gesture. "Default to
+  // extents when opened" is about arriving.
+  if (!renderSidebar._fitted && tree.querySelector('.file-row')) {
+    renderSidebar._fitted = true;
+    fitPanelIfUnsized('sidebar', 'left', 'wb_sb_width');
+  }
 }
 
 // ── Toggle folder ────────────────────────────────────────────────
@@ -5723,6 +5851,68 @@ function safeUrl(u, opts) {
   return '';
 }
 
+// ── Scheme-less web links (0.52.0) ───────────────────────────────
+// A scheme-less href in a Folio note can never resolve to anything. The app
+// is served from its own address and reads the vault through directory
+// handles rather than URLs, so  [IMEG](www.imeg.com)  resolved against
+// Folio's OWN origin, the service worker answered with the app shell, and
+// the link appeared to do nothing but reload the page. That is what "the
+// links go to the default page" was.
+//
+// Every scheme-less form that IS meaningful is matched before this is
+// reached — .md notes, #anchors, file:// shares, the two help docs — so
+// anything still scheme-less at that point is a web address someone typed
+// without the https://, and supplying it is strictly better than a reload.
+//
+// Returns '' for anything this must not touch, so a falsy result means
+// "not mine", never "unsafe" — safeUrl() is still the security gate and
+// still runs afterwards on whatever comes back.
+//
+// Two carve-outs, both deliberate:
+//   · a rooted path (/, ./, ../) is a path, not a host. It cannot resolve
+//     either, but turning "../x" into "https://../x" would invent a host
+//     nobody wrote. It stays dead and reads as dead.
+//   · a bare  name@host.tld  is an email address, and mailto: is already
+//     on the SAFE_URL_SCHEMES allowlist.
+//
+// The scheme test deliberately excludes '.' from the scheme name, which RFC
+// 3986 allows: without that,  imeg.com:8080/x  reads as scheme "imeg.com"
+// and is skipped, when it is really a host and a port. No real scheme in
+// SAFE_URL_SCHEMES contains a dot.
+function webUrlFrom(href) {
+  const raw = String(href == null ? '' : href).trim();
+  if (!raw) return '';
+  if (/^[a-z][a-z0-9+\-]*:/i.test(raw)) return '';                    // already has a scheme
+  if (/^[\/.]/.test(raw)) return '';                                   // /, ./, ../ — a path
+  if (/^[^\s@\/]+@[^\s@\/]+\.[a-z]{2,}$/i.test(raw)) return 'mailto:' + raw;
+  if (!/^[a-z0-9][a-z0-9.\-]*\.[a-z]{2,}/i.test(raw)) return '';        // no host shape
+  return 'https://' + raw;
+}
+
+// Sentence punctuation is not part of an address. Splits a bare URL into the
+// address and whatever trailing characters belong to the prose around it, so
+// "see https://imeg.com." links the site and leaves the full stop outside.
+//
+// A closing paren is only part of the URL when it balances one INSIDE it:
+// "(see https://en.wikipedia.org/wiki/Foo_(bar))" has to keep the inner pair
+// and hand the outer one back to the sentence. Counting is the only way to
+// tell those apart, and it is why this is a loop rather than one regex.
+//
+// One function because the reader and the Links panel must agree on where a
+// URL ends; two copies of this rule would drift the first time either moved.
+function trimUrlTail(u) {
+  let url = String(u || ''), tail = '';
+  for (;;) {
+    if (/[.,;:!?]$/.test(url)) { tail = url.slice(-1) + tail; url = url.slice(0, -1); continue; }
+    if (url.endsWith(')') &&
+        (url.match(/\)/g) || []).length > (url.match(/\(/g) || []).length) {
+      tail = ')' + tail; url = url.slice(0, -1); continue;
+    }
+    break;
+  }
+  return [url, tail];
+}
+
 // Shared broken-image fallback. Both image renderers used to build this
 // markup as a string spliced into the onerror="..." attribute itself —
 // but ICON.imgErr is an SVG with its own double-quoted attributes
@@ -5775,6 +5965,11 @@ function uniqueHeadingId(text, seenIds) {
 // heading text reaches this function unescaped and an apostrophe in it would
 // otherwise become executable.
 //
+// P7.1 — Comment is wired (0.54.0): it opens the Comments companion with
+// this heading locked as the target, through the same composer the pane's
+// own post form uses. Highlight stays a drawn-but-disabled placeholder;
+// it has nowhere to live yet (private-to-one-person storage, per Session A).
+//
 // A note on discoverability, because it decides the design rather than
 // decorating it: a control that only appears on hover is learned by daily
 // users and invisible to everybody else, which is the same failure as a
@@ -5787,7 +5982,7 @@ function headingActionsHTML(hid, text) {
     `<button class="md-h-act" data-wb-copysec="${id}" title="Copy link to this section" aria-label="Copy link to this section">${ICON.copyLink}</button>` +
     `<button class="md-h-act${on ? ' on' : ''}" data-wb-bmtoggle="${id}" data-wb-bmtext="${escHtml(text)}" title="${on ? 'Remove from Saved' : 'Save this section'}" aria-label="${on ? 'Remove from Saved' : 'Save this section'}">${on ? ICON.bookmarkFilled : ICON.bookmark}</button>` +
     `<span class="md-h-act-sep"></span>` +
-    `<button class="md-h-act soon" disabled title="Comment on this section — not built yet" aria-label="Comment on this section, not built yet">${ICON.commentSm}</button>` +
+    `<button class="md-h-act" data-wb-hcmt="${id}" title="Comment on this section" aria-label="Comment on this section">${ICON.commentSm}</button>` +
     `<button class="md-h-act soon" disabled title="Highlight, private to you — not built yet" aria-label="Highlight, not built yet">${ICON.highlightSm}</button>` +
     `</span>`;
 }
@@ -6007,9 +6202,52 @@ function renderInline(text) {
     // any other scheme not on the allowlist; a blocked link degrades to its
     // own label as plain text, so the reader still sees the words but has
     // nothing clickable. rel="noopener" was already correct — kept.
-    const clean = safeUrl(href);
+    //
+    // 0.52.0 — webUrlFrom() runs FIRST and supplies the missing https:// on
+    // a scheme-less host. It must be handed the DECODED href: href is
+    // HTML-escaped at this point, so a query string arrives as "a&amp;b" and
+    // prefixing that would carry the entity into the address. It returns ''
+    // for anything with a scheme already, in which case href is used as-is.
+    // Decode once, escape once. Passing the still-escaped `href` into the
+    // fallback here and then escaping the result would double-escape any
+    // link carrying a query string — the exact bug this codebase's
+    // HTML-string-building style makes easy to write.
+    const decodedHref = unescHtml(href);
+    const clean = safeUrl(webUrlFrom(decodedHref) || decodedHref);
+    // Still no scheme after all of that means a path we cannot resolve —
+    // "../notes/x", "Attachments/spec.pdf". Every path that IS meaningful
+    // was matched further up. Left alone it renders as an ordinary blue
+    // link that reloads Folio, which is the bug this release is fixing;
+    // showing it dead is the same treatment a blocked scheme already got.
+    if (clean && !/^[a-z][a-z0-9+\-]*:/i.test(clean) && !clean.startsWith('#')) {
+      return slot(`<span class="md-ilink-dead" title="Link goes nowhere — a path relative to the page, which Folio cannot open">${text}</span>`);
+    }
     if (!clean) return slot(`<span class="md-ilink-dead" title="Link removed — unsupported or unsafe URL scheme">${text}</span>`);
-    return slot(`<a class="md-ilink" href="${clean}" target="_blank" rel="noopener noreferrer">${text}</a>`);
+    return slot(`<a class="md-ilink" href="${escHtml(clean)}" target="_blank" rel="noopener noreferrer">${text}</a>`);
+  });
+
+  // 1b. Bare URLs typed as plain text (0.52.0). Obsidian links these and
+  // Folio did not, which is the other half of "the links do not work".
+  //
+  // Position is load-bearing. This runs AFTER the [[wiki]] and [text](url)
+  // passes above, so every address that was already made into a link is
+  // sitting in a slot and cannot be matched a second time, and after the
+  // code-span pass for the same reason: a URL inside backticks stays text.
+  // It runs BEFORE bold/italic/tags, so the new link's own href is in a slot
+  // by the time  _  and  #  are given meaning — a URL full of underscores
+  // would otherwise come out italicised down the middle.
+  //
+  // `s` is HTML-escaped here, so the matched text is the DISPLAY form and
+  // unescHtml() gives the address. safeUrl() still gates it: www. is the
+  // only scheme-less form matched, and it is turned into https:// rather
+  // than trusted, so nothing reaches an href without passing the allowlist.
+  s = s.replace(/(^|[\s(\[\x00])((?:https?:\/\/|www\.)[^\s<>"'\x00]+)/gi, (whole, pre, found) => {
+    const [shown, tail] = trimUrlTail(found);
+    if (!shown || /^www\.?$/i.test(shown)) return whole;
+    const decoded = unescHtml(shown);
+    const clean = safeUrl(/^www\./i.test(decoded) ? 'https://' + decoded : decoded);
+    if (!clean) return whole;
+    return pre + slot(`<a class="md-ilink" href="${escHtml(clean)}" target="_blank" rel="noopener noreferrer">${shown}</a>`) + tail;
   });
 
   // 2. Bold + italic (must come before bold/italic alone)
@@ -6244,16 +6482,10 @@ function wbDelegatedClick(e) {
   // Console home (Section 18, session 1). First, because nothing on the
   // landing nests inside another click target and an early return keeps
   // the rest of this function out of the front door's way.
-  // B2 -- a saved SECTION row sits inside its page group, which is itself a
-  // chopen target, so the narrower one is tested first. Same standing rule
-  // as What's New's section buttons.
-  const chSec = e.target.closest('[data-wb-chsec]');
-  if (chSec) {
-    e.preventDefault(); e.stopPropagation();
-    exitConsoleHome();
-    jumpToBookmark(chSec.dataset.wbChopen, chSec.dataset.wbChsec);
-    return;
-  }
+  // A data-wb-chsec branch sat here until 0.52.0. It served the Home saved
+  // flyout's section rows; 0.50.0 made Saved a destination and those rows
+  // became savedItemRowHTML()'s, which carry data-wb-savedjump instead.
+  // Nothing has emitted data-wb-chsec since, so the branch was unreachable.
   const chOpen = e.target.closest('[data-wb-chopen]');
   if (chOpen) {
     e.preventDefault(); e.stopPropagation();
@@ -6322,6 +6554,8 @@ function wbDelegatedClick(e) {
   if (vcRestoreEl) { e.preventDefault(); e.stopPropagation(); vcRestore(vcRestoreEl.dataset.wbVcrestore); return; }
   const vcReviewEl = e.target.closest('[data-wb-vcreview]');
   if (vcReviewEl) { e.preventDefault(); e.stopPropagation(); renderAdminTab('review'); return; }
+  const vcFixEl = e.target.closest('[data-wb-vcfix]');
+  if (vcFixEl) { e.preventDefault(); e.stopPropagation(); vcRepairDoubleFm(vcFixEl.dataset.wbVcfix); return; }
 
   // What's New rows and controls (S35). Checked before the row itself so a
   // click on "Mark group seen" — which sits inside the group header, not a
@@ -6460,8 +6694,11 @@ function wbDelegatedClick(e) {
   // Saved (P7) — the only per-row action left is the broken-links clear,
   // since every save/unsave now happens at its source (the page itself, or
   // the Outline row below).
-  const savedClearBroken = e.target.closest('[data-wb-savedclearbroken]');
-  if (savedClearBroken) { e.preventDefault(); removeAllSavedBroken(); return; }
+  // 0.52.0 — the bar's button now opens the repair screen. The old
+  // data-wb-savedclearbroken attribute is gone from the markup; Remove all
+  // lives inside that screen and is called directly from its own onclick.
+  const savedRepair = e.target.closest('[data-wb-savedrepair]');
+  if (savedRepair) { e.preventDefault(); openSavedRepair(); return; }
   // Session A — the beta shell's overflow menu. Tested early because the
   // menu floats over the reader header and its buttons sit inside nothing
   // else that claims a click.
@@ -6485,6 +6722,12 @@ function wbDelegatedClick(e) {
   if (bmToggle) {
     e.preventDefault();
     toggleBookmarkHeading(bmToggle.dataset.wbBmtoggle, bmToggle.dataset.wbBmtext);
+    return;
+  }
+  const hCmt = e.target.closest('[data-wb-hcmt]');
+  if (hCmt) {
+    e.preventDefault();
+    commentOnHeading(hCmt.dataset.wbHcmt);
     return;
   }
   const savedJump = e.target.closest('[data-wb-savedjump]');
@@ -7525,20 +7768,77 @@ function renderSingleBlock(block, seenIds) {
       const [headerRow, ...bodyRows] = rows;
       const cells = row => splitTableCells(row);
 
-      // Column alignment (Session 2). The separator row already accepted
-      // :---, :---: and ---: -- isSeparatorRow's own regex above requires
-      // it -- and simply threw the row away without reading which one was
-      // used. Nothing about the syntax changes: this reads colons off a
-      // row this table was already parsing.
-      const sepLine = block.lines.find(l => l.trim() && isSeparatorRow(l));
-      const colAligns = sepLine ? splitTableCells(sepLine).map(c => {
-        const left  = c.startsWith(':');
-        const right = c.endsWith(':');
+      // Width-padding row test. A row of periods is how you widen a column
+      // in Obsidian's table editor; that row is noise in the reader, so it
+      // is HIDDEN rather than dropped -- the cells still lay out (see
+      // .md-table-spacer), so the widths it was written for carry over.
+      // Removing the row would delete the only effect it ever had.
+      //
+      // Whole-row test, deliberately: every cell empty or periods-only. A
+      // row reading "Waiting..... | pending" is content and stays, which a
+      // per-cell test would have silently eaten. Separator rows are already
+      // gone by here, so dashes never reach this.
+      //
+      // 0.53.0 adds the optional leading/trailing colon, so |:.....| is a
+      // width row carrying an alignment marker rather than -- as it was
+      // until now -- a data row that printed a stray colon on the page.
+      //
+      // The 5-period floor is what stops a lone "." cell being eaten as
+      // padding, and it stays. But a cell carrying a colon marker is
+      // unambiguous whatever its length, so ONE of those is enough to make
+      // the row a width row on its own: Jayson asked that the period count
+      // not matter, and |:.:| has to work.
+      const isSpacerRow = l => {
+        const parts = cells(l);
+        if (!parts.length) return false;
+        let padded = false;
+        for (const c of parts) {
+          const t = c.trim();
+          if (t === '') continue;
+          if (!/^:?\.+:?$/.test(t)) return false;
+          if (t.length >= 5 || t.startsWith(':') || t.endsWith(':')) padded = true;
+        }
+        return padded;
+      };
+
+      // Column alignment. Read from TWO possible rows (0.53.0), separator
+      // first, periods row second.
+      //
+      // The separator row (:---, :---:, ---:) is standard Markdown and has
+      // worked since 0.40.0. It stays the preferred place because a table
+      // written that way renders correctly in Obsidian too, and Obsidian
+      // compatibility is a locked decision on this project.
+      //
+      // The periods row is Jayson's ask at 0.53.0. His tables use a row of
+      // periods to force column widths (Obsidian's editor sizes a column to
+      // its widest cell), and he wanted the alignment marker to live on the
+      // row he was already maintaining. The cost, stated once and accepted:
+      // |:.....| is not Markdown, so Obsidian shows that row as a junk data
+      // row. Supporting BOTH costs almost nothing and means anyone writing
+      // standard syntax keeps working in both apps.
+      const readColons = line => splitTableCells(line).map(c => {
+        const t = c.trim();
+        const left  = t.startsWith(':');
+        const right = t.endsWith(':') && t.length > 1;
         if (left && right) return 'center';
         if (right) return 'right';
         if (left) return 'left';
         return '';
-      }) : [];
+      });
+      const hasAny = a => a.some(Boolean);
+
+      const sepLine = block.lines.find(l => l.trim() && isSeparatorRow(l));
+      let colAligns = sepLine ? readColons(sepLine) : [];
+      if (!hasAny(colAligns)) {
+        // Only fall back when the separator row said nothing at all. A
+        // table that declares alignment the standard way must not have it
+        // silently overridden by a width row further down.
+        const padLine = block.lines.find(l => l.trim() && !isSeparatorRow(l) && isSpacerRow(l));
+        if (padLine) {
+          const fromPad = readColons(padLine);
+          if (hasAny(fromPad)) colAligns = fromPad;
+        }
+      }
       const alignAttr = i => colAligns[i] ? ` class="md-align-${colAligns[i]}"` : '';
 
       // Width-padding rows (0.29.1). Obsidian's table editor sizes a
@@ -7554,17 +7854,6 @@ function renderSingleBlock(block, seenIds) {
       // reading "Waiting..... | pending" is content and stays, which a
       // per-cell test would have silently eaten. Separator rows are
       // already gone by here, so dashes never reach this.
-      const isSpacerRow = l => {
-        const parts = cells(l);
-        if (!parts.length) return false;
-        let padded = false;
-        for (const c of parts) {
-          if (c === '') continue;
-          if (!/^\.+$/.test(c)) return false;
-          if (c.length >= 5) padded = true;
-        }
-        return padded;
-      };
 
       const thead = `<thead><tr>${cells(headerRow).map((h, i) => `<th${alignAttr(i)}>${renderInline(h)}</th>`).join('')}</tr></thead>`;
       const tbody = bodyRows.length
@@ -8280,6 +8569,11 @@ function openConsoleHome() {
   // column saying so and never blocks the page.
   wnScan().then(() => { if (consoleHomeOn()) renderConsoleHome(); })
           .catch(() => { if (consoleHomeOn()) renderConsoleHome(true); });
+
+  // B3 -- last, after the guards above have all had their chance to return.
+  // An address written for a Home we then failed to open would be an address
+  // pointing at nothing.
+  wbHistoryPushHome();
 }
 
 // Called by every route that puts something else in the reading column.
@@ -8597,16 +8891,23 @@ function chVaultsHTML() {
 // is being asked for the folder every launch is not shown two things at once.
 function renderAppBanner() {
   const el   = $('app-banner');
-  const vBtn = $('btn-version');
   if (!el) return;
   if (!betaShellOn()) {
     el.hidden = true; el.innerHTML = '';
-    if (vBtn) vBtn.style.display = 'none';
+    // 0.52.0 — this used to hide the header's version button here too. That
+    // button is gone and its replacement (#ud-version) lives in the account
+    // menu, which BOTH shells share and which shows it unconditionally, so
+    // there is nothing left for the old-shell branch to turn off.
     return;
   }
 
   const needsFolder = configIsPlaceholder() && !LOCAL.on;
-  const canInstall  = !isInstalled() && !state.installDismissed;
+  // B3 -- ...&& !ranInstalledHere(). Offering to install an app the person is
+  // already running, because they followed a link into a tab, was the loudest
+  // half of the link complaint.
+  const canInstall  = !isInstalled() && !state.installDismissed && !ranInstalledHere();
+  const openInApp   = !isInstalled() && ranInstalledHere() &&
+                      !state.openInAppDismissed && !ranOpenInAppSeen();
 
   let html = '';
   if (needsFolder) {
@@ -8637,24 +8938,48 @@ function renderAppBanner() {
         '<path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>' +
       '</div><div class="ab-txt">A new version of Folio is ready.</div>' +
       '<div class="ab-act"><button class="ab-cta" data-wb-banner="reload">Reload</button></div></div>';
+  } else if (openInApp) {
+    // B3 -- LAST in the chain on purpose. Connect is a blocker, install and
+    // update are actions with a deadline; this is a tip, and a tip never gets
+    // to stand in front of any of them. Same strict priority the slot has had
+    // since 0.42.0.
+    //
+    // There is no way to hand someone off to their installed app from a tab --
+    // no API does it, and a made-up link scheme was considered at B3 and held
+    // in reserve because it makes the link dead for anyone who has not
+    // installed Folio. So this does the only honest thing: it says exactly
+    // which control to click, once, and then never says it again.
+    html =
+      '<div class="ab small"><div class="ab-mark">' +
+        '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 9h6v6"/><path d="M15 9l-6 6"/></svg>' +
+      '</div><div class="ab-txt">You have Folio installed. To open links in the app instead of a tab, ' +
+      'click the open-in-app icon at the right of the address bar and choose to always open Folio links there. Once is enough.</div>' +
+      '<div class="ab-act"><button class="ab-cta" data-wb-banner="gotit">Got it</button></div></div>';
   }
 
   el.innerHTML = html;
   el.hidden    = !html;
 
-  // 2f -- the version indicator is this same priority's fourth and quiet
-  // state: shown only once none of connect/install/update need the slot.
-  // Text is read from #app-version rather than a second hardcoded string,
-  // so there is still only one manual version string to bump on every
-  // ship (see the comment above that button).
-  if (vBtn) {
-    const showVersion = !needsFolder && isInstalled() && !state.updateReady;
-    vBtn.style.display = showVersion ? 'flex' : 'none';
-    if (showVersion) {
-      const src2 = $('app-version');
-      vBtn.textContent = src2 ? src2.textContent : '';
-    }
-  }
+  // 0.52.0 -- the version indicator is no longer one of this slot's states.
+  // It moved to #ud-version in the account menu and is shown there
+  // unconditionally, so nothing about install or update state gates it any
+  // more. syncVersionRow() owns it; refreshAccountMenu() calls that.
+}
+
+// One writer for the account menu's version line. Reads #app-version rather
+// than a second hardcoded string, so bumping a release still touches exactly
+// one version literal in this file. Called only from refreshAccountMenu(),
+// which runs at boot and again on every menu open (toggleUserDropdown) --
+// that is enough, and deliberately fewer call sites than the header button
+// it replaced needed. That button was part of the banner's install/update
+// priority and so had to be repainted whenever either changed; this row is
+// unconditional, and its text cannot change within a session.
+function syncVersionRow() {
+  const txt = $('ud-version-txt');
+  if (!txt) return;
+  const src = $('app-version');
+  txt.textContent = src ? src.textContent : '';
 }
 
 // "Not now" lasts until the next launch, never forever. One click at the
@@ -8666,6 +8991,15 @@ function appBannerAction(which) {
   if (which === 'install')  { tryInstall(); return; }
   if (which === 'reload')   { location.reload(); return; }
   if (which === 'dismiss')  { state.installDismissed = true; renderAppBanner(); }
+  // B3 -- persisted, unlike install's "Not now", which is deliberately only
+  // good until the next launch (see the code fact in project-wikibase.md).
+  // The difference is the point: install is an offer worth repeating, a
+  // one-time instruction is not.
+  if (which === 'gotit')    { state.openInAppDismissed = true; persist('wb_openinapp_seen', true); renderAppBanner(); }
+}
+
+function ranOpenInAppSeen() {
+  try { return localStorage.getItem('wb_openinapp_seen') === 'true'; } catch (_) { return false; }
 }
 
 function chDoor(which, anchorEl) {
@@ -8875,8 +9209,15 @@ function rightResetTabs() {
 // something is a column that should not be there.
 function applyRightColumn() {
   const onlyOutline = state.rightTabs.length === 1 && state.rightActive === 'outline';
-  document.body.classList.toggle('outline-empty', !!(state.outlineEmpty && onlyOutline));
+  const wasHidden   = document.body.classList.contains('outline-empty');
+  const hidden      = !!(state.outlineEmpty && onlyOutline);
+  document.body.classList.toggle('outline-empty', hidden);
   renderRightTabs();
+  // B3 -- this column is shown and hidden by the class above, never by
+  // .closed, so setPanelOpen's fit hook is never reached for it. Fit on the
+  // way back IN only: on every call it would re-measure while the column is
+  // already sitting there, which is a resize nobody asked for.
+  if (wasHidden && !hidden) fitPanelIfUnsized('right-panel', 'right', 'wb_rp_width');
 }
 
 // The strip only appears once there is a choice to make. One tab is not a
@@ -8966,7 +9307,6 @@ const DESTINATIONS = ['bookmarks', 'search', 'admin'];
 let destId     = null;
 let destReturn = null;   // the page to come back to, captured before it is cleared
 
-function destOn() { return destId !== null; }
 
 function destOpen(id) {
   // The old shell is frozen and has no reading-column destinations. It keeps
@@ -9076,8 +9416,14 @@ async function destOpenSearch(q) {
 // Access need Administrator -- the same rung the 'usage' entry in
 // WB_TOOLS and editingAllowed() already gate on.
 const ADMIN_TABS = [
-  { id: 'review', label: 'Review', min: 'contributor' },
-  { id: 'usage',  label: 'Usage',  min: 'admin' },
+  { id: 'review',   label: 'Review',       min: 'contributor' },
+  // 0.54.0 -- moved off the Comments panel footer, which was a page
+  // companion rendering a vault-wide destination directly into the reader
+  // (the companion-vs-destination rule, B2/R1). Same rung as Review: anyone
+  // who can act on a comment vault-wide can already act on one from inside
+  // a single file.
+  { id: 'comments', label: 'All comments', min: 'contributor' },
+  { id: 'usage',    label: 'Usage',        min: 'admin' },
   { id: 'access', label: 'Access', min: 'admin' },
   // P10 -- Administrator, like Usage and Access. The DOOR still opens at
   // Contributor (chDoorsHTML) for the same reason it always has; what gates
@@ -9110,7 +9456,7 @@ function openAdminScreen(tab) {
 }
 
 function adminTabRenderFns() {
-  return { review: renderReviewTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab };
+  return { review: renderReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab };
 }
 
 function renderAdminTab(tab) {
@@ -9360,8 +9706,12 @@ function vcTitleClose(a, b) {
   return vcJaccard(tok(a), tok(b)) >= 0.6;
 }
 
-function vcFinding(band, kind, key, why, page, page2) {
-  return { band, kind, key, why, page, page2: page2 || null };
+// `fix` (0.53.0) is optional and, so far, carried by exactly one check.
+// It is a repair the app can perform itself, offered as a button on the row
+// beside Dismiss -- every other finding is something a person has to go and
+// decide about, so most rows will never have one.
+function vcFinding(band, kind, key, why, page, page2, fix) {
+  return { band, kind, key, why, page, page2: page2 || null, fix: fix || null };
 }
 
 function vcWordCount(text) {
@@ -9386,6 +9736,20 @@ function vcAnalyze(pages) {
     const heads = vcHeadings(p.text);
 
     if (!fm.author) noAuthor++;
+
+    // Duplicate properties (0.53.0). The signature of the pre-0.53.0 writer
+    // bug: two frontmatter blocks, the app's defaults sitting on top of the
+    // page's real ones. Obsidian reads the first block, so the page's real
+    // status and author are live nowhere while this is true -- which is why
+    // it is a hard finding with a repair rather than something to note and
+    // move on from. See fmMergeDoubleBlock() for what Repair does and why
+    // the lower block wins.
+    if (fmDoubleBlock(p.text)) {
+      findings.push(vcFinding('hard', 'Duplicate properties', 'dupfm:' + key,
+        'This page has two property blocks. Obsidian reads the top one, which Folio wrote by ' +
+        'mistake before v0.53.0, so the page\u2019s real status and author are being ignored ' +
+        'everywhere. Repair merges them, keeping the page\u2019s own values.', page, null, p.url));
+    }
 
     vcBrokenLinks(p.text).forEach(t => {
       findings.push(vcFinding('hard', 'Broken link', 'link:' + key + ':' + t.toLowerCase(),
@@ -9496,6 +9860,34 @@ async function vcRun() {
   renderVaultCheckTab();
 }
 
+// The one repair the vault check can perform itself (0.53.0). Re-reads the
+// file rather than trusting the copy the run holds -- a check can sit on
+// screen for a long time, and this WRITES, so it works from what is on disk
+// now. It re-checks for the double block after reading for the same reason:
+// somebody else may have already fixed it.
+//
+// Confirms first, and names the file. Repairing frontmatter is not something
+// to do to a live page on a single click, even when the merge rule is not a
+// judgement call.
+async function vcRepairDoubleFm(url) {
+  if (!atLeast('admin')) return;
+  const name = displayFileName((url || '').split('/').pop());
+  if (!confirm('Merge the two property blocks on "' + name + '"?\n\nThe page\u2019s own values are kept; ' +
+               'the block Folio wrote by mistake is removed. The body of the page is not touched.')) return;
+  try {
+    const text = await readVaultFile(url);
+    const fixed = fmMergeDoubleBlock(text);
+    if (!fixed) { vcMsg = 'That page already has a single property block -- nothing to repair.'; renderVaultCheckTab(); return; }
+    await spWriteFile(url, fixed);
+    await scanBadges();
+    if (state.activeUrl === url) openFile(url, state.activeName);
+    await vcRun();   // the finding is gone now, and the run is what proves it
+  } catch (e) {
+    vcMsg = 'Could not repair that page: ' + e.message;
+    renderVaultCheckTab();
+  }
+}
+
 function vcWhen(ms) {
   const mins = Math.floor((Date.now() - ms) / 60000);
   if (mins < 1)  return 'just now';
@@ -9528,6 +9920,7 @@ function vcRowHTML(f) {
     '</div>' +
     '<div class="vc-act">' +
       '<span class="vc-kind ' + kind + '">' + escHtml(f.kind) + '</span>' +
+      (f.fix ? '<button class="vc-btn primary" data-wb-vcfix="' + escHtml(f.fix) + '">Repair</button>' : '') +
       '<button class="vc-btn" data-wb-vcdismiss="' + escHtml(f.key) + '">Dismiss</button>' +
     '</div>' +
   '</div>';
@@ -9872,6 +10265,46 @@ function wbHistoryReplace(url, hid) {
   updateBackButtons();
 }
 
+// B3 -- Home becomes a place the browser knows about.
+//
+// The report, open since Session 68 and carried past four sessions: Back never
+// returns to Home. The cause was never a bug in Back. Home simply never wrote
+// an address, so as far as the browser was concerned it was not a place the
+// person had been, and there was nothing to go back TO.
+//
+// Three rules hold, and each one is a way this could have gone wrong:
+//
+//   A link still beats everything at boot. Landing on Home with no address
+//   REPLACES rather than pushes, so the arrival entry stays the arrival entry
+//   and Back leaves Folio instead of bouncing off a phantom first entry.
+//   Arriving on a note link never reaches here at all -- boot reads the hash
+//   first, exactly as it did before.
+//
+//   Home twice in a row is one entry, not two. Clicking Home while already on
+//   Home replaces, so a person who taps it three times does not then press
+//   Back three times to get anywhere.
+//
+//   Coming BACK to Home lands here too, because popstate re-opens whatever the
+//   hash names. The hash is already '#home' by then, so the same replace branch
+//   catches it and the entry is rewritten in place rather than a new one being
+//   stacked on top of the one being returned to. That is what stops the loop,
+//   and it is why this needs no "am I in a popstate" flag.
+const HOME_HASH = '#home';
+
+function wbHistoryPushHome() {
+  const atHome = location.hash === HOME_HASH;
+  const atBoot = state.histIdx === 0 && !location.hash;
+  if (atHome || atBoot) {
+    try { history.replaceState({ wb: 1, i: state.histIdx }, '', HOME_HASH); } catch (_) {}
+  } else {
+    wbSaveScrollForCurrent();
+    state.histIdx += 1;
+    state.histMax  = state.histIdx;
+    try { history.pushState({ wb: 1, i: state.histIdx }, '', HOME_HASH); } catch (_) {}
+  }
+  updateBackButtons();
+}
+
 function wbSaveScrollForCurrent() {
   const r = $('reader');
   if (r) state.histScroll[state.histIdx] = r.scrollTop || 0;
@@ -9897,6 +10330,13 @@ function wbOnPopState(e) {
 // A hash that names a file which is not there is not an error worth a dialog:
 // the app simply carries on with whatever it would have opened anyway.
 async function wbOpenFromHash(opts) {
+  // B3 -- before the note branch, because '#home' carries no note= part and
+  // would otherwise read as "no address" and leave whatever page was on screen
+  // still sitting there after a Back that was supposed to reach Home.
+  if (location.hash === HOME_HASH && betaShellOn()) {
+    openConsoleHome();
+    return true;
+  }
   const parsed = parseNoteHash(location.hash);
   if (!parsed) return false;
   // P6 — resolved rather than reconstructed, so a link written before the
@@ -10039,6 +10479,8 @@ async function openFile(url, name) {
     // after it, for the same reason. A new page always starts targeting
     // whatever heading is in view, not a leftover override from the last one.
     state.commentAnchorOverride = null;
+    state.commentTypeOverride   = null;
+    state.replyToIdx            = null;
     await loadPageCommentIndex(url);
     updateBetaCommentCount();
     // S34: headings always open expanded — no applyFoldState any more.
@@ -10128,6 +10570,20 @@ const HANDLE_TOTAL    = 8;   // two 4px handles
 const SNAP_THRESHOLD  = 80;  // drag below this → snap panel closed
 const CLICK_THRESHOLD = 4;   // mouse moved less than this → treat as a click, not a drag
 const DEFAULT_PANEL_W = 220; // matches --sb-width / --rp-width in CSS
+
+// B3 -- the new shell's drag floor. In the old shell a drag below
+// SNAP_THRESHOLD closes the panel, which is a fine gesture where the panel's
+// visibility is the person's to control. In the new shell it is not: the right
+// column is shown and hidden by whether there is anything to outline (0.44.2),
+// and Jayson's B3 instruction was that adjustment comes back while hide-and-show
+// does not change. So a drag here stops at a floor instead of falling through
+// into a close. Narrow enough to be worth dragging to, wide enough that nobody
+// arrives at a column they cannot see and cannot explain.
+const PANEL_FLOOR_W = 180;
+
+// True where a panel's visibility is NOT the drag's business. Reads the shell
+// rather than the panel, because that is what the rule is actually about.
+function fixedVisibility() { return typeof betaShellOn === 'function' && betaShellOn(); }
 
 // Reader floor scales with viewport — matches CSS media queries above
 function getReaderMin() {
@@ -10237,13 +10693,41 @@ function fitPanelToContent(panel, side, max) {
   // collapse rather than fit. Same reset, same reason, both gestures.
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
   const otherKey   = side === 'left' ? 'wb_rp_width'   : 'wb_sb_width';
+
+  // B3 -- PRE-EXISTING BUG, here since v0.32.1, found by a render pass and not
+  // by any of the 2,700 checks, because every one of them measures in jsdom
+  // where nothing transitions.
+  //
+  // The reset below writes a new width on the OTHER panel, and the old code
+  // then read that panel's offsetWidth back to compute the ceiling. But the
+  // panel carries `transition: width 0.18s ease`, so an offsetWidth read on the
+  // very next line returns the width it is animating FROM, not the one just
+  // set. Every fit performed while the neighbour was wider than the default
+  // therefore computed its ceiling against a stale, larger number and landed
+  // narrower than there was room for. Measured live: a 1440 window with the
+  // right column at its 22vw clamp of 317 fitted the sidebar to 215px when 312
+  // was available -- and 215 is still short enough to truncate the name the fit
+  // was asked to reveal, which is how this surfaced at all.
+  //
+  // The fix is to stop asking the DOM a question we already know the answer to.
+  // We are the ones setting the width; use the value we set.
+  let otherWidth;
   if (!otherPanel.classList.contains('closed') && otherPanel.offsetWidth > DEFAULT_PANEL_W) {
     otherPanel.style.width    = DEFAULT_PANEL_W + 'px';
     otherPanel.style.minWidth = DEFAULT_PANEL_W + 'px';
-    persist(otherKey, DEFAULT_PANEL_W);
+    // B3 -- and do not RECORD that reset as the person's own width in the new
+    // shell. Housekeeping is not a preference. Persisting it would mark the
+    // neighbour "sized by the user", which is the one thing that stops it
+    // auto-fitting to its own content ever again (see fitPanelIfUnsized) --
+    // so fitting one column would quietly freeze the other at 220 forever.
+    // The old shell keeps persisting it, because there the saved width IS the
+    // only memory the panel has and the shell is frozen.
+    if (!fixedVisibility()) persist(otherKey, DEFAULT_PANEL_W);
+    otherWidth = DEFAULT_PANEL_W;
+  } else {
+    otherWidth = otherPanel.classList.contains('closed') ? 0 : otherPanel.offsetWidth;
   }
   const bodyWidth  = $('body').offsetWidth;
-  const otherWidth = otherPanel.classList.contains('closed') ? 0 : otherPanel.offsetWidth;
   w = Math.min(w, bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin());
   w = Math.max(w, SNAP_THRESHOLD);
 
@@ -10347,8 +10831,10 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
       const ceiling    = bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin();
       w = Math.min(w, ceiling);
 
-      // Allow down to 0 (snap fires on mouseup)
-      w = Math.max(0, w);
+      // Allow down to 0 (snap fires on mouseup) -- except in the new shell,
+      // where there is no snap to fire and dragging to nothing would be an
+      // unlabelled way to hide a column. See PANEL_FLOOR_W.
+      w = Math.max(fixedVisibility() ? PANEL_FLOOR_W : 0, w);
 
       panel.style.width    = w + 'px';
       panel.style.minWidth = w + 'px';
@@ -10379,7 +10865,11 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
         // closed-panel click-to-reopen branch below) before the dblclick
         // event even fires, which is the "expands fully then shrinks" flicker
         // that was reported once the grip moved to where people double-click.
-        if (fromFlare) {
+        // B3: fixedVisibility() is belt and braces. The flare is display:none
+        // in the new shell, so isOnFlare's zeroed rect already makes fromFlare
+        // false for every real click -- but a collapse that depends on a
+        // measurement of a hidden element is a silent thing to rely on.
+        if (fromFlare && !fixedVisibility()) {
           clearTimeout(collapseTimer);
           collapseTimer = setTimeout(() => {
             panel.style.width    = '';
@@ -10389,8 +10879,11 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
             onClose();
           }, 320);
         }
-      } else if (panel.offsetWidth < SNAP_THRESHOLD) {
+      } else if (!fixedVisibility() && panel.offsetWidth < SNAP_THRESHOLD) {
         // Snap closed — clear inline widths so CSS closed state takes over cleanly
+        // B3: old shell only. The new shell cannot reach this anyway (onMove
+        // floors the width well above the threshold), and the guard is here so
+        // that stays true if either number is ever changed.
         panel.style.width    = '';
         panel.style.minWidth = '';
         panel.classList.add('closed');
@@ -10457,6 +10950,10 @@ function setPanelOpen(panelId, handleId, storageKey, open) {
       w = Math.max(w, 0);
       panel.style.width    = w + 'px';
       panel.style.minWidth = w + 'px';
+    } else {
+      // B3 -- no width of their own yet, so open at the content's extents
+      // rather than at the fixed default that was cutting names off.
+      fitPanelIfUnsized(panelId, panelId === 'sidebar' ? 'left' : 'right', storageKey);
     }
   } else {
     // Clear inline styles so CSS .closed (width:0; min-width:0) can take effect
@@ -10464,6 +10961,47 @@ function setPanelOpen(panelId, handleId, storageKey, open) {
     panel.style.minWidth = '';
     panel.classList.add('closed');
   }
+}
+
+// B3 -- "it should default to extents when opened". A column with no width of
+// the person's own opens FITTED to what it is showing, instead of at the fixed
+// 220 (sidebar) or the clamp (right column) that were truncating a long file
+// name or heading. That truncation is the bug Jayson reported; the fixed number
+// was never sized to anything.
+//
+// Two rules hold this together, and both matter:
+//
+//   1. It reads the STORE, not the current width. A fitted default is never
+//      written back. Persisting it would freeze the column at whatever the
+//      first page happened to contain and stop it tracking content -- the
+//      exact thing "auto adjust to extents" is asking for. Only a drag or a
+//      double-click writes a width, and from then on that width wins here.
+//   2. It measures on the NEXT frame. This is called from the same tick as the
+//      render that filled the column, and rows that have not been laid out yet
+//      measure as nothing -- which is how the Outline pane spent every release
+//      up to 0.32.1 fitting to its own header (see FIT_ROW_SEL).
+//
+// Old shell is frozen, so this is new-shell only.
+function fitPanelIfUnsized(panelId, side, storageKey) {
+  if (!fixedVisibility()) return;
+  if (localStorage.getItem(storageKey)) return;
+  const panel = $(panelId);
+  if (!panel || panel.classList.contains('closed')) return;
+  // TWO frames, not one, and a render pass is what proved it. fitPanelToContent
+  // clamps against a ceiling computed from the OTHER column's current width
+  // (body - other - handles - reader minimum). One frame after a render, that
+  // other column is still mid-transition -- it has a 0.18s width transition of
+  // its own -- so the ceiling is computed against a width that is on its way
+  // somewhere else, and the fit lands short of what there was room for. It
+  // measured 215px where 312 was available. A double rAF puts this after the
+  // paint that settles the neighbour, which is the only thing the arithmetic
+  // depends on.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (localStorage.getItem(storageKey)) return;
+    if (panel.classList.contains('closed')) return;
+    if (!panel.offsetWidth) return;   // auto-collapsed, or Home: nothing to fit
+    fitPanelToContent(panel, side, PANEL_MAX_W);
+  }));
 }
 
 // ── Sidebar toggle ───────────────────────────────────────────────
@@ -10477,12 +11015,6 @@ function toggleSidebar() {
 
 // ── Right panel toggle ───────────────────────────────────────────
 // Called directly by the resize-handle flare (rh-right) — same as above.
-function toggleRightPanel() {
-  state.rightPanelOpen = !state.rightPanelOpen;
-  setPanelOpen('right-panel', 'rh-right', 'wb_rp_width', state.rightPanelOpen);
-  persist('wb_right_panel', state.rightPanelOpen);
-}
-
 // ── Help ─────────────────────────────────────────────────────────
 // The help docs live at the app level (same folder as index.html), not
 // inside the vault. They never appear in the nav tree. Fetched as plain
@@ -10654,6 +11186,30 @@ async function openChangelog() {
 // app-store listing (getInstalledRelatedApps()), which doesn't apply to
 // a self-hosted PWA. That is the right question anyway: the problem this
 // solves is the per-launch folder-permission dialog on THIS launch.
+// B3 -- "has this DEVICE ever run Folio installed?", which is a different
+// question from isInstalled()'s "am I running installed right now", and it is
+// the one the link problem actually needs.
+//
+// There is no browser API that answers it from inside a tab, and the usual
+// dodge -- infer it from beforeinstallprompt not firing -- guesses from an
+// absence and gets it wrong on a slow first load. So Folio records it when it
+// is in a position to know for certain: while running installed. One write,
+// once, and from then on a browser tab on this machine knows the app exists.
+//
+// Two things depend on it, and the first is the bug Jayson reported. Clicking
+// a Folio link opens a browser tab; in that tab isInstalled() is false, so the
+// banner offered to INSTALL an app he already had. That offer is now suppressed
+// for a device that has run installed, and the slot carries the thing he
+// actually needs instead: the one-time browser switch that routes Folio links
+// into the app.
+function ranInstalledHere() {
+  try { return localStorage.getItem('wb_ran_installed') === 'true'; } catch (_) { return false; }
+}
+
+function noteInstalledLaunch() {
+  if (isInstalled()) persist('wb_ran_installed', true);
+}
+
 function isInstalled() {
   // matchMedia is missing in a couple of real environments this app has to
   // run in, not just test harnesses: jsdom (see the test suite) and some
@@ -10701,6 +11257,7 @@ function refreshAccountMenu() {
 
   // P6 — install state just moved, and the banner is the loud half of it.
   renderAppBanner();
+  syncVersionRow();
 }
 
 function fixIdentity() {
@@ -10811,6 +11368,13 @@ $('settings-panel').addEventListener('click', e => e.stopPropagation());
 // vault root) — so entering the same email on a different PC recognizes
 // the returning user via the vault's own OneDrive sync. wb_user_email in
 // localStorage is only a local pointer to which file is "me" on this device.
+// The date existing accounts are backfilled to (0.53.0). A fixed date, not
+// a computed one: it has to mean the same thing on every machine and in
+// every future session, and "the day this version happened to be installed"
+// would differ per person and could not be reasoned about afterwards.
+// Jayson set this value.
+const WB_LEGACY_USER_CREATED = '2026-07-01';
+
 function userFileUrl(email) {
   // Unlike changesUrlFor/commentsUrlFor, this isn't derived from an existing
   // file's own (already-absolute, in SharePoint mode) url — it's built from
@@ -10891,7 +11455,15 @@ async function saveIdentityFrom(rawName, rawEmail) {
     return 'recognized';
   }
 
-  record = { name, email, saved: { pages: {} } };
+  // 0.53.0 -- `created` is the date this person's account came into
+  // existence, and it is the anchor onboarding is measured from: a page
+  // carrying  onboarding-due: 14  is due fourteen days after THIS date.
+  //
+  // Stamped once, here, and never rewritten -- an account that is re-saved
+  // (a corrected name, say) keeps the date it was opened, or the whole
+  // measurement resets itself. Nothing reads it yet; the staged onboarding
+  // it exists for is 1.1, and the properties had to land first.
+  record = { name, email, created: new Date().toISOString().slice(0, 10), saved: { pages: {} } };
   await ensureUserSystemDir();
   await spWriteFile(url, JSON.stringify(record, null, 2));
   state.user = record;
@@ -11424,25 +11996,68 @@ function acPick(i) {
 // ── Save pipeline ────────────────────────────────────────────────
 // Generic frontmatter key setter — replaces existing keys (case-insensitive),
 // appends missing ones, creates the block if the file has none.
+// Writes keys into a file's frontmatter, creating the block only when there
+// genuinely is not one. It now finds that block with fmBounds(), the same
+// function parseFm() uses -- see the comment there for why a reader and a
+// writer disagreeing about where a block starts was destructive rather than
+// merely wrong.
+//
+// Two behaviours preserved deliberately: an existing key is REPLACED in
+// place rather than appended (so a property keeps its position in the file),
+// and everything outside the block is returned untouched, byte for byte.
 function setFmKeys(text, flags) {
-  const lines = text.split('\n');
-  if (lines[0] === '---') {
-    let end = -1;
-    for (let k = 1; k < lines.length; k++) {
-      if (lines[k].trim() === '---') { end = k; break; }
+  const src = String(text == null ? '' : text);
+  const crlf = /\r\n/.test(src);            // remembered so the file goes back the way it came
+  const lines = src.split('\n').map(l => l.replace(/\r$/, ''));
+  const join = arr => arr.join(crlf ? '\r\n' : '\n');
+  const b = fmBounds(lines);
+
+  if (b) {
+    const fm = lines.slice(b.start + 1, b.end);
+    for (const [key, val] of flags) {
+      // The key is escaped before it reaches a regex. Every caller passes a
+      // literal today, but a schema key is data, and a '-' or '.' arriving
+      // here unescaped is a silent wrong match rather than an error.
+      const re  = new RegExp('^' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:', 'i');
+      const idx = fm.findIndex(l => re.test(l));
+      if (idx >= 0) fm[idx] = `${key}: ${val}`;
+      else          fm.push(`${key}: ${val}`);
     }
-    if (end > 0) {
-      const fm = lines.slice(1, end);
-      for (const [key, val] of flags) {
-        const re  = new RegExp('^' + key + '\\s*:', 'i');
-        const idx = fm.findIndex(l => re.test(l));
-        if (idx >= 0) fm[idx] = `${key}: ${val}`;
-        else          fm.push(`${key}: ${val}`);
-      }
-      return ['---', ...fm, '---', ...lines.slice(end + 1)].join('\n');
-    }
+    // lines.slice(0, b.start) keeps whatever preceded the fence (blank
+    // lines), so writing a property never silently reformats the top of
+    // someone's file.
+    return join([...lines.slice(0, b.start), '---', ...fm, '---', ...lines.slice(b.end + 1)]);
   }
-  return ['---', ...flags.map(([k, v]) => `${k}: ${v}`), '---', ''].join('\n') + text;
+
+  return join(['---', ...flags.map(([k, v]) => `${k}: ${v}`), '---', '']) + src;
+}
+
+// Repairs a file damaged by the pre-0.53.0 writer: two frontmatter blocks,
+// the app's defaults on top of the real properties.
+//
+// The merge rule is not a judgement call. The SECOND block is the original
+// -- it is what the file had before the app wrote over it -- so its values
+// win on every key they share, and keys only the first block has are kept
+// rather than dropped. Then the second block's fence is removed and the two
+// become one. Nothing outside either block is touched.
+//
+// Returns the repaired text, or null when there is nothing to repair, so a
+// caller can tell "already fine" from "fixed".
+function fmMergeDoubleBlock(text) {
+  const src = String(text == null ? '' : text);
+  const d = fmDoubleBlock(src);
+  if (!d) return null;
+  const crlf = /\r\n/.test(src);
+  const lines = src.split('\n').map(l => l.replace(/\r$/, ''));
+  const appWritten = parseFm(join1(lines.slice(d.first.start, d.first.end + 1)));
+  const original   = parseFm(join1(lines.slice(d.secondStart, d.secondEnd + 1)));
+  const merged = { ...appWritten, ...original };
+  const body = lines.slice(d.secondEnd + 1);
+  const out = [...lines.slice(0, d.first.start), '---',
+               ...Object.entries(merged).map(([k, v]) => `${k}: ${v}`),
+               '---', ...body];
+  return out.join(crlf ? '\r\n' : '\n');
+  function join1(a) { return a.join('\n'); }
 }
 
 // Review flags applied on every editor save.
@@ -12327,6 +12942,10 @@ function wbDrainRenameQueue() {
   if (!q.length) return;
   let touched = 0;
   q.forEach(p => { if (p && p.from && p.to) touched += wbRemapUserRecord(p.from, p.to); });
+  // 0.52.0 — identity has just arrived, so the scan that already ran this
+  // session had nothing to repair at the time. Replay it against the index
+  // it left behind.
+  touched += savedPostScan(wnRead(WN_INDEX_KEY, null));
   wnWrite(WB_RENAME_Q_KEY, []);
   if (!touched) return;
   saveUserRecord();
@@ -12451,6 +13070,10 @@ async function wnScan() {
       wnWrite(WN_META_KEY, { ...meta, seeded: true });
       state.wnBulk = null;
       wnBuildEntries();
+      // 0.52.0 — a seeded index is precisely the case rename repair cannot
+      // help with: there is no before-and-after to pair from. It is also the
+      // case a stored fingerprint was added for, so it runs here too.
+      savedPostScan(curIdx);
       return { seeded: true };
     }
 
@@ -12520,6 +13143,7 @@ async function wnScan() {
     wnWrite(WN_INDEX_KEY, curIdx);
     wnWrite(WN_META_KEY, meta);
     wnBuildEntries();
+    savedPostScan(curIdx); // 0.52.0 — fingerprints forward, unambiguous moves repaired
     return { seeded: false, updated: updated.length };
   } catch (_) { return null; }
 }
@@ -14346,7 +14970,22 @@ function rvSetPrevWindow(all) {
 // the drift this schema declaration closes. `section` was decided out in
 // Session 37 and is dropped for good, here and in the Properties flyout.
 const REQUIRED_PROPS = ['status', 'reviewed', 'created', 'author'];
-const OPTIONAL_PROPS = ['tags', 'aliases', 'due', 'must-read', 'onboarding'];
+// 0.53.0 -- two new editorial dates. `due` is UNCHANGED and still means
+// "this page needs looking at again", which is what the review dashboard's
+// Due band and Acknowledge-all have always acted on. The new pair answer a
+// different question: when does the clock start for the people READING it.
+//
+//   must-read-start   a date. The must-read window opens here.
+//   onboarding-due    a whole number of days after somebody's account was
+//                     created. This is what makes onboarding progressive --
+//                     a 7, a 14, a 30 and a 90 on four pages is a staged
+//                     path rather than forty pages landing on day one.
+//
+// Deliberately DATA ONLY at 0.53.0. Nothing reads these to decide what a
+// person sees yet; the existing per-person 30-day must-read clock in What's
+// New is untouched. Jayson's call: get the properties in place before 1.0,
+// interview the behaviour after it ships. See the 1.1 roadmap.
+const OPTIONAL_PROPS = ['tags', 'aliases', 'due', 'must-read', 'must-read-start', 'onboarding', 'onboarding-due'];
 
 // 0.44.2 -- B1b item 4, Jayson's call: must-read/onboarding are editorial
 // tags an admin sets deliberately on the handful of pages that need them,
@@ -14357,7 +14996,12 @@ const OPTIONAL_PROPS = ['tags', 'aliases', 'due', 'must-read', 'onboarding'];
 // stay in OPTIONAL_PROPS -- still shown, still editable -- just excluded
 // from the completeness check that decides whether a file lands in the
 // Missing properties band.
-const COMPLETENESS_OPTIONAL_PROPS = OPTIONAL_PROPS.filter(k => k !== 'must-read' && k !== 'onboarding');
+// 0.53.0 -- must-read-start and onboarding-due join the two they belong to.
+// Same argument, unchanged: these are set deliberately on the handful of
+// pages that need them, so gating "Missing properties" on any of the four
+// would leave nearly every ordinary page flagged forever.
+const COMPLETENESS_EXCLUDED = ['must-read', 'must-read-start', 'onboarding', 'onboarding-due'];
+const COMPLETENESS_OPTIONAL_PROPS = OPTIONAL_PROPS.filter(k => !COMPLETENESS_EXCLUDED.includes(k));
 
 // Shared write: injects only the frontmatter keys actually missing (same
 // defaults as new-file creation), then rescans. Never touches a key that's
@@ -14948,11 +15592,27 @@ async function openRvDetail(type, url, name) {
         : '<span class="rvd-val rvd-gap">not set</span>');
   }).join('');
 
-  const gaps = [...REQUIRED_PROPS, ...OPTIONAL_PROPS].filter(k => !(k in fm));
+  // 0.53.0 -- the COUNT uses the completeness rule, the LIST above still
+  // shows every declared key. Those are two different jobs and this line
+  // was doing the wrong one.
+  //
+  // 0.44.2 already decided that must-read and onboarding are editorial tags
+  // an admin sets on a handful of pages, not something every page is
+  // expected to have an opinion on, and excluded them from the check that
+  // decides whether a file is "missing properties". This note was never
+  // brought in line, so it counted them anyway. Harmless while it was two
+  // keys nobody looked at; adding must-read-start and onboarding-due made
+  // it say every page in the vault was missing FOUR properties, which is
+  // noise that trains people to ignore the strip.
+  const gaps = [...REQUIRED_PROPS, ...COMPLETENESS_OPTIONAL_PROPS].filter(k => !(k in fm));
+  const editorialGaps = COMPLETENESS_EXCLUDED.filter(k => !(k in fm));
   const note = gaps.length
     ? `${gaps.length} propert${gaps.length === 1 ? 'y is' : 'ies are'} not set: ${escHtml(gaps.join(', '))}. ` +
       '“Fill properties” writes defaults for the absent keys only — nothing that already has a value is touched.'
-    : 'Every declared property is set on this file.';
+    : 'Every declared property is set on this file.' +
+      (editorialGaps.length
+        ? ` The editorial tags (${escHtml(editorialGaps.join(', '))}) are set per page from the Properties panel and are not expected here.`
+        : '');
 
   $('rvd-strip').innerHTML = `<div class="rvd-props">${rows}</div><div class="rvd-note">${note}</div>`;
   $('rvd-bar').style.display   = 'flex';
@@ -15427,16 +16087,93 @@ async function submitMove() {
 
 const WB_STATUS_VALUES = ['In Progress', 'Draft', 'Needs Review', 'In Review', 'Reviewed', 'Master', 'Archived'];
 
+// ── Frontmatter (0.53.0 rewrite) ─────────────────────────────────
+// This used to test  lines[0] !== '---'  against a raw split on '\n' and
+// give up. Four ordinary things fail that test, and all four happen in a
+// OneDrive-synced vault edited from more than one machine:
+//
+//   * Windows line endings. The first line is '---\r', not '---'.
+//   * A byte order mark, which Notepad and several exporters prepend
+//     invisibly.
+//   * A blank line before the block.
+//   * A trailing space after the dashes.
+//
+// The consequence was not a missing byline. It was DATA LOSS: the app
+// concluded the file had no properties at all, the review dashboard filed
+// it under "New file", Fill properties ran, and setFmKeys -- which made
+// the identical  lines[0] === '---'  test -- prepended a SECOND
+// frontmatter block above the real one. Obsidian reads the first block,
+// so the page's real status, author and must-read flag were orphaned in
+// the body. Found 2026-09-09 on a live vault.
+//
+// fmBounds() is now the ONE place that decides where a frontmatter block
+// starts and ends, so the reader and the writer can never disagree about
+// it again -- which is what made the failure destructive rather than
+// merely wrong. Returns null when there genuinely is no block.
+function fmBounds(lines) {
+  let i = 0;
+  // Skip a BOM and any leading blank lines. The BOM rides on the first
+  // line's first character, so it is stripped rather than skipped.
+  if (lines.length && lines[0].charCodeAt(0) === 0xFEFF) lines[0] = lines[0].slice(1);
+  while (i < lines.length && lines[i].trim() === '') i++;
+  if (i >= lines.length || !/^-{3,}$/.test(lines[i].trim())) return null;
+  for (let k = i + 1; k < lines.length; k++) {
+    if (/^-{3,}$/.test(lines[k].trim())) return { start: i, end: k };
+  }
+  return null;   // an opening fence with no close is not a block
+}
+
 function parseFm(text) {
   const out = {};
-  const lines = text.split('\n');
-  if (lines[0] !== '---') return out;
-  for (let k = 1; k < lines.length; k++) {
-    if (lines[k].trim() === '---') break;
-    const m = lines[k].match(/^([\w][\w-]*)\s*:\s*(.*)$/);
-    if (m) out[m[1].toLowerCase()] = m[2].trim();
+  // \r is stripped per line rather than globally: a CRLF file must parse,
+  // but the body's own line endings are none of this function's business
+  // and it never returns the body.
+  const lines = String(text == null ? '' : text).split('\n').map(l => l.replace(/\r$/, ''));
+  const b = fmBounds(lines);
+  if (!b) return out;
+  let listKey = null;   // the key an Obsidian multi-line list is filling
+  const listVals = {};
+  for (let k = b.start + 1; k < b.end; k++) {
+    const line = lines[k];
+    // Obsidian's own property editor writes lists across several lines:
+    //     tags:
+    //       - standards
+    //       - security
+    // The old parser read that as  tags: ''  and silently lost every item,
+    // so a vault authored in Obsidian's default UI showed empty tags here.
+    // Collected into the same bracketed form fmListToArr already reads, so
+    // nothing downstream has to learn a second shape.
+    const item = line.match(/^\s+-\s+(.*)$/);
+    if (item && listKey) { listVals[listKey].push(item[1].trim()); continue; }
+    const m = line.match(/^([\w][\w-]*)\s*:\s*(.*)$/);
+    if (!m) { listKey = null; continue; }
+    const key = m[1].toLowerCase(), val = m[2].trim();
+    out[key] = val;
+    if (val === '') { listKey = key; listVals[key] = []; }
+    else listKey = null;
   }
+  Object.keys(listVals).forEach(k => {
+    if (listVals[k].length) out[k] = '[' + listVals[k].join(', ') + ']';
+  });
   return out;
+}
+
+// True when a file carries a SECOND frontmatter block immediately after
+// the first -- the signature of the bug above, where Fill properties wrote
+// app defaults on top of the real properties. Only the immediately-adjacent
+// case counts: three dashes further down a document are a horizontal rule,
+// and treating those as frontmatter would be a new bug of its own.
+function fmDoubleBlock(text) {
+  const lines = String(text == null ? '' : text).split('\n').map(l => l.replace(/\r$/, ''));
+  const first = fmBounds(lines);
+  if (!first) return null;
+  const rest = lines.slice(first.end + 1);
+  let j = 0;
+  while (j < rest.length && rest[j].trim() === '') j++;
+  if (j >= rest.length || !/^-{3,}$/.test(rest[j].trim())) return null;
+  const second = fmBounds(rest.slice(j));
+  if (!second) return null;
+  return { first, secondStart: first.end + 1 + j + second.start, secondEnd: first.end + 1 + j + second.end };
 }
 
 // ── Byline (Session 2) ────────────────────────────────────────────
@@ -15488,14 +16225,13 @@ function bylineHTML(fm, url) {
   // Round 2 close -- moved from under the title to the foot of the page
   // (Jayson's ask), which is also why this always renders now: a page with
   // no frontmatter at all still gets a footer, because the report button
-  // below isn't frontmatter-dependent. Report is a real button rather than
-  // a disabled-looking span so it reads as "coming soon", not broken --
-  // wired at 1.1, per the tracker.
+  // below isn't frontmatter-dependent. Wired at 0.54.0: it opens the
+  // Comments companion pre-set to Flag, targeting the whole page.
   const info = parts.length
     ? `<div class="rb-info">${parts.join('<span class="reader-byline-dot">\u00b7</span>')}</div>`
     : '<div class="rb-info"></div>';
   return `<div id="reader-byline">${info}` +
-    `<button class="rb-flag" disabled title="Report a problem with this page — coming in 1.1" aria-label="Report a problem with this page — coming in 1.1">Report</button></div>`;
+    `<button class="rb-flag" onclick="reportThisPage()" title="Report a problem with this page" aria-label="Report a problem with this page">Report</button></div>`;
 }
 
 function strapUpdated(url) {
@@ -15584,7 +16320,15 @@ async function togglePropsPanel() {
       <label class="pp-check"><input type="checkbox" id="pp-mustread"${/^(true|yes)$/i.test(fm['must-read'] || '') ? ' checked' : ''}${ro}> Must-read</label>
     </div>
     <div class="pp-row">
+      <div class="pp-label">Must-read start</div>
+      <input class="pp-input" type="date" id="pp-mrstart" value="${escHtml(fm['must-read-start'] || '')}"${ro}>
+    </div>
+    <div class="pp-row">
       <label class="pp-check"><input type="checkbox" id="pp-onboarding"${/^(true|yes)$/i.test(fm.onboarding || '') ? ' checked' : ''}${ro}> Onboarding</label>
+    </div>
+    <div class="pp-row">
+      <div class="pp-label">Onboarding due (days after joining)</div>
+      <input class="pp-input" type="number" min="0" max="3650" step="1" id="pp-onbdue" value="${escHtml(fm['onboarding-due'] || '')}" placeholder="e.g. 7, 14, 30, 90"${ro}>
     </div>
     <div class="pp-row">
       <div class="pp-label">Created</div>
@@ -15613,6 +16357,16 @@ async function togglePropsPanel() {
     // exposed at all, same wire pattern as Reviewed.
     wire('pp-mustread',   'must-read',  el => el.checked ? 'true' : 'false');
     wire('pp-onboarding', 'onboarding', el => el.checked ? 'true' : 'false');
+    // 0.53.0. A cleared number field writes an EMPTY value rather than a 0:
+    // "no onboarding deadline on this page" and "due the day you join" are
+    // different statements, and 0 is the second one.
+    wire('pp-mrstart',    'must-read-start');
+    wire('pp-onbdue',     'onboarding-due', el => {
+      const v = el.value.trim();
+      if (v === '') return '';
+      const n = Math.max(0, Math.min(3650, Math.round(Number(v))));
+      return Number.isFinite(n) ? String(n) : '';
+    });
   }
 }
 
@@ -15968,7 +16722,6 @@ $('btn-theme').addEventListener('click', () => {
 // dropdown itself already uses. No Save button; see saveThemePrefs().
 // Section order in the panel. 'share' has no Reset — it doesn't hold any
 // state of its own, it only reads and writes the rest.
-const THEME_SECTIONS = ['appearance', 'reading', 'headings', 'navigation', 'interface', 'share'];
 const THEME_NO_RESET = ['share'];
 
 // Rendered as a title-cased word, so this is the display name of the
@@ -16505,6 +17258,13 @@ function loadPersistedState() {
     state.betaShell = readShellPref();
     applyShellMode();
 
+    // B3 -- the one moment Folio can answer "is this app installed on this
+    // machine" for certain: it is running as the installed app right now.
+    // Recorded here so a later browser TAB on the same machine can stop
+    // offering to install what is already there, and can offer the
+    // open-in-app switch instead. See ranInstalledHere().
+    noteInstalledLaunch();
+
     const sidebar = localStorage.getItem('wb_sidebar');
     if (sidebar !== null) {
       state.sidebarOpen = JSON.parse(sidebar);
@@ -16777,7 +17537,7 @@ function paneHead(toolId, opts) {
 // These used to be an "inbox strip" outside the panes entirely, which is why
 // they appeared to belong to the panel rather than to a tool.
 const PANE_FOOT_COMMENTS =
-  '<div class="pane-foot"><button class="pane-foot-btn" id="btn-cmt-inbox" onclick="openReviewView()">' +
+  '<div class="pane-foot"><button class="pane-foot-btn" id="btn-cmt-inbox" onclick="openAdminScreen(\'comments\')">' +
   '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
   'All comments<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span></button></div>';
 
@@ -16813,7 +17573,6 @@ function ensureDockOpen(side) {
   }
 }
 // Kept for the callers that only ever mean the right panel (search hotkey).
-function ensureRightPanelOpen() { ensureDockOpen('right'); }
 
 // Toggling a tool opens it in its HOME dock if it is closed, and closes it
 // from wherever it currently is. A pinned tool (Vault Files) never closes —
@@ -17584,6 +18343,19 @@ function normalizeUserSavedData() {
   if (!Array.isArray(state.user.recent)) {
     state.user.recent = [];
   }
+  // 0.53.0 -- accounts opened before `created` existed. Jayson's call: they
+  // are backfilled to WB_LEGACY_USER_CREATED rather than to today, because
+  // stamping them with today's date would make every existing member of
+  // staff look like a new hire and hand the whole team an onboarding path
+  // they finished months ago.
+  //
+  // Written into the record on the next save rather than by a migration
+  // sweep -- there is no list of user files to sweep, and this runs every
+  // time state.user is assigned, which reaches every account that ever
+  // opens the app.
+  if (!state.user.created) {
+    state.user.created = WB_LEGACY_USER_CREATED;
+  }
 }
 
 // One-time upgrade from S30's bookmarks/favorites shape. A bookmark (always
@@ -17681,6 +18453,11 @@ function toggleBookmarkHeading(id, text) {
   } else {
     if (!p) p = pages[file] = { name: state.activeName || file, page: false, sections: {} };
     p.sections[id] = text;
+    // 0.52.0 — stamp the fingerprint now rather than waiting for the next
+    // scan, so an item saved and then moved in the same sitting is already
+    // repairable. refreshSavedFingerprints() keeps it current afterwards.
+    const fpA = savedFpFor(file);
+    if (fpA) p.fp = fpA;
   }
   saveUserRecord();
   updateSavedTabBadge();
@@ -17723,6 +18500,8 @@ function toggleSavePage(url, name) {
     if (!p) p = pages[url] = { name: name || url, page: false, sections: {} };
     p.page = true;
     p.name = name || p.name;
+    const fpB = savedFpFor(url);   // 0.52.0 — see toggleBookmarkHeading
+    if (fpB) p.fp = fpB;
   }
   saveUserRecord();
   updateSavedTabBadge();
@@ -17777,6 +18556,112 @@ function bmIsBroken(file, known) {
   return !!known && !known.has(file);
 }
 
+// ── Saved items survive a move (0.52.0) ──────────────────────────
+// A saved entry is keyed by path, and a path is not an identity. Move a note
+// into another folder or another vault and the key points at nothing.
+//
+// Rename repair (0.34.0) already covered this, but only for a device that was
+// RUNNING across the move: its pairing is computed inside wnScan() from the
+// before-and-after index, and that index is per-device localStorage. A laptop
+// closed through a reorganisation never learns the pairing, and its owner's
+// saved item stays broken with nothing left to explain why. That is the hole,
+// and it is the one that matters while a vault is being reorganised, because
+// the reorganising happens on one machine and everyone else's is shut.
+//
+// The fix is to stop needing to have witnessed it. Each saved entry now
+// carries `fp`, the content hash the What's New index already computes for
+// every file, stored in the USER RECORD in the vault rather than in
+// localStorage. It travels with the person, so ANY device can re-find a moved
+// file at any later date by matching content, instead of by remembering an
+// event it may not have been awake for.
+//
+// Only the hash is ever stored, never wnSig()'s modified-time-and-size
+// fallback. OneDrive frequently rewrites the modified time as a file moves
+// through it, so pairing on that would match the WRONG file rather than no
+// file, and a wrong pairing silently moves someone's save to another page —
+// worse than leaving it broken, which is the same call wnDetectRenames made.
+// A file that cannot be hashed simply carries no fp and falls back to name.
+function savedFpFor(url, idx) {
+  const rec = (idx || wnRead(WN_INDEX_KEY, null) || {})[url];
+  return (rec && typeof rec === 'object' && rec.h) ? rec.h : '';
+}
+
+// Stamps the current hash onto every saved entry whose file is still where it
+// was. Runs after every scan rather than once at save time, so the
+// fingerprint tracks EDITS too: a note edited in March and moved in June
+// still matches, which a fingerprint captured once at save time would miss.
+function refreshSavedFingerprints(idx) {
+  if (!state.user || !state.user.saved || !state.user.saved.pages) return 0;
+  const pages = state.user.saved.pages;
+  let touched = 0;
+  Object.keys(pages).forEach(u => {
+    const fp = savedFpFor(u, idx);
+    if (fp && pages[u].fp !== fp) { pages[u].fp = fp; touched++; }
+  });
+  return touched;
+}
+
+// Candidate destinations for one broken saved path, best first: a file
+// carrying the saved content's own hash, then a file of the same name.
+// Deliberately the same two-pass shape wnDetectRenames uses, so the repair a
+// person sees and the repair the scan performs cannot disagree about what
+// counts as the same page.
+function savedRepairMatches(url, idx, brokenSet) {
+  const p = state.user && state.user.saved && state.user.saved.pages[url];
+  const out = [], seen = new Set();
+  const add = (u, how) => {
+    if (!u || u === url || seen.has(u)) return;
+    if (brokenSet && brokenSet.has(u)) return;   // a broken path is not a destination
+    seen.add(u); out.push({ url: u, how });
+  };
+  if (p && p.fp) Object.keys(idx).forEach(u => { if (idx[u] && idx[u].h === p.fp) add(u, 'content'); });
+  const stem = x => x.slice(x.lastIndexOf('/') + 1).toLowerCase();
+  const want = stem(url);
+  Object.keys(idx).forEach(u => { if (stem(u) === want) add(u, 'name'); });
+  return out;
+}
+
+// Applies only what nothing has to decide: exactly one file in the vault
+// carries this entry's content hash. Anything ambiguous, and anything
+// matching on name alone, is left for openSavedRepair() where a person looks
+// at it — a name match is a coin toss when two folders both hold "Notes.md",
+// and silently moving someone's save to the wrong page is the failure this
+// whole mechanism exists to avoid.
+function repairSavedAuto(idx) {
+  if (!state.user || !state.user.saved || !state.user.saved.pages || !idx) return 0;
+  const known = new Set(Object.keys(idx));
+  if (!known.size) return 0;
+  const broken = new Set(Object.keys(state.user.saved.pages).filter(u => !known.has(u)));
+  let fixed = 0;
+  broken.forEach(u => {
+    const p = state.user.saved.pages[u];
+    if (!p || !p.fp) return;
+    const hits = savedRepairMatches(u, idx, broken).filter(h => h.how === 'content');
+    if (hits.length !== 1) return;
+    if (wbRemapUserRecord(u, hits[0].url)) {
+      state.user.saved.pages[hits[0].url].fp = p.fp;
+      fixed++;
+    }
+  });
+  return fixed;
+}
+
+// One call for everything the saved store owes a completed scan. Safe at any
+// time and a no-op without identity, for the same boot-order reason
+// wbDrainRenameQueue() is: the first scan of a session routinely lands before
+// the user record exists, so this is called from both places instead of
+// either of them needing to know about the other.
+function savedPostScan(idx) {
+  if (!state.user || !idx) return 0;
+  const n = repairSavedAuto(idx) + refreshSavedFingerprints(idx);
+  if (n) {
+    saveUserRecord();
+    updateSavedTabBadge();
+    try { if (isSavedPaneOpen()) renderSavedTab(); } catch (_) { /* pane may not be mounted */ }
+  }
+  return n;
+}
+
 function savedBrokenFiles() {
   const known = bmVaultPaths();
   if (!known || !state.user) return [];
@@ -17790,7 +18675,92 @@ function removeAllSavedBroken() {
   broken.forEach(f => delete state.user.saved.pages[f]);
   saveUserRecord();
   updateSavedTabBadge();
+  closeSavedRepair();
   renderSavedTab();
+  try { renderOutlineTab(); } catch (_) { /* Outline may not be mounted */ }
+}
+
+// ── The repair screen (0.52.0) ───────────────────────────────────
+// Everything unambiguous has already been fixed silently by repairSavedAuto()
+// before anyone gets here, so this list is only what a person has to decide:
+// a file that was edited as well as moved and matches on name alone, several
+// candidates carrying the same content, or nothing found at all.
+//
+// Every row defaults to its best candidate but nothing is written until the
+// Repair button, because "content" and "name" are different levels of
+// confidence and a bulk confirm should show which is which. A row set to
+// "Leave broken" is the safe default for anything with no match: a broken
+// saved item is recoverable, a save silently re-pointed at the wrong page is
+// not, and that ordering is the same one wnDetectRenames chose.
+function openSavedRepair() {
+  const broken = savedBrokenFiles();
+  const list = $('sr-list'), sub = $('sr-sub');
+  if (!list) return;
+  const idx = wnRead(WN_INDEX_KEY, null) || {};
+  const brokenSet = new Set(broken);
+  const pathOf = u => u.replace(/^local:\//, '').replace(CONFIG.vaultRelPath + '/', '');
+
+  if (!broken.length) {
+    sub.textContent = 'Nothing is broken. Every saved item points at a file that is in the vault.';
+    list.innerHTML = '';
+  } else {
+    sub.textContent = `${broken.length} saved item${broken.length === 1 ? '' : 's'} point${broken.length === 1 ? 's' : ''} at a file that is no longer at that path. Pick where each one should go.`;
+    list.innerHTML = broken.map(u => {
+      const p = state.user.saved.pages[u];
+      const matches = savedRepairMatches(u, idx, brokenSet);
+      const best = matches[0];
+      const opts = matches.map((mm, i) =>
+        `<option value="${escHtml(mm.url)}"${i === 0 ? ' selected' : ''}>${escHtml(pathOf(mm.url))}</option>`).join('');
+      return `<div class="sr-row">` +
+        `<div class="sr-what">` +
+          `<div class="sr-name">${escHtml(p.name || u)}</div>` +
+          `<div class="sr-from" title="${escHtml(pathOf(u))}">was ${escHtml(pathOf(u))}</div>` +
+        `</div>` +
+        (best ? `<span class="sr-how${best.how === 'content' ? ' exact' : ''}">${best.how === 'content' ? 'same file' : 'same name'}</span>` : '') +
+        `<select class="s-select sr-pick" data-sr-from="${escHtml(u)}" aria-label="Where ${escHtml(p.name || u)} should point">` +
+          opts +
+          `<option value="">Leave broken</option>` +
+          `<option value="\u0000remove">Remove this saved item</option>` +
+        `</select>` +
+      `</div>`;
+    }).join('') || '<div class="sr-none">Nothing to repair.</div>';
+  }
+  $('sr-overlay').style.display = 'flex';
+}
+
+function closeSavedRepair() {
+  const el = $('sr-overlay');
+  if (el) el.style.display = 'none';
+}
+
+function submitSavedRepair() {
+  const list = $('sr-list');
+  if (!list || !state.user) { closeSavedRepair(); return; }
+  const idx = wnRead(WN_INDEX_KEY, null) || {};
+  let touched = 0;
+  // Read every choice BEFORE writing any of them. wbRemapUserRecord() deletes
+  // the old key as it moves, so reading the selects as we go would be reading
+  // a list of paths while changing what those paths mean.
+  const picks = [...list.querySelectorAll('select[data-sr-from]')]
+    .map(sel => ({ from: sel.dataset.srFrom, to: sel.value }));
+  picks.forEach(({ from, to }) => {
+    if (!to) return;                                    // Leave broken
+    if (to === '\u0000remove') {
+      if (state.user.saved.pages[from]) { delete state.user.saved.pages[from]; touched++; }
+      return;
+    }
+    if (wbRemapUserRecord(from, to)) {
+      const fp = savedFpFor(to, idx);
+      if (fp) state.user.saved.pages[to].fp = fp;
+      touched++;
+    }
+  });
+  if (touched) {
+    saveUserRecord();
+    updateSavedTabBadge();
+  }
+  closeSavedRepair();
+  try { renderSavedTab(); } catch (_) { /* pane may not be mounted */ }
   try { renderOutlineTab(); } catch (_) { /* Outline may not be mounted */ }
 }
 
@@ -17894,7 +18864,10 @@ function renderSavedTab() {
 
   const nBroken = savedBrokenFiles().length;
   if (nBroken) {
-    html += `<div class="bm-broken-bar">${nBroken} file${nBroken === 1 ? '' : 's'} no longer in the vault<button class="bm-broken-clear" data-wb-savedclearbroken="1">Remove all</button></div>`;
+    // 0.52.0 — Repair, not Remove all. Remove all moved inside the repair
+    // screen: it is still there, but it is no longer the only thing offered
+    // to someone whose folder was renamed.
+    html += `<div class="bm-broken-bar">${nBroken} file${nBroken === 1 ? '' : 's'} no longer at that path<button class="bm-broken-clear" data-wb-savedrepair="1">Repair\u2026</button></div>`;
   }
 
   if (!urls.length) {
@@ -18007,7 +18980,24 @@ function extractLinksForDisplay(rawMd) {
     } else if (/\.md($|#)/i.test(href)) {
       const name = decodeURIComponent(href.replace(/\.md($|#).*$/i, '').split('/').pop());
       addInternal(name, text || name);
+    } else {
+      // 0.52.0 — the panel has to classify a scheme-less host the same way
+      // the body now renders it, or the same link is a Website in the page
+      // and missing from the list beside it.
+      const web = webUrlFrom(href);
+      if (web) addWeb(web, text || href);
     }
+  }
+
+  // Bare URLs typed as plain text (0.52.0) — linked in the body now, so
+  // they belong in this list too. Same trimUrlTail() rule as the renderer,
+  // deliberately the same function: if the two disagreed about where a URL
+  // ends, the panel would list an address the page never linked.
+  const bareRe = /(^|[\s(\[])((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
+  while ((m = bareRe.exec(rawMd)) !== null) {
+    const [shown] = trimUrlTail(m[2]);
+    if (!shown || /^www\.?$/i.test(shown)) continue;
+    addWeb(/^www\./i.test(shown) ? 'https://' + shown : shown, shown);
   }
 
   return out;
@@ -18430,6 +19420,7 @@ function parseComments(text) {
       author:   attrs.author   || '?',
       closedTs: attrs.closedTs || '',
       hid:      attrs.hid      || '', // P7 — section anchor; '' means page-level ("General")
+      replyTo:  attrs.replyTo  || '', // P7.1 — index of the comment this replies to; '' means top-level
       body:     m[2].trim(),
     });
   }
@@ -18444,7 +19435,11 @@ function serializeComments(comments) {
     // comments.md file written before this version stays byte-for-byte
     // re-serializable.
     const hid = c.hid ? ` hid="${c.hid}"` : '';
-    return `<!-- WB type="${c.type}" status="${c.status}" ts="${c.ts}" author="${c.author}"${hid}${closed} -->\n${c.body}\n<!-- /WB -->\n\n`;
+    // P7.1 — a reply's index into ITS file's own comments array. Never
+    // written for a top-level comment, so a comments.md with no replies in
+    // it stays byte-for-byte what 0.53.0 would have written.
+    const replyTo = c.replyTo ? ` replyTo="${c.replyTo}"` : '';
+    return `<!-- WB type="${c.type}" status="${c.status}" ts="${c.ts}" author="${c.author}"${hid}${closed}${replyTo} -->\n${c.body}\n<!-- /WB -->\n\n`;
   }).join('');
 }
 
@@ -18515,30 +19510,54 @@ async function renderCommentsTab() {
   let html = '<div class="comment-list">';
 
   if (comments.length) {
+    // P7.1 — a reply renders directly under its thread root, in the order
+    // written; a comment with no replyTo IS a root. This pane is never
+    // filtered (that's the Admin board's job), so every index below is the
+    // comment's own real index — what closeComment/startReply key off.
+    const repliesByRoot = {};
     comments.forEach((c, i) => {
+      if (c.replyTo) (repliesByRoot[Number(c.replyTo)] = repliesByRoot[Number(c.replyTo)] || []).push(i);
+    });
+    const cardHTML = (i, isReply) => {
+      const c = comments[i];
       const icon = WB_COMMENT_ICONS[c.type] || '·';
       const date = c.ts.replace('T', ' ').slice(0, 16);
-      const closedNote = (c.status === 'closed' && c.closedTs)
+      const closed = c.status === 'closed';
+      const closedNote = (closed && c.closedTs)
         ? `<span style="color:var(--text-muted)"> · closed ${escHtml(c.closedTs.replace('T', ' '))}</span>` : '';
-      const closeBtn = c.status === 'open'
-        ? `<button class="comment-close-btn" onclick="event.stopPropagation();closeComment(${i})">Mark closed</button>`
+      // P7.1 — closed comments collapse by default, same fold language the
+      // callouts already use, so "still see them" (Jayson) means a click,
+      // not scrolling past a wall of resolved threads.
+      const foldBtn = closed
+        ? `<button class="comment-fold-btn" onclick="event.stopPropagation();toggleCommentFold(this)" title="Expand" aria-label="Expand">${ICON.foldChevron}</button>`
         : '';
+      const closeBtn = !closed
+        ? `<button class="comment-close-btn" onclick="event.stopPropagation();closeComment(${i})">Mark closed</button>` : '';
+      const replyBtn = `<button class="comment-reply-btn" onclick="event.stopPropagation();startReply(${i})">Reply</button>`;
+      // Replies skip the section chip — the indent already says which
+      // thread they belong to, and repeating the parent's chip is noise.
       // P7 — a hid that no longer resolves (the heading was renamed or
       // removed) degrades to General rather than a broken or blank chip.
-      const anchorText = c.hid ? headingText[c.hid] : '';
-      const anchorChip = anchorText
+      const anchorText = !isReply && c.hid ? headingText[c.hid] : '';
+      const anchorChip = isReply ? '' : (anchorText
         ? `<span class="comment-anchor">§ ${escHtml(anchorText)}</span>`
-        : `<span class="comment-anchor general">General</span>`;
+        : `<span class="comment-anchor general">General</span>`);
       // whole card is clickable — selects it and best-effort locates quoted text
-      html += `<div class="comment-card wb-sel type-${escHtml(c.type)} status-${escHtml(c.status)}" data-ci="${i}" onclick="selectCommentCard(${i})">
+      return `<div class="comment-card wb-sel type-${escHtml(c.type)} status-${escHtml(c.status)}${isReply ? ' comment-reply' : ''}${closed ? ' folded' : ''}" data-ci="${i}" onclick="selectCommentCard(${i})">
         ${anchorChip}
         <div class="comment-meta">
           <span class="comment-type-badge">${icon} ${escHtml(c.type)}</span>
           <span>${escHtml(c.author)} · ${escHtml(date)}${closedNote}</span>
+          ${foldBtn}
         </div>
         <div class="comment-body">${escHtml(c.body)}</div>
-        ${closeBtn}
+        <div class="comment-card-actions">${closeBtn}${replyBtn}</div>
       </div>`;
+    };
+    comments.forEach((c, i) => {
+      if (c.replyTo) return; // rendered under its root, not here
+      html += cardHTML(i, false);
+      (repliesByRoot[i] || []).forEach(ri => { html += cardHTML(ri, true); });
     });
   } else {
     html += '<div class="rp-empty" style="padding:12px">No comments yet.</div>';
@@ -18549,29 +19568,40 @@ async function renderCommentsTab() {
   // P7 — states where the NEXT comment will land rather than asking via a
   // picker: an explicit override wins, otherwise whatever heading is in
   // view right now. The one link is the only way to change it.
+  // P7.1 — a reply overrides all of that: the target IS the comment being
+  // answered, not a section, and lockCommentTarget() never touches it.
+  const replyParent = (state.replyToIdx !== null) ? comments[state.replyToIdx] : null;
   const effectiveHid  = state.commentAnchorOverride !== null ? state.commentAnchorOverride : (state.activeHeadingId || '');
   const effectiveText = effectiveHid ? (headingText[effectiveHid] || '') : '';
   const canOfferSection = state.activeHeadingId && headingText[state.activeHeadingId];
-  const postTargetLine = effectiveText
-    ? `<div class="comment-post-target">Posting to <b>${escHtml(effectiveText)}</b><a href="#" onclick="event.preventDefault();toggleCommentAnchor()">Post to General instead</a></div>`
-    : `<div class="comment-post-target">Posting to <b>General</b>${canOfferSection ? `<a href="#" onclick="event.preventDefault();toggleCommentAnchor()">Post to ${escHtml(headingText[state.activeHeadingId])} instead</a>` : ''}</div>`;
+  const postTargetLine = replyParent
+    ? `<div class="comment-post-target">Replying to <b>${escHtml(replyParent.author)}</b>&rsquo;s comment<a href="#" onclick="event.preventDefault();cancelReply()">Cancel</a></div>`
+    : (effectiveText
+      ? `<div class="comment-post-target">Posting to <b>${escHtml(effectiveText)}</b><a href="#" onclick="event.preventDefault();toggleCommentAnchor()">Post to General instead</a></div>`
+      : `<div class="comment-post-target">Posting to <b>General</b>${canOfferSection ? `<a href="#" onclick="event.preventDefault();toggleCommentAnchor()">Post to ${escHtml(headingText[state.activeHeadingId])} instead</a>` : ''}</div>`);
 
   // Post form. Escalate (S42) is Contributor+ only — it's a comment type
   // that reuses this same panel rather than a walled-off channel, but the
   // option itself only appears for the tier that can actually raise one.
   // It always routes to Administrator; there's no per-person roster
   // because tiers are shared passwords, not tied to identity.
+  // P7.1 — commentTypeOverride presets Report's Flag without a second
+  // composer; lockCommentTarget() freezes wherever the post is about to
+  // land the instant typing starts, so scrolling mid-comment can no longer
+  // silently move it (the bug: the line above kept tracking the view,
+  // postComment() read the live value, and the two could disagree by the
+  // time Post was clicked).
   html += `<div class="comment-form">
     ${postTargetLine}
     <select class="comment-select" id="comment-type-sel">
-      <option value="note">📝 Note</option>
-      <option value="question">❓ Question</option>
-      <option value="action">✅ Action</option>
-      <option value="flag">🚩 Flag</option>
-      ${reviewAllowed() ? '<option value="escalation">🚨 Escalate (to Administrator)</option>' : ''}
+      <option value="note"${state.commentTypeOverride === 'note' ? ' selected' : ''}>📝 Note</option>
+      <option value="question"${state.commentTypeOverride === 'question' ? ' selected' : ''}>❓ Question</option>
+      <option value="action"${state.commentTypeOverride === 'action' ? ' selected' : ''}>✅ Action</option>
+      <option value="flag"${state.commentTypeOverride === 'flag' ? ' selected' : ''}>🚩 Flag</option>
+      ${reviewAllowed() ? `<option value="escalation"${state.commentTypeOverride === 'escalation' ? ' selected' : ''}>🚨 Escalate (to Administrator)</option>` : ''}
     </select>
-    <textarea class="comment-textarea" id="comment-body-txt" placeholder="Add a comment…"></textarea>
-    <button class="comment-submit" onclick="postComment()">Post</button>
+    <textarea class="comment-textarea" id="comment-body-txt" placeholder="Add a comment…" oninput="lockCommentTarget(this)"></textarea>
+    <button class="comment-submit" onclick="postComment()">${replyParent ? 'Reply' : 'Post'}</button>
   </div>`;
 
   pane.innerHTML = RP_HEADER_COMMENTS() + html + PANE_FOOT_COMMENTS;
@@ -18584,6 +19614,66 @@ async function renderCommentsTab() {
 function toggleCommentAnchor() {
   state.commentAnchorOverride = (state.commentAnchorOverride === '') ? null : '';
   return renderCommentsTab(); // awaitable — the plain onclick call site ignores it, tests don't have to
+}
+
+// P7.1 — locks wherever a comment is about to land the instant typing
+// starts (value goes from empty to one character), so scrolling mid-comment
+// can no longer silently move the target: postComment() reads the LIVE
+// activeHeadingId when nothing is locked, and only a scroll listener kept
+// that fresh, not this pane's own render. A reply's target is already fixed
+// by which "Reply" button was clicked, so this never touches it.
+function lockCommentTarget(el) {
+  if (el.value.length !== 1) return; // fires once, on the empty-to-one transition
+  if (state.replyToIdx === null && state.commentAnchorOverride === null) {
+    state.commentAnchorOverride = state.activeHeadingId || '';
+  }
+}
+
+// Shared open path for the two entry points that used to be disabled
+// placeholders: the footer Report button and each heading's own "Comment
+// on this section". Same composer both times — no popup, nothing new —
+// this only sets what it defaults to before summoning the Comments pane
+// exactly the way its own rail button would.
+async function openCommentComposer(hid, type) {
+  state.commentAnchorOverride = hid;
+  state.commentTypeOverride   = type || null;
+  state.replyToIdx            = null;
+  betaOpenTool('comments');
+  await renderCommentsTab(); // guarantees the textarea exists before focus,
+                              // whichever host (dock or slide-over) just opened it
+  const el = $('comment-body-txt');
+  if (el) el.focus();
+}
+
+function reportThisPage()        { return openCommentComposer('', 'flag'); }
+function commentOnHeading(hid)   { return openCommentComposer(hid || '', null); }
+
+// Reply always targets the THREAD ROOT, even when "Reply" was clicked on a
+// reply itself — flattens the thread to one level rather than growing a
+// reply-to-a-reply chain the panel would then have to indent indefinitely.
+function startReply(idx) {
+  const pane     = $('rp-comments');
+  const comments = pane && pane._wbComments;
+  const c        = comments && comments[idx];
+  if (!c) return;
+  state.replyToIdx = c.replyTo ? Number(c.replyTo) : idx;
+  return renderCommentsTab();
+}
+
+function cancelReply() {
+  state.replyToIdx = null;
+  return renderCommentsTab();
+}
+
+// View-only fold, same mechanism as toggleCalloutFold(): nothing is stored,
+// nothing is re-rendered, the DOM class is the whole state.
+function toggleCommentFold(btn) {
+  const card = btn.closest('.comment-card');
+  if (!card) return;
+  const folded = card.classList.toggle('folded');
+  const label = folded ? 'Expand' : 'Collapse';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
 }
 
 // Shared list of rendered block selectors for text-match highlighting.
@@ -18654,15 +19744,24 @@ async function postComment() {
 
   const ts     = new Date().toISOString().slice(0, 16);
   const author = CONFIG.authorName || 'Anonymous';
-  // P7 — same rule the post-target line just showed: an explicit "Post to
-  // General instead" wins, otherwise whatever heading is in view right now.
-  const hid = state.commentAnchorOverride !== null ? state.commentAnchorOverride : (state.activeHeadingId || '');
 
   const pane       = $('rp-comments');
   const existing   = pane._wbComments || [];
   const commentsUrl = pane._wbCommentsUrl || commentsUrlFor(state.activeUrl);
 
-  const newComment = { type, status: 'open', ts, author, body, hid };
+  // P7.1 — a reply carries the index of the comment it answers and inherits
+  // its section, ignoring whatever heading happens to be in view. Otherwise
+  // the same rule the post-target line just showed: an explicit override
+  // wins, otherwise whatever heading is in view right now.
+  let hid, replyTo = '';
+  if (state.replyToIdx !== null && existing[state.replyToIdx]) {
+    replyTo = String(state.replyToIdx);
+    hid     = existing[state.replyToIdx].hid || '';
+  } else {
+    hid = state.commentAnchorOverride !== null ? state.commentAnchorOverride : (state.activeHeadingId || '');
+  }
+
+  const newComment = { type, status: 'open', ts, author, body, hid, replyTo };
   const allComments = [...existing, newComment];
 
   try {
@@ -18672,6 +19771,8 @@ async function postComment() {
     bodyEl.value    = '';
     bodyEl.disabled = false;
     state.commentAnchorOverride = null; // P7 — back to auto-targeting for the next comment
+    state.commentTypeOverride   = null; // P7.1 — one-shot preset (Report), never sticky
+    state.replyToIdx            = null; // P7.1 — back to a fresh top-level comment
     await renderCommentsTab();
     scanBadges(); // S14 — refresh comment badges
   } catch (e) {
@@ -18697,43 +19798,19 @@ async function closeComment(idx) {
   }
 }
 
-// Same close action, for the Session 42 review dashboard — its rows aren't
-// backed by a cached pane or state.reviewData, so re-read, patch, write.
-async function closeCommentAt(commentsUrl, idx) {
-  try {
-    const text = await readVaultFileOrNull(commentsUrl);
-    if (text === null) return false;
-    const comments = parseComments(text);
-    if (!comments[idx]) return false;
-    comments[idx] = { ...comments[idx], status: 'closed', closedTs: new Date().toISOString().slice(0, 16) };
-    await spWriteFile(commentsUrl, serializeComments(comments));
-    await scanBadges();
-    return true;
-  } catch (e) {
-    alert('Could not update comment: ' + e.message);
-    return false;
-  }
-}
-
 // ================================================================
 // Section 5 — All comments (the vault-wide view of the Comments tool)
 // ================================================================
+// Moved into Admin at 0.54.0 -- a page companion rendering a vault-wide
+// destination straight into the reader was the companion-vs-destination
+// rule broken in the one place nothing had caught yet (B2/R1 named the
+// rule; this is the violation of it). Contributor+, same rung as Review.
 
-async function openReviewView() {
-  if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
-  const empty = $('reader-empty');
-  const rc    = $('reader-content');
-
-  state.activeUrl  = null;
-  state.activeName = null;
-  renderSidebar();
-  updateEditBtn();
-
-  setReaderTitle('All comments');
-
-  empty.style.display = 'none';
-  rc.style.display    = 'block';
-  rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault for comments…</p>';
+async function renderAdminCommentsTab() {
+  const bodyEl = $('admin-body');
+  if (!bodyEl) return;
+  if (!atLeast('contributor')) { bodyEl.innerHTML = ''; return; }
+  bodyEl.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:32px;text-align:center">Scanning vault for comments…</p>';
 
   // Eagerly load any folders not yet opened
   const toLoad = vaultFolders.filter(f => !state.folderLoaded[f.id]);
@@ -18760,7 +19837,11 @@ async function openReviewView() {
   }));
 
   state.reviewData = results.filter(Boolean);
-  rc.innerHTML = buildReviewHTML(state.reviewData, state.reviewFilter);
+  // The scan is async and Admin can move on underneath it (a tab switch, a
+  // tier drop, Close) -- never paint a body nobody is looking at any more,
+  // and never onto a tab the tabs strip has since moved off of.
+  if (adminActiveTab !== 'comments' || (betaSlideId !== 'admin' && destId !== 'admin')) return;
+  bodyEl.innerHTML = buildReviewHTML(state.reviewData, state.reviewFilter);
 }
 
 function buildReviewHTML(data, filter) {
@@ -18768,10 +19849,17 @@ function buildReviewHTML(data, filter) {
 
   const ICONS_TYPE = WB_COMMENT_ICONS;
 
-  // Apply status filter
+  // Apply status filter, keeping each comment's ORIGINAL index (its real
+  // position in that file's own comments array) alongside it. The filtered
+  // POSITION was used here through 0.53.0 -- harmless while every file's
+  // open comments all sat before its closed ones, wrong the moment they
+  // didn't: Mark closed would silently close whatever comment happened to
+  // sit at that position in the FULL array, not the one on screen.
   const filtered = data.map(file => ({
     ...file,
-    comments: file.comments.filter(c => filter === 'all' || c.status === filter),
+    comments: file.comments
+      .map((c, i) => ({ c, i }))
+      .filter(x => filter === 'all' || x.c.status === filter),
   })).filter(f => f.comments.length > 0);
 
   const total = filtered.reduce((n, f) => n + f.comments.length, 0);
@@ -18799,17 +19887,25 @@ function buildReviewHTML(data, filter) {
         <div class="review-file-header" data-wb-open="${escHtml(file.url)}" data-wb-name="${escHtml(file.name)}">${ICON.file} ${escHtml(file.name)}</div>
         <div class="comment-list">`;
 
-      file.comments.forEach((c, i) => {
+      file.comments.forEach(({ c, i }) => {
         const icon  = ICONS_TYPE[c.type] || '·';
         const date  = c.ts.replace('T', ' ').slice(0, 16);
-        const closeBtn = c.status === 'open'
+        const closed = c.status === 'closed';
+        // P7.1 -- same fold language the per-file panel uses: closed rows
+        // collapse rather than pile up, a reply sits indented under
+        // whichever comment it answers.
+        const foldBtn = closed
+          ? `<button class="comment-fold-btn" onclick="event.stopPropagation();toggleCommentFold(this)" title="Expand" aria-label="Expand">${ICON.foldChevron}</button>`
+          : '';
+        const closeBtn = !closed
           ? `<button class="review-open-btn" data-wb-closecmt="${escHtml(file.commentsUrl)}" data-wb-name="${escHtml(file.name)}" data-wb-idx="${i}">Mark closed</button>`
           : '';
 
-        html += `<div class="comment-card type-${escHtml(c.type)} status-${escHtml(c.status)}">
+        html += `<div class="comment-card type-${escHtml(c.type)} status-${escHtml(c.status)}${c.replyTo ? ' comment-reply' : ''}${closed ? ' folded' : ''}">
           <div class="comment-meta">
             <span class="comment-type-badge">${icon} ${escHtml(c.type)}</span>
             <span>${escHtml(c.author)} · ${escHtml(date)}</span>
+            ${foldBtn}
           </div>
           <div class="comment-body">${escHtml(c.body)}</div>
           <div class="review-action-row">
@@ -18834,9 +19930,9 @@ function buildReviewHTML(data, filter) {
 
 function setReviewFilter(filter) {
   state.reviewFilter = filter;
-  const rc = $('reader-content');
-  if (rc && state.reviewData !== null) {
-    rc.innerHTML = buildReviewHTML(state.reviewData, filter);
+  const bodyEl = $('admin-body');
+  if (bodyEl && state.reviewData !== null) {
+    bodyEl.innerHTML = buildReviewHTML(state.reviewData, filter);
   }
 }
 
@@ -18848,8 +19944,8 @@ async function closeCommentInReview(commentsUrl, fileName, idx) {
 
   try {
     await spWriteFile(commentsUrl, serializeComments(fileData.comments));
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewHTML(state.reviewData, state.reviewFilter);
+    const bodyEl = $('admin-body');
+    if (bodyEl) bodyEl.innerHTML = buildReviewHTML(state.reviewData, state.reviewFilter);
     scanBadges(); // S14 — refresh comment badges
   } catch (e) {
     alert('Could not update comment: ' + e.message);
@@ -19353,9 +20449,9 @@ const FR_TOUR = [
     text: ['Saves the whole page to your own list. Saved pages sit on Home and behind the search box, so the handful you use every week are always a click away.',
            'This is not the only place you can save from. Hover any heading in the page and there is a save button on the heading itself, and every row of the Outline column has one too. Those keep a single section rather than the whole page, which is usually what you want on a long procedure.'] },
   // The per-heading hover toolbar, all four tools in one step, drawn rather
-  // than described. Two of the four are deliberately built as disabled
-  // buttons rather than left out (see headingActionsHTML), so the tour says
-  // so plainly instead of pretending they work or hiding them. Icons are
+  // than described. Comment was wired at 0.54.0; Highlight is still a
+  // deliberately-disabled placeholder (see headingActionsHTML), so the tour
+  // says so plainly instead of pretending it works or hiding it. Icons are
   // lifted out of the real buttons at render, so the picture cannot drift.
   { sel: '#reader-content .md-h-acts', title: 'Section tools', wide: true,
     text: 'Hover any heading in a page and four buttons appear on the heading itself. Everything here acts on that one section, not the whole page.',
@@ -19364,8 +20460,8 @@ const FR_TOUR = [
         desc: 'A link that opens the page already scrolled to this heading. The one to send when the answer is halfway down a long procedure.' },
       { sel: '#reader-content .md-h-acts button:nth-of-type(2)', name: 'Save this section',
         desc: 'Keeps just this heading in your saved list, rather than the whole page. The second of the three places you can save from.' },
-      { sel: '#reader-content .md-h-acts button:nth-of-type(3)', name: 'Comment on this section', soon: true,
-        desc: 'Will start a comment anchored here. For now, use the Comments button in the page tools and pick the heading when you post.' },
+      { sel: '#reader-content .md-h-acts button:nth-of-type(3)', name: 'Comment on this section',
+        desc: 'Starts a comment anchored to this heading, right in the Comments panel — no separate step to pick the section.' },
       { sel: '#reader-content .md-h-acts button:nth-of-type(4)', name: 'Highlight', soon: true,
         desc: 'Will mark a passage for yourself, private to you and visible to nobody else.' }
     ] },

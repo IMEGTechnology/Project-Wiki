@@ -8,6 +8,262 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.55.0 — 2026-09-09
+
+**Changed:** `index.html`, `manifest.json`, `sw.js`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/b3-frame.test.js`; updated `supporting/tests/docks.test.js`, `section18-shell.test.js`, `session-d-fixes.test.js`.
+
+*Four items off Jayson's 9 Sep review, all about the app's frame and how you get into it. New capability, so MINOR.*
+
+### The side columns adjust again, and the fitted width stops cutting names off
+
+**Hide and show do not change.** That was the instruction and it is the shape of the whole item: the auto-collapse shipped at 0.44.2 still decides whether the right column is there at all. What comes back is adjustment. The drag handles were hidden in the new shell by two lines of styling since Session 62; the grip returns, the flare does not, because clicking the flare closes a panel and a second way to close the right column would contradict both B2 and the auto-collapse. A drag now stops at a floor instead of falling through into a close, and click-to-collapse is gated off behind the same test.
+
+**A column with no width of your own now opens fitted to its content** rather than at a fixed 220 that truncated any long file name or heading, which is what was reported. Drag one and that width is remembered, per device, and wins from then on. The fitted default is deliberately never written down: recording it would freeze the column at whatever the first page happened to contain and stop it tracking content, which is the opposite of what fitting is for.
+
+**Padding at the app's left and right edges.** It goes on the content, never on the frame, and only at the two real window edges: widening the frame would change every width the drag ceiling, the fit and the reader minimum are computed from.
+
+### Two bugs behind that, both found by rendering it
+
+**The fit was measuring placeholders.** It ran on the first sidebar render of a session, when every open folder still reads "Loading…" while its files are fetched. It measured three placeholder words, found them narrow, and left the column at its default with the long name still truncated — the exact bug it was written to fix. It now waits for a real row.
+
+**And a pre-existing one, here since v0.32.1.** Fitting a column resets the OTHER column to its default first, so the ceiling is computed against a sane neighbour, then read that neighbour's width back to do the arithmetic. That panel carries a 0.18s width transition, so the read returned the width it was animating away from, not the one just set. Every fit performed beside a wider neighbour has therefore landed short of the room available. Measured live: a 1440 window fitted the sidebar to 215px where 312 was free — and 215 still truncated the name. Fixed by using the value we set rather than asking the DOM for it. No check could have caught this: jsdom has no transitions, so all 2,700 of them measured a world where the bug does not exist.
+
+### Links open in the app, and the install offer stops being wrong
+
+Following a Folio link opens a browser tab. In that tab Folio could not tell it was already installed, so it offered to **install an app you already had** — the banner Jayson reported alongside the link itself. Folio now records the one moment it can know for certain, while running as the installed app, and a later tab on the same machine reads that record: no install offer, and the one-time browser switch explained instead, at the bottom of the banner slot's existing priority and dismissed for good once acknowledged.
+
+**A custom link scheme was considered and held in reserve.** It would guarantee the app opens, but a made-up scheme is a dead link for anyone without Folio installed and does not reliably become clickable in Outlook or Teams, which trades a browser annoyance for a link that sometimes cannot be clicked at all. `manifest.json` also now asks for the window you already have open rather than a second one.
+
+### The taskbar icon can change without a reinstall
+
+The icon is captured by the browser at install. Chrome only revisits it when the manifest's own text changes, so replacing the image in place changed nothing it could see and the old icon survived until somebody reinstalled — what happened at the 0.35.0 rename. The icon URLs now carry a version to bump whenever the art changes, and the rule is written into `sw.js`, since JSON cannot hold a comment. Recorded honestly: on macOS the icon is baked into the app bundle at install and a reinstall may still be needed. This is for the Windows machines the staff run.
+
+### Home is a place the browser knows about
+
+Open since Session 68. Home never wrote an address, so the browser had no record of it and Back could never return there. Home now has one, with three rules: arriving at boot replaces rather than adds, so Back still leaves Folio instead of bouncing off a phantom entry; Home clicked twice is one entry, not two; and coming back to Home lands on the same replace branch, which is what stops it looping. A shared link still beats everything at startup, unchanged.
+
+## 0.54.0 — 2026-09-09
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/comment-threads.test.js`; updated `supporting/tests/section18-shell.test.js`, `session-a-shell.test.js`, `walkthrough.test.js`, `p10-vault-check.test.js`, `round2-destinations.test.js`, `review-dashboard.test.js`, `help-split.test.js`; redrawn `help-assets/fig-04-header-bar.svg`.
+
+*Two disabled buttons wired up, a genuine indexing bug fixed along the way, and the help page brought current with the shell it now describes. New capability, so MINOR.*
+
+### Comments: replies, collapsed closed threads, a locked target, and a move to Admin
+
+Report (disabled since 0.51.1) and Comment on this section (drawn but disabled since Session A) both now open the same composer the Comments panel has always used, no second composer built. Report presets to Flag and targets the page as a whole; the section button locks in the heading you pointed at.
+
+**The post target used to follow whatever heading was in view**, so scrolling while typing could silently move where a comment landed. It now locks the moment you start typing.
+
+**Replies.** Every comment carries a Reply button; a reply threads under the comment it answers as its own entry, with its own author and timestamp, rather than an edit to the original. The sidecar format's `replyTo` attribute is new and optional, so a `.comments.md` file written before this release still reads exactly as it did.
+
+**Closed comments collapse.** A closed comment with no open replies shows only its first line; click it to expand. One still under discussion (an open reply beneath a closed parent) stays expanded, since something under it needs attention. Jayson's framing: "comments are just comments, you should be able to close comments but still see them."
+
+**The vault-wide board moved into Admin**, as All comments beside Review, replacing the footer button on the Comments panel itself. A companion describes the page beside it; a vault-wide board is a destination, and the footer button was the one place that rule was still broken.
+
+**A pre-existing bug surfaced by that move, and fixed:** the board's Mark closed button used a comment's position in the *filtered* list as its identity rather than its true index in the file. Under the default Open filter, a file with one closed comment ahead of an open one closed the wrong comment, silently, since the feature shipped. Fixed by carrying the original index through the filter instead of recomputing it.
+
+`closeCommentAt()` deleted: a third close-a-comment implementation nothing ever called, agreed at Session 76.
+
+### The help page now describes the shell people are actually running
+
+`help.md` was still written primarily for Folio's original two-panel layout, with the console shell mentioned as a minor opt-in curiosity. That shell has been the default for new installs since Session 1 (v0.39.0) and the old one is scheduled for deletion at the very next session (P11), so the framing was backwards and about to become actively misleading. Sections 2, 4 and 5 rewritten with the current shell as the primary subject: the header bar, the page controls above the reader, companions versus destinations (a page-shaped tool sits beside the page; a vault-wide one takes the middle over), the first-run guided tour, Vault Files, quick search, and Saved replacing the old Bookmarks-and-Favorites pair. Sections 1, 3, 6 and 7 needed smaller touches for the same reason: the "screen at a glance" summary, the Comment/Highlight state on a heading's hover row, the Comments walkthrough, and the quick-reference tables all named controls that had moved or been renamed.
+
+**Five of the nine help figures no longer match anything this page describes** (the old dock model's panel edges and stacking, the old reader chrome, the old Bookmarks-to-tab flow) and their embeds were dropped rather than left showing the wrong picture. The files are still on disk; deleting or redrawing them is a separate call. `fig-04-header-bar.svg`, the one figure this session's own header-bar rewrite made stale, was redrawn to match.
+
+### Tests
+
+New suite `comment-threads.test.js`, 55 checks: reply threading and flattening, fold/collapse, the locked-target regression (types, scrolls, posts, asserts the comment landed where the composer said it would), the Admin board move, and a direct regression test for the original-index bug above. Six existing suites updated for intentional behavior changes (Comment no longer disabled, the Admin screen's tab count, `closeCommentAt()` gone). `help-split.test.js`'s figure count updated from 9 to 4, with the dropped five named in a comment.
+
+## 0.53.0 — 2026-09-09
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/frontmatter-and-tables.test.js`; updated `supporting/tests/table-spacer.test.js`, `review-bugfix-0321.test.js`
+
+*A bug that was quietly damaging pages, plus the property groundwork for staged onboarding. New capability, so MINOR.*
+
+### Properties were being lost, and a second block written on top
+
+This is the important one, and it has been happening on the live vault.
+
+Folio read a page's properties only when the very first character of the
+file was a dash. Four ordinary things break that, and every one of them
+happens in a folder synced between machines:
+
+- **Windows line endings.** Any file ever saved by a Windows editor.
+- **A byte order mark**, which Notepad and several exports add invisibly.
+- **A blank line** before the properties block.
+- **A trailing space** after the dashes.
+
+When any of those was true, Folio concluded the page had no properties at
+all. The review dashboard then listed it as a new file, and "Fill
+properties" wrote a **second** properties block above the real one.
+Obsidian reads the first block it finds, so from that moment the page's
+real status, author and must-read flag were being ignored everywhere.
+
+All four now read correctly, and writing a property can no longer create a
+second block. Windows line endings survive a write instead of being
+silently converted. Reading and writing now agree about where a block
+starts, which is what turned a parsing miss into lost data in the first
+place.
+
+**Obsidian's own list format is read too.** Properties written as
+
+    tags:
+      - standards
+      - security
+
+used to come through empty, so a vault authored in Obsidian's property
+editor showed no tags at all in Folio.
+
+### Repairing the pages already affected
+
+Fixing the reader does not undo what was already written, so the vault
+check has a new finding: **Duplicate properties**, with a **Repair**
+button beside it.
+
+Repair merges the two blocks and keeps **the page's own values**. The
+lower block is the original, so where the two disagree, it wins; anything
+only the app wrote is kept rather than thrown away. The body of the page is
+not touched, and running it twice does nothing the second time. It asks
+before writing.
+
+Run a vault check from the Admin screen to see whether any of your pages
+are affected.
+
+### Two new properties, for staged onboarding
+
+- **Must-read start** — a date. The must-read window opens here.
+- **Onboarding due** — a whole number of days after somebody's account was
+  created. A 7 on one page, a 14 on another and a 90 on a third is a staged
+  path rather than forty pages landing on a new hire's first morning.
+
+Both are in the Properties panel and in the review dashboard's property
+strip. **Due is unchanged** and still means "this page needs looking at
+again", which is what the review dashboard's Due list has always acted on.
+
+Accounts now record the date they were created, which is what onboarding
+is measured from. Accounts that already existed are dated 1 July 2026,
+rather than today, so nobody who has been here for months is handed an
+onboarding path they finished long ago.
+
+**These are properties only in this release.** Nothing yet reads them to
+decide what anybody sees, and the existing 30-day must-read behaviour is
+untouched. The rules that use them are 1.1, after a conversation about how
+the staging should feel.
+
+### The property strip stopped crying wolf
+
+The review dashboard's property strip counted must-read and onboarding as
+missing properties on every page, which was already wrong and would have
+become "four properties are not set" on every page in the vault once the
+two new ones landed. It now counts the same way the Missing properties list
+does, and names the editorial tags separately instead of reporting them as
+gaps.
+
+### Table columns can be aligned from the width row
+
+Alignment has worked from the separator row since 0.40.0 — `:---` for left,
+`---:` for right, `:---:` for centred — and that is still the best place to
+put it, because a table written that way lines up in Obsidian too.
+
+You can now put the same colons on the **row of periods** you use to set
+column widths:
+
+    |:.....|:.....:|.....:|
+
+The number of periods does not matter, `|:.|` works, and the colons no
+longer print as stray characters on the page. If both rows carry colons the
+separator row wins, so a table that already declares its alignment the
+standard way cannot be quietly overridden by a width row further down.
+
+One thing to know: colons on the periods row are a Folio convention.
+Obsidian will show that row as an odd-looking data row.
+
+## 0.52.0 — 2026-09-09
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/moves-links-version.test.js`; updated `supporting/tests/install-setup-health.test.js`, `rename-and-trim.test.js`
+
+*Three fixes from Jayson's pre-1.0 review, plus a dead-code sweep. New capability in the saved store and the link renderer, so MINOR.*
+
+### Saved items survive a move, from any machine
+
+A saved item is remembered by its path, and a path is not an identity. Move
+a note into another folder or another vault and the saved item points at
+nothing.
+
+Rename repair has existed since 0.34.0, but it only ever worked for a
+computer that was *running* across the move: it pairs the before and after
+from an index kept in that browser's own storage. A laptop that was shut
+through a reorganisation never learns the pairing, and its owner's saved
+item stays broken with nothing left to explain why. That is the case that
+matters while a vault is being reorganised, because the reorganising
+happens on one machine and everyone else's is closed.
+
+Every saved item now carries a fingerprint of the page's content, kept in
+your own record in the vault rather than in one browser. It travels with
+you, so any machine can find a moved page again at any later date, however
+long afterwards, and whether or not it saw the move happen. Moves between
+vaults are covered by the same mechanism.
+
+Only a fingerprint is used, never a modified date: OneDrive rewrites the
+date as a file passes through it, and matching on that would quietly point
+a saved item at the *wrong* page, which is worse than leaving it broken.
+
+### Repair, where there used to be only Remove all
+
+When a saved item did break, the single thing Folio offered was a button
+that deleted it. Deleting somebody's saved page because a folder got
+renamed was never a repair.
+
+Anything unambiguous is now simply fixed, silently, on the next scan.
+Anything that needs a person is collected in a new **Repair** screen: each
+broken item on one row, showing where it used to be, whether the match is
+the same *file* or only the same *name*, and where it would go. Every row
+can also be left alone or removed on its own. Remove all is still there,
+inside that screen, as one choice among several rather than the only one.
+
+Items saved before this release carry no fingerprint yet and will be
+offered by name. They gain one the first time their page is seen in place.
+
+### Links that were never links
+
+A link written without the `https://` — `[IMEG](www.imeg.com)` — was
+resolved against Folio's own web address rather than the internet, so
+clicking it appeared to do nothing but reload the page. That is now read
+as the web address it plainly is, and opens in your default browser.
+
+Bare addresses typed as plain text (`https://imeg.com` on its own, with no
+markdown around it) are now links, the way they are in Obsidian. Sentence
+punctuation stays in the sentence, an address inside backticks stays code,
+and an address already inside a markdown link is not linked twice.
+
+A relative path that cannot lead anywhere — `../Archive/spec.pdf` — is now
+shown greyed out with an explanation on hover, instead of looking like a
+working link that reloads the app.
+
+The Links panel classifies all of the above exactly as the page renders
+it, so the list beside a page and the page itself can no longer disagree.
+
+### The version number moved to the account menu
+
+Out of the header, into the account menu under the three setup checks,
+where it is always shown. The header keeps only what is *actionable*:
+install while not installed, update while one is waiting. Neither of those
+changed. The version still opens the changelog when clicked.
+
+### Sweep
+
+A pass over the whole file for anything unused, unreachable or silent.
+Removed: four functions nothing called (`destOn`, `ensureRightPanelOpen`,
+`toggleRightPanel`, and the click branch for `data-wb-chsec`, whose markup
+stopped existing at 0.50.0), one unread constant (`THEME_SECTIONS`), and
+five CSS rules with no user (`.hdr-count`, `.s-inline-row`,
+`.s-inline-col`, `#ot-toolbar .ot-sep`, `.rp-pane-header`).
+
+Failing to remember the connected folder no longer fails silently. It is
+still best-effort and still never blocks a launch, but it now says what it
+cost you — that the next launch will ask for the folder again — rather
+than leaving a reconnect prompt with no explanation anywhere.
+
 ## 0.51.1 — 2026-09-06
 
 **Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; updated `supporting/tests/b2-home.test.js`, `install-setup-health.test.js`, `p10-vault-check.test.js`, `section18-shell.test.js`, `session2-reading.test.js`

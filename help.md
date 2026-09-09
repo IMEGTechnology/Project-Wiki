@@ -1,9 +1,9 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.51.1**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.55.0**.
 
-**This page covers using Folio** — finding your way around, reading, searching, bookmarking, and making it look the way you want.
+**This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
 **Writing and editing notes is a separate page: [Help — Editing and Markdown](help-edit.md).** Go there for turning on editing, creating and moving files, the editor, properties, review, and the full Markdown reference.
 
@@ -14,9 +14,9 @@ New here? Read [[#1. Start here]] and [[#2. Getting around]], then stop. That is
 ## Contents
 
 1. [[#1. Start here]] — what this is, installing it, your first launch
-2. [[#2. Getting around]] — the header, the panels, Vault Files, moving between notes
+2. [[#2. Getting around]] — the header, companions and destinations, Vault Files, moving between notes
 3. [[#3. Reading a note]] — folding, sending someone a link, images, tables, checkboxes
-4. [[#4. Finding things]] — What's New, Outline, Search, Bookmarks, Links
+4. [[#4. Finding things]] — What's New, Outline, Search, Saved, Links
 5. [[#5. Making it yours]] — the Theme panel and Settings
 6. [[#6. Comments]] — leaving and answering comments
 7. [[#7. Quick reference]] — shortcuts and where every control lives
@@ -59,11 +59,9 @@ To change it later: **your initials badge, top right → Switch user**.
 
 ### The screen at a glance
 
-Three columns. The **reader** in the middle is the note you are on. Either side of it is a **panel** holding tools, and both panels work the same way: a row of tool icons across the top, and whichever tools you have open stacked below.
+Three parts. The **reader** in the middle is the note you're on, with a slim strip of controls above it: Back, Forward, Copy link, Save, Comments. **Vault Files**, on the left, holds the tree of notes and toggles from the header. On the right, **Outline** is always there, and pointing at a page's Comments or Links brings that companion in beside it too.
 
-Out of the box the left panel holds the tools for getting somewhere — **Vault Files**, **Search**, **Bookmarks** — and the right holds the tools about what you are reading — **Outline**, **Comments**, **Links**, and **Review** if you have it. You can move any tool to either side. Either panel collapses out of the way.
-
-![The Folio screen, annotated](help-assets/fig-01-screen-at-a-glance.svg)
+A few things aren't about any one page, the full Search results, **Saved**, and (if you have it) **Admin**, so they take over the middle instead of sharing it. All of this is covered in [[#2. Getting around]].
 
 ---
 
@@ -73,65 +71,75 @@ Out of the box the left panel holds the tools for getting somewhere — **Vault 
 
 ![The header bar, annotated](help-assets/fig-04-header-bar.svg)
 
-| Icon | What it does |
+| Control | What it does |
 |---|---|
-| **+** | New file or folder at the vault root. Needs editing on, see [Help — Editing and Markdown](help-edit.md) |
-| **⇄** | Move a file to another folder. Same gate |
-| *Folio — vault name* | Just a label |
-| **☀ / ☾** | Flip Dark ↔ Light straight away, no menu |
-| **↑** | Only appears when a newer version of the app is ready. Click to reload into it |
-| **?** | This help page |
+| Vault Files icon, far left | Show or hide Vault Files |
+| **Home** | The front door. Doors into Continue reading, Browse, Saved, What's New, Help, and Admin if you have it |
+| **Search, saved, recent…** | Opens quick search. Same box as `Ctrl K` / `⌘K` |
 | **⭳** (only when not installed) | Installs Folio — see [[#Installing it]] |
-| **Your initials** | Account menu: **Theme**, **Settings**, **Switch user**, and (Administrators) **Usage** |
+| **☀ / ☾** | Flip Dark ↔ Light straight away, no menu |
+| **↑** (only when an update is ready) | Click to reload into the newer version |
+| **?** | This help page |
+| Your initials | Account menu: Theme, Settings, Switch user, Usage, Sign out |
 
-There is no gear icon and no panel-toggle buttons in the header. Settings moved into the initials menu, and the panel toggles moved onto the panel edges themselves.
+There is no gear icon in the header. Settings lives in the initials menu.
 
-### Opening and closing panels
+### The page controls
 
-Between each panel is a thin vertical line with a small tab bulging out of it near the top.
+A slim strip sits above every note:
 
-![The four ways to use a panel edge](help-assets/fig-02-panel-edges.svg)
+| Control | What it does |
+|---|---|
+| **←  →** | Back and Forward, same as a browser |
+| *filename* | Where you are |
+| Copy-link icon | Copies a link to this page |
+| Save icon | Saves the whole page, see [[#Saved]] |
+| Comments icon | Opens the Comments companion for this page. The number beside it counts open comments |
+| **⋯ More** | Backlinks (as **Links**), Properties, and Edit if you have it |
 
-- **Click the tab** — collapse or reopen that panel. This is the fastest way.
-- **Drag the line** — resize. Widths save and come back on your next visit.
-- **Double-click the line** — collapse. Two clicks, not one, so an accidental click while aiming for a drag does not shut the panel on you.
-- **Drag narrow and let go** — snaps shut.
-
-When a panel is collapsed its tab stays permanently lit so you can find it. Click it to bring the panel back.
-
-> [!TIP]
-> The tab's icon shades the side it belongs to. The left one shades its left edge, the right one shades its right edge, so it is clear which panel you are about to open.
-
-**If a panel stops widening**, it has hit the reader's floor. The reader keeps a minimum width that scales with your screen — 1200px on a 1920-wide monitor, 900px from 1440, 600px below that — and the side panels stop before they push it under that. Collapse the other panel if you need more room.
+Point at any heading and its own small row appears: copy a link to that section, save it, or comment on it. See [[#Sending someone a link]] and [[#6. Comments]].
 
 ### Vault Files
 
 ![Vault Files, annotated](help-assets/fig-05-sidebar.svg)
 
-- **Expand a folder** — click the folder row. Files load the first time you open it and stay cached until you reload.
-- **Fold control** — one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed. It hides if you narrow the panel enough to crowd the label.
-- **Vault Files is always available.** It is the one tool that cannot be closed or moved to the other side. You can reorder it against Search and Bookmarks, but it is always somewhere.
-- **New and Move** sit at the bottom of whichever panel holds Vault Files, and only appear at Contributor or above.
-- **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine. Headings, outlines and callouts never do — those open fresh every time. A closed folder is obviously a closed folder, so remembering it can never mislead you the way a silently collapsed heading could. Folds inside a list are the other saved kind, and those you can switch off; see [[#Folding lists]].
-- **Sort order** — folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
-- **File counts** — the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
-- **Trim number prefixes** — hides a two-digit prefix from folder AND file names on screen without touching anything on disk. `00_Home` reads as `Home`, `05-File Name` reads as `File Name`. The numbers still do their job: they order the vault, they are what you see in Obsidian, and they are what a `[[link]]` is matched against. On by default; Settings.
-  - The rule is deliberately narrow: **exactly two digits, then one `_` or `-`**. A file called `2024-Q1 Review` or `007-Report` keeps its name in full, because a wider rule would eat part of a real title with nothing on screen to say it had.
-  - Links work either way. `[[05-Safety Plan]]` and `[[Safety Plan]]` both find the same note, whether or not this setting is on.
+- **Show or hide it**: the icon at the far left of the header, or the thin edge where the panel meets the page. Click it to collapse or reopen, drag it to resize.
+- **Expand a folder**: click the folder row. Files load the first time you open it and stay cached until you reload.
+- **Fold control**: one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed.
+- **New and Move** sit at the bottom of Vault Files, and only appear at Contributor or above.
+- **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine.
+- **Sort order**: folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
+- **File counts**: the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
+- **Trim number prefixes**: hides a two-digit prefix from folder AND file names on screen without touching anything on disk. `00_Home` reads as `Home`. On by default; Settings.
+  - The rule is deliberately narrow: **exactly two digits, then one `_` or `-`**. A file called `2024-Q1 Review` keeps its name in full.
+  - Links work either way. `[[05-Safety Plan]]` and `[[Safety Plan]]` both find the same note.
 
-**What the tree never shows:** anything ending `.comments.md` or `.changes.md`, anything starting with `.`, the `zSystem` folder (comments, change logs, profiles, shared theme), your Obsidian attachments subfolder, the `/config/`, `/themes/` and `/assets/` folders, and this help page.
+**What the tree never shows:** anything ending `.comments.md` or `.changes.md`, anything starting with `.`, the `zSystem` folder, your Obsidian attachments subfolder, the `/config/`, `/themes/` and `/assets/` folders, and this help page.
+
+### Companions and destinations
+
+Everything besides the page you're reading is one of two things.
+
+A **companion** describes the page beside it, so it shares the screen with it: **Outline** is always there, and opening a page's Comments or Links brings that companion in next to it too. Open more than one and a small strip of tabs appears above the column so you can switch between them, the same control that opened a companion closes it again.
+
+A **destination**, the full Search results, **Saved**, and **Admin**, isn't about any one page, so it takes over the middle of the screen instead. **Close**, in its corner, takes you back to whatever you were reading, or to Home if that's where you came from.
+
+### The guided tour
+
+The first time anyone opens this layout on a device, Folio walks through it: Home, search, Vault Files, where Comments lives, a handful of highlighted stops with a line of text each. It runs once, automatically, and there's no button to replay it. If you'd like to see it again, ask whoever manages Folio, or just explore. Everything it covers is written up in this page.
 
 ### Moving between notes
 
-The reader's own top-left corner holds **Back**, **Forward** and the name of the note you are on. Back and Forward work like browser tabs and restore your scroll position, not just the file. The history is session-only and resets when you reload.
+**Back** and **Forward**, top left above the page, work like a browser's and restore your scroll position, not just the file. The history is session-only and resets when you reload.
 
-**Open last note** (Settings → Navigation, on by default) reopens the note you were last reading when you launch, expanding whatever folders are needed to reach it **on top of** the tree you left open. The two work together: your saved tree is the starting point, the path to the note is added to it. Turn it off and you simply get your tree back without a note opening.
+**Open last note** (Settings → Navigation, on by default) reopens the note you were last reading when you launch, expanding whatever folders are needed to reach it **on top of** the tree you left open.
+
+> [!NOTE] Still on the old layout?
+> A few installs still run Folio's original two-panel look; everything above describes the current one instead. Switch at **Settings → New look → Try the new layout**. It's on by default for anyone new, and the old layout is being retired soon.
 
 ---
 
 ## 3. Reading a note
-
-![The reader's own controls, annotated](help-assets/fig-06-reader-controls.svg)
 
 ### Who owns this page
 
@@ -157,17 +165,19 @@ When something *is* folded, the row says so — a small **"N hidden"** badge app
 
 Every page has an address, and so does every heading on it.
 
-**Copy link** is in the top-right corner of the reader, next to Properties. It copies the address of the page you are reading, ready to paste into Teams or an email. Anyone who opens it lands on that page.
+**Copy link**, in the row of controls above the reader (see [[#The page controls]]), copies the address of the page you are reading, ready to paste into Teams or an email. Anyone who opens it lands on that page.
 
 **To link to one section rather than the whole page**, point at its heading. A small row of controls appears on the right: the first copies a link straight to that heading, so the person you send it to arrives at the right part of a long note instead of the top. The same control appears on Outline rows when you point at them, which is handier when the section you want is not the one you are looking at.
 
-The second control on a heading **bookmarks that section** — the same bookmark you can already add from the Outline.
+The second control **saves that section** to Saved, the same save you can add from the Outline. See [[#Saved]].
 
-The two greyed-out controls beside them are not broken. Commenting on a single section and highlighting text are being built; they are shown so you can see what is coming.
+The third opens **Comment on this section**, the same composer as the Comments companion, with this heading already locked in as the target. See [[#6. Comments]].
+
+The last, Highlight, stays greyed out: highlighting is private to whoever adds it and doesn't have anywhere to live yet, so it's shown only so you can see what's coming.
 
 **If somebody renames a heading, links to it stop working** and open the page at the top instead. That is worth knowing before you paste a section link into something permanent. A link to the page itself keeps working as long as the file is not renamed.
 
-**Back and Forward** are in the opposite corner. They now match the browser's own Back button, so both do the same thing.
+**Back and Forward** work like a browser's. Both do the same thing a browser's own buttons would.
 
 ### Folding lists
 
@@ -201,7 +211,7 @@ Writing links is covered in [Help — Editing and Markdown](help-edit.md).
 
 ### Folder and file-share links
 
-A link to a network folder or drive path (`file://` UNC, or `X:\...`) cannot open Explorer from a web page. No browser allows it. Clicking one **copies the cleaned path to your clipboard** instead, with a brief confirmation, ready to paste into Explorer's address bar.
+A link to a network folder or drive path (`file://` UNC, or `X:\\...`) cannot open Explorer from a web page. No browser allows it. Clicking one **copies the cleaned path to your clipboard** instead, with a brief confirmation, ready to paste into Explorer's address bar.
 
 ### Images
 
@@ -230,6 +240,8 @@ If any cell in the row has real text in it, the whole row is treated as content 
 ---
 
 ## 4. Finding things
+
+*How to open and close a companion or a destination (Outline, Comments, Links, Search, Saved, Admin) is covered in [[#Companions and destinations]]. This section is about what each one shows.*
 
 ### What's New
 
@@ -261,28 +273,6 @@ Set them the same way as any other property, in the Properties panel or in Obsid
 
 **Where this is stored:** on your own machine, like your theme and your open folders. Nothing about what you have read is written into the vault, and nobody else can see it.
 
-### The panels
-
-Both panels behave identically. Tools **stack** rather than replace each other.
-
-![How the panels stack](help-assets/fig-07-right-panel-stacking.svg)
-
-- **Click a tool icon** — add that tool to the stack, or take it out.
-- **Double-click a tool icon** — show that one alone, closing the rest of that panel.
-- **Drag the handle between two open tools** — change how the height is split.
-- **Drag a tool's title bar** — move it up or down the stack, or across to the other panel.
-- **Move button in a tool's title bar** — send it to the other panel in one click.
-
-Which tools are in which panel, the order they are stacked in, and the height you gave each one are all remembered.
-
-### Resizing a panel
-
-The thin line between a panel and the reader does three things.
-
-- **Drag it** — resize the panel. Dragging never collapses it, however slowly you drag.
-- **Click the tab that appears on it** — collapse the panel, or open it again. The tab stays visible while a panel is collapsed, so there is always a way back.
-- **Double-click the line** — widen the panel to fit its longest visible row. Useful when a file name is being cut off. It fits what is on screen, not what is inside folders you have not opened.
-
 ### Outline
 
 Every heading H1 through H6 in the current note, indented by level. Click one to scroll to it; the active heading highlights as you scroll.
@@ -297,51 +287,35 @@ Neither the outline's folds nor the reader's survive a reload.
 
 ### Search
 
-Press **⌘K** (Mac) or **Ctrl+K** (Windows) anywhere to open Search with the field focused.
+Press **⌘K** (Mac) or **Ctrl+K** (Windows), or click **Search, saved, recent…** in the header, to open quick search.
 
-Results come in two labelled groups: **this file first, then the whole vault**, with filename matches ahead of content matches. Each result shows a snippet; clicking one scrolls to it and highlights it. **Esc** clears the field, and a second **Esc** closes the tab. Arrow keys move through results, Enter opens.
+Empty, it shows your saved pages and what you've opened recently. Start typing and it searches the whole vault, filename matches first, then a snippet of matching text, up to 30 results. **See all results** at the bottom opens the full Search destination with everything the quick list left out.
+
+**Esc** closes it. Arrow keys move through results, Enter opens the highlighted one.
 
 The index is built once per session and refreshed whenever a file is written, so it will not go stale mid-session.
 
-### Bookmarks and Favorites
+### Saved
 
-![Bookmarking, from the Outline to the Bookmarks tab](help-assets/fig-08-bookmarks.svg)
+**To save a whole page:** the **Save** icon above the reader, see [[#The page controls]].
 
-**To bookmark something:** open the Outline and click the **ribbon icon** on any heading row. That saves the file *and* that heading, not a copy of the text. Click it again to remove it.
+**To save one section:** point at its heading and click the save icon in the row that appears, see [[#Sending someone a link]]. It saves that heading, not a copy of the text.
 
-The **Bookmarks tab** has two sections:
+Either way, click the same control again to remove it.
 
-- **Bookmarks** — grouped by file. Headings sit in document order; you reorder the files themselves.
-- **Favorites** — a flat, hand-ordered shortlist, empty until you add to it.
+**Reaching what you've saved:** Home's Saved door, the top of quick search when the box is empty, or **See everything saved** at the bottom of that same list. Either opens the full Saved destination.
 
-**Promote to Favorites** — hover a bookmark row and click the star. It stays in both places.
+The Saved destination groups everything by page. A page you saved whole sits under **Pinned**, at the top; a page where you've only saved a section or two sits below, under its own name, with those sections listed underneath it. Clicking a page opens it; clicking a saved section opens the page, scrolls to it and unfolds it.
 
-**Rename a favorite** — hover it and click the pencil. Favorites are the only place renaming is possible.
+**Saved pages that moved.** Every scan compares the vault against what it saw last time, so renaming or moving a page carries your saves across to it automatically. The one thing it can't follow is a page renamed **and** edited before Folio next opens: with both the name and the contents changed at once, there is nothing left to match on. A broken save shows a repair prompt rather than quietly failing.
 
-**Remove one** — hover any row and click the **×**. On a bookmark it removes that heading; on a file header it removes every bookmark in that file; on a favourite it removes the favourite and leaves the bookmark. Removing here is the same as un-clicking the ribbon in the Outline, and it is the only way to reach a bookmark whose file has gone.
+Saved is **yours**, stored against your email in the vault, so it follows you to another PC rather than living in one browser.
 
-**Bookmarks pointing at nothing** show struck through and marked *file not found*, and clicking them does nothing. A **Remove all** bar appears above the list when there are any. This happens when a file was renamed before Folio learned to follow renames, or when a file was deleted outright — there is no way to work out where those bookmarks were meant to point, so clearing and re-adding them is the fix.
-
-**Clicking any bookmark** opens that file, scrolls to that heading, unfolds anything hiding it, and unfolds the section itself. If the Outline is also open, it follows along.
-
-**Organising them** — each section header has two icons:
-
-| Icon | What it does |
-|---|---|
-| **Folder +** | Create a named group. One level only, no groups inside groups. Always available. |
-| **Sliders** | Turn organise mode on. Off by default. While on, grip handles appear and you can drag rows to reorder them or move them in and out of groups. |
-
-Organise mode is off by default on purpose: with it off there is nothing to drag by accident.
-
-Bookmarks are **yours**, stored against your email in the vault, so they follow you to another PC rather than living in one browser.
-
-**Renaming a page does not break your bookmarks.** Every scan compares the vault against what it saw last time. A path that disappeared alongside a path that appeared carrying the same contents is the same page under a new name, and your bookmarks, favourites and last-opened note are moved across to it. The same is true of a page moved to a different folder. Nothing is asked of you and nothing needs re-adding.
-
-There is one case it cannot catch: **renaming a page and editing it before anyone next opens Folio**. With both the name and the contents changed at once, there is nothing left to match on, and bookmarks to that page do break. If you are reorganising the vault, rename first and let it settle before editing.
-
-Comments and change logs are a separate matter — those are files of their own, named after the page, and a rename does leave them behind. Renaming a page that has comments on it is worth avoiding for now.
+Comments and change logs are a separate matter: those are files of their own, named after the page, and a rename does leave them behind. Renaming a page that has comments on it is worth avoiding for now.
 
 ### Links
+
+Open it from **⋯ More → Links**, above the reader.
 
 Two lists for the open note:
 
@@ -364,7 +338,7 @@ Only Most read has this. **Never opened** has nobody to name, and **Gone quiet**
 
 **What is recorded, and when.** Folio notes which page you are on once it has loaded, and how long you stayed. Nothing is written while you read. When you switch away from the tab or close it, that sitting is written to a hidden file in the vault under `zSystem/Analytics/`, one file per person per month, one line per page per day. That file is safe to delete at any time; it will simply start again.
 
-**Recording happens for everyone; reading the report does not.** The Usage tool is Administrator only — open it from your initials badge → Usage. But the log files themselves are ordinary Markdown in the vault, named after the person they belong to, so anyone who can open the vault in Obsidian can open them. **Nothing here is secret from the team, and it is not meant to be.** If that matters to you, the honest place to raise it is the folder, not the report.
+**Recording happens for everyone; reading the report does not.** The Usage tool is Administrator only — open it from your initials badge → Usage, which opens the Usage tab in Admin. But the log files themselves are ordinary Markdown in the vault, named after the person they belong to, so anyone who can open the vault in Obsidian can open them. **Nothing here is secret from the team, and it is not meant to be.** If that matters to you, the honest place to raise it is the folder, not the report.
 
 Because the write happens when you leave, your own reading appears quickly and other people's lags by up to one sitting, plus however long OneDrive takes to sync. It is near-live, not live.
 
@@ -374,19 +348,19 @@ Because the write happens when you leave, your own reading appears quickly and o
 
 Two separate places. **Theme** is how Folio looks; **Settings** is how it behaves. Both live under your initials badge, top right.
 
-### Trying the new layout
+### Switching layouts
 
-**Settings → New look → Try the new layout.** It is off unless you turn it on, and it only changes the computer you turn it on at. Switching either way is instant, and switching back leaves everything exactly as you had it.
+Folio has two looks: the current one, which is everything this page describes, and the original two-panel layout it replaced. New installs start on the current one; a device that was already running Folio before it existed stays on the old one until you switch it.
 
-Same vault, same pages, nothing removed. Three things move: search comes up into the top bar as a proper box you can see, the panels that are mainly for maintaining the vault move behind one button next to Comments, and the app gains a **Home** button. Comments keeps its own button with the count on it, so you can tell at a glance whether a page has any.
+**Settings → New look → Try the new layout** switches either way, instantly, and only for the computer you're on. Same vault, same pages, nothing removed. Switching back leaves everything exactly as you had it.
 
-If you try it and prefer the old one, turn it off. That is the point of it being a switch.
+The old layout is on its way out and won't be around much longer, so there's little reason to switch to it now.
 
 ### Theme panel
 
 Open with **initials badge → Theme**. It is a popup, not a modal, so the note stays visible behind it and every change lands live as you make it. There is no Save button — everything writes the moment you change it. Each section has its own **Reset**, and there is a **Reset all** in the footer. One section opens at a time.
 
-**On the new layout, this panel is shorter on purpose.** It offers five controls only — Mode, Preset (Things or Minimal), Reading width, Text size, and Line spacing — described under Appearance and Reading below. Accent, body font, and the whole of Headings, Navigation icons, Interface and Share are not shown there; your existing choices in those aren't changed, there's just no way to change them further from the new layout. Switch **Settings → New look** off to reach the full panel described below. **Show page title**, previously part of Headings, moved to **Settings → New look** on the new layout.
+**This panel is shorter on purpose.** It offers five controls: Mode, Preset (Things or Minimal), Reading width, Text size, and Line spacing, described under Appearance and Reading below. Accent, body font, and the whole of Headings, Navigation icons, Interface and Share aren't shown here; your existing choices in those aren't changed, there's just no way to change them further from this panel. Switch to the old layout (**Settings → New look**, off) to reach the full panel described below. **Show page title**, previously part of Headings, lives at **Settings → New look** instead.
 
 ![The Theme panel, annotated](help-assets/fig-03-theme-panel.svg)
 
@@ -473,8 +447,8 @@ Folio has three levels, each one including everything below it. You pick yours f
 | Tier | What it adds |
 |---|---|
 | **User** | The default. Read, search, outline, bookmarks, comments, What's New, themes. Nothing in the vault changes. |
-| **Contributor** | New, Move, Edit, the Properties fields, clickable task checkboxes, the Review tab, the bell and both inboxes. |
-| **Administrator** | Changing the two tier passwords. |
+| **Contributor** | New, Move, Edit, the Properties fields, clickable task checkboxes, and the Review and All comments tabs in Admin. |
+| **Administrator** | Everything in Admin: Usage, Access and Vault check, plus changing the two tier passwords. |
 
 **Moving up asks for that tier's password. Moving down never does**, so nobody is stuck in a mode they turned on by accident. Your tier is remembered on **this PC** and does not follow you to another machine.
 
@@ -522,17 +496,15 @@ Clearing browser data or reimaging a PC resets the first group to defaults, or t
 
 Commenting never requires editing to be on. Anyone can comment.
 
-Open the **Comments** tab in the right panel. It shows the comments on the note you are reading, with a post box underneath.
+**On a page:** open its **Comments** companion, above the reader (see [[#The page controls]]). It shows the comments on the page you're reading, with a post box underneath, and its icon carries the page's own open-comment count.
+
+**On one section:** point at its heading and click the comment icon in the row that appears (see [[#Sending someone a link]]). It opens the same composer with that heading already picked as the target. Once you start typing, the target locks, so scrolling elsewhere can't post it to the wrong place.
 
 **To post:** pick a type, write, click **Post**.
 
-**To close one:** click **Mark closed**. Closed comments dim rather than disappear.
+**To reply:** click **Reply** on any comment. A reply threads underneath the comment it answers, indented, as its own entry rather than an edit to the original.
 
-**Clicking a comment** selects it and tries to find the text it refers to in the note, so you can see what it is about without hunting.
-
-**The whole vault at once:** at the bottom of the Comments tool there is an **All comments** button. That scans every folder and lists every open comment across the vault in the reader, so nothing sits unanswered in a folder nobody opened. The number on the Comments icon is that same vault-wide count of open comments. The Review tool has the same thing, **All changes**.
-
-The rule is the same for both: the **tool** shows the note you are reading, the **button at the bottom of it** shows the whole vault.
+**To close one:** click **Mark closed**. A closed comment with no open replies collapses to its first line; click it to expand.
 
 | Type | Use for |
 |---|---|
@@ -541,7 +513,11 @@ The rule is the same for both: the **tool** shows the note you are reading, the 
 | ✅ Action | Something that needs doing |
 | 🚩 Flag | Something that needs attention |
 
-Comments are written to a sidecar `.comments.md` file that OneDrive carries to the rest of the team. They are stored as HTML comment blocks, which means they are **invisible if you open that note in Obsidian** — they never clutter the note itself.
+**Reporting a page:** the **Report** button under the title opens a comment about the page as a whole, preset to Flag. Use it for something wrong with the page itself, not a particular part of it.
+
+**The whole vault at once:** **Home → Admin → All comments** (Contributor and above) lists every open comment across every folder, so nothing sits unanswered in a folder nobody opened. Review, next to it, has the same shape for changes: **Home → Admin → Review**.
+
+Comments are written to a sidecar `.comments.md` file that OneDrive carries to the rest of the team. They are stored as HTML comment blocks, which means they are **invisible if you open that note in Obsidian**. They never clutter the note itself.
 
 **Email digests:** if your vault lives in a SharePoint or Teams document library, SharePoint can email you when comments change. Open the vault folder in SharePoint in a browser, hover it → three-dot menu → **Alert me** → **All changes** → **Send a daily summary**. One email a day covering the whole vault. Set the alert on an individual `.comments.md` file instead if you only care about one note.
 
@@ -571,21 +547,28 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Install Folio | Header icon next to dark/light, or Initials badge → Install Folio |
 | Check what's connected, identified and installed | Initials badge → the row under your name |
 | What changed since you last looked | **What's New**, above the vault tree |
-| Open or close a side panel | Click the tab on that panel's drag line |
-| Resize a panel | Drag the line; double-click it to collapse |
+| Show or hide Vault Files | Icon at the far left of the header, or click/drag its edge |
+| Open a companion (Outline, Comments, Links) | Its button above the reader, or **⋯ More** |
+| Switch between open companions | The tab strip above the column, once more than one is open |
 | Collapse folders | One button above the vault tree |
 | Collapse headings | One button in the Outline panel |
 | Fold a whole subtree | Alt-click the chevron (Option on Mac) |
 | Fold a whole list | Hover the list, click **All** on its first row |
 | Fold a callout | Chevron at the right of its title row |
 | Back and Forward | Reader's top left, beside the filename |
-| Edit a note | Pencil, reader top right. Needs editing on |
-| Note properties | Sliders icon, next to the pencil |
-| Bookmark a heading | Ribbon icon on that heading's Outline row |
-| Search | `⌘K` / `Ctrl+K`, or the magnifier tab |
+| Edit a note | **⋯ More → Edit**, above the reader. Needs editing on |
+| Note properties | **⋯ More → Properties**, above the reader |
+| Save a heading | Save icon on that heading's row, or the ribbon in Outline |
+| Search | `⌘K` / `Ctrl+K`, or **Search, saved, recent…** in the header |
+| Comment on a page | Comments button above the reader |
+| Comment on one section | Comment icon on that heading's row |
+| Reply to a comment | Reply button on that comment |
+| Report a problem with a page | Report button under the title |
+| See every open comment in the vault | Home → Admin → All comments |
+| Open Admin | Home → Admin (Contributor and above) |
 | Which pages get read, and which never do | **Usage** tool. Administrator only |
 | Who read a particular page | **Usage** → click the reader count on a Most read row |
-| Version and changelog | The version button at the bottom of the right panel |
+| Version and changelog | Initials badge → the version row |
 | How to write Markdown | [Help — Editing and Markdown](help-edit.md) |
 
 ---
