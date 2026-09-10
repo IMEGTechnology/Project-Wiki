@@ -8,6 +8,34 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.55.1 — 2026-09-10
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/connect-failure.test.js`.
+
+*One bug report, root-caused, plus the reporting that would have made it a five-minute problem. Fixes only, so PATCH.*
+
+### Connecting to a vault could stop dead, with nothing said
+
+Reported twice in one morning: the folder picker opens, a folder can be chosen, and then nothing happens. Afterwards every button on the screen appears dead while the picker itself still opens. That is one fault, not three.
+
+**The store that remembers the vault folder between launches opens a small browser database, and an open request has a third outcome besides success and failure: it can be blocked.** Another Folio tab or the installed app still holding it, or a site-data clear whose cleanup has not finished, and the browser fires `blocked` and then waits, with no deadline, for the other connection to close. There was no handler for it, so that wait became the app's wait. The promise never settled, so `await` never returned, nothing was ever thrown, and the `try/catch` written around it specifically to make this step best-effort could not fire, because a hang is not a failure. Every route into a vault queues behind that one line, which is why the picker still opened (it runs first) while everything after it was already stopped.
+
+It now fails on a five-second deadline and names which of the three outcomes it hit. **Remembering the folder is best-effort again, which is what the comment above it always claimed it was.**
+
+### A failure while opening the vault was being written where nobody could see it
+
+Since the beginning, a vault that will not load has written its reason into the sidebar. During the walkthrough the first-run overlay covers the entire app, so that message has been landing behind it, unread, every time. What the person sees is an unchanged screen, which is indistinguishable from a button that did not fire.
+
+**The connect and reconnect screens now report their own failures**, in place, with the reason quoted and the three things that account for nearly every case: another Folio still open, a folder the computer guards (Desktop, Documents and Downloads are protected on a Mac and the browser has to be granted each one), or a folder that has not finished syncing. The report box scrolls rather than the card, so the buttons stay on screen however long the message runs.
+
+**Two smaller silences went with it.** Declining the browser's permission prompt said nothing and left the screen as it was; dismissing the picker was treated as "changed their mind" and said nothing, even though a refused folder arrives the same way and is not the same thing. Both now say what is true and what to do about it.
+
+**And the screen says when it is working.** Opening a folder can take a real moment, and until now nothing on screen changed while it did.
+
+### A failed connect no longer claims to have succeeded
+
+Found while testing the above. Opening a vault marks the app connected on the way in, and nothing put that back on failure, so the retry screen greeted the person with **"Already connected"** and a Continue button that walked them into an app with no vault behind it. Worse than the failure it was reporting. The state is now put back before anything reads it.
+
 ## 0.55.0 — 2026-09-09
 
 **Changed:** `index.html`, `manifest.json`, `sw.js`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/b3-frame.test.js`; updated `supporting/tests/docks.test.js`, `section18-shell.test.js`, `session-d-fixes.test.js`.

@@ -2475,6 +2475,26 @@
     #first-run-card .fr-note { font-size: 11px; color: var(--text-muted); margin-top: 12px; }
     #first-run-card .fr-msg  { font-size: 12px; color: var(--text-secondary); margin: 0 0 14px; min-height: 16px; }
 
+    /* 0.55.1 -- the connect screen's failure report. --border-strong, not
+       --border, so it survives the "borders: none" theme setting: this is
+       the one panel on screen that must never quietly lose its edges. */
+    #first-run-card .fr-fail {
+      border: 1px solid var(--border-strong); border-radius: 6px;
+      padding: 12px 14px; margin: 0 0 20px;
+      font-size: 12.5px; line-height: 1.55; color: var(--text-secondary);
+      /* The box scrolls rather than the card. The overlay centres the card
+         and does not scroll, so a tall card is clipped at BOTH ends and the
+         buttons go with it -- a failure report you cannot act on is worse
+         than none. Capping the box here keeps every screen the same shape
+         and keeps the actions on screen whatever the message says. */
+      max-height: 46vh; overflow-y: auto;
+    }
+    #first-run-card .fr-fail b { color: var(--text-primary); }
+    #first-run-card .fr-fail p { font-size: 12.5px; line-height: 1.55; margin: 10px 0 6px; }
+    #first-run-card .fr-fail .fr-why { color: var(--text-muted); font-size: 11.5px; margin: 6px 0 12px; }
+    #first-run-card .fr-fail ul { margin: 0; padding-left: 18px; }
+    #first-run-card .fr-fail li { margin-bottom: 7px; }
+
     /* 0.45.0 -- screen 3 draws name and email into the card instead of
        popping the account-setup modal over it, so all six screens read as
        one thing. The SAVE is still that modal's own function. */
@@ -4400,7 +4420,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.55.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.55.1</button>
     </aside>
 
   </div>
@@ -5047,12 +5067,34 @@ function configIsPlaceholder() {
 // which is why reopen is a button, not automatic.
 const IDB_NAME = 'wikibase', IDB_STORE = 'handles', IDB_KEY = 'vaultDir';
 
+// 0.55.1 -- an open request has a THIRD outcome besides success and error:
+// it can be BLOCKED, when another tab or the installed app is still holding
+// the database or a site-data clear has a delete still pending. The browser
+// fires `blocked` and then waits, with no deadline, for the other connection
+// to close. Without a handler that wait becomes the app's wait: the promise
+// never settles, `await` never returns, nothing is thrown, and every
+// try/catch around it is useless, because a hang is not a failure. That is
+// the whole of the "the button does nothing" report -- every route into the
+// vault queues behind this one line, so the picker (which runs before it)
+// still opened while everything after it was already stopped.
+// A store that only remembers a folder must never be able to hold the app
+// still, so it now fails on a deadline and says which of the three it was.
+const IDB_OPEN_MS = 5000;
 function idbOpen() {
   return new Promise((res, rej) => {
-    const rq = indexedDB.open(IDB_NAME, 1);
+    let settled = false;
+    const finish = (fn, arg) => { if (settled) return; settled = true; clearTimeout(timer); fn(arg); };
+    const timer = setTimeout(() => finish(rej, new Error(
+      'the browser did not answer within ' + (IDB_OPEN_MS / 1000) + ' seconds')), IDB_OPEN_MS);
+    let rq;
+    try { rq = indexedDB.open(IDB_NAME, 1); }
+    catch (e) { finish(rej, e); return; }
     rq.onupgradeneeded = () => rq.result.createObjectStore(IDB_STORE);
-    rq.onsuccess = () => res(rq.result);
-    rq.onerror   = () => rej(rq.error);
+    // A late success after the deadline still has to close its connection,
+    // or the giveaway is a second Folio that can never open the store again.
+    rq.onsuccess = () => { if (settled) { try { rq.result.close(); } catch (_) {} return; } finish(res, rq.result); };
+    rq.onerror   = () => finish(rej, rq.error || new Error('the browser refused to open its storage'));
+    rq.onblocked = () => finish(rej, new Error('another Folio window is still holding it open'));
   });
 }
 async function idbSet(val) {
@@ -5183,6 +5225,10 @@ async function startLocalVault(root, fresh = false) {
     console.warn('Folio: could not remember this folder, so the next launch will ask for it again.', e);
   }
   renderAppBanner(); // P6 — the connect banner has just stopped being true
+  // 0.55.1 -- a folder can take a real moment to open, and until now the
+  // screen said nothing at all while it did, which is indistinguishable
+  // from a button that did not fire.
+  frConnectStatus({ busy: true });
   await bootVault();
 }
 
@@ -5195,9 +5241,17 @@ async function pickLocalVault(fresh = false) {
   try {
     root = await window.showDirectoryPicker({ mode: 'readwrite' });
   } catch (e) {
-    if (e && e.name === 'AbortError') return; // user cancelled the picker — fine
-    alert('Could not open the folder: ' + (e.message || e.name || e) +
-      '\n\nIf this says the operation is not allowed, your browser is blocking folder access for pages opened from disk. Tell Claude the exact message and browser.');
+    // A dismissed picker and a REFUSED folder both arrive as AbortError, so
+    // this cannot claim the person changed their mind. It says only what is
+    // true: nothing was chosen, plus the question that has to be answered
+    // yes if something was.
+    if (e && e.name === 'AbortError') {
+      frConnectStatus({ note: 'Nothing was chosen, so nothing changed. If you did choose a folder and the browser then asked whether to allow it, that question has to be answered yes.' });
+      return;
+    }
+    if (!frConnectStatus({ error: (e && e.message) || (e && e.name) || String(e) })) {
+      alert('Could not open the folder: ' + (e.message || e.name || e));
+    }
     return;
   }
   await startLocalVault(root, fresh);
@@ -5219,7 +5273,12 @@ async function reopenLocalVault() {
   try {
     let perm = await root.queryPermission({ mode: 'readwrite' });
     if (perm !== 'granted') perm = await root.requestPermission({ mode: 'readwrite' });
-    if (perm !== 'granted') return; // user declined — stay on the prompt
+    if (perm !== 'granted') {
+      // 0.55.1 -- staying on the prompt with nothing said was the second way
+      // this screen looked broken.
+      frConnectStatus({ note: 'The browser was not given permission to that folder, so Folio still cannot read it.' });
+      return;
+    }
     await startLocalVault(root);
   } catch (e) {
     // folder moved/deleted or handle stale — fall back to a fresh pick
@@ -20075,7 +20134,7 @@ async function bootVault() {
       openFile(last.url, last.name);
     }
   } catch (e) {
-    $('sb-tree').innerHTML = `<div class="sb-msg">Could not load vault.<br><span style="font-size:11px">${escHtml(e.message)}</span></div>`;
+    vaultLoadFailed(e);
   }
 }
 
@@ -20201,6 +20260,70 @@ function finishReturningRun() {
   checkIdentity(); // self-skips for a recognized person, same as always
 }
 
+// ── 0.55.1 — the connect screen answers for itself ────────────────
+// Every failure between "choose a folder" and "the vault is open" reports
+// HERE. It has to. During a walkthrough the first-run overlay covers the
+// entire app, so the sidebar message bootVault() has written on a failure
+// since the beginning lands BEHIND it, where it has never once been read.
+// The person sees an unchanged screen, which is indistinguishable from a
+// button that did not fire, and that is exactly how it was reported twice.
+// Standing rule, same one loadAppDoc() follows: make the failure describe
+// itself, and put the description where the person is looking.
+function frConnectBusyHTML() {
+  return '<div class="fr-actions"><button type="button" class="local-pick-btn" disabled>' +
+         'Opening the folder…</button></div>';
+}
+
+function frConnectMsg(ctx) {
+  if (ctx.error) {
+    return '<div class="fr-fail">' +
+      '<b>Folio could not open that folder.</b>' +
+      '<p class="fr-why">' + escHtml(ctx.error) + '</p>' +
+      '<p>Nearly every case of this is one of three things:</p>' +
+      '<ul>' +
+      '<li><b>Another Folio is still open</b>, including the installed app. ' +
+      'Close the others, then try again.</li>' +
+      '<li><b>The computer is guarding that folder.</b> Desktop, Documents and ' +
+      'Downloads are protected on a Mac: open System Settings, then Privacy and ' +
+      'Security, then Files and Folders, and turn the matching folder on for your browser.</li>' +
+      '<li><b>The folder has not finished syncing</b>, so parts of it are not on ' +
+      'this computer yet.</li>' +
+      '</ul></div>';
+  }
+  if (ctx.note) return '<p class="fr-msg">' + escHtml(ctx.note) + '</p>';
+  return '';
+}
+
+// Returns true when the walkthrough took the message, false when there is no
+// walkthrough on screen and the caller still has to report it somewhere else.
+function frConnectStatus(patch) {
+  if (!firstRunActive) return false;
+  firstRunCtx.busy  = !!patch.busy;
+  firstRunCtx.note  = patch.note  || '';
+  firstRunCtx.error = patch.error || '';
+  showFirstRunStep('connect');
+  return true;
+}
+
+// One place for "the vault did not open". The sidebar copy stays for the case
+// with no overlay over it; the walkthrough gets the same words somewhere they
+// can be seen.
+function vaultLoadFailed(e) {
+  const why = (e && e.message) ? e.message : String(e || 'no reason given');
+  // The connect is what failed, so the app is NOT on a vault, whatever
+  // startLocalVault() set on its way in. Leaving this true made the retry
+  // screen greet the person with "Already connected" and a Continue button
+  // that walks them into an app with no vault behind it -- a worse outcome
+  // than the failure it was reporting. The state has to match the truth
+  // before anything reads it.
+  LOCAL.on = false;
+  const tree = $('sb-tree');
+  if (tree) tree.innerHTML = '<div class="sb-msg">Could not load vault.<br>' +
+    '<span style="font-size:11px">' + escHtml(why) + '</span></div>';
+  renderAppBanner(); // the connect banner is true again
+  frConnectStatus({ error: why });
+}
+
 function showFirstRunStep(step, ctx) {
   ctx = ctx || firstRunCtx || {};
   const body = $('first-run-body');
@@ -20230,10 +20353,12 @@ function showFirstRunStep(step, ctx) {
       '<p>Your browser drops folder permission when Folio is closed, so it ' +
       'needs one click to open the vault again. Installing Folio is what ' +
       'stops it asking — you can do that from the account menu.</p>' +
+      frConnectMsg(ctx) +
+      (ctx.busy ? frConnectBusyHTML() :
       '<div class="fr-actions">' +
       '<button type="button" class="local-pick-btn" onclick="reopenLocalVault()">Reconnect to vault</button>' +
       '<a onclick="pickLocalVault();return false">Open a different folder…</a>' +
-      '</div>';
+      '</div>');
 
   } else if (step === 'connect') {
     const fsOk = ctx.fsOk !== undefined ? ctx.fsOk : !!window.showDirectoryPicker;
@@ -20250,13 +20375,15 @@ function showFirstRunStep(step, ctx) {
           'it syncing to this computer first. They will point you at the right ' +
           'one. Then open it here and Folio does the rest.</p>' +
           '<p>One folder is all Folio needs for now. Room for more comes later.</p>') +
+      frConnectMsg(ctx) +
+      (ctx.busy ? frConnectBusyHTML() :
       '<div class="fr-actions">' +
       (on
         ? '<button type="button" class="local-pick-btn" onclick="frAdvance(\'connect\')">Continue</button>' +
           '<a onclick="pickLocalVault();return false">Choose a different folder…</a>'
         : '<button type="button" class="local-pick-btn" onclick="pickLocalVault()"' +
           (fsOk ? '' : ' disabled') + '>Open vault folder…</button>') +
-      '</div>' +
+      '</div>') +
       (fsOk ? '' : '<p class="fr-note">Needs Chrome or Edge.</p>');
 
   } else if (step === 'identity') {

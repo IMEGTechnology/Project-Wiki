@@ -20,7 +20,7 @@
 
   <!-- wordmark -->
   <text x="90" y="105" fill="#C9C9CE" font-size="14" font-weight="600">Folio</text>
-  <text x="140" y="105" fill="#6E6E73" font-size="12">Team Wiki</text>
+  
 
   <!-- Home pill, accent-filled (the one accent control in the app) -->
   <rect x="212" y="87" width="72" height="24" rx="12" fill="#5B9CF6"/>

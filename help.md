@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.55.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.55.1**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -59,6 +59,8 @@ To change it later: **your initials badge, top right → Switch user**.
 
 ### The screen at a glance
 
+![The screen at a glance, annotated](help-assets/fig-01-screen-at-a-glance.svg)
+
 Three parts. The **reader** in the middle is the note you're on, with a slim strip of controls above it: Back, Forward, Copy link, Save, Comments. **Vault Files**, on the left, holds the tree of notes and toggles from the header. On the right, **Outline** is always there, and pointing at a page's Comments or Links brings that companion in beside it too.
 
 A few things aren't about any one page, the full Search results, **Saved**, and (if you have it) **Admin**, so they take over the middle instead of sharing it. All of this is covered in [[#2. Getting around]].
@@ -101,12 +103,12 @@ Point at any heading and its own small row appears: copy a link to that section,
 
 ### Vault Files
 
-![Vault Files, annotated](help-assets/fig-05-sidebar.svg)
-
-- **Show or hide it**: the icon at the far left of the header, or the thin edge where the panel meets the page. Click it to collapse or reopen, drag it to resize.
+- **Show or hide it**: the icon at the far left of the header. Dragging the panel's inner edge changes its width but never closes it, so a stray drag cannot make the tree disappear.
+- **Set its width**: drag the inner edge. Double-click that edge to fit the panel to the longest name in view. Your width is remembered on that computer.
+- **The note you are reading** is marked in the tree with a bar down its edge, a tint behind the row, or both.
 - **Expand a folder**: click the folder row. Files load the first time you open it and stay cached until you reload.
 - **Fold control**: one button to the right of the "Vault Files" label. It collapses the whole tree, and the same button expands it again once everything is closed.
-- **New and Move** sit at the bottom of Vault Files, and only appear at Contributor or above.
+- **New and Move** sit at the bottom of Vault Files, and only appear at Contributor or above. Pointing at a folder row also reveals a **+** that creates a file inside that folder, where the one at the bottom creates at the vault root.
 - **The tree remembers how you left it.** Folders you open stay open across reloads and between sessions, on your own machine.
 - **Sort order**: folders with a numeric prefix (`00_Identity`, `01_Projects`) sort numerically. Unprefixed folders sort alphabetically after them.
 - **File counts**: the badge on each folder is how many `.md` files it holds. Turn it off in Settings.
@@ -117,6 +119,8 @@ Point at any heading and its own small row appears: copy a link to that section,
 **What the tree never shows:** anything ending `.comments.md` or `.changes.md`, anything starting with `.`, the `zSystem` folder, your Obsidian attachments subfolder, the `/config/`, `/themes/` and `/assets/` folders, and this help page.
 
 ### Companions and destinations
+
+![Companions and destinations, annotated](help-assets/fig-10-companions-destinations.svg)
 
 Everything besides the page you're reading is one of two things.
 
@@ -362,8 +366,6 @@ Open with **initials badge → Theme**. It is a popup, not a modal, so the note 
 
 **This panel is shorter on purpose.** It offers five controls: Mode, Preset (Things or Minimal), Reading width, Text size, and Line spacing, described under Appearance and Reading below. Accent, body font, and the whole of Headings, Navigation icons, Interface and Share aren't shown here; your existing choices in those aren't changed, there's just no way to change them further from this panel. Switch to the old layout (**Settings → New look**, off) to reach the full panel described below. **Show page title**, previously part of Headings, lives at **Settings → New look** instead.
 
-![The Theme panel, annotated](help-assets/fig-03-theme-panel.svg)
-
 #### Appearance
 
 | Control | Options | Default |
@@ -547,7 +549,7 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Install Folio | Header icon next to dark/light, or Initials badge → Install Folio |
 | Check what's connected, identified and installed | Initials badge → the row under your name |
 | What changed since you last looked | **What's New**, above the vault tree |
-| Show or hide Vault Files | Icon at the far left of the header, or click/drag its edge |
+| Show or hide Vault Files | Icon at the far left of the header. Its edge sets the width, it does not close the panel |
 | Open a companion (Outline, Comments, Links) | Its button above the reader, or **⋯ More** |
 | Switch between open companions | The tab strip above the column, once more than one is open |
 | Collapse folders | One button above the vault tree |
@@ -563,7 +565,7 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | Comment on a page | Comments button above the reader |
 | Comment on one section | Comment icon on that heading's row |
 | Reply to a comment | Reply button on that comment |
-| Report a problem with a page | Report button under the title |
+| Report a problem with a page | Report button in the page's footer |
 | See every open comment in the vault | Home → Admin → All comments |
 | Open Admin | Home → Admin (Contributor and above) |
 | Which pages get read, and which never do | **Usage** tool. Administrator only |
