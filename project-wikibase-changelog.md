@@ -8,6 +8,38 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.56.0 — 2026-09-11
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/review-actions.test.js`.
+
+*Five defects in the review flow, found while auditing it against Jayson's report that it "seems to be working weird." Every one of them was silent, and one was losing work. New user-facing behaviour (the app can now say an action worked), so MINOR.*
+
+### Filling in properties was deleting review items
+
+**The serious one.** Folio keeps a baseline for each page: a record of the content as it was when somebody last approved it. A page edited in Obsidian is compared against that baseline, and the difference is what appears in Review as "edited in Obsidian."
+
+Filling in a page's missing properties wrote a **new baseline**, at the page's current content. That line exists so a page dropped into the vault after the first run starts being watched, which is right. For every other page it did the opposite: a page that already had a baseline *and* an unapproved change had that change quietly folded into the new baseline. The difference then came out as nothing, and the item left Review with nobody having looked at it. **Fill all did that to every page in the band in one press.**
+
+A baseline is a record that a person approved this content. Filling in properties is not a person approving content, so it no longer writes one. A page with no baseline still gets one, which is the only case the line was ever for.
+
+**If you have run a property fill, the changes it swallowed are not recoverable from the log.** Re-approving them means looking at those pages again.
+
+### Approving from the review strip replaced the page you were reading
+
+Every review action can be pressed from two places: a row on the dashboard, where the reader is showing the dashboard, or the strip at the bottom of the page you are reviewing. All of them redrew the dashboard into the reader afterwards. On the dashboard that is correct. Mid-review it replaced the page you were looking at with the dashboard, which is most of what "working weird" was describing.
+
+### The review bar at the bottom never went away
+
+Open a change that was made in Obsidian, then open a different page: the bar stayed, still describing the page you left, with its Approve button aimed at a file no longer on screen. The rule that the bottom strip leaves with its page has been in the code since it was written; this bar was added later and was never added to the rule.
+
+### Nothing ever said whether an action had worked
+
+Accept, Approve, Fill properties, Clear due date: each one wrote to the vault and said nothing at all, so a write that worked, a write that was slow and a write that failed were indistinguishable. **Every one of them now confirms, and names the reason when it fails.** Failures no longer interrupt with a dialog box.
+
+### And the review walk now keeps up with the work
+
+The list you walk with **Next** was built when the walk started and never touched again, so an item you had just dealt with was offered again and the "N left" count never went down. Resolving an item now drops it and opens the next one; resolving the last one ends the walk and returns you to the dashboard.
+
 ## 0.55.1 — 2026-09-10
 
 **Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/connect-failure.test.js`.

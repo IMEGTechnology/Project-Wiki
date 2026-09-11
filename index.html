@@ -403,6 +403,30 @@
     }
     #admin-body { flex: 1; min-height: 0; }
 
+    /* 0.56.0 -- the confirmation. Sits above the panes (200) and below the
+       first-run overlay (300), so it is visible over the app but never over
+       a screen that is asking for something. Both colour pairs are written
+       out per theme in the token block; nothing here resolves to a fallback. */
+    .wb-toast {
+      /* bottom is set by wbToastLift() at show time, so the toast clears
+         whatever the review bottom stack is occupying. 22px is the value it
+         uses when the stack is closed. */
+      position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 12px);
+      z-index: 260; max-width: min(440px, calc(100vw - 32px));
+      padding: 8px 15px; font-size: 12.5px; font-weight: 600; line-height: 1.45;
+      text-align: center; border-radius: 999px;
+      border: 1px solid var(--co-green-bd);
+      background: var(--co-green-bg); color: var(--co-green-txt);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease, visibility .16s;
+    }
+    .wb-toast.on { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+    .wb-toast.bad {
+      border-color: var(--co-red-bd); background: var(--co-red-bg); color: var(--co-red-txt);
+    }
+    @media (prefers-reduced-motion: reduce) { .wb-toast { transition: none; } }
+
     /* P10 -- Vault check. Its own small group rather than a reuse of the
        review dashboard's rows: a review row is a DECISION about a file
        (approve, acknowledge) and a check row is a FACT about it, and the
@@ -4362,6 +4386,11 @@
         <button class="diff-close" onclick="closeRvDetail()" title="Close" aria-label="Close review detail">✕</button>
       </div>
       <div id="rvd-strip" style="display:none"></div>
+      <!-- 0.56.0 -- the app's one confirmation. Fixed to the viewport, not
+           dropped into a pane, because the actions that use it are pressed
+           from three different surfaces and the answer has to appear in the
+           same place every time. -->
+      <div id="wb-toast" class="wb-toast" role="status" aria-live="polite"></div>
     </div>
 
     <!-- Right panel resize handle -->
@@ -4420,7 +4449,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.55.1</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.56.0</button>
     </aside>
 
   </div>
@@ -10481,7 +10510,12 @@ async function openFile(url, name) {
   // standing over the next file is the stale-pane bug in another costume.
   if (state.activeUrl !== url) { rightResetTabs(); betaCloseSlide(); }
   // S14+ — the bottom stack describes the file being left, so it goes with it.
-  if (state.activeUrl !== url) { closeDiffStrip(); closeRvDetail(); }
+  // 0.56.0 -- auditCloseBar() joins the line it should have been on since
+  // S15. The vault-audit bar was added after this rule was written and was
+  // only ever closed on the review-walk path, so ordinary navigation left it
+  // standing over the next page, still describing the last one, with its
+  // Approve button pointed at a file that was no longer on screen.
+  if (state.activeUrl !== url) { closeDiffStrip(); closeRvDetail(); auditCloseBar(); }
 
   // Session A. History is the browser's now. A navigation that came FROM a
   // popstate must not push another entry, or Back would walk one step and
@@ -14370,10 +14404,8 @@ async function auditApproveActive() {
     await auditRecord(url);                 // appends to the log; the note is untouched
     auditCloseBar();
     await scanBadges();
-    if (state.rvQueue) { rvShowQueueBar(); }
-    const rc = $('reader-content');
-    if (rc && !state.activeUrl) rc.innerHTML = buildReviewDashboardHTML();
-  } catch (e) { alert('Could not approve: ' + e.message); }
+    await rvAfterAction(url, 'Approved. This page is recorded as reviewed.');
+  } catch (e) { rvNotify('Could not approve: ' + e.message, false); }
 }
 
 // Flag writes an ordinary comment. No new comment type, no new filter
@@ -14396,9 +14428,15 @@ async function auditFlagActive() {
     await ensureZSystemDir(cUrl);
     await spWriteFile(cUrl, serializeComments(list));
     await scanBadges();
-    soloRPTab('comments');
+    // 0.56.0 -- was soloRPTab, the double-click "show this alone" gesture.
+    // Flagging tore down whatever pane layout you were working in, which is
+    // the same mistake rvOpenItem was fixed for at v0.32.1 and this call was
+    // missed. Opening is what this needs; soloing was never part of it.
+    ensureToolOpen('comments');
     await renderCommentsTab();
-  } catch (e) { alert('Could not flag: ' + e.message); }
+    auditCloseBar();   // the bar described a decision that has now been made
+    rvNotify('Flagged. Your note is on the page as a comment.', true);
+  } catch (e) { rvNotify('Could not flag: ' + e.message, false); }
 }
 
 // OneDrive is the only thing that knows WHO changed a file. The app knows
@@ -14566,9 +14604,77 @@ async function rvApproveAudit(url) {
   try {
     await auditRecord(url);
     await scanBadges();
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+    rvRefreshDashboard();
   } catch (e) { alert('Could not approve: ' + e.message); }
+}
+
+// ── Saying so, and moving on (0.56.0) ─────────────────────────────
+// Until now no review action said anything. Accept, Approve, Fill, Clear due
+// date: each one wrote to the vault and returned in silence, so a write that
+// worked, a write that was slow and a write that failed all looked the same
+// from the outside. That is most of why the flow felt like it was doing
+// nothing, and it is why the first thing built here is the confirmation.
+let wbToastTimer = null;
+
+// The review strips live along the bottom of the window and can be dragged to
+// most of its height, so a confirmation pinned to the bottom of the viewport
+// lands ON TOP of the surface the person just acted in -- the diff they were
+// reading, or the properties they were filling. Found by rendering it; no
+// check could see it, because jsdom measures every element as zero. The toast
+// is lifted clear of whatever the bottom stack is currently occupying.
+const WB_BOTTOM_STACK = ['rv-queue-bar', 'diff-bar', 'diff-strip', 'audit-bar', 'rvd-bar', 'rvd-strip'];
+function wbToastLift() {
+  let h = 0;
+  WB_BOTTOM_STACK.forEach(id => {
+    const el = $(id);
+    if (el && el.style.display !== 'none') h += el.offsetHeight || 0;
+  });
+  return h ? h + 14 : 22;
+}
+
+function rvNotify(msg, ok) {
+  const el = $('wb-toast');
+  if (!el) return;
+  el.style.bottom = wbToastLift() + 'px';
+  el.textContent = msg;
+  el.className   = 'wb-toast on' + (ok ? '' : ' bad');
+  if (wbToastTimer) clearTimeout(wbToastTimer);
+  // A failure is left up longer, because it is the one you have to read.
+  wbToastTimer = setTimeout(() => { el.className = 'wb-toast'; }, ok ? 3200 : 7000);
+}
+
+// A review action can be pressed from a dashboard ROW, where the reader is
+// showing the dashboard, or from the bottom strip mid-walk, where the reader
+// is showing the page being reviewed. Rewriting reader-content is right in
+// the first case and destroys the page you are reading in the second.
+// auditApproveActive() guarded this from the start; nothing else did, which
+// is why approving from the strip replaced the page with the dashboard.
+function rvRefreshDashboard() {
+  if (state.activeUrl) return;         // a page is open, so the dashboard is not on screen
+  const rc = $('reader-content');
+  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+}
+
+// One ending for every review action: say what happened, then, if a walk is
+// running, drop the item just resolved and open the next one.
+//
+// The drop is the part that was missing. state.rvQueue is captured when the
+// walk starts and was never touched again, so Next re-opened items that had
+// already been dealt with and "N left" counted them forever. Only the item
+// at the current position is dropped, and only if it is the one that was
+// acted on: a page can sit in the queue twice for two different reasons, and
+// clearing one of them does not clear the other.
+async function rvAfterAction(url, msg) {
+  if (msg) rvNotify(msg, true);
+  const q = state.rvQueue;
+  if (!q || !q.length) { rvRefreshDashboard(); return; }
+  const at = state.rvQueuePos;
+  if (!q[at] || q[at].url !== url) { rvShowQueueBar(); rvRefreshDashboard(); return; }
+  q.splice(at, 1);                     // position now holds what used to be next
+  if (at > q.length - 1) { rvQueueExit(); return; }   // that was the last one
+  const item = q[at];
+  await rvOpenItem(item.type, item.url, item.name, item.opts);
+  rvShowQueueBar();
 }
 
 function buildReviewDashboardHTML() {
@@ -14887,10 +14993,9 @@ async function rvApproveFlagged(url) {
     const txt = await readVaultFile(url);
     await spWriteFile(url, setFmKeys(txt, [['status', 'Reviewed'], ['reviewed', 'true']]));
     await scanBadges();
-    if (state.activeUrl === url) openFile(url, state.activeName);
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewDashboardHTML();
-  } catch (e) { alert('Could not approve: ' + e.message); }
+    if (state.activeUrl === url) await openFile(url, state.activeName);
+    await rvAfterAction(url, 'Approved. The page is marked Reviewed.');
+  } catch (e) { rvNotify('Could not approve: ' + e.message, false); }
 }
 
 async function rvClearDue(url) {
@@ -14898,10 +15003,9 @@ async function rvClearDue(url) {
     const txt = await readVaultFile(url);
     await spWriteFile(url, setFmKeys(txt, [['due', '']]));
     await scanBadges();
-    if (state.activeUrl === url) openFile(url, state.activeName);
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewDashboardHTML();
-  } catch (e) { alert('Could not clear due date: ' + e.message); }
+    if (state.activeUrl === url) await openFile(url, state.activeName);
+    await rvAfterAction(url, 'Due date cleared.');
+  } catch (e) { rvNotify('Could not clear the due date: ' + e.message, false); }
 }
 
 async function rvAcknowledgeAllBand2() {
@@ -14928,8 +15032,7 @@ async function rvAcknowledgeAllBand2() {
     }
     await scanBadges();
     if (state.activeUrl) openFile(state.activeUrl, state.activeName);
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+    rvRefreshDashboard();
   } catch (e) { alert('Could not acknowledge: ' + e.message); }
 }
 
@@ -14937,10 +15040,9 @@ async function rvAcknowledgeAllBand2() {
 async function rvUpdateFile(url) {
   try {
     await approveNewFileCore({ url });
-    if (state.activeUrl === url) openFile(url, state.activeName);
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewDashboardHTML();
-  } catch (e) { alert('Could not update: ' + e.message); }
+    if (state.activeUrl === url) await openFile(url, state.activeName);
+    await rvAfterAction(url, 'Properties filled in. Only the keys that were missing were written.');
+  } catch (e) { rvNotify('Could not fill the properties: ' + e.message, false); }
 }
 
 // v0.33.0 — deduplicated by url. A new file now legitimately appears in both
@@ -14966,8 +15068,7 @@ async function rvFillAllBand3() {
     for (const it of items) await approveNewFileCore({ url: it.url }, { skipScan: true });
     await scanBadges();
     if (state.activeUrl) openFile(state.activeUrl, state.activeName);
-    const rc = $('reader-content');
-    if (rc) rc.innerHTML = buildReviewDashboardHTML();
+    rvRefreshDashboard();
   } catch (e) { alert('Could not fill properties: ' + e.message); }
 }
 
@@ -15101,7 +15202,19 @@ async function approveNewFileCore(f, opts) {
   // no matter how often it was edited afterwards. Frontmatter is stripped
   // before hashing, so writing the property block does not itself move the
   // baseline — only real content does.
-  try { await auditRecord(f.url, text); } catch (_) {}
+  // 0.56.0 -- ONLY when the file has no baseline yet, and that condition is
+  // the whole point. This line exists so a file dropped into the vault after
+  // the first-run seed starts being watched. Written unconditionally it did
+  // the exact opposite for every OTHER file it touched: a file that already
+  // had a baseline AND an unapproved change made in Obsidian was re-baselined
+  // to the changed text, so auditDelta() compared the change against itself,
+  // returned null, and the item left the review queue with nobody having
+  // looked at it. "Fill all" did that to every file in the band at once.
+  // A baseline records that somebody approved this content. A property fill
+  // is not somebody approving the content, so it must not write one.
+  try {
+    if (!state.auditBaseline[auditPathKey(f.url)]) await auditRecord(f.url, text);
+  } catch (_) {}
   if (!(opts && opts.skipScan)) await scanBadges();
 }
 
@@ -15117,7 +15230,7 @@ async function inboxEntryAction(fileIdx, entryIdx, value) {
     }
     await maybeFlipFileReviewed(r.url, r.changesUrl);
     await scanBadges();
-    $('reader-content').innerHTML = buildReviewDashboardHTML();
+    rvRefreshDashboard();
   } catch (e) {
     alert('Could not update: ' + e.message);
   }
@@ -15142,7 +15255,7 @@ async function markReviewed(idx) {
   if (!r) return;
   try {
     await markReviewedCore(r.url, r.changesUrl);
-    $('reader-content').innerHTML = buildReviewDashboardHTML();
+    rvRefreshDashboard();
   } catch (e) {
     alert('Could not mark reviewed: ' + e.message);
   }
@@ -15370,11 +15483,18 @@ async function reviewEntryAction(idx, value) {
     }
     const flipped = await maybeFlipFileReviewed(fileUrl, changesUrl);
     await scanBadges();
-    if (flipped || value === 'rejected') openFile(fileUrl, state.activeName); // content changed — re-render
-    else renderReviewTab();
+    if (flipped || value === 'rejected') await openFile(fileUrl, state.activeName); // content changed — re-render
+    else await renderReviewTab();
     if (diffEntryIdx === idx) closeDiffStrip();
+    // Rejecting resolves the whole file (every later pending change goes with
+    // it), and flipping means the last open change was just accepted. Either
+    // way this page owes nothing more, so the walk moves on. An accept that
+    // leaves more changes queued stays put — there is another one to look at.
+    if (value === 'rejected')  await rvAfterAction(fileUrl, 'Change rejected. The page was put back to how it was.');
+    else if (flipped)          await rvAfterAction(fileUrl, 'Last change accepted. The page is now marked Reviewed.');
+    else                       rvNotify('Change accepted.', true);
   } catch (e) {
-    alert('Could not update: ' + e.message);
+    rvNotify('Could not update: ' + e.message, false);
   }
 }
 
