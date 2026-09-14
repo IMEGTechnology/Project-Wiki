@@ -108,7 +108,9 @@
       --rb-0: #f38ba8; --rb-1: #fab387; --rb-2: #f9e2af;
       --rb-3: #a6e3a1; --rb-4: #74c7ec; --rb-5: #cba6f7;
 
-      /* Callout color families — 13 Obsidian types → 9 families */
+      /* Callout color families — 13 Obsidian types → 10 families.
+         Rose added J3 (13 Sep) for Admin's door -- teal read too close
+         to green at a glance; Help took teal's old spot, purple. */
       --co-blue-bg:  rgba(91,156,246,0.12);  --co-blue-bd:  #5b9cf6; --co-blue-txt:  #5b9cf6;
       --co-teal-bg:  rgba(45,212,191,0.12);  --co-teal-bd:  #2dd4bf; --co-teal-txt:  #2dd4bf;
       --co-cyan-bg:  rgba(34,211,238,0.12);  --co-cyan-bd:  #22d3ee; --co-cyan-txt:  #22d3ee;
@@ -117,6 +119,7 @@
       --co-orange-bg:rgba(251,146,60,0.12);  --co-orange-bd:#fb923c; --co-orange-txt:#fb923c;
       --co-red-bg:   rgba(248,113,113,0.12); --co-red-bd:   #f87171; --co-red-txt:   #f87171;
       --co-purple-bg:rgba(167,139,250,0.12); --co-purple-bd:#a78bfa; --co-purple-txt:#a78bfa;
+      --co-rose-bg:  rgba(251,113,133,0.12); --co-rose-bd:  #fb7185; --co-rose-txt:  #fb7185;
       --co-gray-bg:  rgba(168,162,158,0.12); --co-gray-bd:  #a8a29e; --co-gray-txt:  #a8a29e;
     }
 
@@ -158,6 +161,7 @@
       --co-orange-bg:#fef3e2; --co-orange-bd:#ea580c; --co-orange-txt:#c1490a;
       --co-red-bg:   #fde8e8; --co-red-bd:   #dc2626; --co-red-txt:   #b91c1c;
       --co-purple-bg:#f1ebfe; --co-purple-bd:#7c3aed; --co-purple-txt:#6926c4;
+      --co-rose-bg:  #fde7ec; --co-rose-bd:  #e11d48; --co-rose-txt:  #be123c;
       --co-gray-bg:  #f1f1ef; --co-gray-bd:  #57534e; --co-gray-txt:  #44403c;
     }
 
@@ -381,21 +385,23 @@
       flex-shrink: 0;
     }
     #right-tabs { display: none; }
-    .rt-tab {
-      font-size: 11px; padding: 3px 8px; border-radius: var(--radius);
-      border: 1px solid var(--border); background: transparent;
-      color: var(--text-muted); cursor: pointer;
+    /* J3, 13 Sep -- replaces .rt-tab (sample 2): one segmented control
+       instead of five loose pills, each tab saying what's waiting behind
+       it via .ch-count (the same badge Home's doors use, sample 3). */
+    .seg2 {
+      display: inline-flex; border: 1px solid var(--border-strong);
+      border-radius: var(--radius); overflow: hidden;
     }
-    .rt-tab:hover { color: var(--text-primary); border-color: var(--border-strong); }
-    .rt-tab.on {
-      background: var(--accent-bg); border-color: var(--accent);
-      color: var(--accent); font-weight: 600;
+    .seg2 button {
+      font-family: inherit; font-size: 11px; padding: 4px 11px; border: none;
+      border-right: 1px solid var(--border); background: transparent;
+      color: var(--text-secondary); cursor: pointer; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 5px;
     }
-    /* P9 -- reuses .rt-tab rather than a second tab-strip style, since the
-       Admin screen's tab strip is visually the same idea: a small pill row,
-       one active at a time. .locked is the one thing .rt-tab never needed
-       before, because a companion is never offered and then refused. */
-    .rt-tab.locked { color: var(--text-muted); opacity: .6; cursor: not-allowed; }
+    .seg2 button:last-child { border-right: none; }
+    .seg2 button:hover:not(.locked) { color: var(--accent); }
+    .seg2 button.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    .seg2 button.locked { color: var(--text-muted); opacity: .55; cursor: not-allowed; }
     .admin-lock { font-size: 9px; }
     #admin-tabs {
       display: flex; gap: 4px; flex-wrap: wrap;
@@ -805,12 +811,7 @@
        as the widths above. Hidden rather than exited on purpose: a walk
        keeps its position and returns the moment a page is open again, so
        pressing Home never costs someone their place in a 17-item queue. */
-    body.beta-shell.console-home #rv-queue-bar,
-    body.beta-shell.console-home #diff-bar,
-    body.beta-shell.console-home #diff-strip,
-    body.beta-shell.console-home #audit-bar,
-    body.beta-shell.console-home #rvd-bar,
-    body.beta-shell.console-home #rvd-strip { display: none !important; }
+    body.beta-shell.console-home #rv-banner { display: none !important; }
 
     /* 0.41.1: the you-are-here section bar (0.40.0) retires in this shell.
        The breadcrumb sits directly above it naming the same page, so it was
@@ -954,30 +955,67 @@
     }
     .ch-vnote b { color: var(--text-primary); }
 
-    /* Uneven cells, Jayson's call: Continue reading carries the longest
-       label (a filename) and was wrapping to two lines at an equal 1/6
-       share, so it gets more; Admin lost its subtext line and gets less
-       to compensate. .no-admin drops Admin's own column entirely rather
-       than leaving the row six-wide with a gap, for a User with nothing
-       to review. */
+    /* J3, 13 Sep -- sample C: doors read across in one row, sub-line
+       hidden until hover (revealed, never inserted, so nothing below the
+       row moves when it appears), icon and label centred, and each door
+       coloured by the meaning Folio already gives its group -- blue for
+       reading, green for new, purple for help (moved off teal, too close
+       to green), rose for admin. The centred, ellipsised label no longer
+       needs Continue reading to be wider or Admin to be narrower, so
+       every door now shares flex evenly; .no-admin still drops Admin's
+       own slot for a tier that can't see it, it just costs nothing to
+       keep under flex. Hovering grows the door under the pointer and
+       narrows the rest to fit -- if that reads badly the cheaper fix is
+       dropping flex-grow on hover and revealing the sub-line in place. */
     .ch-doors {
-      display: grid; grid-template-columns: 1.35fr 1fr 1fr 1fr 1fr 0.75fr; gap: 8px;
-      margin-top: 20px;
+      display: flex; gap: 8px; align-items: stretch; margin-top: 20px;
     }
-    .ch-doors.no-admin { grid-template-columns: 1.35fr 1fr 1fr 1fr 1fr; }
     .ch-door {
+      flex: 1 1 0; min-width: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0; min-height: 58px; padding: 8px 10px;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
-      padding: 10px 12px; background: var(--bg-reader); color: var(--text-primary);
-      font-size: 12.5px; font-weight: 600; text-align: left; cursor: pointer;
-      min-height: 56px; display: flex; flex-direction: column;
-      justify-content: center; gap: 2px;
+      background: var(--bg-reader); color: var(--text-primary);
+      font-size: 12.5px; font-weight: 600; text-align: center;
+      cursor: pointer; overflow: hidden;
+      transition: flex-grow .18s ease, background .18s ease;
     }
-    .ch-door:hover { border-color: var(--accent); color: var(--accent); }
+    .ch-door:hover { flex-grow: 2.4; border-color: var(--accent); color: var(--accent); }
+    .ch-door-top {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      max-width: 100%; min-width: 0;
+    }
+    .ch-door-lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ch-door .icon {
+      width: 15px; height: 15px; stroke: currentColor; fill: none;
+      stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none;
+    }
+    /* Sub-line is revealed, never inserted -- opacity/max-height, not
+       display, so the button's own height never changes and nothing
+       below the row moves when it appears. */
     .ch-door small {
-      display: block; color: var(--text-muted); font-size: 11px;
-      font-weight: 400; line-height: 1.35;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      display: block; color: var(--text-muted); font-size: 11px; font-weight: 400;
+      line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 100%; opacity: 0; max-height: 0; margin-top: 0;
+      transition: opacity .18s ease, max-height .18s ease, margin-top .18s ease;
     }
+    .ch-door:hover small { opacity: 1; max-height: 1.4em; margin-top: 3px; color: inherit; }
+
+    /* One colour per group -- meanings Folio already carries, not a
+       palette. Blue: the three reading doors, the app's own accent.
+       Green: What's new, the colour a diff's added block already takes.
+       Purple: Help. Rose: Admin, the door hidden below Contributor that
+       almost nobody opens, so its warmth barely registers where almost
+       nobody sees it. */
+    .ch-door { box-shadow: inset 3px 0 0 currentColor; }
+    .ch-door.g-read  { border-color: var(--co-blue-bd);   background: var(--co-blue-bg); box-shadow: inset 3px 0 0 var(--co-blue-bd); }
+    .ch-door.g-read  .icon, .ch-door.g-read  small { color: var(--co-blue-txt); }
+    .ch-door.g-new   { border-color: var(--co-green-bd);  background: var(--co-green-bg); box-shadow: inset 3px 0 0 var(--co-green-bd); }
+    .ch-door.g-new   .icon, .ch-door.g-new   small { color: var(--co-green-txt); }
+    .ch-door.g-help  { border-color: var(--co-purple-bd); background: var(--co-purple-bg); box-shadow: inset 3px 0 0 var(--co-purple-bd); }
+    .ch-door.g-help  .icon, .ch-door.g-help  small { color: var(--co-purple-txt); }
+    .ch-door.g-admin { border-color: var(--co-rose-bd);   background: var(--co-rose-bg); box-shadow: inset 3px 0 0 var(--co-rose-bd); }
+    .ch-door.g-admin .icon, .ch-door.g-admin small { color: var(--co-rose-txt); }
     /* P9 -- .ghost is gone with it: the Admin door was its only user, and
        it's a real door now (see chDoorsHTML()). */
     .ch-soon {
@@ -1089,7 +1127,13 @@
     /* Narrow: the rail stacks BELOW the left panel, never beside it at half
        width. Also the arrangement that survives if mobile is ever revisited. */
     @media (max-width: 1000px) { .ch-split { grid-template-columns: 1fr; } }
-    @media (max-width: 900px)  { .ch-doors { grid-template-columns: repeat(3, 1fr); } }
+    /* Hover-grow only makes sense in one row; below this width fall
+       back to a wrapped grid with the sub-line always shown. */
+    @media (max-width: 900px) {
+      .ch-doors { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .ch-door { flex-grow: 0 !important; }
+      .ch-door small { opacity: 1; max-height: none; margin-top: 2px; }
+    }
     @media (max-width: 560px)  { .ch-doors { grid-template-columns: repeat(2, 1fr); } }
 
     /* === The banner slot (P6) ================================
@@ -1426,12 +1470,12 @@
     .folder-row:hover .fr-add { display: block; }
     .fr-add:hover { color: var(--text-primary); }
     /* create + move + default-page modals */
-    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay {
+    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay, #rpt-overlay {
       position: fixed; inset: 0; z-index: 60;
       background: rgba(0,0,0,0.35);
       display: flex; align-items: center; justify-content: center;
     }
-    #create-modal, #move-modal, #dp-modal, #sr-modal {
+    #create-modal, #move-modal, #dp-modal, #sr-modal, #rpt-modal {
       width: 380px; padding: 16px; border-radius: 10px;
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
@@ -1819,40 +1863,127 @@
       padding: 0;
       min-height: 0;
     }
-    /* Review diff strip (S14+) */
-    #diff-bar, #audit-bar, #rvd-bar {
-      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-      padding: 7px 14px 4px; border-top: 1px solid var(--border-strong);
+    /* ── The one-shape review banner (J2b, 0.60.0) ──────────────────
+       Replaces four bars that each laid themselves out differently: the
+       walk bar, the diff bar, the audit bar and the detail bar. The order
+       below never changes, whatever the item is:
+
+         [walk] [page title] [kind] [chips] ──── [actions] [x]
+
+       THE RULE THAT MAKES IT ONE SHAPE AT EVERY WIDTH: the kind text and
+       the chips give up room and ellipse, the title shrinks to nine
+       characters, and the ACTION CLUSTER NEVER GIVES UP ANYTHING. The bar
+       does not wrap. A wrapping bar is a bar whose buttons move, which is
+       the exact fault this surface exists to remove — and it is the same
+       family as the filter chip row sliced by the column edge at S86.
+       Found by rendering at four widths; jsdom measures everything as
+       zero and can see none of it. */
+    #rv-banner { flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; }
+    #rvb-bar {
+      flex-shrink: 0; display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+      /* 10px, not 14: at the reading column's 600px floor the worst case
+         (an escalation, five actions, a walk in progress) came out six pixels
+         over. Taken from the gutter rather than from the title, which is
+         already at the shortest width where it still says something. */
+      padding: 7px 10px 6px; border-top: 1px solid var(--border-strong);
       background: var(--bg-sidebar); cursor: row-resize; user-select: none;
       font-size: 11.5px; color: var(--text-muted);
       position: relative; /* anchors the ::before grab bead */
     }
-    #rvd-bar .rvd-spacer { flex: 1; }
-    #rvd-bar #rvd-title { font-weight: 600; color: var(--text-primary); }
-    #rvd-strip {
+    /* Small, and it must never truncate: a position indicator that reads
+       "Page" is worse than one that is not there. */
+    #rvb-walk  { display: flex; align-items: center; gap: 8px; white-space: nowrap; flex: none; }
+    .rvb-pos   { font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    #rvb-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary);
+      flex: 1 1 auto; min-width: 6ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #rvb-kind  { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #rvb-sp    { flex: 1 1 auto; min-width: 8px; }
+    /* An empty slot still costs a gap. Four of the seven are empty on most
+       item types, which was 32px of a 572px bar spent on nothing — found by
+       measuring the clusters after the bar still overflowed with every
+       shrinkable thing already at zero. */
+    #rvb-bar > span:empty { display: none; }
+    #rvb-acts  { display: flex; align-items: center; gap: 6px; flex: none; }
+    /* One button scale, the same one Admin's tab pills already use. A label
+       that wraps makes the bar taller, which is the one-shape break by
+       another route, so every one of them is nowrap. */
+    #rvb-acts button, #rvb-walk button {
+      white-space: nowrap; font-family: inherit; font-size: 11px; padding: 3px 9px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--text-secondary); cursor: pointer;
+    }
+    #rvb-acts button:hover, #rvb-walk button:hover { border-color: var(--accent); color: var(--accent); }
+    #rvb-acts button.go   { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    #rvb-acts button.warn { border-color: var(--co-red-bd); color: var(--co-red-txt); }
+    #rvb-acts button:disabled, #rvb-walk button:disabled { opacity: .5; cursor: default; }
+    .rvb-chiprow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 9px; }
+    .rvb-chip { font-size: 10.5px; padding: 1px 6px; border-radius: 9px;
+      border: 1px solid var(--border-strong); color: var(--text-muted);
+      white-space: nowrap; }
+    .rvb-chip.esc  { border-color: var(--co-red-bd);    color: var(--co-red-txt);    background: var(--co-red-bg); }
+    .rvb-chip.due  { border-color: var(--co-yellow-bd); color: var(--co-yellow-txt); background: var(--co-yellow-bg); }
+    .rvb-chip.sec  { border-color: var(--co-blue-bd);   color: var(--co-blue-txt);   background: var(--co-blue-bg); }
+    #rvb-x { flex: none; border: 0; background: none; cursor: pointer;
+      color: var(--text-muted); font-size: 12px; padding: 2px 6px; }
+    #rvb-x:hover { color: var(--text-primary); }
+    #rvb-body {
       flex-shrink: 0; height: 180px; overflow-y: auto;
       padding: 10px 16px; background: var(--bg-sidebar);
       font-size: 12.5px; color: var(--text-secondary);
     }
-    /* Property table inside the detail strip. A missing key is stated as
-       missing rather than left blank — a blank cell and an absent key look
-       identical, and the whole point of this strip is telling them apart. */
-    .rvd-props { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; align-items: baseline; }
-    .rvd-key   { font-weight: 600; color: var(--text-primary); }
-    .rvd-val   { color: var(--text-secondary); word-break: break-word; }
+    /* Editable property grid inside the banner (J2b, item 10). A missing key
+       is stated as missing rather than left blank — a blank field and an
+       absent key look identical, and telling them apart is the whole point of
+       this surface. The gap tint is on the FIELD, so "not set" survives you
+       clicking into it. */
+    .rvb-pg { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px 14px; }
+    .rvb-pf { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .rvb-pf label { font-size: 10px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-muted); }
+    .rvb-pf input[type=text], .rvb-pf input[type=date],
+    .rvb-pf input[type=number], .rvb-pf select {
+      font: inherit; font-size: 12px; padding: 4px 7px; min-width: 0;
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      background: var(--bg-app); color: var(--text-primary); outline: none;
+      color-scheme: var(--input-scheme);
+    }
+    .rvb-pf.gap input, .rvb-pf.gap select {
+      border-color: var(--co-yellow-bd); background: var(--co-yellow-bg); }
+    .rvb-chk { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 0; }
     .rvd-gap   { color: var(--co-red-txt); font-style: italic; }
+
+    /* The question and escalation banner (J2b). The thread and the reply box
+       are the Comments pane's own shapes, narrowed to one thread. */
+    .rvb-qthread { display: flex; flex-direction: column; gap: 8px; }
+    .rvb-qcard { border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 8px 10px; background: var(--bg-app); }
+    .rvb-qcard.reply { margin-left: 22px; background: transparent; }
+    .rvb-qmeta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .rvb-qwho { font-weight: 650; color: var(--text-secondary); }
+    .rvb-qbody { font-size: 12.5px; color: var(--text-primary); line-height: 1.55;
+      white-space: pre-wrap; word-break: break-word; }
+    .rvb-qreply { display: flex; gap: 8px; align-items: flex-start; }
+    .rvb-qreply textarea { flex: 1; font: inherit; font-size: 12px; min-height: 46px;
+      resize: vertical; padding: 6px 8px; border: 1px solid var(--border-strong);
+      border-radius: var(--radius); background: var(--bg-app);
+      color: var(--text-primary); outline: none; }
+    .rvb-qreply button, .rvb-qfields button {
+      font-family: inherit; font-size: 11px; padding: 3px 9px; align-self: flex-start;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+    .rvb-qreply button:hover, .rvb-qfields button:hover { border-color: var(--accent); color: var(--accent); }
+    .rvb-qfields { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end;
+      margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--border); }
+    .rvb-qhint { flex-basis: 100%; font-size: 10.5px; color: var(--text-muted); }
     .rvd-note  { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11.5px; line-height: 1.6; }
-    #audit-bar .audit-dim { color: var(--text-muted); font-weight: 400; }
-    #audit-bar .audit-ghost-toggle { display: flex; align-items: center; gap: 5px; font-size: 11.5px; margin-left: 4px; }
-    #diff-bar .diff-close, #audit-bar .diff-close {
-      margin-left: auto; border: 0; background: none; cursor: pointer;
-      color: var(--text-muted); font-size: 12px; padding: 2px 6px;
-    }
-    #diff-bar .diff-close:hover { color: var(--text-primary); }
-    #diff-strip {
-      flex-shrink: 0; height: 180px; overflow-y: auto;
-      padding: 8px 16px; background: var(--bg-sidebar);
-    }
+    .audit-dim { color: var(--text-muted); font-weight: 400; }
+    /* The deleted-text toggle rides in the action cluster with the buttons,
+       so it gets the buttons' no-wrap rule too. */
+    #rvb-acts .audit-ghost-toggle { display: flex; align-items: center; gap: 5px;
+      font-size: 11.5px; white-space: nowrap; flex: none; }
     /* v0.32.1 — was a bare tint with a 3px bleed, which on a light theme is
        almost the reader background and read as "nothing happened". Now it
        carries the same gutter bar the vault-audit markers use, so a changed
@@ -2361,12 +2492,50 @@
        disabled button rather than a styled span so it reads as "coming
        soon" and not as a broken control. Pinned to the far right by the
        footer's own space-between; the info cluster stays left. */
+    /* J1 -- Jayson's item 4. This shipped at v0.51.1 as a placeholder and was
+       WIRED at v0.54.0, but nobody came back for the styling, so a working
+       control kept being drawn at half opacity with a not-allowed cursor. It
+       read as unavailable because it was painted unavailable. The general
+       form, worth carrying: wiring a placeholder is not finishing it, and a
+       disabled LOOK is a claim about availability exactly the way a disabled
+       attribute is. Now a live control, carrying the flag the convention
+       everywhere else uses so the shape says "report" before the word does. */
     .rb-flag {
       flex: none; font-family: inherit; font-size: 11.5px; font-weight: 500;
+      display: inline-flex; align-items: center; gap: 5px;
       padding: 3px 10px; border-radius: var(--radius);
       border: 1px solid var(--border-strong); background: transparent;
-      color: var(--text-muted); opacity: .5; cursor: not-allowed;
+      color: var(--text-secondary); cursor: pointer;
+      transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
     }
+    .rb-flag:hover {
+      color: var(--accent); border-color: var(--accent); background: var(--hover);
+    }
+    .rb-flag svg {
+      width: 12px; height: 12px; flex: none;
+      fill: none; stroke: currentColor; stroke-width: 1.9;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* The report popup. Jayson's call: open, fill out, Submit, gone -- rather
+       than summoning the Comments companion into the right column and leaving
+       it sitting there afterwards. Deliberately the SAME overlay and dialog
+       shape as Create, Move and Default page rather than a new one, and
+       deliberately scoped to Report only for now; if it proves out it goes
+       elsewhere. */
+    #rpt-modal .cm-title { margin-bottom: 2px; }
+    #rpt-target {
+      font-size: 11.5px; color: var(--text-muted);
+      margin: 0 0 10px; line-height: 1.45;
+    }
+    #rpt-body {
+      width: 100%; box-sizing: border-box; min-height: 96px; resize: vertical;
+      font-family: inherit; font-size: 13px; line-height: 1.5;
+      padding: 8px 10px; border-radius: var(--radius);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-sidebar); color: var(--text-primary);
+    }
+    #rpt-body:focus { outline: none; border-color: var(--accent); }
 
     /* Page strap (Section 18, session 1) -- the byline becomes a ruled
        strap, and the page summary sits above it. The summary is read from
@@ -3699,7 +3868,11 @@
     .dock-actions .icon-btn { width: 26px; height: 26px; }
 
     /* Review inbox reader view (S5) */
-    .review-filter-bar { display: flex; gap: 4px; flex-shrink: 0; }
+    /* J2 -- flex-shrink:0 kept this bar at its content width, so on a
+       reading column narrower than the chips the last chip was sliced off by
+       the edge rather than wrapping to a second line. Found by rendering it;
+       jsdom measures every element as zero and cannot see a clip. */
+    .review-filter-bar { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
     .review-chip {
       padding: 4px 10px; font-size: 11px; font-weight: 500;
       background: var(--badge-bg); border: 1px solid var(--border);
@@ -3730,6 +3903,22 @@
 
     /* === S42 Review dashboard — bands + Previous + queue bar === */
     .rv-band { margin-bottom: 20px; }
+    /* J2 -- what a page owes, one chip per thing, inside its row. Tone
+       tokens are the callout palette the review types already use, so a
+       chip and its type's filter dot are the same colour in both themes. */
+    .rv-owe-row { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 2px; }
+    .rv-owe {
+      font-size: 11px; line-height: 1.5; padding: 1px 7px; border-radius: 10px;
+      border: 1px solid var(--border); color: var(--text-secondary); white-space: nowrap;
+    }
+    .rv-owe-red    { border-color: var(--co-red-bd);    background: var(--co-red-bg);    color: var(--co-red-txt); }
+    .rv-owe-orange { border-color: var(--co-orange-bd); background: var(--co-orange-bg); color: var(--co-orange-txt); }
+    .rv-owe-purple { border-color: var(--co-purple-bd); background: var(--co-purple-bg); color: var(--co-purple-txt); }
+    .rv-owe-blue   { border-color: var(--co-blue-bd);   background: var(--co-blue-bg);   color: var(--co-blue-txt); }
+    .rv-owe-yellow { border-color: var(--co-yellow-bd); background: var(--co-yellow-bg); color: var(--co-yellow-txt); }
+    .rv-owe-teal   { border-color: var(--co-teal-bd);   background: var(--co-teal-bg);   color: var(--co-teal-txt); }
+    .rv-owe-green  { border-color: var(--co-green-bd);  background: var(--co-green-bg);  color: var(--co-green-txt); }
+    .rv-owe-gray   { border-color: var(--co-gray-bd);   background: var(--co-gray-bg);   color: var(--co-gray-txt); }
     .rv-band-head {
       display: flex; align-items: center; gap: 8px; cursor: pointer;
       padding: 8px 4px; border-bottom: 1px solid var(--border-strong);
@@ -3762,13 +3951,6 @@
        the border that separates it from the reader is now above it.
        v0.32.2 — and it resizes the stack, so it gets the same cursor and the
        same grab affordance as the detail bars below it. */
-    #rv-queue-bar {
-      display: none; align-items: center; gap: 10px; padding: 7px 16px;
-      background: var(--accent-bg); border-top: 1px solid var(--accent);
-      font-size: 12.5px; color: var(--text-primary); flex-shrink: 0;
-      cursor: row-resize; user-select: none; position: relative;
-    }
-
     /* Grab affordance for every bar in the bottom stack (v0.32.2). These bars
        have carried cursor:row-resize since S14 and nothing else — a cursor
        change you only discover by hovering the exact right row is not an
@@ -3776,7 +3958,7 @@
        "this edge moves" before the pointer gets there. Drawn on ::before so it
        cannot disturb the flex row's own layout, and pointer-events:none so it
        never becomes the mousedown target. */
-    #diff-bar::before, #audit-bar::before, #rvd-bar::before, #rv-queue-bar::before {
+    #rvb-bar::before {
       content: '';
       position: absolute;
       top: 2px; left: 50%;
@@ -3788,18 +3970,24 @@
       pointer-events: none;
       transition: opacity 0.15s;
     }
-    #diff-bar:hover::before, #audit-bar:hover::before,
-    #rvd-bar:hover::before, #rv-queue-bar:hover::before { opacity: 0.85; }
-    #rv-queue-bar button {
-      padding: 3px 10px; font-size: 12px; font-family: inherit; cursor: pointer;
-      border: 1px solid var(--accent); border-radius: var(--radius);
-      background: var(--bg-reader); color: var(--accent);
-    }
-    #rv-queue-bar .rv-qb-pos { color: var(--text-muted); }
-    #rv-queue-bar .rv-qb-spacer { flex: 1; }
+    #rvb-bar:hover::before { opacity: 0.85; }
 
     /* === SVG icon helpers ==================================== */
     .icon    { width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    /* J1 -- Jayson's item 7, and the class of bug behind it. `.icon` above sets
+       fill:none, and a CLASS RULE BEATS A PRESENTATION ATTRIBUTE, so every
+       `fill="currentColor"` written onto an element that also carries .icon has
+       been quietly discarded. The reader's Save control swaps its markup to a
+       filled bookmark the moment a page is saved and has done since the shell
+       shipped; the fill never arrived, so it stayed an outline while the
+       Outline pane's identical glyph -- which carries no .icon class -- filled
+       correctly. That is exactly the mismatch he reported.
+       Worth carrying, because it is the mirror of the v0.44.1 lesson: there an
+       inline style beat a stylesheet rule, here a stylesheet rule beats an
+       attribute. Either way the losing side is silent. A render found it; no
+       check could, because jsdom does not cascade.
+       Anything meant to be a solid glyph asks for it by name. */
+    .icon.icon-fill { fill:currentColor; stroke:none; }
     .icon-sm { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
   </style>
 </head>
@@ -3927,7 +4115,7 @@
       <div class="ud-health">
         <div class="health-row" id="hr-connected">
           <span class="health-dot"></span>
-          <span class="health-label">Connected</span>
+          <span class="health-label">Connected<span id="hr-connected-folder" style="display:block;font-size:11px;font-weight:400;color:var(--text-muted)"></span></span>
           <button class="health-fix" onclick="reconnectVault()">Fix</button>
         </div>
         <div class="health-row" id="hr-identified">
@@ -4162,7 +4350,9 @@
           <span class="bt-num" id="bt-cmt-count" style="display:none">0</span>
         </button>
         <button class="bt-btn bt-icon-only" id="bt-more" onclick="betaToggleMore(event)" title="More" aria-label="More">
-          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+          <!-- J1 -- the other casualty of the same rule: these three dots asked
+               for a fill by attribute and were drawn as hollow rings. -->
+          <svg class="icon icon-fill" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
         </button>
         <div id="bt-more-menu" style="display:none"></div>
       </div>
@@ -4349,43 +4539,23 @@
            three of the eight item types showing nothing at the bottom at all
            (they opened the Properties flyout in the opposite corner instead).
            One place to look, and every one of them drag-resizable. -->
-      <div id="rv-queue-bar" style="display:none"></div>
-      <!-- S14+ Review diff strip (adjustable) -->
-      <div id="diff-bar" style="display:none">
-        <span id="diff-title">Change</span>
-        <button class="ed-btn rv-accept-btn" id="diff-accept" onclick="diffAction('yes')">Accept</button>
-        <button class="ed-btn rv-reject-btn" id="diff-reject" onclick="diffAction('rejected')">Reject</button>
-        <button class="diff-close" onclick="closeDiffStrip()" title="Close" aria-label="Close diff">✕</button>
+      <!-- J2b / 0.60.0 — ONE banner. It used to be four: #rv-queue-bar,
+           #diff-bar, #audit-bar and #rvd-bar, each with its own layout, its
+           own close control in its own place, and its own idea of where the
+           actions went. Questions and escalations had none of them at all.
+           Everything the bottom of the review flow shows is rendered by
+           rvBannerRender() into these two elements and nowhere else. -->
+      <div id="rv-banner" style="display:none">
+        <div id="rvb-bar">
+          <span id="rvb-walk"></span>
+          <span id="rvb-title"></span>
+          <span id="rvb-kind"></span>
+          <span id="rvb-sp"></span>
+          <span id="rvb-acts"></span>
+          <button id="rvb-x" data-rvb="close" title="Close" aria-label="Close review banner">✕</button>
+        </div>
+        <div id="rvb-body" style="display:none"></div>
       </div>
-      <div id="diff-strip" style="display:none"><pre class="rv-diff" id="diff-body"></pre></div>
-      <!-- S15 vault-audit review bar. Separate from #diff-bar on purpose:
-           that one acts on .changes.md entries the app itself wrote, this
-           one acts on the audit log and can never revert anything. -->
-      <div id="audit-bar" style="display:none">
-        <span id="audit-title">Changed outside the app</span>
-        <button class="ed-btn" onclick="auditStep(-1)" title="Previous change">↑ prev</button>
-        <button class="ed-btn" onclick="auditStep(1)" title="Next change">↓ next</button>
-        <button class="ed-btn rv-accept-btn" onclick="auditApproveActive()">Approve file</button>
-        <button class="ed-btn rv-reject-btn" onclick="auditFlagActive()">Flag</button>
-        <button class="ed-btn" onclick="auditOpenHistory()">Version history ↗</button>
-        <label class="audit-ghost-toggle"><input type="checkbox" checked onchange="auditToggleGhosts(this.checked)"> Show deleted</label>
-        <button class="diff-close" onclick="auditCloseBar()" title="Close" aria-label="Close review bar">✕</button>
-      </div>
-
-      <!-- v0.32.1 — the bottom surface for the four item types that had none:
-           flagged, due, new file, missing properties. All four are frontmatter
-           fixes, so the strip lists the keys and their current values and
-           carries that type's one action. The Properties flyout still exists
-           and still edits; this is the read-and-act view the walk needs, in
-           the same corner as every other review detail. -->
-      <div id="rvd-bar" style="display:none">
-        <span id="rvd-title">Review item</span>
-        <span class="rvd-spacer"></span>
-        <button class="ed-btn rv-accept-btn" id="rvd-action" onclick="rvdAction()"></button>
-        <button class="ed-btn" id="rvd-props" onclick="rvdOpenProps()">Edit properties</button>
-        <button class="diff-close" onclick="closeRvDetail()" title="Close" aria-label="Close review detail">✕</button>
-      </div>
-      <div id="rvd-strip" style="display:none"></div>
       <!-- 0.56.0 -- the app's one confirmation. Fixed to the viewport, not
            dropped into a pane, because the actions that use it are pressed
            from three different surfaces and the answer has to appear in the
@@ -4449,7 +4619,7 @@
       <!-- Single manual version string in this file — the one thing to
            bump on every ship, together with the changelog entry (this
            has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.56.0</button>
+      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.61.0</button>
     </aside>
 
   </div>
@@ -4526,6 +4696,21 @@
   <!-- Quick pass, 2026-09-05 -- Default page (Admin only). Same shape as
        Move file above: a <select> built from allMdFiles(), nothing fancier,
        because that pattern already exists and works. -->
+  <!-- J1 -- Report a problem. Same shape as its siblings above. Scoped to
+       Report only at this time (Jayson's call); every other comment type
+       still goes through the Comments companion. -->
+  <div id="rpt-overlay" style="display:none" onclick="closeReportModal()">
+    <div id="rpt-modal" role="dialog" aria-label="Report a problem" onclick="event.stopPropagation()">
+      <div class="cm-title">Report a problem</div>
+      <div id="rpt-target"></div>
+      <textarea id="rpt-body" placeholder="What is wrong with this page?"></textarea>
+      <div class="cm-actions">
+        <button class="ed-btn" onclick="closeReportModal()">Cancel</button>
+        <button class="ed-btn ed-save" id="rpt-btn" onclick="submitReport()">Submit</button>
+      </div>
+    </div>
+  </div>
+
   <div id="dp-overlay" style="display:none" onclick="closeDefaultPageModal()">
     <div id="dp-modal" role="dialog" aria-label="Default page" onclick="event.stopPropagation()">
       <div class="cm-title">Default page</div>
@@ -5267,8 +5452,17 @@ async function pickLocalVault(fresh = false) {
     return;
   }
   let root;
+  // Debug aid, 2026-09-13 -- "Open a different folder" always opened wherever
+  // Chrome last remembered on its own, forcing a renavigate from scratch every
+  // time. startIn takes a handle as a location hint, not a permission grant,
+  // so this is safe even when the saved handle's own permission has lapsed.
+  const pickerOpts = { mode: 'readwrite' };
   try {
-    root = await window.showDirectoryPicker({ mode: 'readwrite' });
+    const startHandle = LOCAL.root || await savedVaultHandle();
+    if (startHandle) pickerOpts.startIn = startHandle;
+  } catch (_) { /* best effort only -- never blocks the picker */ }
+  try {
+    root = await window.showDirectoryPicker(pickerOpts);
   } catch (e) {
     // A dismissed picker and a REFUSED folder both arrive as AbortError, so
     // this cannot claim the person changed their mind. It says only what is
@@ -6604,8 +6798,6 @@ function wbDelegatedClick(e) {
     renderConsoleHome(false);
     return;
   }
-  const rightTab = e.target.closest('[data-wb-righttab]');
-  if (rightTab) { e.preventDefault(); e.stopPropagation(); rightSelect(rightTab.dataset.wbRighttab); return; }
   const chVault = e.target.closest('[data-wb-chvault]');
   if (chVault) {
     e.preventDefault(); e.stopPropagation();
@@ -6643,7 +6835,9 @@ function wbDelegatedClick(e) {
   const vcReviewEl = e.target.closest('[data-wb-vcreview]');
   if (vcReviewEl) { e.preventDefault(); e.stopPropagation(); renderAdminTab('review'); return; }
   const vcFixEl = e.target.closest('[data-wb-vcfix]');
-  if (vcFixEl) { e.preventDefault(); e.stopPropagation(); vcRepairDoubleFm(vcFixEl.dataset.wbVcfix); return; }
+  if (vcFixEl) { e.preventDefault(); e.stopPropagation(); vcRepair(vcFixEl.dataset.wbVcfixop, vcFixEl.dataset.wbVcfix); return; }
+  const vcFillEl = e.target.closest('[data-wb-vcfillall]');
+  if (vcFillEl) { e.preventDefault(); e.stopPropagation(); vcFillAllProps(); return; }
 
   // What's New rows and controls (S35). Checked before the row itself so a
   // click on "Mark group seen" — which sits inside the group header, not a
@@ -8313,6 +8507,26 @@ function pinJumpHighlight(id) {
   });
 }
 
+// Which heading owns this block (J1). The reader nests a `.md-h-row` header
+// immediately before the `.md-section` holding everything under it, so walking
+// out through the sections and taking the nearest row's heading id gives the
+// section a paragraph lives in. Returns '' above the first heading, which is a
+// real place to land on a page that opens with prose.
+function headingIdOwning(el) {
+  let node = el;
+  while (node) {
+    const section = node.closest ? node.closest('.md-section') : null;
+    if (!section) return '';
+    const row = section.previousElementSibling;
+    if (row && row.classList.contains('md-h-row')) {
+      const hd = row.querySelector('[id]');
+      if (hd && hd.id) return hd.id;
+    }
+    node = section.parentElement;
+  }
+  return '';
+}
+
 function clearJumpHighlight() {
   if (!state.jumpPinnedId) return;
   const prevRow = document.querySelector('.md-h-row.wb-jump-flash');
@@ -8921,10 +9135,12 @@ function chSavedHTML() {
 // reversed here at Jayson's ask: a User with nothing to review or approve
 // has no use for the door itself, so it is gone rather than disabled. Five
 // cells instead of six when it's hidden (.no-admin on the wrapper switches
-// the column widths -- see .ch-doors.no-admin). Continue reading gets more
-// width because its filename subtitle was wrapping to two lines; Admin
-// gives that space back since it also lost its subtext line (Jayson's
-// call -- the door's own bold label already says enough).
+// J3, 13 Sep -- sample C. Every door gets an icon, the label is centred
+// instead of left-aligned, and the sub-line is only revealed on hover
+// (see .ch-door small in the CSS) instead of always shown, so the row
+// reads its meaning from colour and icon first, detail second. Continue
+// reading no longer needs a wider column and Admin no longer needs a
+// narrower one -- see the CSS comment above .ch-doors for why.
 function chDoorsHTML() {
   const pages  = vaultReady ? allMdFiles().length : 0;
   const unread = (state.wnEntries || []).filter(e => !e.seen).length;
@@ -8933,21 +9149,32 @@ function chDoorsHTML() {
   const vaults = vaultsOn() ? state.vaults.filter(v => vaultIsHere(v)).length : 1;
   const showAdmin = reviewAllowed();
 
+  const top = (icon, label) => '<span class="ch-door-top"><svg class="icon" viewBox="0 0 24 24">' +
+    icon + '</svg><span class="ch-door-lab">' + label + '</span></span>';
+
   return '<div class="ch-doors' + (showAdmin ? '' : ' no-admin') + '">' +
-    '<button class="ch-door" data-wb-chdoor="continue">Continue reading' +
+    '<button class="ch-door g-read" data-wb-chdoor="continue">' +
+      top('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>', 'Continue reading') +
       '<small>' + escHtml(last ? displayFileName(last.name).replace(/\.md$/i, '') : 'Nothing opened yet') + '</small></button>' +
-    '<button class="ch-door" data-wb-chdoor="browse">Browse the vault' +
+    '<button class="ch-door g-read" data-wb-chdoor="browse">' +
+      top('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>', 'Browse the vault') +
       '<small>' + (state.defaultPage
         ? escHtml(displayFileName(state.defaultPage.name).replace(/\.md$/i, '')) + ' <span class="ch-tag">(Default)</span>'
         : (pages ? pages + ' page' + (pages === 1 ? '' : 's') +
             (vaults > 1 ? ', ' + vaults + ' vaults' : '') : 'The folder tree')
       ) + '</small></button>' +
-    '<button class="ch-door" data-wb-chdoor="saved">Saved' +
+    '<button class="ch-door g-read" data-wb-chdoor="saved">' +
+      top('<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>', 'Saved') +
       '<small>' + (saved ? saved + ' page' + (saved === 1 ? '' : 's') : 'Nothing saved yet') + '</small></button>' +
-    '<button class="ch-door" data-wb-chdoor="whatsnew">What\u2019s new' +
+    '<button class="ch-door g-new" data-wb-chdoor="whatsnew">' +
+      top('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 'What\u2019s new') +
       '<small>' + (unread ? unread + ' not read yet' : 'Everything read') + '</small></button>' +
-    '<button class="ch-door" data-wb-chdoor="help">How Folio works<small>Help File</small></button>' +
-    (showAdmin ? '<button class="ch-door" data-wb-chdoor="admin">Admin</button>' : '') +
+    '<button class="ch-door g-help" data-wb-chdoor="help">' +
+      top('<circle cx="12" cy="12" r="9"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-2.8 2.4-2.8 4"/><path d="M12 17.5v.01"/>', 'How Folio works') +
+      '<small>Help File</small></button>' +
+    (showAdmin ? '<button class="ch-door g-admin" data-wb-chdoor="admin">' +
+      top('<path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/>', 'Admin') +
+      '</button>' : '') +
   '</div>';
 }
 
@@ -9267,13 +9494,40 @@ function betaOpenTool(id) {
   betaOpenSlide(id);
 }
 
+// The right column's stack, Outline first and always. J1b.
+//
+// Outline is the one pane that cannot be closed or reordered out of the top:
+// it is the page's own table of contents, it is what the column is FOR, and
+// making it permanent is what stops anything else becoming "the default".
+function rightStack() {
+  const rest = (state.rightTabs || []).filter(t => t !== 'outline');
+  return ['outline', ...rest];
+}
+
+function rightIsStacked() { return rightStack().length > 1; }
+
 // Summon a companion into the right column. Clicking the same trigger again
-// puts Outline back, which is what makes the reader-head button a toggle
-// rather than a one-way door.
+// CLOSES it, which is what keeps the reader-head button a toggle rather than
+// a one-way door -- it used to mean "put Outline back", which only made
+// sense while the two could not be on screen together.
 function rightSummon(id) {
-  if (state.rightActive === id && id !== 'outline') { rightSelect('outline'); return; }
-  if (!state.rightTabs.includes(id)) state.rightTabs.push(id);
+  if (id === 'outline') { rightSelect('outline'); return; }
+  if (state.rightTabs.includes(id)) { rightClose(id); return; }
+  state.rightTabs.push(id);
   rightSelect(id);
+}
+
+// Closing a companion in the console shell. closeTool() below edits
+// state.docks, which the console shell's right column does not read, so the
+// header's ✕ has been doing nothing there since the shell shipped -- it was
+// editing a model nobody was rendering. This is the half of Jayson's item 5
+// that looked like a dead button.
+function rightClose(id) {
+  if (id === 'outline') return;                 // permanent, by design
+  state.rightTabs = (state.rightTabs || []).filter(t => t !== id);
+  if (state.rightActive === id) state.rightActive = 'outline';
+  renderDocks();
+  applyRightColumn();
 }
 
 function rightSelect(id) {
@@ -9308,19 +9562,20 @@ function applyRightColumn() {
   if (wasHidden && !hidden) fitPanelIfUnsized('right-panel', 'right', 'wb_rp_width');
 }
 
-// The strip only appears once there is a choice to make. One tab is not a
-// tab strip, and the pane's own header already names what it is showing.
-// Empty markup rather than a class is what hides it: the CSS keys off
-// :not(:empty), so there is no flag to keep in step with the content.
+// J1b -- the strip is gone, and it went because its job did.
+//
+// It existed to choose WHICH ONE companion was on screen. Now they are all on
+// screen, stacked, each under its own header with its own name and its own
+// close. A strip listing those same names would be a second set of labels for
+// panes you can already see, and a selector for a choice that no longer
+// exists. Emptied rather than deleted: the element and its :not(:empty) CSS
+// stay, so the old shell's behaviour and every layout that reads this node
+// are untouched, and there is one obvious place for it to come back if the
+// column ever holds more than it can show at once.
 function renderRightTabs() {
   const rail = $('right-tabs');
   if (!rail) return;
-  if (!betaShellOn() || state.rightTabs.length < 2) { rail.innerHTML = ''; return; }
-  rail.innerHTML = state.rightTabs.map(id => {
-    const t = toolById(id);
-    return '<button class="rt-tab' + (state.rightActive === id ? ' on' : '') +
-           '" data-wb-righttab="' + id + '">' + escHtml(t ? t.label : id) + '</button>';
-  }).join('');
+  rail.innerHTML = '';
 }
 
 // ── The slide-over ──────────────────────────────────────────────
@@ -9504,19 +9759,24 @@ async function destOpenSearch(q) {
 // Access need Administrator -- the same rung the 'usage' entry in
 // WB_TOOLS and editingAllowed() already gate on.
 const ADMIN_TABS = [
-  { id: 'review',   label: 'Review',       min: 'contributor' },
+  // J3, 13 Sep -- each tab with a vault-wide number to show now declares
+  // it as `count`, the same shape WB_TOOLS already uses for its own
+  // badges (0.60.0). Usage and Access carry none: Usage is a report, not
+  // a queue, and Access has nothing to count.
+  { id: 'review',   label: 'Review',       min: 'contributor', count: () => reviewDashboardTotal() },
   // 0.54.0 -- moved off the Comments panel footer, which was a page
   // companion rendering a vault-wide destination directly into the reader
   // (the companion-vs-destination rule, B2/R1). Same rung as Review: anyone
   // who can act on a comment vault-wide can already act on one from inside
   // a single file.
-  { id: 'comments', label: 'All comments', min: 'contributor' },
+  { id: 'comments', label: 'All comments', min: 'contributor', count: () => state.cmtOpenCount },
   { id: 'usage',    label: 'Usage',        min: 'admin' },
   { id: 'access', label: 'Access', min: 'admin' },
   // P10 -- Administrator, like Usage and Access. The DOOR still opens at
   // Contributor (chDoorsHTML) for the same reason it always has; what gates
   // is the tab.
-  { id: 'vault',  label: 'Vault check', min: 'admin' },
+  { id: 'vault',  label: 'Vault check', min: 'admin',
+    count: () => vcResults ? (vcResults.counts.hard + vcResults.counts.warn) : 0 },
 ];
 
 // Which tab is currently showing inside the Admin screen, or null when it
@@ -9562,12 +9822,16 @@ function renderAdminTab(tab) {
   const bodyEl = $('admin-body');
   if (!tabsEl || !bodyEl) return;
 
-  tabsEl.innerHTML = ADMIN_TABS.map(t => {
-    const open = atLeast(t.min);
-    return '<button class="rt-tab' + (tab === t.id ? ' on' : '') + (open ? '' : ' locked') +
+  // J3, 13 Sep -- one segmented control instead of loose pills (sample 2),
+  // each tab carrying its own vault-wide count where it has one (sample 3).
+  tabsEl.innerHTML = '<div class="seg2">' + ADMIN_TABS.map(t => {
+    const open  = atLeast(t.min);
+    const count = (open && t.count) ? t.count() : 0;
+    return '<button class="' + (tab === t.id ? 'on' : '') + (open ? '' : ' locked') +
            '" data-wb-admintab="' + t.id + '">' + escHtml(t.label) +
+           (count ? ' <span class="ch-count">' + count + '</span>' : '') +
            (open ? '' : ' <span class="admin-lock">&#128274;</span>') + '</button>';
-  }).join('');
+  }).join('') + '</div>';
 
   // A real pane left over from the last tab (#rp-review / #rp-usage) gets
   // parked, not discarded -- the rest of the app still looks it up by id
@@ -9798,9 +10062,16 @@ function vcTitleClose(a, b) {
 // It is a repair the app can perform itself, offered as a button on the row
 // beside Dismiss -- every other finding is something a person has to go and
 // decide about, so most rows will never have one.
+// J2 -- `fix` used to be a bare url and the Repair button was wired straight
+// to the double-frontmatter repair, because there was only ever one kind. A
+// second repair arrives here (missing properties), and a button that names a
+// page but not the operation is the shape this project has been bitten by
+// three times: a control acting on whichever model the reader assumed. So a
+// fix now says what to DO as well as what to do it to.
 function vcFinding(band, kind, key, why, page, page2, fix) {
   return { band, kind, key, why, page, page2: page2 || null, fix: fix || null };
 }
+function vcFix(op, url) { return { op, url }; }
 
 function vcWordCount(text) {
   return (String(text || '').trim().match(/\S+/g) || []).length;
@@ -9825,6 +10096,25 @@ function vcAnalyze(pages) {
 
     if (!fm.author) noAuthor++;
 
+    // J2 -- missing properties live here now, not in Review. propRepairNeeded()
+    // is the single routing rule (see it for Jayson's split): a page with no
+    // status at all is an approval and Review keeps it; a page that has been
+    // approved and is missing keys is a repair, and this is where repairs are.
+    //
+    // Band by what is absent. A missing REQUIRED key is a hard failure --
+    // without author or created the page cannot be attributed or aged, and
+    // without `reviewed` the review surfaces cannot see it at all. A gap in
+    // the optional-but-expected set is a warning: the page works, it is just
+    // not fully described.
+    if (propRepairNeeded(fm)) {
+      const g = propGaps(fm);
+      findings.push(vcFinding(g.required.length ? 'hard' : 'warn', 'Missing properties', 'props:' + key,
+        'This page was approved at some point and its properties are incomplete. ' +
+        escHtml(rvGapNote({ required: g.required, optional: g.optional })) +
+        '. Repair writes only the keys that are absent and touches nothing that already has a value.',
+        page, null, vcFix('props', p.url)));
+    }
+
     // Duplicate properties (0.53.0). The signature of the pre-0.53.0 writer
     // bug: two frontmatter blocks, the app's defaults sitting on top of the
     // page's real ones. Obsidian reads the first block, so the page's real
@@ -9836,7 +10126,7 @@ function vcAnalyze(pages) {
       findings.push(vcFinding('hard', 'Duplicate properties', 'dupfm:' + key,
         'This page has two property blocks. Obsidian reads the top one, which Folio wrote by ' +
         'mistake before v0.53.0, so the page\u2019s real status and author are being ignored ' +
-        'everywhere. Repair merges them, keeping the page\u2019s own values.', page, null, p.url));
+        'everywhere. Repair merges them, keeping the page\u2019s own values.', page, null, vcFix('dupfm', p.url)));
     }
 
     vcBrokenLinks(p.text).forEach(t => {
@@ -9957,6 +10247,64 @@ async function vcRun() {
 // Confirms first, and names the file. Repairing frontmatter is not something
 // to do to a live page on a single click, even when the merge rule is not a
 // judgement call.
+// J2 -- one door for every repair Vault check offers. The button carries the
+// operation, this decides what runs. Adding a third repair means adding a
+// branch here rather than remembering which of two attributes the old button
+// happened to read.
+function vcRepair(op, url) {
+  if (op === 'props') return vcRepairProps(url);
+  if (op === 'dupfm') return vcRepairDoubleFm(url);
+  vcMsg = 'That repair is not one this version knows how to run.';
+  renderVaultCheckTab();
+}
+
+// J2 -- the property repair. It is approveNewFileCore(), which is the one
+// writer of missing keys in the app, so a repair here and a fill anywhere
+// else cannot drift apart. That function has carried the v0.56.0 guard since
+// the session that found it deleting review items: it writes a review
+// baseline only for a page that has none, so repairing a page's properties
+// can never sign off an unapproved edit sitting in the same page.
+async function vcRepairProps(url) {
+  if (!atLeast('admin')) return;
+  const name = displayFileName((url || '').split('/').pop());
+  if (!confirm('Fill the missing properties on "' + name + '"?\n\nOnly absent keys are written. ' +
+               'Nothing that already has a value is touched, and the body of the page is not changed.')) return;
+  try {
+    await approveNewFileCore({ url });
+    if (state.activeUrl === url) openFile(url, state.activeName);
+    await vcRun();   // the finding is gone now, and the run is what proves it
+    rvNotify('Properties filled in on ' + name + '.', true);
+  } catch (e) {
+    vcMsg = 'Could not fill the properties on that page: ' + e.message;
+    renderVaultCheckTab();
+  }
+}
+
+// J2 -- Fill all moved here with the repairs it acts on. It was Review's
+// band-3 bulk button; band 3 is gone, and a bulk action has to live beside
+// the list it empties or the count on it is describing another screen.
+function vcPropFindings() {
+  return ((vcResults && vcResults.findings) || []).filter(f => f.fix && f.fix.op === 'props');
+}
+
+async function vcFillAllProps() {
+  if (!atLeast('admin')) return;
+  const items = vcPropFindings();
+  if (!items.length) return;
+  if (!confirm('Fill missing properties on ' + items.length + ' page' + (items.length > 1 ? 's' : '') +
+               '?\n\nOnly absent keys are written -- nothing that already has a value is touched.')) return;
+  try {
+    for (const f of items) await approveNewFileCore({ url: f.fix.url }, { skipScan: true });
+    await scanBadges();
+    if (state.activeUrl) openFile(state.activeUrl, state.activeName);
+    await vcRun();
+    rvNotify('Properties filled in on ' + items.length + ' page' + (items.length > 1 ? 's' : '') + '.', true);
+  } catch (e) {
+    vcMsg = 'Could not fill the properties: ' + e.message;
+    renderVaultCheckTab();
+  }
+}
+
 async function vcRepairDoubleFm(url) {
   if (!atLeast('admin')) return;
   const name = displayFileName((url || '').split('/').pop());
@@ -10008,7 +10356,8 @@ function vcRowHTML(f) {
     '</div>' +
     '<div class="vc-act">' +
       '<span class="vc-kind ' + kind + '">' + escHtml(f.kind) + '</span>' +
-      (f.fix ? '<button class="vc-btn primary" data-wb-vcfix="' + escHtml(f.fix) + '">Repair</button>' : '') +
+      (f.fix ? '<button class="vc-btn primary" data-wb-vcfixop="' + escHtml(f.fix.op) +
+               '" data-wb-vcfix="' + escHtml(f.fix.url) + '">Repair</button>' : '') +
       '<button class="vc-btn" data-wb-vcdismiss="' + escHtml(f.key) + '">Dismiss</button>' +
     '</div>' +
   '</div>';
@@ -10056,24 +10405,25 @@ function vcTabHTML() {
     '<div class="vc-tally gone"><b>' + Object.keys(vcDismissed || {}).length + '</b> dismissed</div>' +
     '</div>';
 
-  // The pointer into Review, not a second list of the same files. See rule 2
-  // in the note at the top of this section.
-  const pointer = r.noAuthor
-    ? '<div class="vc-band"><div class="vc-rows"><div class="vc-row vc-hard">' +
-        '<div class="vc-stripe"></div><div class="vc-main">' +
-        '<div style="font-size:12.5px;font-weight:600">' + r.noAuthor + ' page' +
-          (r.noAuthor === 1 ? ' has' : 's have') + ' no author</div>' +
-        '<div class="vc-why">Review already lists these under Missing properties, with every other ' +
-          'gap in the same row. They are counted here rather than listed twice.</div>' +
-        '</div><div class="vc-act"><button class="vc-btn" data-wb-vcreview="1">Open Review</button></div>' +
-      '</div></div></div>'
+  // J2 -- the Open Review pointer row is GONE. P10 put it here because the
+  // missing-property fact lived in Review and printing it twice would have
+  // been two lists of one thing; the fact has moved here, so the pointer has
+  // nothing left to point at. What replaces it is the bulk button, which
+  // belongs beside the rows it clears.
+  const props = vcPropFindings().length;
+  const pointer = props
+    ? '<div class="vc-msg" style="display:flex;align-items:center;gap:10px">' +
+        '<span style="flex:1">' + props + ' page' + (props === 1 ? '' : 's') +
+        ' had properties filled in after approval and are missing keys. Filling writes only what is absent.</span>' +
+        '<button class="vc-btn primary" data-wb-vcfillall="1">Fill all (' + props + ')</button>' +
+      '</div>'
     : '';
 
   const body = vcBandHTML('hard', 'Hard failure', r.findings) +
                vcBandHTML('warn', 'Warning', r.findings) +
                vcBandHTML('info', 'Information', r.findings);
 
-  const clear = (!r.findings.length && !r.noAuthor)
+  const clear = (!r.findings.length)
     ? '<div class="rp-empty" style="padding:22px 12px">Nothing to report. Every link resolves, no page ' +
       'is orphaned, and no two pages read as the same subject.</div>' : '';
 
@@ -10515,7 +10865,7 @@ async function openFile(url, name) {
   // only ever closed on the review-walk path, so ordinary navigation left it
   // standing over the next page, still describing the last one, with its
   // Approve button pointed at a file that was no longer on screen.
-  if (state.activeUrl !== url) { closeDiffStrip(); closeRvDetail(); auditCloseBar(); }
+  if (state.activeUrl !== url) rvBannerCloseAny();
 
   // Session A. History is the browser's now. A navigation that came FROM a
   // popstate must not push another entry, or Back would walk one step and
@@ -10739,6 +11089,45 @@ const FIT_ROW_SEL = [
   '.ph-label', '.sbt-label', '.wn-row', '.usage-row',
 ].join(', ');
 
+// ── The neighbour squeeze, in ONE place (J1) ──────────────────────
+// Widening a side column used to shove the OTHER column back to its default,
+// to buy the one being dragged some extra room. B3 added the one exception
+// that rule needs -- housekeeping must never be recorded as the person's own
+// width, because a recorded width is what stops a column auto-fitting forever
+// -- and wrote that exception at the double-click call site only. The drag
+// call site kept recording it. Identical shape to S82's five call sites and
+// one guard: a rule written as a line each caller has to remember is a rule
+// that gets forgotten at the next caller, so this is now a function.
+//
+// J1 also settles what the rule IS, which is the half B3 had wrong. Jayson's
+// report was that the two columns fight each other and neither remembers its
+// width, and both halves are this squeeze: the visible shove, and the write
+// that overwrites the neighbour's stored width with 220. In the console shell
+// the columns are independent. Adjusting one never moves the other, and what
+// each is left at survives a return.
+//
+// The reader is protected without any of this. Both gestures already clamp
+// against `bodyWidth - otherWidth - handles - readerMin`, so the squeeze was
+// never what kept the reading column alive; it only took room from a
+// neighbour to give it away. The old shell keeps the squeeze, because there a
+// stored width is the only memory a panel has and that shell dies at P11.
+//
+// Returns the width the CALLER must use for its ceiling. Never re-read the
+// neighbour from the DOM after calling this: it carries a width transition,
+// so an offsetWidth read on the next line returns the width it is animating
+// FROM. That is the v0.32.1 bug B3 found with a render, and returning the
+// number instead of leaving it to be re-read is what stops it coming back.
+function squeezeNeighbour(otherPanel, otherKey) {
+  if (otherPanel.classList.contains('closed')) return 0;
+  const w = otherPanel.offsetWidth;
+  if (fixedVisibility()) return w;            // console shell: hands off
+  if (w <= DEFAULT_PANEL_W) return w;
+  otherPanel.style.width    = DEFAULT_PANEL_W + 'px';
+  otherPanel.style.minWidth = DEFAULT_PANEL_W + 'px';
+  persist(otherKey, DEFAULT_PANEL_W);
+  return DEFAULT_PANEL_W;
+}
+
 function fitPanelToContent(panel, side, max) {
   const prevW    = panel.style.width;
   const prevMinW = panel.style.minWidth;
@@ -10787,39 +11176,11 @@ function fitPanelToContent(panel, side, max) {
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
   const otherKey   = side === 'left' ? 'wb_rp_width'   : 'wb_sb_width';
 
-  // B3 -- PRE-EXISTING BUG, here since v0.32.1, found by a render pass and not
-  // by any of the 2,700 checks, because every one of them measures in jsdom
-  // where nothing transitions.
-  //
-  // The reset below writes a new width on the OTHER panel, and the old code
-  // then read that panel's offsetWidth back to compute the ceiling. But the
-  // panel carries `transition: width 0.18s ease`, so an offsetWidth read on the
-  // very next line returns the width it is animating FROM, not the one just
-  // set. Every fit performed while the neighbour was wider than the default
-  // therefore computed its ceiling against a stale, larger number and landed
-  // narrower than there was room for. Measured live: a 1440 window with the
-  // right column at its 22vw clamp of 317 fitted the sidebar to 215px when 312
-  // was available -- and 215 is still short enough to truncate the name the fit
-  // was asked to reveal, which is how this surfaced at all.
-  //
-  // The fix is to stop asking the DOM a question we already know the answer to.
-  // We are the ones setting the width; use the value we set.
-  let otherWidth;
-  if (!otherPanel.classList.contains('closed') && otherPanel.offsetWidth > DEFAULT_PANEL_W) {
-    otherPanel.style.width    = DEFAULT_PANEL_W + 'px';
-    otherPanel.style.minWidth = DEFAULT_PANEL_W + 'px';
-    // B3 -- and do not RECORD that reset as the person's own width in the new
-    // shell. Housekeeping is not a preference. Persisting it would mark the
-    // neighbour "sized by the user", which is the one thing that stops it
-    // auto-fitting to its own content ever again (see fitPanelIfUnsized) --
-    // so fitting one column would quietly freeze the other at 220 forever.
-    // The old shell keeps persisting it, because there the saved width IS the
-    // only memory the panel has and the shell is frozen.
-    if (!fixedVisibility()) persist(otherKey, DEFAULT_PANEL_W);
-    otherWidth = DEFAULT_PANEL_W;
-  } else {
-    otherWidth = otherPanel.classList.contains('closed') ? 0 : otherPanel.offsetWidth;
-  }
+  // Both the squeeze and the transition bug B3 found in it now live in
+  // squeezeNeighbour(); read the account there. All this site needs is the
+  // neighbour's settled width, handed back rather than re-read from a panel
+  // that is mid-transition.
+  const otherWidth = squeezeNeighbour(otherPanel, otherKey);
   const bodyWidth  = $('body').offsetWidth;
   w = Math.min(w, bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin());
   w = Math.max(w, SNAP_THRESHOLD);
@@ -10897,13 +11258,11 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
     panel.style.transition = 'none';
     handle.classList.add('dragging');
 
-    // If the other panel is open and wider than default, reset it to default
-    // so expanding this one doesn't immediately crush the reader
-    if (!otherPanel.classList.contains('closed') && otherPanel.offsetWidth > DEFAULT_PANEL_W) {
-      otherPanel.style.width    = DEFAULT_PANEL_W + 'px';
-      otherPanel.style.minWidth = DEFAULT_PANEL_W + 'px';
-      persist(otherKey, DEFAULT_PANEL_W);
-    }
+    // J1 -- one call, and the width comes back rather than being re-read. In
+    // the console shell this leaves the neighbour completely alone, which is
+    // the whole of Jayson's item 2; in the old shell it squeezes exactly as
+    // it always did. See squeezeNeighbour().
+    const otherWidthAtStart = squeezeNeighbour(otherPanel, otherKey);
 
     const startX     = e.clientX;
     const startWidth = panel.offsetWidth;
@@ -10920,8 +11279,9 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
 
       // Enforce reader minimum ceiling
       const bodyWidth  = $('body').offsetWidth;
-      const otherWidth = otherPanel.classList.contains('closed') ? 0 : otherPanel.offsetWidth;
-      const ceiling    = bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin();
+      // The neighbour cannot change during a drag, so use the width settled at
+      // mousedown. Re-reading it here is what walked into the transition bug.
+      const ceiling    = bodyWidth - otherWidthAtStart - HANDLE_TOTAL - getReaderMin();
       w = Math.min(w, ceiling);
 
       // Allow down to 0 (snap fires on mouseup) -- except in the new shell,
@@ -11332,6 +11692,13 @@ function setHealthRow(id, ok) {
 function refreshAccountMenu() {
   const installedNow = isInstalled();
   setHealthRow('hr-connected', LOCAL.on === true);
+  // Debug aid, 2026-09-13 -- Jayson asked to see which folder Folio thinks
+  // is connected. FileSystemDirectoryHandle only ever exposes the leaf
+  // folder NAME, never a full path (browser security), so that is all this
+  // can ever show -- enough to tell "test-vault" from its parent project
+  // folder, which is the confusion this exists to catch.
+  const hrFolder = $('hr-connected-folder');
+  if (hrFolder) hrFolder.textContent = (LOCAL.on === true && LOCAL.root && LOCAL.root.name) ? ('\u2014 ' + LOCAL.root.name) : '';
   setHealthRow('hr-identified', !!state.user);
   setHealthRow('hr-installed', installedNow);
 
@@ -12566,18 +12933,19 @@ async function scanBadges() {
         // further it should have gone then.
         //
         // Still Contributor-gated, like every other row in this dashboard.
-        if (reviewAllowed()) {
-          const reqAll = REQUIRED_PROPS.filter(k => !(k in fm));
-          const optAll = OPTIONAL_PROPS.filter(k => !(k in fm));
-          // 0.44.2 -- gate on the completeness subset only (see
-          // COMPLETENESS_OPTIONAL_PROPS above); `optional` below still
-          // reports the full gap list, must-read/onboarding included, for
-          // whichever surface is already showing this file for another
-          // reason.
-          const optGate = COMPLETENESS_OPTIONAL_PROPS.filter(k => !(k in fm));
-          if (reqAll.length || optGate.length) {
-            missingProps.push({ name: displayFileName(f.name), url: f.url, required: reqAll, optional: optAll });
-          }
+        // J2 -- this list is now REPAIRS ONLY and it feeds Vault check, not
+        // Review. See propRepairNeeded(): a page with no status has never
+        // been approved, so it is an approval and stays in Review under New
+        // files, which already names its gaps. A page that has a status and
+        // is missing keys is a repair and belongs with the other repairs.
+        //
+        // What this deletes: the v0.33.0 note explaining why one file could
+        // legitimately appear in two sections of one band. It cannot any
+        // more -- the two questions were never the same kind of thing, and
+        // now they are not on the same screen either.
+        if (reviewAllowed() && propRepairNeeded(fm)) {
+          const g = propGaps(fm);
+          missingProps.push({ name: displayFileName(f.name), url: f.url, required: g.required, optional: g.optional });
         }
         if (!fm.status) {
           // v0.32.1 — a New file row used to be a bare name. It stays one row
@@ -12585,8 +12953,8 @@ async function scanBadges() {
           // row answers "what is wrong with this file" without opening it.
           audit.push({
             name: displayFileName(f.name), url: f.url,
-            required: REQUIRED_PROPS.filter(k => !(k in fm)),
-            optional: OPTIONAL_PROPS.filter(k => !(k in fm)),
+            required: propGaps(fm).required,
+            optional: propGaps(fm).optional,
           });
         } else if (reviewAllowed()) {
           // Session 42 fields are Contributor+ data, same gate as content
@@ -14371,25 +14739,34 @@ function auditStep(dir) {
 }
 
 function auditShowBar() {
-  const bar = $('audit-bar');
-  if (!bar) return;
   const d = auditWalk.delta;
-  if (!d) { bar.style.display = 'none'; return; }
-  const n   = auditWalk.marks.length;
-  const pos = auditWalk.pos >= 0 ? auditWalk.pos + 1 : 0;
+  if (!d) { rvBannerClearIf('audit'); return; }
+  const n    = auditWalk.marks.length;
+  const pos  = auditWalk.pos >= 0 ? auditWalk.pos + 1 : 0;
   const base = state.auditBaseline[auditPathKey(auditWalk.url)] || {};
-  $('audit-title').innerHTML =
-    `<b>${n ? `Change ${pos} of ${n}` : 'Changed outside the app'}</b>` +
-    `<span class="audit-dim"> · last approved ${base.ts ? escHtml(base.ts.slice(0, 10)) : 'never'}` +
-    `${base.by ? ' by ' + escHtml(base.by) : ''}</span>`;
-  bar.style.display = 'flex';
+  rvBannerSet({
+    owner: 'audit',
+    title: state.activeName || '',
+    kind:  `· edited in Obsidian${n ? ` · change ${pos} of ${n}` : ''}` +
+      `<span class="audit-dim"> · last approved ${base.ts ? escHtml(base.ts.slice(0, 10)) : 'never'}` +
+      `${base.by ? ' by ' + escHtml(base.by) : ''}</span>`,
+    actions: [
+      { label: '↑ prev',            fn: () => auditStep(-1) },
+      { label: '↓ next',            fn: () => auditStep(1) },
+      { label: 'Approve page', tone: 'go',   fn: () => auditApproveActive() },
+      { label: 'Flag',         tone: 'warn', fn: () => auditFlagActive() },
+      { label: 'Version history ↗', fn: () => auditOpenHistory() },
+      { html: '<label class="audit-ghost-toggle"><input type="checkbox" checked ' +
+              'onchange="auditToggleGhosts(this.checked)"> Show deleted</label>' },
+    ],
+    close: auditCloseBar,
+  });
 }
 
 function auditCloseBar() {
   auditWalk = { url: null, marks: [], pos: -1, delta: null };
   auditClearMarks();
-  const bar = $('audit-bar');
-  if (bar) bar.style.display = 'none';
+  rvBannerClearIf('audit');
 }
 
 function auditToggleGhosts(on) {
@@ -14477,60 +14854,7 @@ const RV_FILTERS = [
   ['flagged',     'Flagged',             'teal'],
   ['due',         'Due',                 'gray'],
   ['newfile',     'New file',            'green'],
-  ['missing',     'Missing properties',  'cyan'],
 ];
-
-function reviewDashboardTotal() {
-  return state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0)
-    + state.questionItems.length + state.escalatedItems.length
-    + state.flaggedFiles.length + state.dueItems.length
-    + state.unauditedFiles.length + state.missingProps.length
-    + state.vaultChanges.length + state.newSections.length;
-}
-
-function rvBandState() {
-  try { return JSON.parse(localStorage.getItem('wb_rv_bands') || '{}'); } catch (_) { return {}; }
-}
-// A band with zero items collapses itself by default (but stays
-// togglable) so the queue's shape stays stable between visits — a band
-// never just disappears.
-function rvIsCollapsed(id, count) {
-  const s = rvBandState();
-  return (id in s) ? s[id] : (count === 0);
-}
-function rvToggleBand(id) {
-  const s = rvBandState();
-  s[id] = !rvIsCollapsed(id, rvBandCounts()[id]);
-  persist('wb_rv_bands', s);
-  const rc = $('reader-content');
-  if (rc) rc.innerHTML = buildReviewDashboardHTML();
-}
-
-function rvBandCounts() {
-  const show = t => state.rvFilter === 'all' || state.rvFilter === t;
-  const band1 = (show('escalation') ? state.escalatedItems.length : 0)
-    + (show('vaultchange') ? state.vaultChanges.length : 0)
-    + (show('question') ? state.questionItems.length : 0)
-    + (show('change') ? state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0) : 0);
-  const band2 = (show('newsection') ? state.newSections.length : 0)
-    + (show('flagged') ? state.flaggedFiles.length : 0) + (show('due') ? state.dueItems.length : 0);
-  const band3 = (show('newfile') ? state.unauditedFiles.length : 0) + (show('missing') ? state.missingProps.length : 0);
-  return { band1, band2, band3 };
-}
-
-function setRvFilter(f) {
-  state.rvFilter = f;
-  const rc = $('reader-content');
-  if (rc) rc.innerHTML = buildReviewDashboardHTML();
-}
-
-function rvBandHead(id, label, count, collapsed) {
-  return `<div class="rv-band-head" onclick="rvToggleBand('${id}')">
-    <span class="rv-band-caret">${collapsed ? '▶' : '▼'}</span>
-    <span>${escHtml(label)}</span>
-    <span class="rv-band-count">${count}</span>
-  </div>`;
-}
 
 // ── Review view ──────────────────────────────────────────────────
 async function openChangesView() {
@@ -14622,7 +14946,7 @@ let wbToastTimer = null;
 // reading, or the properties they were filling. Found by rendering it; no
 // check could see it, because jsdom measures every element as zero. The toast
 // is lifted clear of whatever the bottom stack is currently occupying.
-const WB_BOTTOM_STACK = ['rv-queue-bar', 'diff-bar', 'diff-strip', 'audit-bar', 'rvd-bar', 'rvd-strip'];
+const WB_BOTTOM_STACK = ['rv-banner'];
 function wbToastLift() {
   let h = 0;
   WB_BOTTOM_STACK.forEach(id => {
@@ -14677,188 +15001,214 @@ async function rvAfterAction(url, msg) {
   rvShowQueueBar();
 }
 
-function buildReviewDashboardHTML() {
-  const total  = reviewDashboardTotal();
-  const show   = t => state.rvFilter === 'all' || state.rvFilter === t;
-  const queue  = []; // band-ordered — becomes state.rvFlatQueue below, what Next walks
-  const counts = rvBandCounts();
+// J2 -- Review is one list of PAGES now, ordered oldest first. Design B from
+// supporting/review-redesign-sample.html, Jayson's pick, with the ordering he
+// answered on 13 Sep. The three severity bands are gone: they sorted ITEMS,
+// and a person reviews a page, not an item. A page that owes three things was
+// three rows in three bands and three separate visits.
+//
+// What replaced them, in order of how much it matters:
+//   1. one row per page, saying everything that page owes
+//   2. oldest first, so nothing can sit unseen at the bottom of a band
+//   3. the walk follows the list on screen, page by page, not item by item
+//   4. missing properties left entirely -- see propRepairNeeded()
+//
+// The bands' collapse state, their per-band counts and their bulk buttons all
+// went with them rather than being kept pointing at a shape nobody renders,
+// which is the mistake S84 found twice in one column.
 
-  // S15 — the chip carries the type's colour as a dot. One colour per
-  // type, all from the existing callout palette, so no new tokens. The
-  // icon and label always travel with it: the colour is a re-find aid,
-  // not a code anyone has to memorise.
+// Type -> how it reads and how heavily it weighs. `sev` drives the stripe and
+// the tallies: decide is a judgement call, ack is additive and only needs
+// somebody to have seen it, again is a page asking to be re-read.
+const RV_OWE = {
+  escalation:  { icon: '\u{1F6A8}', sev: 'decide', tone: 'red'    },
+  vaultchange: { icon: '✏️', sev: 'decide', tone: 'orange' },
+  question:    { icon: '❓', sev: 'decide', tone: 'purple' },
+  change:      { icon: '\u{1F4DD}', sev: 'decide', tone: 'blue'   },
+  newsection:  { icon: '\u{1F9E9}', sev: 'ack',    tone: 'yellow' },
+  flagged:     { icon: '\u{1F6A9}', sev: 'ack',    tone: 'teal'   },
+  newfile:     { icon: '\u{1F195}', sev: 'ack',    tone: 'green'  },
+  due:         { icon: '⏰', sev: 'again',  tone: 'gray'   },
+};
+const RV_SEV_BAND = { decide: 'hard', ack: 'warn', again: 'info' };
+
+function reviewDashboardTotal() {
+  return state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0)
+    + state.questionItems.length + state.escalatedItems.length
+    + state.flaggedFiles.length + state.dueItems.length
+    + state.unauditedFiles.length
+    + state.vaultChanges.length + state.newSections.length;
+}
+
+// When did this page start waiting? Every owed thing that carries a real
+// timestamp gives one; the rest fall back to when the page itself was last
+// modified, which What's New already holds for every page and refreshes on
+// every focus regain. A page with no readable date returns null and sorts
+// LAST, because "we cannot tell how long this has waited" is not the same
+// claim as "this has waited longest" -- the S84 rule about not reporting an
+// assumption as an observation, applied to a sort key.
+function rvStamp(v) {
+  if (!v) return null;
+  const t = new Date(v).getTime();
+  return isNaN(t) ? null : t;
+}
+function rvPageModified(url) {
+  const wn = (state.wnEntries || []).find(x => x.url === url);
+  return wn ? rvStamp(wn.modified) : null;
+}
+
+// The roll-up. Every list the scan already builds, regrouped by page. This is
+// the ONE derivation: the rows, the tallies, the walk queue and the bar count
+// all read it, so they cannot disagree about what is waiting.
+function rvPageRollup() {
+  const show  = t => state.rvFilter === 'all' || state.rvFilter === t;
+  const pages = new Map();
+  const add = (type, url, name, label, ts, opts, act) => {
+    if (!pages.has(url)) pages.set(url, { url, name, owes: [] });
+    pages.get(url).owes.push({ type, label, ts: rvStamp(ts), opts: opts || {}, act: act || null });
+  };
+
+  state.escalatedItems.forEach(it => { if (show('escalation'))
+    add('escalation', it.url, it.name, 'Escalated', it.comment && it.comment.ts, { idx: it.idx }); });
+  state.vaultChanges.forEach(it => { if (show('vaultchange'))
+    add('vaultchange', it.url, it.name, 'Edited in Obsidian', null, { delta: it.delta }); });
+  state.questionItems.forEach(it => { if (show('question'))
+    add('question', it.url, it.name, 'Question', it.comment && it.comment.ts, { idx: it.idx }); });
+  state.reviewChanges.forEach((r, ri) => { if (show('change')) {
+    // The oldest UNRESOLVED edit is what this page has been waiting on. A
+    // resolved one is history and must not drag the page up the list.
+    const open = (r.entries || []).filter(e => e.reviewed === 'no');
+    const oldest = open.reduce((m, e) => {
+      const t = rvStamp(e.ts);
+      return (t && (m === null || t < m)) ? t : m;
+    }, null);
+    add('change', r.url, r.name, r.unreviewed + ' pending edit' + (r.unreviewed === 1 ? '' : 's'),
+        oldest, { headIdx: headOpenIdx(r.entries) }, { fn: 'markReviewed(' + ri + ')', label: 'Accept all' });
+  } });
+  state.newSections.forEach(it => { if (show('newsection'))
+    add('newsection', it.url, it.name, 'New section', null, { delta: it.delta },
+        { fn: "rvApproveAudit('" + escHtml(it.url) + "')", label: 'Approve' }); });
+  state.flaggedFiles.forEach(it => { if (show('flagged'))
+    add('flagged', it.url, it.name, it.status || 'Flagged', null, {},
+        { fn: "rvApproveFlagged('" + escHtml(it.url) + "')", label: 'Approve' }); });
+  state.dueItems.forEach(it => { if (show('due'))
+    add('due', it.url, it.name, 'Due ' + it.due, it.due, {},
+        { fn: "rvClearDue('" + escHtml(it.url) + "')", label: 'Clear due date' }); });
+  state.unauditedFiles.forEach(it => { if (show('newfile'))
+    add('newfile', it.url, it.name, 'New page', null, {},
+        { fn: "rvUpdateFile('" + escHtml(it.url) + "')", label: 'Approve' }); });
+
+  const rows = [...pages.values()].map(pg => {
+    // Most serious first inside the row, so the chip you read first is the
+    // one that decides the stripe.
+    const rank = { decide: 0, ack: 1, again: 2 };
+    pg.owes.sort((a, b) => rank[RV_OWE[a.type].sev] - rank[RV_OWE[b.type].sev]);
+    pg.sev   = RV_OWE[pg.owes[0].type].sev;
+    const stamps = pg.owes.map(o => o.ts).filter(t => t !== null);
+    pg.since = stamps.length ? Math.min(...stamps) : rvPageModified(pg.url);
+    return pg;
+  });
+
+  // Oldest first. A page with no readable date goes to the end rather than
+  // being treated as infinitely old.
+  rows.sort((a, b) => {
+    if (a.since === null && b.since === null) return a.name.localeCompare(b.name);
+    if (a.since === null) return 1;
+    if (b.since === null) return -1;
+    return a.since - b.since;
+  });
+  return rows;
+}
+
+function rvSinceText(pg) {
+  if (pg.since === null) return 'Waiting since an unknown date';
+  const days = Math.floor((Date.now() - pg.since) / 86400000);
+  if (days <= 0) return 'Waiting since today';
+  if (days === 1) return 'Waiting 1 day';
+  return 'Waiting ' + days + ' days';
+}
+
+function setRvFilter(f) {
+  state.rvFilter = f;
+  const rc = $('reader-content');
+  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+}
+
+function buildReviewDashboardHTML() {
+  const total = reviewDashboardTotal();
+  const rows  = rvPageRollup();
+  const queue = [];   // one entry per PAGE -- becomes state.rvFlatQueue
+
   const chips = RV_FILTERS.map(([id, label, col]) =>
     `<button class="review-chip${state.rvFilter === id ? ' active' : ''}" onclick="setRvFilter('${id}')">` +
     (col ? `<span class="rv-chip-dot" style="background:var(--co-${col}-bd)"></span>` : '') +
     `${escHtml(label)}</button>`
   ).join('');
 
+  const nDecide = rows.filter(r => r.sev === 'decide').length;
+  const nAck    = rows.filter(r => r.sev === 'ack').length;
+  const nAgain  = rows.filter(r => r.sev === 'again').length;
+  const ackable = rows.filter(r => r.sev !== 'decide').length;
+
   let html = `<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
     <div>
       <h1 class="md-h md-h1" style="margin-bottom:4px">Review dashboard</h1>
-      <p class="md-p" style="margin-top:2px">${total} item${total !== 1 ? 's' : ''} across the vault</p>
+      <p class="md-p" style="margin-top:2px">${rows.length} page${rows.length !== 1 ? 's' : ''} waiting on you, oldest first · ${total} item${total !== 1 ? 's' : ''} in all</p>
     </div>
-    <div class="review-filter-bar" style="flex-wrap:wrap">${chips}</div>
+    <div class="review-filter-bar">${chips}</div>
   </div>`;
 
-  // ── Band 1 — needs your decision ─────────────────────────────────
-  {
-    const collapsed = rvIsCollapsed('band1', counts.band1);
-    let body = '';
-    if (show('escalation') && state.escalatedItems.length) {
-      body += '<div class="rv-sub-head">Escalated — to Administrator</div>';
-      state.escalatedItems.forEach(it => {
-        const qi = queue.push({ type: 'escalation', url: it.url, name: it.name, opts: { idx: it.idx } }) - 1;
-        body += `<div class="backlink-item" style="cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">
-          <span style="flex:1">🚨 ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.comment.body.slice(0, 80))}</span></span>
-        </div>`;
-      });
-    }
-    // S15 — one row per FILE, never one per change. A file can hold a new
-    // heading and three edits and a deletion; that is one walk, one
-    // approval, one line in the log, and one item in the counter.
-    if (show('vaultchange') && state.vaultChanges.length) {
-      body += '<div class="rv-sub-head" style="color:var(--co-orange-txt)">Vault changes — edited in Obsidian</div>';
-      state.vaultChanges.forEach(it => {
-        const qi = queue.push({ type: 'vaultchange', url: it.url, name: it.name, opts: { delta: it.delta } }) - 1;
-        body += `<div class="backlink-item" style="border-left:4px solid var(--co-orange-bd);cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">
-          <span style="flex:1">✏️ ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(rvAuditBlurb(it))}</span></span>
-          ${rvAuditTicks(it.counts)}
-        </div>`;
-      });
-    }
-    if (show('question') && state.questionItems.length) {
-      body += '<div class="rv-sub-head">Questions</div>';
-      state.questionItems.forEach(it => {
-        const qi = queue.push({ type: 'question', url: it.url, name: it.name, opts: { idx: it.idx } }) - 1;
-        body += `<div class="backlink-item" style="cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">
-          <span style="flex:1">❓ ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.comment.body.slice(0, 80))}</span></span>
-        </div>`;
-      });
-    }
-    if (show('change') && state.reviewChanges.length) {
-      body += '<div class="rv-sub-head">Content changes</div>';
-      state.reviewChanges.forEach((r, ri) => {
-        const head = headOpenIdx(r.entries);
-        const qi = queue.push({ type: 'change', url: r.url, name: r.name, opts: { headIdx: head } }) - 1;
-        body += `<div class="rv-file">
-          <div class="rv-file-head">
-            <span class="rv-file-name" style="cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">${escHtml(r.name)}</span>
-            <button class="rv-mark-btn" onclick="event.stopPropagation();markReviewed(${ri})">Accept all</button>
-          </div>`;
-        r.entries.forEach((e, ei) => {
-          if (e.reviewed !== 'no') return; // accepted + rejected are resolved — see Previous
-          const actions = ei === head
-            ? `<button class="rv-accept-btn" style="border:1px solid var(--co-green-bd);border-radius:var(--radius);cursor:pointer" onclick="inboxEntryAction(${ri},${ei},'yes')">Accept</button>
-               <button class="rv-reject-btn" style="border:1px solid var(--co-red-bd);border-radius:var(--radius);cursor:pointer" onclick="inboxEntryAction(${ri},${ei},'rejected')">Reject</button>`
-            : '<span style="font-size:11px;color:var(--text-muted)">⏳ queued — resolve the change above first</span>';
-          body += `<div class="rv-entry">
-            <div class="rv-meta" style="display:flex;gap:8px;align-items:center">
-              <span style="flex:1">${escHtml(e.author)} · ${escHtml(e.ts.replace('T', ' '))}</span>
-              ${actions}
-            </div>
-            <pre class="rv-diff">${renderDiffBody(e.body)}</pre>
-          </div>`;
-        });
-        body += '</div>';
-      });
-    }
-    if (!body) body = '<div class="rv-empty">Nothing needs a decision.</div>';
-    html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
-      ${rvBandHead('band1', 'Needs your decision', counts.band1, collapsed)}
-      <div class="rv-band-body">${body}</div>
-    </div>`;
+  html += '<div class="vc-tallies" style="padding:0 0 4px">' +
+    `<div class="vc-tally hard"><b>${nDecide}</b> decide</div>` +
+    `<div class="vc-tally warn"><b>${nAck}</b> acknowledge</div>` +
+    `<div class="vc-tally info"><b>${nAgain}</b> read again</div>` +
+    '</div>';
+
+  if (rows.length) {
+    html += '<div class="vc-bar" style="margin:12px 0 0">' +
+      '<div class="vc-bar-meta">Counted by the most serious thing each page owes. ' +
+      'Start at the top and the list empties from the oldest end.</div>' +
+      (ackable
+        ? `<button class="vc-btn" onclick="rvAcknowledgeAllAdditive()">Acknowledge all (${ackable})</button>` : '') +
+      '<button class="vc-btn primary" onclick="rvQueueStart(state.rvFlatQueue,0)">Start review &rarr;</button>' +
+      '</div>';
   }
 
-  // ── Band 2 — needs acknowledgement ───────────────────────────────
-  {
-    const collapsed = rvIsCollapsed('band2', counts.band2);
-    let body = '';
-    // S15 — a file whose ONLY change is new headings. Nothing was altered
-    // and nothing was lost, so it needs acknowledging rather than deciding,
-    // and the band 2 bulk button covers it.
-    if (show('newsection') && state.newSections.length) {
-      body += '<div class="rv-sub-head" style="color:var(--co-yellow-txt)">New sections</div>';
-      state.newSections.forEach(it => {
-        const qi = queue.push({ type: 'newsection', url: it.url, name: it.name, opts: { delta: it.delta } }) - 1;
-        body += `<div class="backlink-item" style="border-left:4px solid var(--co-yellow-bd)">
-          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🧩 ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(rvAuditBlurb(it))}</span></span>
-          <button class="rv-ov-btn" onclick="event.stopPropagation();rvApproveAudit('${escHtml(it.url)}')">Approve</button>
-        </div>`;
-      });
-    }
-    if (show('flagged') && state.flaggedFiles.length) {
-      body += '<div class="rv-sub-head">Flagged for review</div>';
-      state.flaggedFiles.forEach(it => {
-        const qi = queue.push({ type: 'flagged', url: it.url, name: it.name, opts: {} }) - 1;
-        body += `<div class="backlink-item">
-          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🚩 ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.status || 'Needs Review')}</span></span>
-          <button class="rv-ov-btn" onclick="event.stopPropagation();rvApproveFlagged('${escHtml(it.url)}')">Approve</button>
-        </div>`;
-      });
-    }
-    if (show('due') && state.dueItems.length) {
-      body += '<div class="rv-sub-head">Due for re-review</div>';
-      state.dueItems.forEach(it => {
-        const qi = queue.push({ type: 'due', url: it.url, name: it.name, opts: {} }) - 1;
-        body += `<div class="backlink-item">
-          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">⏰ ${escHtml(it.name)} <span style="color:var(--text-muted)">— due ${escHtml(it.due)}</span></span>
-          <button class="rv-ov-btn" onclick="event.stopPropagation();rvClearDue('${escHtml(it.url)}')">Clear due date</button>
-        </div>`;
-      });
-    }
-    if (!body) {
-      body = '<div class="rv-empty">Nothing to acknowledge.</div>';
-    } else {
-      body += `<div class="rv-bulk-row"><button class="rv-mark-btn" onclick="rvAcknowledgeAllBand2()">Acknowledge all (${counts.band2})</button></div>`;
-    }
-    html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
-      ${rvBandHead('band2', 'Needs acknowledgement', counts.band2, collapsed)}
-      <div class="rv-band-body">${body}</div>
+  // ── The list ──────────────────────────────────────────────────────
+  let body = '';
+  rows.forEach(pg => {
+    const qi = queue.push({
+      type: pg.owes[0].type, url: pg.url, name: pg.name, opts: pg.owes[0].opts,
+    }) - 1;
+    const oweChips = pg.owes.map(o =>
+      `<span class="rv-owe rv-owe-${RV_OWE[o.type].tone}">${RV_OWE[o.type].icon} ${escHtml(o.label)}</span>`
+    ).join('');
+    // Every page carries Review page. A page owing exactly ONE thing that can
+    // be closed without reading it also carries that thing's own button --
+    // approving a new section or clearing a due date has never needed the
+    // page open. A page owing several does not: the buttons would be acting
+    // on one of the things in a row that lists three, which is the ambiguity
+    // the old bands had.
+    const solo = pg.owes.length === 1 ? pg.owes[0].act : null;
+    body += `<div class="vc-row vc-${RV_SEV_BAND[pg.sev]}">
+      <div class="vc-stripe"></div>
+      <div class="vc-main">
+        <div><span class="vc-name" onclick="rvQueueStart(state.rvFlatQueue,${qi})">${escHtml(pg.name)}</span></div>
+        <div class="rv-owe-row">${oweChips}</div>
+        <div class="vc-why">${escHtml(rvSinceText(pg))}${pg.owes.length > 1 ? ' · ' + pg.owes.length + ' things owed, one visit' : ''}</div>
+      </div>
+      <div class="vc-act">
+        <button class="vc-btn primary" onclick="rvQueueStart(state.rvFlatQueue,${qi})">Review page &rarr;</button>
+        ${solo ? `<button class="vc-btn" onclick="event.stopPropagation();${solo.fn}">${escHtml(solo.label)}</button>` : ''}
+      </div>
     </div>`;
-  }
+  });
 
-  // ── Band 3 — needs completion ────────────────────────────────────
-  {
-    const collapsed = rvIsCollapsed('band3', counts.band3);
-    let body = '';
-    if (show('newfile') && state.unauditedFiles.length) {
-      body += '<div class="rv-sub-head">New files</div>';
-      state.unauditedFiles.forEach(it => {
-        const qi = queue.push({ type: 'newfile', url: it.url, name: it.name, opts: {} }) - 1;
-        body += `<div class="backlink-item" style="align-items:flex-start">
-          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">🆕 ${escHtml(it.name)}<br>
-            <span style="color:var(--text-muted);font-size:11px">${escHtml(rvGapNote(it))}</span></span>
-          <button class="rv-ov-btn" onclick="event.stopPropagation();rvUpdateFile('${escHtml(it.url)}')">Update</button>
-        </div>`;
-      });
-    }
-    if (show('missing') && state.missingProps.length) {
-      body += '<div class="rv-sub-head">Missing properties</div>' +
-        '<div class="rv-empty" style="padding:2px 4px 6px">Every file is checked against the full property list, so a file listed here may also appear above under New files. Those are two different checks and a file can fail both.</div>';
-      state.missingProps.forEach(it => {
-        const qi = queue.push({ type: 'missing', url: it.url, name: it.name, opts: {} }) - 1;
-        body += `<div class="backlink-item" style="align-items:flex-start">
-          <span style="flex:1;cursor:pointer" onclick="rvQueueStart(state.rvFlatQueue,${qi})">📋 ${escHtml(it.name)}<br>
-            <span style="color:var(--text-muted);font-size:11px">${escHtml(rvGapNote(it))}</span></span>
-          <button class="rv-ov-btn" onclick="event.stopPropagation();rvUpdateFile('${escHtml(it.url)}')">Fill in</button>
-        </div>`;
-      });
-    }
-    if (!body) {
-      body = '<div class="rv-empty">Nothing to complete.</div>';
-    } else {
-      // The count on the button is the number of FILES that will be written,
-      // not the number of rows above it. Those two stopped being the same
-      // number in v0.33.0, when a new file started appearing under both
-      // sub-heads, and the button has to name what it is about to do.
-      body += `<div class="rv-bulk-row"><button class="rv-mark-btn" onclick="rvFillAllBand3()">Fill all (${rvBand3Files().length})</button></div>`;
-    }
-    html += `<div class="rv-band${collapsed ? ' collapsed' : ''}">
-      ${rvBandHead('band3', 'Needs completion', counts.band3, collapsed)}
-      <div class="rv-band-body">${body}</div>
-    </div>`;
-  }
+  html += rows.length
+    ? '<div class="vc-band" style="margin:12px 0 0"><div class="vc-rows">' + body + '</div></div>'
+    : `<div class="rv-empty" style="padding:22px 12px">${state.rvFilter === 'all'
+        ? 'Nothing is waiting on you. Every page in the vault is approved and up to date.'
+        : 'No page owes that. Choose All to see the rest.'}</div>`;
 
   state.rvFlatQueue = queue;
 
@@ -14904,8 +15254,7 @@ function buildReviewDashboardHTML() {
 async function rvOpenItem(type, url, name, opts) {
   opts = opts || {};
   if (!guardLeaveEdit()) return;
-  auditCloseBar(); // leaving one audit item must not leave its ghosts behind
-  closeRvDetail(); // and one item's property strip must not survive into the next
+  rvBannerCloseAny(); // one item's banner must never survive into the next
   await openFile(url, name);
   if (type === 'vaultchange' || type === 'newsection') {
     // S15 — the whole point of the walk: land in the file, on the change.
@@ -14918,9 +15267,14 @@ async function rvOpenItem(type, url, name, opts) {
     const idx = opts.headIdx !== undefined ? opts.headIdx : headOpenIdx(entries);
     if (idx >= 0) selectChangeCard(idx);
   } else if (type === 'question' || type === 'escalation') {
+    closeDiffStrip();
     ensureToolOpen('comments');
     await renderCommentsTab();
     if (opts.idx !== undefined) selectCommentCard(opts.idx);
+    // J2b — and the bottom of the screen stops being empty. Until now these
+    // two types were the only ones in the queue with no bottom surface at
+    // all, so a walk changed shape the moment it reached one.
+    await openQuestionBanner(type, url, name, opts.idx);
   } else {
     // flagged, due, new file, missing properties — all frontmatter fixes.
     // v0.32.1: these used to open the Properties flyout in the reader's top
@@ -14966,26 +15320,21 @@ async function rvQueueNext() {
 function rvQueueExit() {
   state.rvQueue    = null;
   state.rvQueuePos = -1;
-  const bar = $('rv-queue-bar');
-  if (bar) bar.style.display = 'none';
+  // 0.60.0 — leaving the walk also closes whatever item was open, through
+  // that item's own close function. It did not before: the walk bar hid and
+  // the diff or audit bar stayed, standing over the dashboard still
+  // describing a page you had left. That is the same fault S82 fixed for
+  // navigation (the audit bar that never left) in the one route it missed.
+  rvBannerCloseAny();
+  rvBannerRender();
   openChangesView();
 }
 
-function rvShowQueueBar() {
-  const bar = $('rv-queue-bar');
-  if (!bar) return;
-  if (!state.rvQueue || !state.rvQueue.length) { bar.style.display = 'none'; return; }
-  const pos = state.rvQueuePos + 1, total = state.rvQueue.length;
-  const remaining = total - pos;
-  bar.innerHTML = '<span>Reviewing from the dashboard</span>' +
-    `<span class="rv-qb-pos">Item ${pos} of ${total}</span>` +
-    '<span class="rv-qb-spacer"></span>' +
-    (remaining > 0
-      ? `<button onclick="rvQueueNext()">Next (${remaining} left) →</button>`
-      : '<span class="rv-qb-pos">Last item</span>') +
-    '<button onclick="rvQueueExit()">Back to dashboard</button>';
-  bar.style.display = 'flex';
-}
+// The walk no longer paints anything of its own — rvBannerRender() reads
+// state.rvQueue itself. This stays as the name the walk calls because a type
+// that opens no banner (a `change`, which opens the Review pane) still needs
+// the walk position to appear.
+function rvShowQueueBar() { rvBannerRender(); }
 
 // ── Band 2 row + bulk actions ──────────────────────────────────────
 async function rvApproveFlagged(url) {
@@ -15008,7 +15357,12 @@ async function rvClearDue(url) {
   } catch (e) { rvNotify('Could not clear the due date: ' + e.message, false); }
 }
 
-async function rvAcknowledgeAllBand2() {
+// J2 -- was rvAcknowledgeAllBand2(). The bands are gone, so a name pointing
+// at one is a name describing a screen nobody renders. What it does is
+// unchanged and so is why bulk is allowed here and nowhere else: everything
+// it touches is additive, so acknowledging without reading loses nothing that
+// was not already there.
+async function rvAcknowledgeAllAdditive() {
   const flaggedItems = state.flaggedFiles.slice();
   const dueList       = state.dueItems.slice();
   const sectionList   = state.newSections.slice(); // S15
@@ -15045,32 +15399,13 @@ async function rvUpdateFile(url) {
   } catch (e) { rvNotify('Could not fill the properties: ' + e.message, false); }
 }
 
-// v0.33.0 — deduplicated by url. A new file now legitimately appears in both
-// sub-lists of this band, so the raw concatenation would count it twice in the
-// confirm and write it twice in the loop. The second write is harmless (only
-// absent keys are ever injected, so the second pass finds nothing to do) but
-// the COUNT is not: it would tell someone they are about to touch more files
-// than exist, which is the number they use to decide whether to press it.
-function rvBand3Files() {
-  const seen = new Set();
-  return [...state.unauditedFiles, ...state.missingProps].filter(it => {
-    if (seen.has(it.url)) return false;
-    seen.add(it.url);
-    return true;
-  });
-}
+// J2 -- rvBand3Files() and rvFillAllBand3() were DELETED here, not left
+// forwarding. Band 3 no longer exists in Review and the pages they acted on
+// are Vault check's repairs now, so the bulk button lives beside the list it
+// empties: see vcFillAllProps(). Their dedupe reason retired with them --
+// a file could appear under both New files and Missing properties, and after
+// the routing split it cannot be in both places at once.
 
-async function rvFillAllBand3() {
-  const items = rvBand3Files();
-  if (!items.length) return;
-  if (!confirm(`Fill missing properties on ${items.length} file${items.length > 1 ? 's' : ''}?\n\nOnly absent keys are written — nothing that already has a value is touched.`)) return;
-  try {
-    for (const it of items) await approveNewFileCore({ url: it.url }, { skipScan: true });
-    await scanBadges();
-    if (state.activeUrl) openFile(state.activeUrl, state.activeName);
-    rvRefreshDashboard();
-  } catch (e) { alert('Could not fill properties: ' + e.message); }
-}
 
 // ── Previous / resolved ────────────────────────────────────────────
 // Nothing here is a new store — every entry is derived from frontmatter
@@ -15162,6 +15497,49 @@ const OPTIONAL_PROPS = ['tags', 'aliases', 'due', 'must-read', 'must-read-start'
 // would leave nearly every ordinary page flagged forever.
 const COMPLETENESS_EXCLUDED = ['must-read', 'must-read-start', 'onboarding', 'onboarding-due'];
 const COMPLETENESS_OPTIONAL_PROPS = OPTIONAL_PROPS.filter(k => !COMPLETENESS_EXCLUDED.includes(k));
+
+// J2 -- one function answering "what is this page missing", because two
+// surfaces now ask it. The scan asks it to route a page (Review or Vault
+// check) and Vault check asks it again to write the row. Until J2 the rule
+// lived as three filter lines inside the scan, and this project has paid
+// four separate times for a rule that lives in a line rather than in a
+// function: the caller that arrives later never inherits the exception.
+//
+//   required   every REQUIRED_PROPS key the page has not got
+//   optional   the full optional gap, must-read and onboarding included --
+//              reported, never gated on (see COMPLETENESS_EXCLUDED)
+//   gated      the optional subset that is allowed to make a page a finding
+//
+// It reads frontmatter and returns lists. It does not decide where the page
+// goes; that is the caller's business, and the two callers decide
+// differently on purpose.
+function propGaps(fm) {
+  fm = fm || {};
+  return {
+    required: REQUIRED_PROPS.filter(k => !(k in fm)),
+    optional: OPTIONAL_PROPS.filter(k => !(k in fm)),
+    gated:    COMPLETENESS_OPTIONAL_PROPS.filter(k => !(k in fm)),
+  };
+}
+
+// J2 -- the routing rule itself, in one place, so the scan and Vault check
+// cannot answer it differently. Jayson's split, 11 Sep, refined 13 Sep:
+//
+//   no `status` key at all   nobody has ever approved this page. That is an
+//                            APPROVAL and it stays in Review, where it is
+//                            already listed as a New file with its gaps.
+//   a status, keys missing   somebody approved it and the properties are
+//                            incomplete. That is a REPAIR, and repairs are
+//                            Vault check's.
+//
+// The consequence worth having: a repair run from Vault check can no longer
+// manufacture review work, so the band-hop that has existed since v0.29.0
+// closes by construction rather than by a rule anyone has to remember.
+function propRepairNeeded(fm) {
+  if (!fm || !fm.status) return false;      // an approval, not a repair
+  const g = propGaps(fm);
+  return !!(g.required.length || g.gated.length);
+}
 
 // Shared write: injects only the frontmatter keys actually missing (same
 // defaults as new-file creation), then rescans. Never touches a key that's
@@ -15306,9 +15684,11 @@ function rvPaneBoardHTML() {
       ...S.flaggedFiles.map(it => ['🚩', it.name, it.url, it.status || 'Needs Review', 'flagged', {}]),
       ...S.dueItems.map(it => ['⏰', it.name, it.url, `due ${it.due}`, 'due', {}]),
     ]],
-    ['Needs completion', [
+    // J2 -- the Missing properties line is gone from this pane for the same
+    // reason it is gone from the dashboard: those pages are Vault check's
+    // repairs now. What is left is the approval, which Review keeps.
+    ['Needs approval', [
       ...S.unauditedFiles.map(it => ['🆕', it.name, it.url, rvGapNote(it), 'newfile', {}]),
-      ...S.missingProps.map(it => ['📋', it.name, it.url, rvGapNote(it), 'missing', {}]),
     ]],
   ];
 
@@ -15513,6 +15893,163 @@ async function markReviewedFromTab() {
   }
 }
 
+// ══ The one-shape review banner (J2b, 0.60.0) ═══════════════
+// Jayson's items 10 and 13's banner half. Four bars became one.
+//
+// Before this the bottom of the review flow was four bars — the walk bar,
+// the diff bar, the audit bar and the detail bar — each laying itself out its
+// own way. The close control reached the right edge by `margin-left:auto` on
+// two of them and by a spacer span on a third, which is two mechanisms for
+// one job. Questions and escalations had no bottom bar at all: clicking one
+// opened the Comments pane and left the bottom of the screen empty, so a walk
+// through the queue changed shape halfway along.
+//
+// ONE ELEMENT, ONE RENDERER. Everything that used to write into one of the
+// four bars hands rvBannerSet() a spec and stops caring where anything goes.
+// The order is fixed and identical for every item type:
+//
+//   [walk position + its controls] [page] [kind] [chips] ── [actions] [x]
+//
+// The walk portion is READ FROM STATE AT RENDER TIME rather than painted by
+// its own function, so "where am I in the queue" cannot disagree with what
+// the banner below it is showing — they are one paint, not two that have to
+// be kept in step. That is the same move as propRepairNeeded() at S86 and
+// paintRailCounts() earlier in this release: one place answers, every caller
+// goes through it.
+//
+// A spec is:
+//   { title, kind, chips:[{text,tone}], actions:[{label,tone,fn,disabled}|{html}],
+//     bodyHTML, onBody, close }
+let rvbItem = null;
+
+function rvBannerSet(spec) { rvbItem = spec || null; rvBannerRender(); }
+function rvBannerClear()   { rvbItem = null; rvBannerRender(); }
+
+// A closer must only clear the banner IT owns. rvOpenItem() calls all of the
+// closers before opening the next item, and openFile() calls them again, so
+// an unscoped clear would let a closer that ran late wipe the banner a
+// different type had just set. Same fault as a call site acting on a model it
+// does not own — see the call-site note.
+function rvBannerClearIf(owner) { if (rvbItem && rvbItem.owner === owner) rvBannerClear(); }
+
+// Close whatever the banner is showing, whichever type it is. Every route
+// that leaves a page has to do this, and until now each of those routes wrote
+// out the LIST — closeDiffStrip(), closeRvDetail(), auditCloseBar() — in its
+// own line. Adding a fourth item type at J2b meant remembering to add a
+// fourth call at every one of them, which is the failure this project has now
+// paid for six times. The list lives here, once. Each closer is idempotent
+// and owner-scoped, so calling all four is safe and calling one is not enough:
+// a type can hold state (audit's marks) even when its banner never opened.
+function rvBannerCloseAny() {
+  closeDiffStrip();
+  closeRvDetail();
+  auditCloseBar();
+  closeQuestionBanner();
+}
+
+// Update only the kind text. showDiffStrip has to measure the highlight AFTER
+// the banner is on screen, and a full re-render to change one span would
+// rebuild the diff body underneath the scroll position.
+function rvBannerKind(html) {
+  if (!rvbItem) return;
+  rvbItem.kind = html;
+  const k = $('rvb-kind');
+  if (k) k.innerHTML = html;
+}
+
+function rvBannerRender() {
+  const el = $('rv-banner');
+  if (!el) return;
+  // A walk with no item open still shows: pressing the close control on one
+  // item must not throw away your place in a seventeen-page queue.
+  const walking = !!(state.rvQueue && state.rvQueue.length && state.rvQueuePos >= 0);
+  if (!walking && !rvbItem) { el.style.display = 'none'; return; }
+
+  // 0.60.0, corrected after a render: the walk's POSITION is the only thing
+  // on the left. Its buttons were there too, which put two action zones on a
+  // bar whose entire promise is that actions are always in the same place —
+  // and with three fixed clusters competing for one row the bar overflowed
+  // its own column below about 1100px. The position is a label; the walk's
+  // controls are actions, so they go where the actions are.
+  const walk = $('rvb-walk');
+  if (walk) {
+    walk.innerHTML = walking
+      // The word "Page" is load-bearing and cost width to keep: S86's whole
+      // finding was a bar that said "Item N of M" over a queue of PAGES,
+      // counting one thing and naming another. Saying neither is not a fix.
+      ? '<span class="rvb-pos">Page ' + (state.rvQueuePos + 1) + ' of ' + state.rvQueue.length + '</span>'
+      : '';
+  }
+
+  const it = rvbItem;
+  const t = $('rvb-title'), k = $('rvb-kind'), a = $('rvb-acts');
+  if (t) t.textContent = it ? (it.title || '') : '';
+  if (k) k.innerHTML   = (it && it.kind) ? it.kind : '';
+  // The type's own actions first, then the walk's, so the buttons that move
+  // you between pages sit together beside the close control and a type with
+  // more actions never shifts them.
+  const walkActs = walking
+    ? ((state.rvQueue.length - state.rvQueuePos - 1) > 0
+        ? '<button data-rvb="next">Next page (' + (state.rvQueue.length - state.rvQueuePos - 1) + ') →</button>'
+        : '<span class="audit-dim">last page</span>') +
+      '<button data-rvb="exit">Dashboard</button>'
+    : '';
+  if (a) a.innerHTML   = ((it && it.actions) || [])
+    .map((x, i) => x.html !== undefined
+      ? x.html
+      : '<button data-rvb="' + i + '" class="' + (x.tone || '') + '"' +
+        (x.disabled ? ' disabled' : '') + '>' + escHtml(x.label) + '</button>')
+    .join('') + walkActs;
+
+  // 0.60.0, second render correction: the chips used to sit in the bar. With
+  // four of them beside five buttons everything that COULD shrink shrank to a
+  // stub — the walk position read "Page", the chips read "§…" and "Ass…" —
+  // which is no overflow and no information either. A varying set of facts
+  // belongs in the type's own detail, not on a bar whose whole promise is
+  // that it looks the same every time. Nothing was lost: the section is on
+  // the thread, the assignee and due date are fields a click away.
+  const chipRow = ((it && it.chips) || [])
+    .map(ch => '<span class="rvb-chip ' + (ch.tone || '') + '">' + escHtml(ch.text) + '</span>').join('');
+  const body = $('rvb-body');
+  if (body) {
+    if (it && it.bodyHTML !== undefined) {
+      body.innerHTML = (chipRow ? '<div class="rvb-chiprow">' + chipRow + '</div>' : '') + it.bodyHTML;
+      body.style.display = 'block';
+      if (it.onBody) it.onBody(body);
+    } else {
+      body.innerHTML = '';
+      body.style.display = 'none';
+    }
+  }
+  const x = $('rvb-x');
+  if (x) x.style.display = it ? '' : 'none';
+  el.style.display = 'flex';
+}
+
+// One delegated handler for every control in the bar. The alternative is an
+// onclick string per action, which is what the four bars did and is why each
+// of them had to be edited to add a button.
+(function wireRvBanner() {
+  const bar = $('rvb-bar');
+  if (!bar) return;
+  bar.addEventListener('click', e => {
+    const b = e.target.closest('[data-rvb]');
+    if (!b) return;
+    const key = b.dataset.rvb;
+    if (key === 'next') { rvQueueNext(); return; }
+    if (key === 'exit') { rvQueueExit(); return; }
+    // The close control closes the ITEM, never the walk — the type's own
+    // close function runs, so its cleanup (highlights, marks, ghosts) is not
+    // something this renderer has to know about.
+    if (key === 'close') {
+      if (rvbItem && rvbItem.close) rvbItem.close(); else rvBannerClear();
+      return;
+    }
+    const act = rvbItem && rvbItem.actions && rvbItem.actions[Number(key)];
+    if (act && act.fn) act.fn();
+  });
+})();
+
 // ── Diff strip below the reader (adjustable) + in-file highlight ─
 let diffEntryIdx = -1;
 
@@ -15524,14 +16061,20 @@ function showDiffStrip(entryIdx) {
   const head   = headOpenIdx(entries);
   const suffix = e.reviewed === 'yes' ? ' · reviewed'
     : (e.reviewed === 'rejected' ? ' · rejected' : (entryIdx !== head ? ' · queued' : ''));
-  $('diff-body').innerHTML = renderDiffBody(e.body);
-  // sequential review: only the queue head is actionable from the strip
-  const actionable = (e.reviewed === 'no' && entryIdx === head) ? '' : 'none';
-  $('diff-accept').style.display = actionable;
-  $('diff-reject').style.display = actionable;
-  $('diff-bar').style.display   = 'flex';
-  $('diff-strip').style.display = 'block';
-  // After the strip is visible, so ensureVisible/scroll measure against the
+  // sequential review: only the queue head is actionable from the banner
+  const actionable = (e.reviewed === 'no' && entryIdx === head);
+  rvBannerSet({
+    owner: 'change',
+    title: state.activeName || '',
+    kind:  '',                       // set below, once the highlight has run
+    actions: actionable
+      ? [{ label: 'Accept', tone: 'go',   fn: () => diffAction('yes') },
+         { label: 'Reject', tone: 'warn', fn: () => diffAction('rejected') }]
+      : [],
+    bodyHTML: '<pre class="rv-diff" id="diff-body">' + renderDiffBody(e.body) + '</pre>',
+    close: closeDiffStrip,
+  });
+  // After the banner is visible, so ensureVisible/scroll measure against the
   // layout the user is actually looking at rather than the one before it.
   const hits    = highlightChangedLines(e);
   const removes = e.body.split('\n').filter(l => l.startsWith('- ')).length;
@@ -15539,14 +16082,13 @@ function showDiffStrip(entryIdx) {
     ? ` · ${hits} block${hits === 1 ? '' : 's'} highlighted`
     : (removes ? ' · deleted text, nothing left in the file to highlight'
                : ' · could not locate this change in the rendered page');
-  $('diff-title').textContent = `Change by ${e.author} · ${e.ts.replace('T', ' ')}${suffix}${mark}`;
+  rvBannerKind(escHtml(`· change by ${e.author} · ${e.ts.replace('T', ' ')}${suffix}${mark}`));
 }
 
 function closeDiffStrip() {
   diffEntryIdx = -1;
-  $('diff-bar').style.display   = 'none';
-  $('diff-strip').style.display = 'none';
   clearChangeHighlights();
+  rvBannerClearIf('change');
 }
 
 function clearChangeHighlights() {
@@ -15689,42 +16231,31 @@ function makeStripResizable(barId, resolve) {
   });
 }
 
-// The one strip currently on screen, or null. Order matches the markup, and
-// only one detail surface is ever open at a time — rvOpenItem closes the
-// others before it opens one.
+// The banner body, when it has one. There used to be two strips and this
+// function had to pick between them; there is one now, and an item type with
+// no detail (the audit walk) leaves it hidden, which is the null case.
 function visibleBottomStrip() {
-  const strips = [['diff-strip', 'wb_diff_h'], ['rvd-strip', 'wb_rvd_h']];
-  for (const [id, key] of strips) {
-    const el = $(id);
-    if (el && el.style.display !== 'none' && el.offsetParent !== null) return { el, key };
-  }
-  // Nothing painted yet (a wiring-time or headless call) — fall back to the
-  // first one whose display says it is open, so this is still answerable
-  // before layout exists.
-  for (const [id, key] of strips) {
-    const el = $(id);
-    if (el && el.style.display === 'block') return { el, key };
-  }
-  return null;
+  const el = $('rvb-body');
+  return (el && el.style.display !== 'none') ? { el, key: 'wb_rvb_h' } : null;
 }
 
-// Restore each strip to the height it was last dragged to. The diff strip
-// never did this — it persisted a height on every drag and read it back
-// nowhere, so the setting existed and did nothing for four releases.
+// Restore the banner body to the height it was last dragged to. One height
+// for one body now, under `wb_rvb_h`. The old `wb_diff_h` and `wb_rvd_h` keys
+// are simply ignored where they still exist, the same way wb_outline_fold_mode
+// is — reading them would restore a height from a surface that no longer
+// exists, which is worse than starting at the default once.
 function restoreStripHeights() {
-  [['diff-strip', 'wb_diff_h'], ['rvd-strip', 'wb_rvd_h']].forEach(([id, key]) => {
-    const el = $(id);
-    if (!el) return;
-    const saved = localStorage.getItem(key);
-    if (!saved) return;
-    const h = parseInt(JSON.parse(saved), 10);
-    if (h > 0) el.style.height = Math.min(h, window.innerHeight * 0.6) + 'px';
-  });
+  const el = $('rvb-body');
+  if (!el) return;
+  const saved = localStorage.getItem('wb_rvb_h');
+  if (!saved) return;
+  const h = parseInt(JSON.parse(saved), 10);
+  if (h > 0) el.style.height = Math.min(h, window.innerHeight * 0.6) + 'px';
 }
 
-makeStripResizable('diff-bar',     () => ({ el: $('diff-strip'), key: 'wb_diff_h' }));
-makeStripResizable('rvd-bar',      () => ({ el: $('rvd-strip'),  key: 'wb_rvd_h'  }));
-makeStripResizable('rv-queue-bar', visibleBottomStrip);
+// One bar, so one grip. It used to be three calls, and the walk bar needed a
+// resolver of its own because it sat above a surface it could not name.
+makeStripResizable('rvb-bar', visibleBottomStrip);
 restoreStripHeights();
 
 // ── Review detail strip (v0.32.1) ─────────────────────────────────
@@ -15748,6 +16279,60 @@ const RVD_TITLE = {
   missing: 'Missing properties',
 };
 
+// J2b / 0.60.0 — Jayson's item 10. Every declared property is EDITABLE here,
+// in the banner, and the "Edit properties" button and its trip to the
+// Properties flyout in the reader's opposite corner are both gone. The flyout
+// still exists and is still reachable; what is gone is being sent to it from
+// a surface that was already listing every key and its value.
+//
+// THE RULE, and it is the S82 lesson applied deliberately rather than
+// discovered again: a save here writes THE PROPERTIES AND NOTHING ELSE. No
+// baseline, no status flip, no approval. A record that somebody approved a
+// page must never be a side effect of a write that does something else —
+// that is exactly how a property fill was silently erasing pending changes
+// before v0.56.0. Approval stays a separate, explicit press.
+function rvbFieldKind(key) {
+  if (key === 'status') return 'status';
+  if (key === 'created' || key === 'due' || key === 'must-read-start') return 'date';
+  if (key === 'onboarding-due') return 'number';
+  if (key === 'must-read' || key === 'onboarding' || key === 'reviewed') return 'bool';
+  return 'text';
+}
+
+// Absent and false are DIFFERENT for must-read and onboarding — 0.44.2 made
+// that distinction on purpose, and the Review gap list depends on it. So a
+// bool reads absent as unchecked, and an unchecked box over an absent key
+// counts as unchanged and is not written. Writing 'false' over nothing would
+// make "never decided" and "decided no" indistinguishable.
+function rvbPropWas(fm, k) {
+  if (rvbFieldKind(k) === 'bool') return (k in fm) ? String(fm[k]).toLowerCase() === 'true' : false;
+  return (k in fm) ? String(fm[k] ?? '') : '';
+}
+
+function rvbPropFieldHTML(k, fm) {
+  const kind = rvbFieldKind(k);
+  const has  = (k in fm);
+  const val  = has ? String(fm[k] ?? '') : '';
+  const lab  = '<label>' + escHtml(k) + (has ? '' : ' · not set') + '</label>';
+  let input;
+  if (kind === 'bool') {
+    input = '<span class="rvb-chk"><input type="checkbox" data-k="' + escHtml(k) + '"' +
+            (String(val).toLowerCase() === 'true' ? ' checked' : '') + '></span>';
+  } else if (kind === 'status') {
+    // The same vocabulary the Properties flyout offers, read from the same
+    // list, so the two doors onto one property cannot drift apart.
+    const known = WB_STATUS_VALUES.map(v =>
+      '<option value="' + escHtml(v) + '"' + (val === v ? ' selected' : '') + '>' + escHtml(v) + '</option>').join('');
+    const extra = (val && !WB_STATUS_VALUES.includes(val))
+      ? '<option value="' + escHtml(val) + '" selected>' + escHtml(val) + '</option>' : '';
+    input = '<select data-k="' + escHtml(k) + '"><option value="">—</option>' + known + extra + '</select>';
+  } else {
+    const t = kind === 'date' ? 'date' : (kind === 'number' ? 'number' : 'text');
+    input = '<input type="' + t + '" data-k="' + escHtml(k) + '" value="' + escHtml(val) + '">';
+  }
+  return '<div class="rvb-pf' + (has ? '' : ' gap') + '">' + lab + input + '</div>';
+}
+
 async function openRvDetail(type, url, name) {
   const act = RVD_ACTION[type];
   if (!act) return;
@@ -15755,53 +16340,37 @@ async function openRvDetail(type, url, name) {
   try { fm = parseFm(await readVaultFile(url)) || {}; } catch (_) {}
   rvdItem = { type, url, name, fm };
 
-  $('rvd-title').textContent = `${RVD_TITLE[type]} · ${name}`;
-  const btn = $('rvd-action');
-  btn.textContent   = act.label;
-  btn.style.display = '';
-
-  // Every declared key, in schema order, present or not — the absent ones are
-  // the whole message, so listing only what is there would hide the answer.
-  const rows = [...REQUIRED_PROPS, ...OPTIONAL_PROPS].map(k => {
-    const has = (k in fm);
-    const val = has ? String(fm[k] ?? '') : '';
-    return `<span class="rvd-key">${escHtml(k)}</span>` +
-      (has
-        ? `<span class="rvd-val">${escHtml(val === '' ? '(empty)' : val)}</span>`
-        : '<span class="rvd-val rvd-gap">not set</span>');
-  }).join('');
-
-  // 0.53.0 -- the COUNT uses the completeness rule, the LIST above still
-  // shows every declared key. Those are two different jobs and this line
-  // was doing the wrong one.
-  //
-  // 0.44.2 already decided that must-read and onboarding are editorial tags
-  // an admin sets on a handful of pages, not something every page is
-  // expected to have an opinion on, and excluded them from the check that
-  // decides whether a file is "missing properties". This note was never
-  // brought in line, so it counted them anyway. Harmless while it was two
-  // keys nobody looked at; adding must-read-start and onboarding-due made
-  // it say every page in the vault was missing FOUR properties, which is
-  // noise that trains people to ignore the strip.
+  const keys = [...REQUIRED_PROPS, ...OPTIONAL_PROPS];
+  // 0.53.0 — the COUNT uses the completeness rule, the LIST shows every
+  // declared key. Those are two different jobs and one line used to do the
+  // wrong one. Unchanged here; only the list became editable.
   const gaps = [...REQUIRED_PROPS, ...COMPLETENESS_OPTIONAL_PROPS].filter(k => !(k in fm));
   const editorialGaps = COMPLETENESS_EXCLUDED.filter(k => !(k in fm));
   const note = gaps.length
     ? `${gaps.length} propert${gaps.length === 1 ? 'y is' : 'ies are'} not set: ${escHtml(gaps.join(', '))}. ` +
-      '“Fill properties” writes defaults for the absent keys only — nothing that already has a value is touched.'
+      'Edit any of them here and press Save. Saving writes only what you changed.'
     : 'Every declared property is set on this file.' +
       (editorialGaps.length
-        ? ` The editorial tags (${escHtml(editorialGaps.join(', '))}) are set per page from the Properties panel and are not expected here.`
+        ? ` The editorial tags (${escHtml(editorialGaps.join(', '))}) are set per page and are not expected here.`
         : '');
 
-  $('rvd-strip').innerHTML = `<div class="rvd-props">${rows}</div><div class="rvd-note">${note}</div>`;
-  $('rvd-bar').style.display   = 'flex';
-  $('rvd-strip').style.display = 'block';
+  rvBannerSet({
+    owner: 'props',
+    title: name,
+    kind:  '· ' + escHtml(RVD_TITLE[type]),
+    actions: [
+      { label: 'Save properties', fn: () => rvbSaveProps() },
+      { label: act.label, tone: 'go', fn: () => rvdAction() },
+    ],
+    bodyHTML: '<div class="rvb-pg">' + keys.map(k => rvbPropFieldHTML(k, fm)).join('') + '</div>' +
+              '<div class="rvd-note">' + note + '</div>',
+    close: closeRvDetail,
+  });
 }
 
 function closeRvDetail() {
   rvdItem = null;
-  $('rvd-bar').style.display   = 'none';
-  $('rvd-strip').style.display = 'none';
+  rvBannerClearIf('props');
 }
 
 function rvdAction() {
@@ -15810,9 +16379,255 @@ function rvdAction() {
   if (act) act.fn(rvdItem);
 }
 
-function rvdOpenProps() {
-  const panel = $('props-panel');
-  if (panel && panel.style.display === 'none') togglePropsPanel();
+async function rvbSaveProps() {
+  const it = rvdItem;
+  const body = $('rvb-body');
+  if (!it || !body) return;
+  const fm = it.fm || {};
+  const flags = [];
+  body.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.dataset.k;
+    const was = rvbPropWas(fm, k);
+    if (rvbFieldKind(k) === 'bool') {
+      if (el.checked !== was) flags.push([k, el.checked ? 'true' : 'false']);
+    } else if (el.value !== was) {
+      flags.push([k, el.value]);
+    }
+  });
+  if (!flags.length) { rvNotify('Nothing changed, so nothing was written.', true); return; }
+  try {
+    const txt = await readVaultFile(it.url);
+    await spWriteFile(it.url, setFmKeys(txt, flags));
+    await scanBadges();
+    if (state.activeUrl === it.url) await openFile(it.url, state.activeName);
+    rvNotify(flags.length + ' propert' + (flags.length === 1 ? 'y' : 'ies') +
+             ' saved. Nothing else was written.', true);
+    // Re-read rather than trust what was just sent, and deliberately NOT
+    // rvAfterAction(): that clears the item off the queue and moves on, which
+    // is right for an approval and wrong for an edit. You stay where you are.
+    rvRefreshDashboard();
+    await openRvDetail(it.type, it.url, it.name);
+  } catch (e) {
+    rvNotify('Could not save the properties: ' + e.message, false);
+  }
+}
+
+
+// ── The question and escalation banner (J2b) ───────────────
+// Jayson took all four actions on 13 Sep: reply, close, jump to the section
+// the question was raised against, reassign or escalate, and set or clear a
+// due date. Reply is the body, because that is where you are already looking;
+// the rest are in the bar, in the same place every other item type puts them.
+//
+// ASSIGN IS A TYPED NAME, NOT A PICKED ONE. There is no roster anywhere in
+// this architecture — the same gap the review dashboard recorded at S42, and
+// nothing since has closed it. A name that matches nobody is still written,
+// because refusing it would make the field useless in a vault that has no
+// user list.
+let qbItem       = null;   // { url, name, type, idx } — which comment this is about
+let qbFieldsOpen = false;  // the assign/due panel, toggled from the bar
+let qbFocusField = '';     // which field the toggling button wants focused
+
+async function openQuestionBanner(type, url, name, idx) {
+  const pane = $('rp-comments');
+  const list = (pane && pane._wbComments) || [];
+  // The dashboard hands an index. Without one, the oldest open top-level
+  // comment on the page is what this stop in the walk is about.
+  const i = (idx !== undefined && idx !== null && list[Number(idx)])
+    ? Number(idx)
+    : list.findIndex(c => c.status === 'open' && !c.replyTo);
+  if (i < 0 || !list[i]) { qbItem = null; rvBannerClearIf('question'); return; }
+  qbItem = { url, name, type, idx: i };
+  qbFieldsOpen = false;
+  qbFocusField = '';
+  qbRender();
+}
+
+function closeQuestionBanner() {
+  qbItem = null;
+  qbFieldsOpen = false;
+  rvBannerClearIf('question');
+}
+
+function qbRoot() {
+  const pane = $('rp-comments');
+  const list = (pane && pane._wbComments) || [];
+  return (qbItem && list[qbItem.idx]) ? list[qbItem.idx] : null;
+}
+
+function qbCardHTML(c, isReply) {
+  return '<div class="rvb-qcard' + (isReply ? ' reply' : '') + '">' +
+    '<div class="rvb-qmeta"><span class="rvb-qwho">' + escHtml(c.author || '?') + '</span>' +
+    '<span>' + escHtml(String(c.ts || '').replace('T', ' ').slice(0, 16)) + '</span></div>' +
+    '<div class="rvb-qbody">' + escHtml(c.body || '') + '</div></div>';
+}
+
+function qbFieldsHTML(root) {
+  return '<div class="rvb-qfields">' +
+    '<div class="rvb-pf"><label>Assigned to</label>' +
+      '<input type="text" id="qb-assignee" value="' + escHtml(root.assignee || '') + '"></div>' +
+    '<div class="rvb-pf"><label>Due</label>' +
+      '<input type="date" id="qb-due" value="' + escHtml(root.due || '') + '"></div>' +
+    '<div class="rvb-pf"><label>Escalate</label><span class="rvb-chk">' +
+      '<input type="checkbox" id="qb-esc"' + (root.type === 'escalation' ? ' checked' : '') + '>' +
+      '<span>Raise as an escalation</span></span></div>' +
+    '<button data-qb="save">Save</button>' +
+    '<span class="rvb-qhint">Assigned to is typed, not picked — there is no roster in the app. ' +
+    'Clear the due date to remove it. Saving here writes the comment and nothing else.</span>' +
+  '</div>';
+}
+
+function qbRender() {
+  const root = qbRoot();
+  if (!root) { rvBannerClearIf('question'); return; }
+  const pane = $('rp-comments');
+  const list = (pane && pane._wbComments) || [];
+
+  const headings = {};
+  try { outlineHeadingsMeta().forEach(m => { headings[m.id] = m.text; }); } catch (_) {}
+
+  const openOnPage = list.filter(c => c.status === 'open' && !c.replyTo).length;
+  const chips = [];
+  if (root.hid)       chips.push({ text: '§ ' + (headings[root.hid] || 'section'), tone: 'sec' });
+  else                chips.push({ text: 'General', tone: '' });
+  if (root.type === 'escalation') chips.push({ text: 'Escalated', tone: 'esc' });
+  if (root.assignee)  chips.push({ text: 'Assigned ' + root.assignee, tone: '' });
+  if (root.due)       chips.push({ text: 'Due ' + root.due, tone: 'due' });
+
+  const replies = list.filter(c => String(c.replyTo) === String(qbItem.idx));
+
+  rvBannerSet({
+    owner: 'question',
+    title: qbItem.name,
+    kind:  '· ' + escHtml(root.type) + (openOnPage > 1 ? ' · 1 of ' + openOnPage + ' open' : ''),
+    chips,
+    actions: [
+      { label: 'Jump to section', fn: () => qbJump() },
+      // One door, not two. These were separate buttons that opened the same
+      // panel, justified by which field they focused — a thin reason, and the
+      // render made it thinner: four actions plus the walk's two overflowed
+      // the reading column. Both fields are still here and both still work.
+      { label: 'Assign / due…', fn: () => qbOpenFields('qb-assignee') },
+      // "Close", not "Close question": the kind text beside the title already
+      // says question or escalation, and the width that word cost is spent on
+      // "Page" and "Next page", where the noun is doing real work.
+      { label: 'Close', tone: 'go', fn: () => qbCloseQuestion() },
+    ],
+    bodyHTML:
+      '<div class="rvb-qthread">' +
+        qbCardHTML(root, false) +
+        replies.map(c => qbCardHTML(c, true)).join('') +
+        '<div class="rvb-qreply"><textarea id="qb-reply" placeholder="Reply…"></textarea>' +
+        '<button data-qb="post">Post reply</button></div>' +
+      '</div>' +
+      (qbFieldsOpen ? qbFieldsHTML(root) : ''),
+    onBody: body => {
+      body.addEventListener('click', e => {
+        const b = e.target.closest('[data-qb]');
+        if (!b) return;
+        if (b.dataset.qb === 'post') qbPostReply();
+        if (b.dataset.qb === 'save') qbSaveFields();
+      });
+      if (qbFocusField) {
+        const f = $(qbFocusField);
+        if (f) f.focus();
+        qbFocusField = '';
+      }
+    },
+    close: closeQuestionBanner,
+  });
+}
+
+// One button, opening the panel that holds both fields and closing it again.
+// It was two buttons, Assign and Due, each focusing its own field; a render
+// at the reading column's real width showed four type actions plus the walk's
+// two overflowing the bar, and "which field does it focus" was the thinnest
+// reason of the six to keep a button.
+function qbOpenFields(focusId) {
+  qbFieldsOpen = !qbFieldsOpen;              // the button opens the panel, and closes it again
+  qbFocusField = qbFieldsOpen ? focusId : '';
+  qbRender();
+}
+
+function qbJump() {
+  if (!qbItem) return;
+  try { selectCommentCard(qbItem.idx); } catch (_) {}
+}
+
+// The reply goes through appendPageComment(), the same single write path the
+// Comments pane uses. A second writer for one file is how two surfaces start
+// disagreeing about its shape.
+async function qbPostReply() {
+  const root = qbRoot();
+  const ta   = $('qb-reply');
+  if (!root || !ta) return;
+  const text = ta.value.trim();
+  if (!text) return;
+  const pane = $('rp-comments');
+  const commentsUrl = (pane && pane._wbCommentsUrl) || commentsUrlFor(qbItem.url);
+  try {
+    ta.disabled = true;
+    await appendPageComment(commentsUrl, {
+      type: 'note', status: 'open',
+      ts: new Date().toISOString().slice(0, 16),
+      author: wbAuthor(), body: text,
+      hid: root.hid || '', replyTo: String(qbItem.idx),
+    });
+    await renderCommentsTab();
+    scanBadges();
+    qbRender();
+    rvNotify('Reply posted. The question is still open.', true);
+  } catch (e) {
+    rvNotify('Could not post the reply: ' + e.message, false);
+  } finally {
+    const t = $('qb-reply');
+    if (t) t.disabled = false;
+  }
+}
+
+// Writes the comment's own fields and nothing else — same rule as a property
+// save. Closing a question is a separate, explicit press.
+async function qbSaveFields() {
+  const root = qbRoot();
+  if (!root || !qbItem) return;
+  const pane = $('rp-comments');
+  const list = (pane && pane._wbComments) || [];
+  const commentsUrl = (pane && pane._wbCommentsUrl) || commentsUrlFor(qbItem.url);
+  const a = $('qb-assignee'), d = $('qb-due'), esc = $('qb-esc');
+  const next = {
+    ...root,
+    assignee: a ? a.value.trim() : (root.assignee || ''),
+    due:      d ? d.value : (root.due || ''),
+    type:     esc ? (esc.checked ? 'escalation' : (root.type === 'escalation' ? 'question' : root.type))
+                  : root.type,
+  };
+  if (next.assignee === (root.assignee || '') && next.due === (root.due || '') && next.type === root.type) {
+    rvNotify('Nothing changed, so nothing was written.', true);
+    return;
+  }
+  list[qbItem.idx] = next;
+  try {
+    await spWriteFile(commentsUrl, serializeComments(list));
+    await renderCommentsTab();
+    scanBadges();
+    qbFieldsOpen = false;
+    qbRender();
+    rvNotify('Saved. The question is still open.', true);
+  } catch (e) {
+    rvNotify('Could not save: ' + e.message, false);
+  }
+}
+
+async function qbCloseQuestion() {
+  if (!qbItem) return;
+  const url = qbItem.url;
+  try {
+    await closeComment(qbItem.idx);
+    closeQuestionBanner();
+    await rvAfterAction(url, 'Question closed.');
+  } catch (e) {
+    rvNotify('Could not close the question: ' + e.message, false);
+  }
 }
 
 // ── S14 access tier UI ───────────────────────────────────────────
@@ -16410,7 +17225,9 @@ function bylineHTML(fm, url) {
     ? `<div class="rb-info">${parts.join('<span class="reader-byline-dot">\u00b7</span>')}</div>`
     : '<div class="rb-info"></div>';
   return `<div id="reader-byline">${info}` +
-    `<button class="rb-flag" onclick="reportThisPage()" title="Report a problem with this page" aria-label="Report a problem with this page">Report</button></div>`;
+    `<button class="rb-flag" onclick="openReportModal()" title="Report a problem with this page" aria-label="Report a problem with this page">` +
+    `<svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>` +
+    `Report</button></div>`;
 }
 
 function strapUpdated(url) {
@@ -17382,6 +18199,11 @@ function setHeadingColorLive(idx, hex) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && state.themePanelOpen) closeThemePanel();
   if (e.key === 'Escape' && betaSlideId) betaCloseSlide();
+  // J1 -- the report popup. It sits above everything else while it is open, so
+  // it is what Escape should take away first; the two above it cannot be open
+  // underneath it without the popup having been opened from them, which no
+  // route does.
+  if (e.key === 'Escape' && reportTargetUrl) closeReportModal();
 });
 
 // P8 — relocated from the Theme panel; same setThemePref() every other
@@ -17555,8 +18377,9 @@ function loadPersistedState() {
       renderTierSettings();
     }
 
-    const diffH = localStorage.getItem('wb_diff_h');
-    if (diffH) $('diff-strip').style.height = JSON.parse(diffH) + 'px';
+    // 0.60.0 — the strip height used to be restored HERE and again in
+    // restoreStripHeights(), two mechanisms for one setting, disagreeing
+    // about the 60%-of-window cap. restoreStripHeights() owns it.
 
     // S34: wb_outline_fold_mode is no longer read — the lock it drove is
     // gone. Any leftover key in a user's localStorage is simply ignored.
@@ -17584,15 +18407,26 @@ const WB_TOOLS = [
     icon: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>' },
   { id: 'search', label: 'Search', home: 'left',
     icon: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' },
+  // countId with no count: the span exists and nothing writes it. Left that
+  // way on purpose -- wiring it is a bookmarks change, not a review fix --
+  // and it is now visible as a missing `count` rather than as an absent line
+  // in a function somewhere else.
   { id: 'bookmarks', label: 'Saved', home: 'left', countId: 'bm-tab-count',
     icon: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>' },
   { id: 'outline', label: 'Outline', home: 'right',
     icon: '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>' },
+  // 0.60.0 -- a tool's badge says what THAT TOOL counts. The Comments pane is
+  // a page companion, so its badge is this page's open comments, not the
+  // vault's. It was the vault's until now, which is what "comments are
+  // behaving as vault-level" was: the reader's own badge read 2 while the tab
+  // beside it read 19, on the same page, in the same moment.
   { id: 'comments', label: 'Comments', home: 'right', countId: 'cmt-tab-count',
+    count: () => { const i = pageCmtCountsFor(state.activeUrl); return i ? i.openTotal : 0; },
     icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
   { id: 'backlinks', label: 'Links', home: 'right',
     icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>' },
   { id: 'review', label: 'Review', home: 'right', countId: 'review-count', gated: true,
+    count: () => (reviewAllowed() ? reviewDashboardTotal() : 0),
     icon: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>' },
   // S45 — the first tool gated ABOVE Contributor. `tier` is explicit rather
   // than a second boolean beside `gated`, because two booleans would encode a
@@ -17632,6 +18466,16 @@ function isToolOpen(id) { return !!dockOf(id); }
 function isSavedPaneOpen() {
   return isToolOpen('bookmarks') || betaSlideId === 'bookmarks' ||
          (typeof destId !== 'undefined' && destId === 'bookmarks');
+}
+
+// J1 -- the same question for Comments, asked the same way. The report popup
+// only re-renders that pane when it is actually on screen; re-rendering a pane
+// nobody is looking at is how a parked node gets rebuilt under a surface that
+// has moved on.
+function isCommentsPaneOpen() {
+  return isToolOpen('comments') || betaSlideId === 'comments' ||
+         (typeof destId !== 'undefined' && destId === 'comments') ||
+         (betaShellOn() && state.rightActive === 'comments');
 }
 
 // A gated tool is only ever offered at Contributor and above. This is the one
@@ -17688,7 +18532,11 @@ function paneHead(toolId, opts) {
   const count = (o.count === undefined || o.count === null || o.count === '')
     ? '' : `<span class="badge">${escHtml(String(o.count))}</span>`;
 
-  const moveBtn = t.pinned ? '' :
+  // J1b -- the arrows move a pane to the OTHER dock, which is a thing only
+  // the old shell has. In the console shell there is one companion column,
+  // so the control pointed at nothing and Jayson quite reasonably asked what
+  // it was. A control whose destination does not exist is not a control.
+  const moveBtn = (t.pinned || fixedVisibility()) ? '' :
     `<button class="icon-btn ph-move" title="Move to ${other} panel" aria-label="Move to ${other} panel"` +
     ` onclick="event.stopPropagation();moveTool('${toolId}','${other}')">` +
     (other === 'right'
@@ -17696,7 +18544,10 @@ function paneHead(toolId, opts) {
       : '<svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>') +
     '</button>';
 
-  const closeBtn = t.pinned ? '' :
+  // Outline is permanent in the console shell (see rightStack), so it gets no
+  // ✕ there. Offering one that refuses is worse than not offering one.
+  const outlinePermanent = fixedVisibility() && toolId === 'outline';
+  const closeBtn = (t.pinned || outlinePermanent) ? '' :
     `<button class="icon-btn ph-close" title="Close ${escHtml(t.label)}" aria-label="Close ${escHtml(t.label)}"` +
     ` onclick="event.stopPropagation();closeTool('${toolId}')">` +
     '<svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
@@ -17715,10 +18566,21 @@ function paneHead(toolId, opts) {
 // way from one to the other is a button pinned inside the pane it belongs to.
 // These used to be an "inbox strip" outside the panes entirely, which is why
 // they appeared to belong to the panel rather than to a tool.
-const PANE_FOOT_COMMENTS =
+// J1b -- Jayson: "remove the comments inbox from the right bar (We have this
+// in admin)." He is right, and S77 is why: the vault-wide board MOVED to
+// Admin that session, so this footer has been a second door to a room that
+// already has one, sitting inside a per-page pane. R1's rule is that the pane
+// is per-file and the page is vault-wide; the door between them stopped being
+// needed when Admin got the board and Home got a link to it.
+//
+// A function, not a constant, so the one place that decides can decide -- the
+// old shell keeps it, because there Admin is not where people go.
+const PANE_FOOT_COMMENTS_HTML =
   '<div class="pane-foot"><button class="pane-foot-btn" id="btn-cmt-inbox" onclick="openAdminScreen(\'comments\')">' +
   '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
   'All comments<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span></button></div>';
+
+const PANE_FOOT_COMMENTS = () => fixedVisibility() ? '' : PANE_FOOT_COMMENTS_HTML;
 
 const PANE_FOOT_REVIEW =
   '<div class="pane-foot"><button class="pane-foot-btn" id="btn-review-inbox" onclick="openChangesView()">' +
@@ -17813,6 +18675,11 @@ function moveTool(tab, toSide) {
 function closeTool(tab) {
   const t = toolById(tab);
   if (!t || t.pinned) return;
+  // J1b -- the console shell keeps its right column in state.rightTabs, not
+  // state.docks, so a close that only edits state.docks silently does
+  // nothing there. One entry point, two models underneath, rather than a
+  // second ✕ that knows which shell it is in.
+  if (betaShellOn() && rightStack().includes(tab)) { rightClose(tab); return; }
   const side = dockOf(tab);
   if (!side) return;
   state.docks[side].splice(state.docks[side].indexOf(tab), 1);
@@ -17958,11 +18825,18 @@ function paintRailCounts() {
     el.textContent   = n;
     el.style.display = n ? '' : 'none';
   };
-  set('cmt-tab-count',   state.cmtOpenCount);
+  // 0.60.0 — each tool's badge is read from the tool's own declaration. This
+  // function used to hold the numbers itself, and wrote the SAME vault-wide
+  // comment total into the Comments TAB badge and the vault-wide INBOX badge,
+  // which are two elements that mean different things. Jayson's item 5. The
+  // rule is the same one this project has now paid for six times: put it in
+  // one place that every caller goes through, not in a line each caller has
+  // to remember.
+  WB_TOOLS.forEach(t => { if (t.countId && t.count) set(t.countId, t.count()); });
+  // Not a tool badge, deliberately: the inbox belongs to the vault-wide
+  // comments board, so the vault-wide total is the right number here and
+  // always was. It is the one that stays.
   set('cmt-inbox-count', state.cmtOpenCount);
-  set('review-count',    reviewAllowed() ? reviewDashboardTotal() : 0);
-  // bm-tab-count is declared in WB_TOOLS and has never had a writer. Left
-  // alone deliberately — wiring it is a bookmarks change, not a review fix.
   // S-A: the beta header's comment count is derived from the same number
   // rather than counted again, so the two can never disagree.
   if (typeof updateBetaCommentCount === 'function') updateBetaCommentCount();
@@ -17987,14 +18861,31 @@ function renderDocks() {
   // all, it is whichever companion is active. BETA_HIDDEN_RIGHT stays for
   // the old shell's saved layouts, which are untouched and still restored
   // the moment the switch goes off.
+  // J1b -- Jayson's item 6. The console shell's right column used to be
+  // whichever single companion was active, which is why summoning Comments
+  // took Outline off screen and why "Comments becomes the default" was a
+  // thing that could happen at all. It is now the whole stack, Outline
+  // always first and never removable.
+  //
+  // Nothing new was needed to stack it: the dock model has stacked panes,
+  // drag-to-resize handles between them and per-pane heights since v0.28.0.
+  // The console shell was throwing all of that away by collapsing the list
+  // to one entry. Widening the list IS the feature.
   const docks = betaShellOn()
-    ? { left: state.docks.left, right: [state.rightActive || 'outline'] }
+    ? { left: state.docks.left, right: rightStack() }
     : state.docks;
 
   const openAll = [...docks.left, ...docks.right];
   document.querySelectorAll('.rp-pane').forEach(p => {
     const tab = p.id.slice(3); // 'rp-outline' -> 'outline'
-    const side = dockOf(tab);
+    // J1b -- ask the layout being RENDERED which side this pane is on, not
+    // state.docks. A companion summoned into the console shell's right
+    // column is not in state.docks at all, so dockOf() answered null for it
+    // and its stored height was never found. Same shape as every other bug
+    // this week: a question answered from the wrong model.
+    const side = docks.left.includes(tab) ? 'left'
+               : docks.right.includes(tab) ? 'right'
+               : dockOf(tab);
     const isOpen = openAll.includes(tab);
     p.classList.toggle('active', isOpen);
     p.style.flex = isOpen ? `${(state.dockFlex[side] || {})[tab] || 1} 1 0` : '';
@@ -18124,7 +19015,14 @@ function makeStackResizable(handle, aboveEl, belowEl, aboveTab, belowTab, side) 
 // whichever tabs happen to be in the stack.
 function refreshRightPanel() {
   const fns = rpRenderFns();
-  [...state.docks.left, ...state.docks.right].forEach(tab => { const fn = fns[tab]; if (fn) fn(); });
+  // J1b -- state.docks is not where the console shell's right column lives,
+  // so a companion stacked there was never in this list. It mattered less
+  // when a companion could not be on screen beside Outline; now that it can,
+  // a stale one is visible rather than merely wrong.
+  const open = betaShellOn()
+    ? [...state.docks.left, ...rightStack()]
+    : [...state.docks.left, ...state.docks.right];
+  [...new Set(open)].forEach(tab => { const fn = fns[tab]; if (fn) fn(); });
   // Session B — the slide-over holds its tool outside the dock arrays
   // above, so without this line it would keep showing the file you left.
   if (typeof betaSlideId !== 'undefined' && betaSlideId) { const fn = fns[betaSlideId]; if (fn) fn(); }
@@ -18699,8 +19597,8 @@ function updateBetaSaveButton() {
   btn.title = label;
   btn.setAttribute('aria-label', label);
   btn.innerHTML = on
-    ? '<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.4"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
-    : '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+    ? '<svg class="icon icon-fill" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+    : '<svg class="icon" viewBox="0 0 24 24" stroke-width="1.8"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
 }
 
 async function jumpToBookmark(file, id) {
@@ -19537,6 +20435,21 @@ async function gotoSearchHit(idx) {
     const t = el.textContent.replace(/\s+/g, ' ').trim();
     if (t && (t === text || t.includes(text))) {
       el.classList.add('wb-changed');
+      // J1 -- Jayson's item 3. Arriving here tinted the matching LINE and left
+      // the section header untouched, so nothing told the eye which section it
+      // had landed in. A saved item has pinned its heading since the Outline
+      // jump was built; search never did, which is why this reads as something
+      // that used to work and stopped. Same pin, so the reader row and the
+      // Outline's active item agree however you arrived.
+      //
+      // Pinned BEFORE the scroll, for the reason revealHeading() records: the
+      // scroll-spy can fire on a neighbouring heading as we land and overwrite
+      // the highlight. The suppression window is what holds it.
+      const owner = headingIdOwning(el);
+      if (owner) {
+        pinJumpHighlight(owner);
+        readerJumpSuppressUntil = performance.now() + 700;
+      }
       scrollToBlock(el);
       break;
     }
@@ -19600,6 +20513,11 @@ function parseComments(text) {
       closedTs: attrs.closedTs || '',
       hid:      attrs.hid      || '', // P7 — section anchor; '' means page-level ("General")
       replyTo:  attrs.replyTo  || '', // P7.1 — index of the comment this replies to; '' means top-level
+      // J2b — the two fields the question banner needs and the format did
+      // not have. Written only when set (see serializeComments), so a
+      // comments file that never used them is byte-for-byte what it was.
+      assignee: attrs.assignee || '', // typed, not picked: there is no roster
+      due:      attrs.due      || '', // yyyy-mm-dd, or '' for none
       body:     m[2].trim(),
     });
   }
@@ -19618,7 +20536,13 @@ function serializeComments(comments) {
     // written for a top-level comment, so a comments.md with no replies in
     // it stays byte-for-byte what 0.53.0 would have written.
     const replyTo = c.replyTo ? ` replyTo="${c.replyTo}"` : '';
-    return `<!-- WB type="${c.type}" status="${c.status}" ts="${c.ts}" author="${c.author}"${hid}${closed}${replyTo} -->\n${c.body}\n<!-- /WB -->\n\n`;
+    // J2b — same rule as hid and replyTo above: absent unless set, and
+    // appended AFTER the existing attributes, so nothing already written
+    // changes shape. A double quote inside a value would close the attribute,
+    // so it is dropped rather than escaped — these are a name and a date.
+    const qa = (k, v) => v ? ` ${k}="${String(v).replace(/"/g, '')}"` : '';
+    const extra = qa('assignee', c.assignee) + qa('due', c.due);
+    return `<!-- WB type="${c.type}" status="${c.status}" ts="${c.ts}" author="${c.author}"${hid}${closed}${replyTo}${extra} -->\n${c.body}\n<!-- /WB -->\n\n`;
   }).join('');
 }
 
@@ -19658,14 +20582,14 @@ const RP_HEADER_COMMENTS = () => paneHead('comments');
 async function renderCommentsTab() {
   const pane = $('rp-comments');
   if (!state.activeUrl) {
-    pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Open a file to see comments.</div>' + PANE_FOOT_COMMENTS;
+    pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Open a file to see comments.</div>' + PANE_FOOT_COMMENTS();
     return;
   }
 
   const commentsUrl = commentsUrlFor(state.activeUrl);
   let comments = [];
 
-  pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Loading…</div>' + PANE_FOOT_COMMENTS;
+  pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Loading…</div>' + PANE_FOOT_COMMENTS();
 
   const cText = await readVaultFileOrNull(commentsUrl);
   if (cText !== null) comments = parseComments(cText);
@@ -19783,7 +20707,7 @@ async function renderCommentsTab() {
     <button class="comment-submit" onclick="postComment()">${replyParent ? 'Reply' : 'Post'}</button>
   </div>`;
 
-  pane.innerHTML = RP_HEADER_COMMENTS() + html + PANE_FOOT_COMMENTS;
+  pane.innerHTML = RP_HEADER_COMMENTS() + html + PANE_FOOT_COMMENTS();
 }
 
 // P7 — flips between auto (post to whatever heading is in view) and a
@@ -19824,7 +20748,83 @@ async function openCommentComposer(hid, type) {
   if (el) el.focus();
 }
 
-function reportThisPage()        { return openCommentComposer('', 'flag'); }
+// J1 -- Jayson's item 4. Report no longer summons the Comments companion into
+// the right column; it opens a popup, takes the report, and gets out of the
+// way.
+//
+// reportThisPage() was deleted rather than left forwarding here. Once the
+// button called openReportModal() directly it had no caller anywhere in the
+// app, and a function alive only because a test calls it is exactly what
+// closeCommentAt() was when S77 removed it. One name for one thing.
+function openReportModal() {
+  if (!state.activeUrl) return;
+  const tgt = $('rpt-target');
+  if (tgt) tgt.textContent = 'Reporting: ' + (state.activeName || displayNameOf(state.activeUrl));
+  const body = $('rpt-body');
+  if (body) { body.value = ''; body.disabled = false; }
+  const btn = $('rpt-btn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Submit'; }
+  // Remembered so a page change mid-compose cannot silently move the report
+  // onto a different file -- the same rule lockCommentTarget() enforces for
+  // the composer, made simpler by the popup having one target and no heading.
+  reportTargetUrl = state.activeUrl;
+  $('rpt-overlay').style.display = 'flex';
+  if (body) body.focus();
+}
+
+function closeReportModal() {
+  const ov = $('rpt-overlay');
+  if (ov) ov.style.display = 'none';
+  reportTargetUrl = null;
+}
+
+let reportTargetUrl = null;
+
+// Open, fill out, Submit, disappear -- and then SAY so. A write that returns
+// in silence is indistinguishable from one that failed, which is the whole of
+// item 9 from the same list; the toast built at v0.56.0 is what this reuses
+// rather than inventing a second confirmation.
+async function submitReport() {
+  const body = $('rpt-body');
+  const btn  = $('rpt-btn');
+  const url  = reportTargetUrl;
+  if (!body || !url) return;
+  const text = body.value.trim();
+  if (!text) { body.focus(); return; }
+
+  if (btn)  { btn.disabled = true; btn.textContent = 'Sending…'; }
+  body.disabled = true;
+
+  const report = {
+    type:   'flag',
+    status: 'open',
+    ts:     new Date().toISOString().slice(0, 16),
+    author: CONFIG.authorName || 'Anonymous',
+    body:   text,
+    hid:    '',          // a report is about the page, not a section
+    replyTo: ''
+  };
+
+  try {
+    // Same sidecar the composer writes to, so a report shows up in this page's
+    // Comments pane and in All comments like any other flag. A popup that
+    // wrote somewhere of its own would be a report that goes nowhere.
+    const all = await appendPageComment(commentsUrlFor(url), report);
+    closeReportModal();
+    rvNotify('Report sent', true);
+    // Keep whatever is already on screen honest about the new flag.
+    if (url === state.activeUrl) {
+      state.pageCmts = { url, list: all, ...deriveCmtCounts(all) };
+      updateBetaCommentCount();
+      try { if (isCommentsPaneOpen()) await renderCommentsTab(); } catch (_) {}
+    }
+    scanBadges();
+  } catch (e) {
+    body.disabled = false;
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit'; }
+    rvNotify('Could not send the report: ' + e.message, false);
+  }
+}
 function commentOnHeading(hid)   { return openCommentComposer(hid || '', null); }
 
 // Reply always targets the THREAD ROOT, even when "Reply" was clicked on a
@@ -19912,6 +20912,29 @@ async function spWriteFile(serverRelUrl, content) {
   if (!res.ok) throw new Error(`write HTTP ${res.status}`);
 }
 
+// ── Adding a comment to a page, through ONE door (J1) ─────────────
+// The report popup and the Comments composer are two entrances to the same
+// act, so they go through one function rather than each carrying its own copy
+// of read-append-serialize-write. This project has now twice paid for a rule
+// written as a line at each call site instead of as a function (B3's neighbour
+// reset, S82's five dashboard repaints), and a second serializer for comments
+// is exactly how the two would drift.
+//
+// It RE-READS the sidecar immediately before writing rather than trusting a
+// list loaded earlier. The popup has no loaded list at all, so it must; and
+// for the composer this closes a real window in which a comment written by
+// somebody else since the pane rendered was overwritten by the next post. The
+// TARGET is still passed in, never recomputed: a person who navigates away
+// mid-compose must still post against the page they were composing on.
+async function appendPageComment(commentsUrl, comment) {
+  const cText    = await readVaultFileOrNull(commentsUrl);
+  const existing = cText !== null ? parseComments(cText) : [];
+  const all      = [...existing, comment];
+  await ensureZSystemDir(commentsUrl);
+  await spWriteFile(commentsUrl, serializeComments(all));
+  return all;
+}
+
 async function postComment() {
   const typeEl = $('comment-type-sel');
   const bodyEl = $('comment-body-txt');
@@ -19922,7 +20945,11 @@ async function postComment() {
   if (!body) return;
 
   const ts     = new Date().toISOString().slice(0, 16);
-  const author = CONFIG.authorName || 'Anonymous';
+  // 0.60.0 — wbAuthor(), not the raw config value. This read the setting
+  // directly and would happily write an unreplaced [PLACEHOLDER] into a
+  // comment as somebody's name; wbAuthor() is the guard that already existed
+  // everywhere else. Two spellings of "who am I" is how they drift.
+  const author = wbAuthor();
 
   const pane       = $('rp-comments');
   const existing   = pane._wbComments || [];
@@ -19941,12 +20968,10 @@ async function postComment() {
   }
 
   const newComment = { type, status: 'open', ts, author, body, hid, replyTo };
-  const allComments = [...existing, newComment];
 
   try {
     bodyEl.disabled = true;
-    await ensureZSystemDir(commentsUrl);
-    await spWriteFile(commentsUrl, serializeComments(allComments));
+    await appendPageComment(commentsUrl, newComment);
     bodyEl.value    = '';
     bodyEl.disabled = false;
     state.commentAnchorOverride = null; // P7 — back to auto-targeting for the next comment
@@ -20191,9 +21216,14 @@ async function bootVault() {
     // note" is on. The two compose rather than compete — the saved tree is
     // the base, the path to the note is a union on top, so neither setting
     // silently undoes the other.
+    // 0.58.1 -- a stale wb_last_file from an older version can carry a
+    // folderId that is no longer a path string ("last.folderId.split is not
+    // a function" on every connect attempt, from a leftover localStorage
+    // value predating whatever shape this used to be). Guard the type
+    // rather than trust a persisted value's shape.
     const last = getLastFile();
     state.openFolders = readFolderState();
-    if (last && last.folderId) {
+    if (last && typeof last.folderId === 'string' && last.folderId) {
       let acc = '';
       last.folderId.split('/').forEach(seg => { acc = acc ? `${acc}/${seg}` : seg; state.openFolders[acc] = true; });
     }
@@ -20487,7 +21517,7 @@ function showFirstRunStep(step, ctx) {
       frStep('connect') +
       '<h1>' + (on ? 'Already connected' : 'Connect Folio to the vault') + '</h1>' +
       (on
-        ? '<p>Folio is reading from a folder on this computer already. Carry ' +
+        ? '<p>Folio is reading from <b>' + escHtml((LOCAL.root && LOCAL.root.name) || 'a folder') + '</b> on this computer already. Carry ' +
           'on, or point it somewhere else.</p>'
         : '<p>Folio reads pages straight out of a synced folder on this ' +
           'computer. Nothing is uploaded and there is no account to make.</p>' +

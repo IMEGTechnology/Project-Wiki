@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.56.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.61.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -159,24 +159,26 @@ The oldest unresolved change on a file is the only one you can act on. Later one
 > [!WARNING] Reject undoes the edit
 > Rejecting does not just flag a change for the author. It restores the previous version of the file. Use it when the edit should not stand at all. If you just want to raise a question about it, leave a comment instead.
 
-### New Files
+### The list is pages, oldest first
 
-A second section of the review screen lists files Folio has never touched — usually notes added straight from Obsidian, which have no `status` property because only this app writes one.
+Review lists **pages**, not items. One row per page, saying everything that page owes you: a chip for each thing, and the row disappears once the page owes nothing. A page that has been edited in Obsidian, carries an open question and is overdue is one row and one visit, not three.
 
-Clicking one opens it alongside its Properties so you can fill them in. **Update** adds only the property keys that are actually missing and never overwrites what is already there. Nothing is written automatically.
+The list is ordered **oldest first**, by the oldest thing each page owes. **Start review** walks it in the order you see, from the top. A page whose age cannot be read from anything on it sits at the end rather than the top, because not knowing how long it has waited is not the same as it having waited longest.
 
-### Missing properties
+Every row has **Review page**. A page owing exactly one thing that can be settled without reading it also carries that button, so you can approve a new section or clear a due date from the list. A page owing several does not: the button would be acting on one of the things in a row that lists three.
 
-Beside it, under the same *Needs completion* heading, is a list of every file with a gap in its property block — any of the nine keys absent, required or optional.
+### New pages
 
-**A file can be in both lists, and that is not a mistake.** They are two different questions. *New file* asks whether anyone has looked at this note yet, and you answer it by looking. *Missing properties* asks which keys are absent, and you answer it by writing them. A note dropped in from Obsidian fails both, so it appears twice, once per thing you have to do about it.
+A page Folio has never touched, usually one added straight from Obsidian, has no `status` property, because only this app writes one. Nobody has approved it, so it is an **approval** and it belongs here. Its row names the property keys it is missing, and **Approve** writes only the keys that are absent, never overwriting what is already there.
 
-Each row names what is actually missing, so you can tell a note short of one optional key from one with no property block at all without opening either.
+### Missing properties are Vault check's now
 
-**Fill all** at the foot of the section writes the missing keys across every file listed, in one pass. It counts *files*, not rows, so a note appearing in both lists is written once and counted once — the number on the button is the number of files it will touch.
+A page that **has** been approved and is missing some of its keys is a different thing: a repair, not an approval. Those live in **Home → Admin → Vault check**, alongside the other repairs, with a **Repair** button on each row and one **Fill all** for the lot. Both write only the keys that are absent.
 
-> [!NOTE] Why this list may be long the first time
-> `must-read` and `onboarding` arrived after most vaults were already written, so every note predating them is missing at least those two. That is the population this list exists to find. One **Fill all** clears it.
+The split is what stops the two lists chasing each other. A repair run from Vault check used to be able to create new work in Review; it cannot now, because they are not the same list.
+
+> [!NOTE] Why the Vault check list may be long the first time
+> `must-read` and `onboarding` arrived after most vaults were already written, so every note predating them is missing at least those two. Those two are deliberately not counted, so what is left is real gaps. One **Fill all** clears them.
 
 ### Changes made in Obsidian
 

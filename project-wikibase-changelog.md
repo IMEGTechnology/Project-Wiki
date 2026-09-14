@@ -8,6 +8,229 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.61.0 — 2026-09-13
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; updated `supporting/button-scale-sample.html`, `supporting/tests/b2-home.test.js`, `supporting/tests/round2-destinations.test.js`.
+
+*J3, the button scale applied. Home's six doors and Admin's five tabs both draw from one scale now, and a same-day colour review swapped teal out before any of it was built.*
+
+### Home: sample C
+
+Every door gets an icon, the label is centred instead of left-aligned, and the sub-line is only revealed on hover — opacity and max-height, never `display`, so the button's own height never changes and nothing below the row moves. Doors are an equal flex row now rather than an uneven grid: the centred, ellipsised label no longer needs Continue reading wider or Admin narrower. Hovering grows the door under the pointer and narrows the rest to fit; below 900px that behaviour turns off and the sub-line is shown at rest instead, since a single shrinking row doesn't suit a touch width.
+
+### Admin: sample 2, carrying sample 3's counts
+
+One `.seg2` segmented control replaces five loose `.rt-tab` pills, and each tab that has a vault-wide number now shows it — Review and Vault check's counts read off numbers the app already computes (`reviewDashboardTotal()`, and hard+warn from a Vault check run), Comments off `state.cmtOpenCount`, the same vault-wide total the inbox badge already used. Usage and Access carry none, by design: one is a report, the other has nothing to count.
+
+### The colour review, before any of it was built
+
+Jayson flagged teal (Help's original colour) as too close to green at a glance. Measured: teal sits at ~175° on the wheel, almost exactly midway between green (~139°) and blue (~217°), so the first idea — nudge green toward blue — would have closed that gap further, not opened it, and it would have touched the same token the app uses for diff-add elsewhere. Landed on a swap instead: **purple moved onto Help**, since it read calm enough for the door people use most; **a new rose token** (`#e11d48` light / `#fb7185` dark) **took Admin**, the door hidden below Contributor that almost nobody opens, so the warmest colour in the set barely registers. Teal's token is unchanged and still used elsewhere (callouts, code fences, Review's `.rv-owe-teal`).
+
+### Tests
+
+`b2-home.test.js`'s uneven-grid assertions replaced with checks for the new flex layout, the hover-grow rule and the four colour groups. `round2-destinations.test.js`'s tab-count check now queries `.seg2 button` instead of `.rt-tab`. **Full suite re-run: 3,106 passed**, the same two standing `usage-analytics.test.js` reds (open since S66, untouched by this release) — nothing regressed.
+
+### Still open
+
+Whether the hover-resize feel holds up in daily use — the cheaper fallback (reveal the sub-line without resizing) is recorded in the CSS comment above `.ch-doors` if it doesn't. And whether purple carrying both Help and Admin's old "the one family the reader never uses" meaning is fine now that it means two things.
+
+---
+
+## 0.60.0 — 2026-09-13
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/j2b-banner.test.js` and `supporting/button-scale-sample.html`; updated `supporting/review-redesign-sample.html`, `supporting/tests/review-actions.test.js`, `review-bugfix-0321.test.js`, `vault-audit.test.js`, `home-isolation.test.js`, `frontmatter-and-tables.test.js`, `j2-review-b.test.js`.
+
+*J2b, the second half. Four bottom bars become one, properties are edited where you are already looking, and questions get a bottom banner for the first time.*
+
+### One banner instead of four bars
+
+The bottom of the review flow was four separate bars — the walk bar, the diff bar, the audit bar and the detail bar — each with its own layout. Two of them pushed the close control to the right edge with `margin-left:auto`, a third used a spacer span, and the buttons landed in a different place for every kind of item. Walking a queue moved the controls under the cursor at every step.
+
+There is one banner now, rendered from one spec, in an order that never changes: the walk position on the left, then the page, then what kind of item it is, then the actions and the close control on the right. The type's own detail sits below.
+
+**The rule that keeps it one shape at every width:** the kind text and the title give up room and ellipse; the action cluster never gives up anything, and the bar does not wrap. A bar that wraps is a bar whose buttons move, which is the fault the whole surface exists to remove.
+
+### Questions and escalations have a banner at last
+
+They were the only item types in the queue with no bottom surface at all: clicking one opened the Comments pane in the right column and left the bottom of the screen empty, so a walk changed shape halfway along. They get the same bar as everything else, with the thread and a reply box as the detail, and four actions — jump to the section the question was raised against, assign or escalate, set or clear a due date, and close.
+
+Assign and a due date are **two new optional attributes on the comment tag**, written only when set, exactly the way `hid` and `replyTo` already are. Every comments file written before this version is byte-for-byte what it was. **Assign is a typed name, not a picked one** — there is still no roster anywhere in the app, the same gap the review dashboard recorded at S42.
+
+### Properties are edited in the banner
+
+Every declared key is a field. The **Edit properties** button and its trip to the Properties flyout in the reader's opposite corner are both gone: the banner was already listing every key and its value, so being sent somewhere else to change one was a round trip with nothing in it.
+
+**A save writes the properties and nothing else.** No baseline, no status flip, no approval. Approval stays a separate, explicit press. That is the v0.56.0 lesson applied deliberately rather than rediscovered — a property fill used to sign off content nobody had read.
+
+An absent key and an explicit `false` stay different, on both sides: an unchecked box over a key that was never set writes nothing, and an empty text field over an absent key writes nothing either. **That second half was found by the revert pass, not by writing the check first** — reverting "write only what changed" to "write every field" left every existing check green.
+
+### The Comments tab badge counts this page
+
+Jayson's item 5, "comments are behaving as vault-level". Settled by rendering it: the reader's own comment badge read 2 while the Comments tab badge beside it read 19, on the same page, at the same moment. The pane's content, the reader badge and Outline's per-heading dots were all per-page and correct. **Only the tab badge was fed the vault-wide total**, because one line wrote the same number into it and into the vault-wide inbox badge — two elements that mean different things.
+
+Each tool now declares what its own badge counts, so the next tool with a badge cannot inherit the wrong number by a caller forgetting. The inbox badge still gets the vault-wide total, which was always the right number there.
+
+### One function closes the banner, whatever is in it
+
+Every route that leaves a page has to close the bottom surface, and each of those routes used to write out the list of closers. Adding a fourth item type is exactly when that costs you. The list lives in one function now. **Leaving a walk also closes the open item**, which it did not before: the walk bar hid and the diff or audit bar stayed, standing over the dashboard still describing a page you had left.
+
+### What the render found that no check could, seventh session running
+
+Four separate breaks of the one-shape promise, none of them visible to jsdom, which measures every element as zero:
+
+- Status chips sitting on the action side pushed the close control onto a second line. They are in the body now: a set of facts that varies by item type must never sit where it can move a button.
+- Button labels wrapped, which made the bar taller — the same break by another route.
+- The walk position stacked "Page 1 of 3" into three lines.
+- Everything that could shrink shrank into stubs: the position read "Page", the chips read "§…" and "Ass…". No overflow, and no information either.
+
+And one fault that was mine contradicting the spec I was building: the walk's buttons sat on the left with its position. The position is a label and stays left; the buttons are actions and belong where the actions are.
+
+### Subtracted
+
+**Skip**, which duplicated the walk's own Next. **Assign and Due as two buttons** opening the same panel, now one. A second mechanism that restored the strip height, disagreeing with the first about the 60%-of-window cap. And `postComment` read the author name straight from config, so an unreplaced `[PLACEHOLDER]` could be written into a comment as somebody's name; it uses the same guard as everywhere else now.
+
+### Also
+
+`supporting/button-scale-sample.html` is new: one button scale, three sizes and three treatments, with five samples for Home's door row and three for Admin, drawn from it. Nothing is applied yet — Jayson's items 15 and 16, awaiting his pick.
+
+## 0.59.0 — 2026-09-13
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/j2-review-b.test.js`; updated `supporting/tests/review-dashboard.test.js`, `review-actions.test.js`, `review-bugfix-0321.test.js`, `vault-audit.test.js`, `p10-vault-check.test.js`, `frontmatter-and-tables.test.js`.
+
+*J2, first half. Review becomes one list of pages, oldest first, and the property repairs move to Vault check.*
+
+### Review is a list of pages now, not a list of items
+
+The three severity bands are gone. They sorted items, and a person reviews a page: a page that had been edited in Obsidian, carried an open question and was overdue appeared as three rows in three bands and took three separate visits. It is one row now, saying all three things, and clearing the page removes the row.
+
+The list is ordered **oldest first**, and the walk follows the order on screen rather than a band order of its own, so nothing can sit unseen at the bottom of a collapsed band. A page's age is the oldest thing it owes: the timestamp on a question, an escalation or a pending edit where there is one, and otherwise when the page itself was last modified. A page with no readable date sorts last rather than first, because not knowing how long something has waited is not the same as knowing it has waited longest.
+
+Each row carries **Review page**, and a page owing exactly one thing that can be closed without reading it also carries that button (Approve, Clear due date). A page owing several does not: the button would be acting on one of the things in a row that lists three.
+
+### Missing properties left Review for Vault check
+
+Jayson's split, and the rule now lives in one function rather than three filter lines inside the scan:
+
+- A page with **no `status` key at all** has never been approved. That is an approval, and it stays in Review as a New page with its missing keys named on its own row.
+- A page that **has a status and is missing keys** is a repair, and repairs are Vault check's.
+
+The consequence worth having is that a repair run from Vault check can no longer manufacture review work, so the band-hop between completion and acknowledgement closes by construction rather than by a rule someone has to remember.
+
+Vault check gained the findings, one per page, banded by what is absent: a missing required key is a hard failure, a gap in the optional-but-expected set is a warning. **Fill all** moved there with the rows it clears, and each row carries its own Repair. Both go through the one writer of missing keys in the app, so a repair here and a fill anywhere else cannot drift, and both inherit the v0.56.0 guard that stops a fill signing off content nobody approved.
+
+**Vault check's "Open Review" pointer row is deleted.** P10 added it because the missing-author fact lived in Review and printing it twice would have been two lists of one thing. The fact has moved, so the pointer had nothing left to point at.
+
+### What was deleted rather than left pointing at nothing
+
+The band collapse state, the per-band counts, the band headings, `Fill all`'s Review-side helpers and the bulk button that read them are all gone rather than kept aimed at a shape nobody renders — the fault this project found twice in one column at v0.58.0. Acknowledge all survived, unchanged in what it does, under a name that no longer claims there is a band 2.
+
+### Tests
+
+New `j2-review-b.test.js`, **46 checks**, asserting what the person would see and what the sort actually produced rather than that a function exists. Six existing suites were updated where they encoded a decision this release reverses; each rewritten check now asserts the new rule and says what the old one got right, and the deletions are asserted as absences so a band heading or a bulk button that quietly came back would fail rather than pass unnoticed.
+
+**46 suites, 3,042 checks + 8 smoke. Green except the two standing `usage-analytics.test.js` reds**, open since S66, confirmed pre-existing by running the whole suite before the first edit and untouched by this release.
+
+Six fixes were reverted one at a time in a scratch copy and confirmed to turn the suite red. **Two came back green on the first pass and one of them was a real hole**: the repair check called `vcRepairProps()` directly rather than going through the button's own dispatcher, so deleting the dispatcher's branch left it passing while the button would have run the wrong repair. That is the call-site-not-callee fault this project has now recorded five times, and the check now goes in the way the button does. The other green revert was a bad revert that never applied, which is worth separating from a hole: a revert that changes nothing proves nothing either way.
+
+### One thing the render caught, as usual
+
+The filter chip row was set never to shrink, so on a reading column narrower than the chips the last chip was sliced off by the edge instead of wrapping. It has presumably been that way since the bar was built. jsdom measures every element as zero and cannot see a clip, so nothing in the harness could ever have found it.
+
+---
+
+## 0.58.1 — 2026-09-13
+
+**Changed:** `index.html`; updated `supporting/tests/fold-consolidation.test.js`.
+
+*Pre-1.0 test-vault pass. Local connect was crashing outright on a stale saved value, plus two small diagnostics added while chasing it.*
+
+### Boot crashed on a leftover value, every time, on any folder
+
+Connecting a vault threw `last.folderId.split is not a function` on every attempt, always landing back on the same "Folio could not open that folder" / "Welcome back" screen regardless of which folder was picked. The cause was not the vault or the folder: `wb_last_file`, the "last file you had open" record Folio keeps in the browser, can carry a `folderId` left over from an older version that is no longer a plain path string. Boot's ancestor-chain restore trusted that shape blindly and called `.split()` on it. It now checks the type first and skips the record if it doesn't match, the same way stale persisted state is handled elsewhere in this file.
+
+First reported against a build believed to date back to around 0.50.0, when Admin, Saved, Search results and What's New started opening as full destinations rather than a side panel — a plausible origin for a non-file record reaching `wb_last_file`, though the exact write site was not traced.
+
+### Two small diagnostics, added while chasing the above
+
+- **Account menu → Connected** now shows the folder's name (`— test-vault`, etc.) so a mismatched connection is visible at a glance. Browsers only ever expose a folder's name through this API, never a full path, so a name match is the limit of what this can show.
+- **"Open a different folder…" now opens starting at the currently-connected (or last-saved) folder** via `showDirectoryPicker`'s `startIn`, instead of wherever Chrome last remembered on its own.
+
+### Tests
+
+`fold-consolidation.test.js` gained one check asserting the type guard is present in boot's ancestor-chain read, alongside the existing check for that block. 173 passed, 0 failed. `usage-analytics.test.js`'s two pre-existing failures (Most read row counts) are carried forward from before this release, untouched by it, and are tracked as a known issue rather than fixed here.
+
+---
+
+## 0.58.0 — 2026-09-11
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/j1b-right-stack.test.js`.
+
+*The right column stacks instead of swapping. Jayson's item 6, and the cleanup he asked for alongside it.*
+
+### Outline no longer disappears
+
+Opening Comments or Links used to **replace** the Outline. That is why the side column could feel like it had been taken over, and why the only way back to the Outline was to click away from what you had just opened.
+
+The Outline is now permanent. Opening a companion **stacks it underneath** rather than swapping it in, and you can drag the divider between them to give either one more room. With only the Outline open nothing changes at all: one panel, no divider, no strip.
+
+Nothing else about how the column behaves has changed. Moving to another page still clears the companions and leaves the Outline, exactly as before.
+
+### The ✕ works, and the arrows are gone
+
+The ✕ on a panel's header **did nothing** in the current interface. It was written for the older two-column layout and was removing the panel from a list this interface does not read. It closes the panel now.
+
+The arrows beside it moved a panel to the *other* side column. There is only one companion column here, so the control pointed at nothing. Removed. The older interface, which does have two, keeps them.
+
+The Outline has no ✕, because it is always there.
+
+### Panels remember their height
+
+Set the Outline tall and Comments short, close Comments, open it again later: it comes back the way you left it. Each panel's height is remembered separately.
+
+### All comments has left the side column
+
+The **All comments** button at the foot of the Comments panel is gone from the current interface. That vault-wide view moved to Admin at 0.54.0, and Home links to it, so the button was a third door to the same room sitting inside a panel that is about one page.
+
+## 0.57.0 — 2026-09-11
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/j1-everyday.test.js` and `supporting/right-panel-stack-sample.html`.
+
+*Five everyday annoyances from Jayson's own list, the ones he hits every time he opens the app. Four shipped, one is a question with a drawing attached. New user-facing behaviour (a report popup), so MINOR.*
+
+### The two side columns stopped fighting each other
+
+Widening one side column shoved the other back to its default width, and then **recorded that shove as your own choice** — so the column you had sized never came back, on this or any later visit. Both halves of that were one rule in one place.
+
+The rule existed to stop a widened column crushing the reading area. It was never what protected the reading area: both gestures already refuse to go past the reading minimum on their own. All the shove did was take room from one column to give to the other.
+
+So in the current interface it is gone. Each side adjusts on its own, is limited only by how much room is actually free, and keeps the width you left it at. The old interface keeps the old behaviour, because there a saved width is the only memory a panel has.
+
+*Behind it: the exception that forbids recording the shove was written at one of the two places that shove, and not the other. It is now one piece of code both of them use, rather than a rule each one has to remember.*
+
+### Arriving from search highlights the section you landed in
+
+Opening a saved item has always highlighted the heading it lands on. Arriving from a search result marked the matching line and left the heading alone, so nothing told your eye which section you had arrived in. That is why this read as something that used to work and stopped: it worked on one of the two ways in.
+
+A search arrival now highlights both — the section header and the matching line.
+
+### Report is a real button, and it opens a popup
+
+The Report button under each page was wired up at 0.56.0 but was still **painted** as unavailable: half faded, with a "not allowed" cursor. A working control had been reading as dead for three releases.
+
+It is now a live control with a flag on it. Clicking it opens a small popup: write what is wrong, Submit, and it goes away, with a confirmation. It no longer summons the Comments panel into the side column and leaves it there.
+
+Reports still land in exactly the same place as before — the page's own comments — so they appear in that page's Comments panel and in the vault-wide list like any other flag.
+
+### The favourite icon fills when a page is saved
+
+Saving a page has always switched the icon in the reader to a solid one, and the solid version never arrived on screen: a styling rule was overriding it, silently, so the icon stayed an outline while the same icon in the Outline panel filled correctly. Both now look the same. The "more" menu's three dots, which had the same problem, are solid dots again rather than hollow rings.
+
+### Still open
+
+**Stacking the right panel's three tabs** was not built. "Like the original" reads two different ways — all three panels visible at once, or just the tab labels running down the side — and they are different changes with different consequences. Three versions are drawn at `supporting/right-panel-stack-sample.html` for a decision.
+
+The rename of **Links** to **Backlinks** was dropped: that panel lists the links this page points *at*, in four groups, and carries backlinks as one section at the bottom, so the new name would have described its smallest part.
+
 ## 0.56.0 — 2026-09-11
 
 **Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; added `supporting/tests/review-actions.test.js`.
