@@ -783,6 +783,15 @@
        keeps its position and returns the moment a page is open again, so
        pressing Home never costs someone their place in a 17-item queue. */
     body.beta-shell.console-home #rv-banner { display: none !important; }
+    /* S92, Jayson: Home now ENDS a walk (rvEndReview) rather than hiding it,
+       so the rule above only guards a banner painted during the switch. */
+
+    /* S92 -- during a review the page and its banner take the whole width.
+       !important for the same inline-width reason as the Home rule above. */
+    body.beta-shell.rv-reviewing #sidebar,
+    body.beta-shell.rv-reviewing #rh-sidebar,
+    body.beta-shell.rv-reviewing #right-panel,
+    body.beta-shell.rv-reviewing #rh-right { display: none !important; }
 
     /* 0.41.1: the you-are-here section bar (0.40.0) retires in this shell.
        The breadcrumb sits directly above it naming the same page, so it was
@@ -1848,7 +1857,7 @@
       color: var(--text-muted); font-size: 12px; padding: 2px 6px; }
     #rvb-x:hover { color: var(--text-primary); }
     #rvb-body {
-      flex-shrink: 0; height: 180px; overflow-y: auto;
+      flex-shrink: 0; height: 38vh; min-height: 160px; overflow-y: auto; /* S92: was 180px, too small to read a diff */
       padding: 10px 16px; background: var(--bg-sidebar);
       font-size: 12.5px; color: var(--text-secondary);
     }
@@ -3608,34 +3617,8 @@
     /* Board rows in the pane. Long note names wrap onto the gap line rather
        than widening the pane, and double-clicking the resize handle is what
        expands it to the full name (see FIT_ROW_SEL). */
-    .rvp-row { cursor: pointer; }
-    .rvp-row:hover { background: var(--hover); }
-
-    /* Vault-wide entry points (S41). These used to be an "inbox strip" that
-       sat OUTSIDE the panes — first above them (where showing it pushed every
-       pane down), then below them (S37, which fixed the jump but left two
-       buttons floating in the panel belonging to no tool in particular).
-       Both positions were wrong for the same reason: the button is the
-       Comments tool's own vault-wide view, so it belongs INSIDE the Comments
-       pane, pinned to that pane's bottom. Same for Review. There is no strip
-       any more and no updateInboxStrip() — a pane owns its own footer.
-       The rule this encodes: the PANE is per-file, the PAGE is vault-wide. */
-    .pane-foot {
-      padding: 6px 8px; border-top: 1px solid var(--border);
-      flex-shrink: 0; margin-top: auto;
-      display: flex; flex-direction: column; gap: 4px;
-      background: var(--bg-sidebar);
-    }
-    .pane-foot-btn {
-      width: 100%; padding: 5px 8px;
-      font-size: 12px; font-weight: 500;
-      background: none; border: 1px solid var(--border);
-      border-radius: var(--radius); cursor: pointer;
-      color: var(--text-secondary); text-align: left;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .pane-foot-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
-    .pane-foot-btn svg { width: 13px; height: 13px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    /* S92 -- the Review pane's rows and the pane footer styles went with the
+       Review companion; no pane carries a footer any more. */
 
     /* === Docks (S41) ========================================= */
     /* Both sides are now the same thing: a rail of tool icons over a stack of
@@ -3960,7 +3943,7 @@
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.62.1</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.63.0</button>
       </div>
 
       <div class="ud-actions">
@@ -4335,7 +4318,6 @@
         <div class="rp-pane"        id="rp-bookmarks"><div class="rp-empty">Nothing saved yet.</div></div>
         <div class="rp-pane"        id="rp-comments"> <div class="rp-empty">Open a file to see comments.</div></div>
         <div class="rp-pane"        id="rp-backlinks"><div class="rp-empty">Open a file to see backlinks.</div></div>
-        <div class="rp-pane"        id="rp-review">   <div class="rp-empty">Open a file to see its changes.</div></div>
         <div class="rp-pane"        id="rp-usage">    <div class="rp-empty">Usage.</div></div>
         <div class="rp-pane"        id="rp-search">
           <div class="pane-chrome-slot" data-tool="search"></div>
@@ -4813,7 +4795,6 @@ const state = {
   rvPrevOpen:      false,   // Previous/resolved section collapsed by default
   rvPrevAll:       false,   // false = last 30 days, true = everything
   rvFlatQueue:     [],      // band-ordered items, built fresh each dashboard render
-  rvPaneQueue:     [],      // the same list as rendered in the right-panel Review pane (v0.32.1)
   rvQueue:         null,    // active Next-item walk, or null when not navigating from the dashboard
   rvQueuePos:      -1,
   user:            null,  // S15 — {name, email, saved} once identity is set
@@ -8468,6 +8449,7 @@ function consoleHomeOn() { return state.consoleHome === true; }
 function openConsoleHome() {
   rightResetTabs();             // B2 -- after the guard, never before it
   if (!guardLeaveEdit()) return;
+  rvEndReview();                // S92 -- Home ends a review walk
   wnCommitPending();
   betaClosePalette(); betaCloseMore(); betaCloseSlide();
   destClose(); destReturn = null;   // round 2c -- Home is the other occupant
@@ -8511,7 +8493,10 @@ function openConsoleHome() {
 // Called by every route that puts something else in the reading column.
 // One line at the top of each of them, rather than a mode test buried
 // inside the render functions where the next person would not find it.
-function exitConsoleHome() {
+function exitConsoleHome(nextUrl) {
+  // S92 -- anything taking the reading column ends a review walk, unless it
+  // is the walk opening its own next page.
+  if (!nextUrl || nextUrl !== rvWalkUrl()) rvEndReview();
   // Round 2c -- a destination occupies the reading column exactly as Home
   // does, so every route that already announces "I am putting something else
   // in the reading column" leaves one too. One line here beats the same line
@@ -9411,7 +9396,7 @@ function openAdminScreen(tab) {
 }
 
 function adminTabRenderFns() {
-  return { review: renderReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab };
+  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab };
 }
 
 function renderAdminTab(tab) {
@@ -9461,7 +9446,7 @@ function renderAdminTab(tab) {
   }
 
   bodyEl.innerHTML = '';
-  if (tab === 'review' || tab === 'usage') {
+  if (tab === 'usage') {
     const pane = $('rp-' + tab);
     if (pane) { pane.classList.add('active'); bodyEl.appendChild(pane); }
   }
@@ -10453,7 +10438,7 @@ function updateBackButtons() {
 // ── Open file ────────────────────────────────────────────────────
 async function openFile(url, name) {
   if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
-  exitConsoleHome(); // Section 18 — home is a mode, and opening a page leaves it
+  exitConsoleHome(url); // Section 18 — home is a mode, and opening a page leaves it
   // B2 / R1 -- a companion describes the page it was summoned for, so it
   // leaves with that page. Same call on every other route into a surface
   // below. The slide-over goes for the same reason: a destination left
@@ -12691,10 +12676,10 @@ function updateBadges() {
   // that only wants the numbers refreshed should not have to know that.
   paintRailCounts();
 
-  // The pane headers carry the same numbers, and they are rendered by their
-  // own pane, not by the rail. A scan that changes a count has to reach both.
-  const rp = $('rp-review');
-  if (rp && rp.classList.contains('active')) renderReviewTab();
+  // S92 -- a scan that changes the queue repaints Admin > Review when it is
+  // on screen. A scan asked for while another runs returns at once, so the
+  // tab cannot rely on awaiting its own.
+  if (destId === 'admin' && adminActiveTab === 'review') rvDashPaint();
 }
 
 // S41: updateInboxStrip() is gone. The two vault-wide buttons are no longer a
@@ -14423,23 +14408,6 @@ const RV_FILTERS = [
   ['newfile',     'New file',            'green'],
 ];
 
-// ── Review view ──────────────────────────────────────────────────
-async function openChangesView() {
-  if (!guardLeaveEdit()) return;
-  const empty = $('reader-empty');
-  const rc    = $('reader-content');
-  state.activeUrl  = null;
-  state.activeName = null;
-  renderSidebar();
-  updateEditBtn();
-  setReaderTitle('Review dashboard');
-  empty.style.display = 'none';
-  rc.style.display    = 'block';
-  rc.innerHTML = '<p class="md-p" style="color:var(--text-muted);padding-top:40px;text-align:center">Scanning vault…</p>';
-  await scanBadges();
-  rc.innerHTML = buildReviewDashboardHTML();
-}
-
 function renderDiffBody(body) {
   return body.split('\n').map(l => {
     if (l.startsWith('+ ')) return `<span class="rv-add">+ ${escHtml(l.slice(2))}</span>`;
@@ -14486,7 +14454,7 @@ async function rvApproveAudit(url) {
   try {
     await auditRecord(url);
     await scanBadges();
-    rvRefreshDashboard();
+    rvDashPaint();
   } catch (e) { alert('Could not approve: ' + e.message); }
 }
 
@@ -14525,16 +14493,24 @@ function rvNotify(msg, ok) {
   wbToastTimer = setTimeout(() => { el.className = 'wb-toast'; }, ok ? 3200 : 7000);
 }
 
-// A review action can be pressed from a dashboard ROW, where the reader is
-// showing the dashboard, or from the bottom strip mid-walk, where the reader
-// is showing the page being reviewed. Rewriting reader-content is right in
-// the first case and destroys the page you are reading in the second.
-// auditApproveActive() guarded this from the start; nothing else did, which
-// is why approving from the strip replaced the page with the dashboard.
-function rvRefreshDashboard() {
-  if (state.activeUrl) return;         // a page is open, so the dashboard is not on screen
-  const rc = $('reader-content');
-  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+// A review action can be pressed from a dashboard row or from the bottom
+// banner mid-walk. S92 -- the dashboard lives only in Admin > Review now, so
+// repainting it can never replace the page being reviewed.
+// S92 -- the ONE place the dashboard is drawn: into Admin > Review. It used
+// to write into the reading page, which Admin hides, so the old bottom button
+// opened onto a blank screen. No Admin Review tab on screen, nothing to paint.
+function rvDashPaint() {
+  const host = $('rv-dash');
+  if (host) host.innerHTML = buildReviewDashboardHTML();
+}
+
+async function renderAdminReviewTab() {
+  const bodyEl = $('admin-body');
+  if (!bodyEl) return;
+  bodyEl.innerHTML = '<div id="rv-dash"></div>';
+  rvDashPaint();
+  await scanBadges();
+  if (adminActiveTab === 'review') rvDashPaint();
 }
 
 // One ending for every review action: say what happened, then, if a walk is
@@ -14549,9 +14525,9 @@ function rvRefreshDashboard() {
 async function rvAfterAction(url, msg) {
   if (msg) rvNotify(msg, true);
   const q = state.rvQueue;
-  if (!q || !q.length) { rvRefreshDashboard(); return; }
+  if (!q || !q.length) { rvDashPaint(); return; }
   const at = state.rvQueuePos;
-  if (!q[at] || q[at].url !== url) { rvShowQueueBar(); rvRefreshDashboard(); return; }
+  if (!q[at] || q[at].url !== url) { rvShowQueueBar(); rvDashPaint(); return; }
   q.splice(at, 1);                     // position now holds what used to be next
   if (at > q.length - 1) { rvQueueExit(); return; }   // that was the last one
   const item = q[at];
@@ -14688,8 +14664,7 @@ function rvSinceText(pg) {
 
 function setRvFilter(f) {
   state.rvFilter = f;
-  const rc = $('reader-content');
-  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  rvDashPaint();
 }
 
 function buildReviewDashboardHTML() {
@@ -14819,9 +14794,7 @@ async function rvOpenItem(type, url, name, opts) {
     closeDiffStrip();
     auditOpenReview(url, opts.delta);
   } else if (type === 'change') {
-    ensureToolOpen('review');
-    await renderReviewTab();
-    const entries = ($('rp-review') || {})._wbEntries || [];
+    const entries = await rvLoadChanges(url);
     const idx = opts.headIdx !== undefined ? opts.headIdx : headOpenIdx(entries);
     if (idx >= 0) selectChangeCard(idx);
   } else if (type === 'question' || type === 'escalation') {
@@ -14875,6 +14848,23 @@ async function rvQueueNext() {
   rvShowQueueBar();
 }
 
+// S92, Jayson: leaving the review ends it. Home, any destination, a page that
+// is not the walk's own, and the close control all come through here, so no
+// bar is left at the bottom holding a position in a walk nobody is on.
+// Only a running walk is ended: a banner opened outside one belongs to its
+// page and is closed by that page's own route.
+function rvWalkUrl() {
+  const q = state.rvQueue, it = q && q[state.rvQueuePos];
+  return it ? it.url : null;
+}
+function rvEndReview() {
+  if (!state.rvQueue) return;
+  state.rvQueue    = null;
+  state.rvQueuePos = -1;
+  rvBannerCloseAny();
+  rvBannerRender();
+}
+
 function rvQueueExit() {
   state.rvQueue    = null;
   state.rvQueuePos = -1;
@@ -14885,7 +14875,7 @@ function rvQueueExit() {
   // navigation (the audit bar that never left) in the one route it missed.
   rvBannerCloseAny();
   rvBannerRender();
-  openChangesView();
+  openAdminScreen('review');
 }
 
 // The walk no longer paints anything of its own — rvBannerRender() reads
@@ -14944,7 +14934,7 @@ async function rvAcknowledgeAllAdditive() {
     }
     await scanBadges();
     if (state.activeUrl) openFile(state.activeUrl, state.activeName);
-    rvRefreshDashboard();
+    rvDashPaint();
   } catch (e) { alert('Could not acknowledge: ' + e.message); }
 }
 
@@ -15000,14 +14990,12 @@ function rvPrevFiltered() {
 
 function rvTogglePrev() {
   state.rvPrevOpen = !state.rvPrevOpen;
-  const rc = $('reader-content');
-  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  rvDashPaint();
 }
 
 function rvSetPrevWindow(all) {
   state.rvPrevAll = all;
-  const rc = $('reader-content');
-  if (rc) rc.innerHTML = buildReviewDashboardHTML();
+  rvDashPaint();
 }
 
 // New Files (S12 file audit): a file with no Folio "status" key has
@@ -15173,140 +15161,14 @@ async function markReviewed(idx) {
   if (!r) return;
   try {
     await markReviewedCore(r.url, r.changesUrl);
-    rvRefreshDashboard();
+    rvDashPaint();
   } catch (e) {
     alert('Could not mark reviewed: ' + e.message);
   }
 }
 
-// ── Review tab (right panel) ──────────────────────────────────────
-// v0.32.1 removed renderReviewOverview() and its two action helpers,
-// inboxEntryActionOverview() and approveNewFileFromOverview(). S41 moved the
-// vault-wide list out of this pane and left a comment saying the function was
-// "still called by the All changes page." It was not — nothing had called it
-// since S41, and a suite asserted it existed, so a test was guarding ninety
-// lines of code that could not run. rvPaneBoardHTML() below is the list those
-// lines were for, and it renders from the same state on the same rows.
-//
-// S41 made this pane per-file and moved the vault-wide list out to the "All
-// changes" page. v0.32.1 puts the vault-wide list back at the TOP of the pane,
-// with the open file's own changes beneath it, because the split had a cost
-// S41 did not anticipate: with no file open the pane said "Open a file to see
-// its changes" while the dashboard said nineteen items were waiting, so the
-// tool with a 19 on its icon opened onto an empty panel. The pane is the
-// standing view of the queue; the PAGE is still where you work through it.
-const RP_HEADER_REVIEW = () => paneHead('review', { count: reviewDashboardTotal() || '' });
-
-// The pane's own copy of the walk list. Separate from state.rvFlatQueue, which
-// the dashboard page rebuilds on every render — sharing one array would mean a
-// pane row's index pointing into a list the page had since re-sorted.
-function rvPaneRow(icon, name, url, sub, type, opts) {
-  const qi = state.rvPaneQueue.push({ type, url, name, opts: opts || {} }) - 1;
-  return `<div class="backlink-item rvp-row" style="align-items:flex-start"` +
-    ` onclick="rvQueueStart(state.rvPaneQueue,${qi})" title="${escHtml(name)}">` +
-    `<span style="flex:1;min-width:0">${icon} ${escHtml(name)}` +
-    (sub ? `<br><span style="color:var(--text-muted);font-size:11px">${escHtml(sub)}</span>` : '') +
-    '</span></div>';
-}
-
-function rvPaneBoardHTML() {
-  state.rvPaneQueue = [];
-  const S = state;
-  const groups = [
-    ['Needs your decision', [
-      ...S.escalatedItems.map(it => ['⚠️', it.name, it.url, 'Escalated', 'escalation', { idx: it.idx }]),
-      ...S.vaultChanges.map(it => ['📝', it.name, it.url, rvAuditBlurb(it), 'vaultchange', { delta: it.delta }]),
-      ...S.questionItems.map(it => ['❓', it.name, it.url, 'Question', 'question', { idx: it.idx }]),
-      ...S.reviewChanges.map(r => ['✏️', r.name, r.url, `${r.unreviewed} pending change${r.unreviewed === 1 ? '' : 's'}`, 'change', {}]),
-    ]],
-    ['Needs acknowledgement', [
-      ...S.newSections.map(it => ['🧩', it.name, it.url, rvAuditBlurb(it), 'newsection', { delta: it.delta }]),
-      ...S.flaggedFiles.map(it => ['🚩', it.name, it.url, it.status || 'Needs Review', 'flagged', {}]),
-      ...S.dueItems.map(it => ['⏰', it.name, it.url, `due ${it.due}`, 'due', {}]),
-    ]],
-    // J2 -- the Missing properties line is gone from this pane for the same
-    // reason it is gone from the dashboard: those pages are Vault check's
-    // repairs now. What is left is the approval, which Review keeps.
-    ['Needs approval', [
-      ...S.unauditedFiles.map(it => ['🆕', it.name, it.url, rvGapNote(it), 'newfile', {}]),
-    ]],
-  ];
-
-  let html = '';
-  groups.forEach(([label, rows]) => {
-    if (!rows.length) return;
-    html += `<div class="rv-ov-label">${escHtml(label)} · ${rows.length}</div>`;
-    rows.forEach(r => { html += rvPaneRow(r[0], r[1], r[2], r[3], r[4], r[5]); });
-  });
-  if (!html) html += '<div class="rp-empty" style="text-align:left">Nothing waiting for review.</div>';
-  return html;
-}
-
-async function renderReviewTab() {
-  const pane = $('rp-review');
-  if (!pane) return;
-  const board = rvPaneBoardHTML();
-
-  if (!state.activeUrl) {
-    pane._wbEntries = [];
-    pane.innerHTML = RP_HEADER_REVIEW() + board + PANE_FOOT_REVIEW;
-    return;
-  }
-  const changesUrl = changesUrlFor(state.activeUrl);
-  const txt = await readVaultFileOrNull(changesUrl);
-  const entries = txt ? parseChanges(txt) : [];
-  pane._wbEntries = entries;
-
-  const thisFile = '<div class="rv-ov-label">This file</div>';
-  if (!entries.length) {
-    pane.innerHTML = RP_HEADER_REVIEW() + board + thisFile +
-      '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No recorded changes for this file.</div>' +
-      PANE_FOOT_REVIEW;
-    return;
-  }
-  const open = entries.filter(e => e.reviewed === 'no').length;
-  const head = headOpenIdx(entries);
-  let html = thisFile;
-  if (open > 1) {
-    html += `<div style="padding:10px 12px;border-bottom:1px solid var(--border)">
-      <button class="rv-mark-btn" style="width:100%" onclick="markReviewedFromTab()">Accept all (${open})</button>
-    </div>`;
-  }
-  html += '<div class="comment-list">';
-  entries.forEach((e, i) => {
-    const st    = e.reviewed === 'yes' ? 'reviewed' : (e.reviewed === 'rejected' ? 'rejected' : 'open');
-    const badge = st === 'open'
-      ? (i === head ? '🔔 needs review' : '⏳ queued')
-      : (st === 'rejected' ? '✗ rejected · reverted' : '✓ reviewed');
-    const actions = (st === 'open' && i === head)
-      ? `<button class="rv-accept-btn" style="border:1px solid var(--co-green-bd);border-radius:var(--radius);cursor:pointer" onclick="event.stopPropagation();reviewEntryAction(${i},'yes')">Accept</button>
-         <button class="rv-reject-btn" style="border:1px solid var(--co-red-bd);border-radius:var(--radius);cursor:pointer" onclick="event.stopPropagation();reviewEntryAction(${i},'rejected')">Reject</button>`
-      : (st === 'open' ? '<span style="font-size:11px;color:var(--text-muted)">resolve the change above first</span>' : '');
-    // whole card is clickable — selects it, opens the diff strip, jumps to the change
-    html += `<div class="comment-card wb-sel ${st === 'open' ? 'status-open' : 'status-closed'}" data-ci="${i}" onclick="selectChangeCard(${i})">
-      <div class="comment-meta">
-        <span class="comment-type-badge">${badge}</span>
-        <span>${escHtml(e.author)} · ${escHtml(e.ts.replace('T', ' '))}</span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        ${actions}
-      </div>
-    </div>`;
-  });
-  html += '</div>';
-  pane.innerHTML = RP_HEADER_REVIEW() + board + html + PANE_FOOT_REVIEW;
-  // keep the selection in sync with an already-open diff strip
-  if (diffEntryIdx >= 0) {
-    const sel = pane.querySelector(`.comment-card[data-ci="${diffEntryIdx}"]`);
-    if (sel) sel.classList.add('selected');
-  }
-}
-
-// Click a change card: select it, show its diff in the bottom strip,
-// and scroll the reader to the first highlighted changed block.
+// Show one change's diff in the bottom banner and scroll the reader to the first highlighted changed block.
 function selectChangeCard(i) {
-  document.querySelectorAll('#rp-review .comment-card').forEach(c =>
-    c.classList.toggle('selected', +c.dataset.ci === i));
   showDiffStrip(i);
   const hit = document.querySelector('#reader-content .wb-changed');
   if (hit) scrollToBlock(hit);
@@ -15404,7 +15266,7 @@ async function reviewEntryAction(idx, value) {
     const flipped = await maybeFlipFileReviewed(fileUrl, changesUrl);
     await scanBadges();
     if (flipped || value === 'rejected') await openFile(fileUrl, state.activeName); // content changed — re-render
-    else await renderReviewTab();
+    await rvLoadChanges(fileUrl);
     if (diffEntryIdx === idx) closeDiffStrip();
     // Rejecting resolves the whole file (every later pending change goes with
     // it), and flipping means the last open change was just accepted. Either
@@ -15412,7 +15274,12 @@ async function reviewEntryAction(idx, value) {
     // leaves more changes queued stays put — there is another one to look at.
     if (value === 'rejected')  await rvAfterAction(fileUrl, 'Change rejected. The page was put back to how it was.');
     else if (flipped)          await rvAfterAction(fileUrl, 'Last change accepted. The page is now marked Reviewed.');
-    else                       rvNotify('Change accepted.', true);
+    else {
+      rvNotify('Change accepted.', true);
+      // S92 -- with the pane gone, the banner moves on to the next change.
+      const next = headOpenIdx(rvChangeEntries);
+      if (next >= 0) selectChangeCard(next);
+    }
   } catch (e) {
     rvNotify('Could not update: ' + e.message, false);
   }
@@ -15422,14 +15289,17 @@ function diffAction(value) {
   if (diffEntryIdx >= 0) reviewEntryAction(diffEntryIdx, value);
 }
 
-async function markReviewedFromTab() {
+// S92 -- Accept all moved from the removed Review pane onto the banner.
+async function rvAcceptAllChanges() {
   if (!state.activeUrl) return;
+  const url = state.activeUrl;
   try {
-    await markReviewedCore(state.activeUrl, changesUrlFor(state.activeUrl));
-    renderReviewTab();
-    openFile(state.activeUrl, state.activeName); // frontmatter changed — re-render
+    await markReviewedCore(url, changesUrlFor(url));
+    await scanBadges();
+    await openFile(url, state.activeName); // frontmatter changed — re-render
+    await rvAfterAction(url, 'All changes accepted. The page is now marked Reviewed.');
   } catch (e) {
-    alert('Could not mark reviewed: ' + e.message);
+    rvNotify('Could not update: ' + e.message, false);
   }
 }
 
@@ -15503,6 +15373,9 @@ function rvBannerRender() {
   // A walk with no item open still shows: pressing the close control on one
   // item must not throw away your place in a seventeen-page queue.
   const walking = !!(state.rvQueue && state.rvQueue.length && state.rvQueuePos >= 0);
+  // S92 -- while the banner is up the side columns step aside (CSS on this
+  // class), so the page and the banner get the full width.
+  document.body.classList.toggle('rv-reviewing', walking || !!rvbItem);
   if (!walking && !rvbItem) { el.style.display = 'none'; return; }
 
   // 0.60.0, corrected after a render: the walk's POSITION is the only thing
@@ -15581,8 +15454,11 @@ function rvBannerRender() {
     // The close control closes the ITEM, never the walk — the type's own
     // close function runs, so its cleanup (highlights, marks, ghosts) is not
     // something this renderer has to know about.
+    // S92, Jayson: and it ends the walk too. Keeping the walk alive after
+    // close is what left a small bar at the bottom with nothing in it.
     if (key === 'close') {
       if (rvbItem && rvbItem.close) rvbItem.close(); else rvBannerClear();
+      rvEndReview();
       return;
     }
     const act = rvbItem && rvbItem.actions && rvbItem.actions[Number(key)];
@@ -15593,8 +15469,17 @@ function rvBannerRender() {
 // ── Diff strip below the reader (adjustable) + in-file highlight ─
 let diffEntryIdx = -1;
 
+// S92 -- the open page's change records. They used to hang off the Review
+// pane's node, which no longer exists.
+let rvChangeEntries = [];
+async function rvLoadChanges(url) {
+  const txt = url ? await readVaultFileOrNull(changesUrlFor(url)) : null;
+  rvChangeEntries = txt ? parseChanges(txt) : [];
+  return rvChangeEntries;
+}
+
 function showDiffStrip(entryIdx) {
-  const entries = ($('rp-review') || {})._wbEntries || [];
+  const entries = rvChangeEntries;
   const e = entries[entryIdx];
   if (!e) return;
   diffEntryIdx = entryIdx;
@@ -15603,13 +15488,15 @@ function showDiffStrip(entryIdx) {
     : (e.reviewed === 'rejected' ? ' · rejected' : (entryIdx !== head ? ' · queued' : ''));
   // sequential review: only the queue head is actionable from the banner
   const actionable = (e.reviewed === 'no' && entryIdx === head);
+  const openCount  = entries.filter(x => x.reviewed === 'no').length;
   rvBannerSet({
     owner: 'change',
     title: state.activeName || '',
     kind:  '',                       // set below, once the highlight has run
     actions: actionable
       ? [{ label: 'Accept', tone: 'go',   fn: () => diffAction('yes') },
-         { label: 'Reject', tone: 'warn', fn: () => diffAction('rejected') }]
+         { label: 'Reject', tone: 'warn', fn: () => diffAction('rejected') },
+         ...(openCount > 1 ? [{ label: 'Accept all (' + openCount + ')', fn: rvAcceptAllChanges }] : [])]
       : [],
     bodyHTML: '<pre class="rv-diff" id="diff-body">' + renderDiffBody(e.body) + '</pre>',
     close: closeDiffStrip,
@@ -15760,7 +15647,7 @@ function makeStripResizable(barId, resolve) {
   });
   document.addEventListener('mousemove', e => {
     if (!dragging || !target) return;
-    const h = Math.min(Math.max(startH + (startY - e.clientY), 60), window.innerHeight * 0.6);
+    const h = Math.min(Math.max(startH + (startY - e.clientY), 160), window.innerHeight * 0.7);
     target.el.style.height = h + 'px';
   });
   document.addEventListener('mouseup', () => {
@@ -15790,7 +15677,7 @@ function restoreStripHeights() {
   const saved = localStorage.getItem('wb_rvb_h');
   if (!saved) return;
   const h = parseInt(JSON.parse(saved), 10);
-  if (h > 0) el.style.height = Math.min(h, window.innerHeight * 0.6) + 'px';
+  if (h > 0) el.style.height = Math.min(Math.max(h, 160), window.innerHeight * 0.7) + 'px';
 }
 
 // One bar, so one grip. It used to be three calls, and the walk bar needed a
@@ -15945,7 +15832,7 @@ async function rvbSaveProps() {
     // Re-read rather than trust what was just sent, and deliberately NOT
     // rvAfterAction(): that clears the item off the queue and moves on, which
     // is right for an approval and wrong for an edit. You stay where you are.
-    rvRefreshDashboard();
+    rvDashPaint();
     await openRvDetail(it.type, it.url, it.name);
   } catch (e) {
     rvNotify('Could not save the properties: ' + e.message, false);
@@ -17829,9 +17716,9 @@ const WB_TOOLS = [
     icon: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>' },
   { id: 'backlinks', label: 'Links', home: 'right',
     icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>' },
-  { id: 'review', label: 'Review', home: 'right', countId: 'review-count', gated: true,
-    count: () => (reviewAllowed() ? reviewDashboardTotal() : 0),
-    icon: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>' },
+  // S92, Jayson: the Review companion is gone. The vault-wide list is Admin >
+  // Review, and a single change is accepted or rejected from the bottom banner
+  // during the walk, so a column beside the page had nothing left to do.
   // S45 — the first tool gated ABOVE Contributor. `tier` is explicit rather
   // than a second boolean beside `gated`, because two booleans would encode a
   // ladder position as a pair of flags and the next rung would need a third.
@@ -17887,7 +17774,7 @@ function toolVisible(t) {
 function dockBody(side) { return side === 'left' ? $('left-body') : $('rp-body'); }
 
 function rpRenderFns() {
-  return { files: null, outline: renderOutlineTab, bookmarks: renderSavedTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null, usage: renderUsageTab };
+  return { files: null, outline: renderOutlineTab, bookmarks: renderSavedTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, search: null, usage: renderUsageTab };
 }
 
 function persistDocks() {
@@ -17946,23 +17833,6 @@ function paneHead(toolId, opts) {
          `<span class="ph-tools">${o.controls || ''}${moveBtn}${closeBtn}</span>` +
          '</div>';
 }
-
-// ── Pane footers: the vault-wide view of a per-file tool ──────────
-// The rule S41 settles: the PANE is per-file, the PAGE is vault-wide, and the
-// way from one to the other is a button pinned inside the pane it belongs to.
-// These used to be an "inbox strip" outside the panes entirely, which is why
-// they appeared to belong to the panel rather than to a tool.
-// J1b -- Jayson: "remove the comments inbox from the right bar (We have this
-// in admin)." He is right, and S77 is why: the vault-wide board MOVED to
-// Admin that session, so this footer has been a second door to a room that
-// already has one, sitting inside a per-page pane. R1's rule is that the pane
-// is per-file and the page is vault-wide; the door between them stopped being
-// needed when Admin got the board and Home got a link to it.
-
-const PANE_FOOT_REVIEW =
-  '<div class="pane-foot"><button class="pane-foot-btn" id="btn-review-inbox" onclick="openChangesView()">' +
-  '<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>' +
-  'Review dashboard</button></div>';
 
 // P11 -- the rail buttons and their click/double-click pair went with the rails
 // themselves. toggleRPTab() below is still how a tool is opened, from the
@@ -18196,6 +18066,10 @@ function renderDocks() {
 
   const openAll = [...docks.left, ...docks.right];
   document.querySelectorAll('.rp-pane').forEach(p => {
+    // S92 -- a pane standing in as a destination (Admin, and Usage inside it)
+    // or in the slide-over is not a dock's to switch off. A scan finishing
+    // while Admin was open ran this and blanked the whole screen.
+    if (p.closest('#cd-body, #beta-slide-body')) return;
     const tab = p.id.slice(3); // 'rp-outline' -> 'outline'
     // J1b -- ask the layout being RENDERED which side this pane is on, not
     // state.docks. A companion summoned into the console shell's right
@@ -18660,7 +18534,8 @@ function setupSectionBarObserver(headings) {
   state.sectionBarObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        bar.textContent = entry.target.textContent;
+        // S92 -- the bar this wrote to was deleted at P11 and the leftover
+        // line threw on every heading scrolled past, so this never ran.
         state.activeHeadingId = entry.target.id;
       }
     });

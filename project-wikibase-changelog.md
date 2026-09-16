@@ -8,6 +8,24 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.63.0 — 2026-09-16
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; new `supporting/tests/s92-review.test.js` (27 checks); ten suites updated for the removed Review panel.
+
+*Review cleanup, Jayson's report: Admin > Review showed the old side list, its bottom button opened a blank page, and a review left a small bar behind after leaving it.*
+
+### Changed
+
+- **Admin > Review is the review dashboard** (tallies, pages oldest first, Start review, Acknowledge all, Previous), drawn straight into the tab. The "Review dashboard" button at the bottom is gone; it drew the dashboard onto the reading page, which Admin hides.
+- **The Review side panel is removed.** A single change is accepted or rejected from the bottom bar, which now also offers **Accept all (n)** and moves on to the next change after an Accept.
+- **During a review the left and right columns step aside**, so the page and the bottom bar get the full width. The bar's detail area opens taller (about 38% of the window, never under 160px) and drags up to 70%.
+- **Leaving ends the review.** Home, Admin or any other destination, opening a page that is not the review's own, Dashboard and the ✕ all end it. It used to keep a small "Page N of M" bar at the bottom.
+
+### Fixed
+
+- A scan finishing while Admin was open switched the Admin screen off, leaving a blank page.
+- The heading watcher threw on every heading scrolled past (a line left over from the P11 deletion), so a new comment could be filed under the wrong section.
+
 ## 0.62.1 — 2026-09-16
 
 **Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; `supporting/tests/p8-first-run.test.js` (+15 checks).

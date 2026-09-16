@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.62.1**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.63.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -144,7 +144,7 @@ That pairing is deliberate: only an edit made in the app writes a change record,
 
 Change records are always written whether or not anyone is on Contributor. The tier only decides whether you see the review interface, so a reader who never reviews anything is not shown machinery they do not need.
 
-On Contributor you get a **Review tab** in the right panel, a **bell** with a count of open items, and a **Review Inbox** covering the whole vault.
+On Contributor you get **Home → Admin → Review**: the review dashboard for the whole vault, with a count of open items on its tab.
 
 ### It is sequential, per file
 
@@ -163,7 +163,7 @@ The oldest unresolved change on a file is the only one you can act on. Later one
 
 Review lists **pages**, not items. One row per page, saying everything that page owes you: a chip for each thing, and the row disappears once the page owes nothing. A page that has been edited in Obsidian, carries an open question and is overdue is one row and one visit, not three.
 
-The list is ordered **oldest first**, by the oldest thing each page owes. **Start review** walks it in the order you see, from the top. A page whose age cannot be read from anything on it sits at the end rather than the top, because not knowing how long it has waited is not the same as it having waited longest.
+The list is ordered **oldest first**, by the oldest thing each page owes. **Start review** walks it in the order you see, from the top. While you review, the side columns step aside so the page and the bar at the bottom get the full width; drag the bar's top edge to give the bottom more room. **Home**, opening any other page, **Dashboard** or the **✕** on the bar all end the review. A page whose age cannot be read from anything on it sits at the end rather than the top, because not knowing how long it has waited is not the same as it having waited longest.
 
 Every row has **Review page**. A page owing exactly one thing that can be settled without reading it also carries that button, so you can approve a new section or clear a due date from the list. A page owing several does not: the button would be acting on one of the things in a row that lists three.
 

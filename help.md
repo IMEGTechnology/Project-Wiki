@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.62.1**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.63.0**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -445,7 +445,7 @@ Folio has three levels, each one including everything below it. You pick yours f
 
 Anything your tier does not include is not shown at all, rather than shown greyed out.
 
-Editing and reviewing are both Contributor, deliberately. Only an edit made in the app writes the change record that the Review tab exists to show, so a reviewer who cannot edit would be looking at an empty list.
+Editing and reviewing are both Contributor, deliberately. Only an edit made in the app writes the change record that Admin's Review tab exists to show, so a reviewer who cannot edit would be looking at an empty list.
 
 ### Setting the passwords the first time
 
