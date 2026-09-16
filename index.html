@@ -285,26 +285,12 @@
       text-overflow: ellipsis;
     }
 
-    #breadcrumb {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 400;
-    }
-
     /* ================================================================
-       BETA SHELL (Session A)
+       THE LAYOUT (Session A, sole layout since P11)
        ================================================================
-       Everything here hangs off one class on <body>. That is deliberate
-       and it is the whole reason two shells are affordable: this is a
-       different ARRANGEMENT of the same panels, the same reader and the
-       same tools, not a second copy of them. There is one vault tree, one
-       reading column, one Outline. A fix to any of them lands in both
-       shells at once, which is what "the old shell is frozen" can actually
-       mean without it becoming "the old shell rots".
-
-       Everything beta is hidden by default and revealed by the class, so
-       the old shell is exactly what it was — nothing below it applies
-       until someone opts in.
+       Everything here hangs off one class on <body>, body.beta-shell,
+       which applyShellMode() always sets. The name is historical: it was
+       the opt-in beta until P11 deleted the original layout.
        ================================================================ */
     #bt-home, #bt-search, #beta-reader-head { display: none; }
 
@@ -323,8 +309,6 @@
     /* The header breadcrumb goes. The reader header now carries a real one
        showing the folder path as well as the page, and two breadcrumbs
        saying nearly the same thing is worse than either. */
-    body.beta-shell #breadcrumb { display: none; }
-
     body.beta-shell #bt-home {
       display: inline-flex; align-items: center; gap: 6px;
       height: 28px; padding: 0 12px; margin-left: 4px;
@@ -375,7 +359,6 @@
        the right the Outline is, and the rest moved behind the overflow.
        The panes themselves are untouched, so a person who had dragged
        tools between docks keeps that layout the moment they switch back. */
-    body.beta-shell #right-rail, body.beta-shell #left-rail { display: none; }
     /* B2 / R1 -- the companion tab strip. Drawn only when renderRightTabs()
        has put something in it, which it only does when a companion has been
        summoned, so a page with nothing but an outline shows no chrome at all. */
@@ -537,14 +520,8 @@
     /* ── Reader header ───────────────────────────────────────── */
     /* The floating corner controls are a different answer to the same
        question and having both would be two answers. */
-    body.beta-shell #reader-corner-align { display: none; }
-    body.beta-shell #reader-fade { display: none; }
-
     /* Round 2a -- a soft edge where the page passes under the reader bar.
-       The old shell's #reader-fade above answers the same question for the
-       floating corner buttons; this is that answer for the new shell's bar,
-       and it is a SEPARATE node because that one is positioned against
-       #reader-wrap while this has to be sticky inside #reader's own
+       It has to be sticky inside #reader's own
        scrollport. z-index 2 is deliberate: below the sticky table header (3)
        and the section bar (4), so a pinned header paints over the fade
        rather than through it. The negative margin cancels the height
@@ -604,9 +581,7 @@
 
     /* 2e -- the slide-over's own head drew a second hairline right under
        the reader bar's and carried the reader's tone even though it sits
-       at the same height as the top bar above it. Scoped to the new
-       shell only: the old shell's Admin still reaches this same node and
-       is untouched. */
+       at the same height as the top bar above it. */
     body.beta-shell .beta-slide-head {
       border-bottom: none;
       background: var(--bg-header);
@@ -724,9 +699,6 @@
        the flare is visibility, and visibility is not ours to add here.
        makeResizable() carries the matching guards: no snap-closed, no
        click-to-collapse, a floor instead of zero. */
-    body.beta-shell #rh-sidebar .rh-flare,
-    body.beta-shell #rh-right   .rh-flare { display: none; }
-
     /* Dividers go. The three columns already sit at three different
        background tones, so a hairline drawn on top of a tone change is
        the same boundary drawn twice. --border-strong is untouched and
@@ -803,7 +775,6 @@
     body.beta-shell.console-home #beta-reader-head,
     body.beta-shell.console-home #bt-search,
     body.beta-shell.console-home #bt-rail,
-    body.beta-shell.console-home #reader-corner-align { display: none; }
 
     /* 0.44.1 - the review bottom stack belongs to the page being read, not
        to Home. All six of its surfaces are revealed by their own functions
@@ -815,11 +786,7 @@
 
     /* 0.41.1: the you-are-here section bar (0.40.0) retires in this shell.
        The breadcrumb sits directly above it naming the same page, so it was
-       a third bar saying most of what the second one said. The bar, its
-       observer and its tests are all left in place for the frozen old shell,
-       which has no breadcrumb of its own and still earns it. */
-    body.beta-shell #reader-section-bar { display: none; }
-
+       a third bar saying most of what the second one said. */
     /* !important because openFile() and friends set these two inline, and
        an inline value would otherwise win. Home is a mode, not a file. */
     body.beta-shell.console-home #reader-content,
@@ -1191,10 +1158,6 @@
 
     /* The header's update arrow and the banner are the same news twice, so in
        the new shell the banner is the one that carries it. */
-    body.beta-shell #btn-update { display: none !important; }
-    /* 2f -- superseded by #ud-version in the account menu (0.52.0). */
-    body.beta-shell #app-version { display: none !important; }
-
     /* === Body ================================================ */
     #body {
       flex: 1;
@@ -1629,12 +1592,6 @@
        sits at left/right: 48px, leaving 24px of gap on both sides at any
        panel width and in either collapsed state. 48px is the floor. Do
        not shrink a child's inset past it or the flare will overlap. */
-    #reader-corner-align {
-      position: absolute; top: 0; left: 0; right: 0;
-      max-width: none; margin: 0;
-      pointer-events: none;
-    }
-    #reader-corner-align > * { pointer-events: auto; }
     #btn-edit {
       position: absolute; top: 8px; right: 48px; z-index: 6;
       background: var(--bg-reader);
@@ -1647,51 +1604,14 @@
        moves out by one button width to match. The offsets here are a hand
        chain — each button knows only its own right edge — which is why the
        pill's value has to be edited whenever one is added. */
-    #btn-copylink {
-      position: absolute; top: 8px; right: 120px; z-index: 6;
-      background: var(--bg-reader);
-    }
     /* Back/Forward pair — mirrors Properties/Edit on the opposite corner,
        same size, grouped the same way the fold-pill icons are on the
        right so they move together instead of needing separate math. */
-    #reader-nav-pill {
-      /* right:160px clears the copy/props/edit run on the opposite corner
-         (copy link starts at right:120 and is 28px wide, ending at 148)
-         so the filename can flex-grow into all the space between, instead
-         of a small fixed box. Was 218px until S34, when the fold pill that
-         used to sit at right:120 was removed; 124px until S-A added Copy
-         link to the run. */
-      position: absolute; top: 8px; left: 48px; right: 160px; z-index: 6;
-      display: flex; align-items: center; gap: 6px;
-    }
-    #reader-nav-pill .icon-btn { background: var(--bg-reader); flex-shrink: 0; }
-    .reader-nav-sep { width: 1px; height: 14px; background: var(--border-strong); flex-shrink: 0; }
-    .reader-filename {
-      flex: 1; min-width: 0;
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
-      background: var(--bg-reader); border-radius: var(--radius);
-      padding: 2px 6px; margin: -2px -6px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
     /* Fade strip behind the floating corner buttons — content used to
        scroll straight up with a hard edge right under the button row.
        This sits above the scroll area (below the buttons' z-index) and
        fades the reader background from solid to transparent, so text
        dissolves before it reaches the icons instead of clipping under them. */
-    #reader-fade {
-      position: absolute; top: 0; left: 0; right: 0; height: 48px;
-      /* Solid through 79% (~38px) — still clears the button row (top:8px,
-         28px tall, bottom edge ~36px) with a couple px to spare — then
-         tapers over the remaining ~10px. Shorter overall than the old
-         72px version; the jump-landing offset (READER_TOP_CLEARANCE,
-         56px) already lands past this, so a heading landing there is
-         fully opaque, not mid-taper. Opacity is also suppressed at the
-         very top of a file — see updateReaderFadeVisibility() — so the
-         first heading never fades when there's nothing above it to hide. */
-      background: linear-gradient(to bottom, var(--bg-reader) 0%, var(--bg-reader) 79%, transparent 100%);
-      pointer-events: none; z-index: 5;
-      transition: opacity 0.15s ease;
-    }
     /* S34: #reader-fold-pill and its .rfp-sep are gone — bulk folding moved
        to the Outline panel. Nothing replaces them here; the corner is now
        just Back/Forward + filename on the left, Properties + Edit on the right. */
@@ -2436,21 +2356,16 @@
        (overflow-y: auto), so a sticky child pins to ITS top edge with no
        combined-height math against the outer #header -- same reasoning
        #beta-slide's own comment gives for using a fixed number instead of
-       an observer. Old shell's floating Edit/Properties/Copy-link row
-       (#reader-corner-align) sits outside #reader and always overlays its
-       first 36px, so the base offset clears that; beta shell has no such
-       overlay. Both add the section bar's own height on top of that when
+       an observer. Both add the section bar's own height on top of that when
        one is actually showing (#reader.has-section-bar, set in JS -- a
        file with no headings never grows one). */
     .md-table thead th { position: sticky; top: 40px; z-index: 3; }
     body.beta-shell .md-table thead th { top: 0; }
-    #reader.has-section-bar .md-table thead th { top: 70px; }
     /* Round 2a -- the beta shell HIDES the section bar (its own rule below),
        so reserving 30px for it pinned the table header a bar's height DOWN
        the panel with live rows scrolling through the empty gap above it. The
        class still records "this page has headings", which stays true; what is
        not true in this shell is that anything is drawn in that space. */
-    body.beta-shell #reader.has-section-bar .md-table thead th { top: 0; }
     .md-table tr:last-child td { border-bottom: none; }
     .md-table tr:hover td { background: var(--hover); }
     /* Width-padding rows (0.29.1). A row padded with periods in Obsidian
@@ -2549,19 +2464,6 @@
        itself, not #reader-wrap, so position:sticky pins it to #reader's
        own scrollport. See the .md-table thead offset comment above for
        why the numbers are hardcoded rather than measured. */
-    #reader-section-bar {
-      display: none;
-      position: sticky; top: 40px; z-index: 4;
-      height: 30px; padding: 0 24px; box-sizing: border-box;
-      align-items: center;
-      background: var(--bg-sidebar);
-      border-bottom: 1px solid var(--border);
-      font-size: 12px; color: var(--text-muted);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    #reader-section-bar.on { display: flex; }
-    body.beta-shell #reader-section-bar { top: 0; }
-
     /* Images */
     .md-img-wrap { margin: 0.75rem 0; }
     img.md-img { max-width: 100%; border-radius: var(--radius); border: 1px solid var(--border); display: block; }
@@ -3167,9 +3069,6 @@
 
     /* Update-available arrow — accent-colored so it actually catches the
        eye; it's only ever visible when there's something to click. */
-    #btn-update { color: var(--accent); }
-    #btn-update:hover { color: var(--accent); opacity: 0.8; }
-
     /* 2f -- text, not an icon, so it does not borrow .icon-btn's fixed
        28x28 box; sized to the same 28px row height instead. */
     /* Version row in the account menu (0.52.0). Sits directly under
@@ -3177,17 +3076,17 @@
        column. A button rather than a <p> because it opens the changelog,
        but styled flat -- it must not compete with the .ud-item actions
        below it, which are the things you go to the menu to DO. */
-    #ud-version {
+    /* P11 -- this is now the version button itself rather than a second row
+       copying its text. The 14px left padding replaces the spacer span that
+       used to do the same job: it lines the label up with the health rows
+       above, whose 7px dot plus 7px gap indent their text by exactly that. */
+    #app-version {
       display: flex; align-items: center; gap: 7px; width: 100%;
-      margin: 0; padding: 7px 0 0; border: none; background: transparent;
+      margin: 0; padding: 7px 0 0 14px; border: none; background: transparent;
       cursor: pointer; font-family: inherit; font-size: 11px; text-align: left;
       color: var(--text-muted);
     }
-    #ud-version:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
-    /* Aligns the label with the health rows above, whose 7px dot + 7px gap
-       indents their text by 14px. An empty span rather than a margin so the
-       two blocks stay locked together if the dot size is ever changed. */
-    #ud-version .udv-pad { width: 7px; flex-shrink: 0; }
+    #app-version:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
     /* Install (S60) — dot rather than a text badge; every other header
        icon here (Theme, Help) carries no label, so a bare new icon would
        read as decoration without it. */
@@ -3273,35 +3172,6 @@
        while the panel is open (drag anywhere on the line to resize, click
        the dots without dragging to collapse), a chevron once it's closed
        (click it to reopen). No separate button anywhere else. */
-    .rh-flare {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 11px;
-      height: 28px;
-      border-radius: 5px;
-      background: var(--bg-app);
-      border: 1px solid var(--handle-rest);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.15s, border-color 0.15s;
-      cursor: pointer;
-    }
-    .resize-handle.handle-closed .rh-flare { border-color: var(--handle-active); cursor: pointer; }
-    .resize-handle:hover .rh-flare,
-    .resize-handle.dragging .rh-flare { border-color: var(--handle-hover); }
-    .resize-handle:hover .rh-flare,
-    .resize-handle.dragging .rh-flare,
-    .resize-handle.handle-closed .rh-flare { opacity: 1; }
-    .rh-dots { display: flex; flex-direction: column; gap: 3px; }
-    .rh-dots span { width: 2.5px; height: 2.5px; border-radius: 50%; background: var(--text-secondary); display: block; }
-    .resize-handle.handle-closed .rh-dots { display: none; }
-    .rh-chevron { display: none; width: 9px; height: 9px; color: var(--text-secondary); }
-    .resize-handle.handle-closed .rh-chevron { display: block; }
-
     /* Pane-hover persistence (v0.19.1) — the flare stays visible the whole
        time the pointer is anywhere inside the pane that handle belongs to,
        not only while it's on the 4px line. Left pane keeps the left flare
@@ -3319,9 +3189,6 @@
        Collapsed panes are already covered by .handle-closed above (a
        zero-width pane can't be hovered), so these rules only ever apply
        while the pane is open. */
-    #sidebar:hover ~ #rh-sidebar .rh-flare,
-    #rh-right:has(+ #right-panel:hover) .rh-flare { opacity: 1; }
-
     /* === Reader panel ======================================== */
     /* Responsive minimum width — panels can never squeeze reader below these values */
     #reader-wrap { min-width: 600px; }
@@ -3349,21 +3216,6 @@
     /* Version tag — bottom-right corner of the right panel.
        Trailing letter = tweak (a, b, c…), .# = minor,
        #. = major (reserved until final deployment). */
-    #app-version {
-      flex-shrink: 0;
-      padding: 4px 8px;
-      font-size: 11px;
-      text-align: right;
-      color: var(--text-muted);
-      opacity: 0.7;
-      user-select: none;
-      border: none;
-      background: transparent;
-      font-family: inherit;
-      cursor: pointer;
-      width: 100%;
-    }
-    #app-version:hover { opacity: 1; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 
     /* Tab bar */
     .rp-tabs {
@@ -3677,34 +3529,6 @@
     }
     .saved-divider { height: 1px; background: var(--border); margin: 6px 0; }
 
-    /* Quick pass — the Home Saved flyout. Same scrim+anchored-box shape as
-       #beta-palette (same betaAnchorPanel() math, same "landed" class),
-       sized for a short list rather than a search box: capped rows, its
-       own scroll rather than growing the page. New-shell only, like the
-       door that opens it. */
-    body.beta-shell #saved-flyout-scrim {
-      position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 24;
-    }
-    body.beta-shell #saved-flyout {
-      position: fixed; z-index: 25; min-width: 240px; max-width: 340px;
-      background: var(--bg-reader); border: 1px solid var(--border-strong);
-      border-radius: var(--radius); box-shadow: 0 22px 60px rgba(0,0,0,.3);
-      padding: 6px; transform: translateX(-50%); left: 50%; top: 60px;
-    }
-    body.beta-shell #saved-flyout.landed { transform: none; }
-    .sf-list { max-height: 280px; overflow-y: auto; }
-    .sf-empty {
-      padding: 14px 10px; font-size: 12.5px; color: var(--text-muted); max-width: 260px;
-    }
-    .sf-more { padding: 4px 10px; font-size: 11px; color: var(--text-muted); }
-    .sf-seeall {
-      display: block; width: 100%; text-align: left; margin-top: 4px;
-      background: none; border: none; border-top: 1px solid var(--border);
-      padding: 8px 10px 4px; font: inherit; font-size: 12.5px; color: var(--accent);
-      cursor: pointer;
-    }
-    .sf-seeall:hover { color: var(--text-primary); }
-
     /* Comments */
     .comment-list { padding: 6px; }
     .comment-card {
@@ -3820,9 +3644,6 @@
        single DOM node that gets appended into whichever dock body owns it,
        which is the same appendChild move the right panel already used to
        reorder its own stack — moving a tool across docks costs nothing extra. */
-    #left-rail  { justify-content: flex-start; padding-left: 4px; padding-right: 0; }
-    #right-rail { justify-content: flex-end; }
-
     /* Unified pane header. Replaces RP_HEADER_COMMENTS / RP_HEADER_LINKS /
        RP_HEADER_REVIEW (three constants restating what the rail already says)
        and generalises #ot-toolbar's shape, which was the only one doing it
@@ -4085,9 +3906,8 @@
          newer app shell is active. PWAs (and some browsers) don't reliably
          pick up a new version on an already-open tab/installed app, so this
          is a manual "a newer version is ready, click to reload" signal. -->
-    <button class="icon-btn" id="btn-update" title="Update available — click to reload" aria-label="Update available" style="display:none" onclick="location.reload()">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
-    </button>
+    <!-- P11 — the header's update arrow is gone. The app banner is the one
+         place update news appears now, rather than the same news twice. -->
 
     <!-- Help -->
     <button class="icon-btn" id="btn-help" title="Help" aria-label="Help">
@@ -4129,18 +3949,18 @@
           <button class="health-fix" onclick="tryInstall()">Install</button>
         </div>
 
-        <!-- Version (0.52.0). ALWAYS shown, unlike the health rows above,
-             which each hide once they are fine, and unlike the header's
-             install/update controls, which each appear only when there is
-             something to do. This is reference: you come here to read what
-             you are running, so it must never be conditional. Its text is
-             read from #app-version at open time rather than hardcoded --
-             there is still exactly one manual version string in this file
-             (see that button, bottom of the old shell's right panel). -->
-        <button id="ud-version" title="View changelog" onclick="openChangelog()">
-          <span class="udv-pad" aria-hidden="true"></span>
-          <span id="ud-version-txt"></span>
-        </button>
+        <!-- Version (0.52.0, moved here at P11). ALWAYS shown, unlike the
+             health rows above, which each hide once they are fine, and unlike
+             the install/update controls, which appear only when there is
+             something to do. This is reference: you come here to read what you
+             are running, so it must never be conditional. THIS IS THE SINGLE
+             MANUAL VERSION STRING IN THIS FILE -- the one thing to bump on
+             every ship, together with the changelog entry (it has drifted
+             before, see changelog 0.10.0 / was v0.9g). release.sh and
+             release-integrity.test.js both match it by its onclick and text,
+             not by where it sits, which is why moving it here cost them
+             nothing. -->
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.62.1</button>
       </div>
 
       <div class="ud-actions">
@@ -4168,15 +3988,9 @@
           </svg>
           Settings
         </button>
-        <!-- Usage (Session 1, S60) — the beta shell's right dock hides this
-             tool entirely (BETA_HIDDEN_RIGHT), so before this it had no way
-             in at all while beta was on. Admin-tier gated the same way the
+        <!-- Usage (Session 1, S60). Admin-tier gated the same way the
              dock registry already gates it — hidden rather than shown-
              locked, matching how every other gated tool behaves. -->
-        <button class="ud-item" id="ud-usage" onclick="openUsageFromMenu()">
-          <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Usage
-        </button>
         <!-- Quick pass, 2026-09-05 -- Default page (Admin only). Same
              gating pattern as Usage above: hidden rather than shown-locked
              for anyone below Admin, toggled in refreshAccountMenu(). -->
@@ -4204,16 +4018,13 @@
        ONE slot, three states, strict priority: connect beats install beats
        update. Two banners stacked on a first run is how a first run gets
        abandoned, so this is a single node and renderAppBanner() decides what
-       is in it. New shell only — the old shell is frozen and keeps its
-       header icons. -->
+       is in it. -->
   <div id="app-banner" hidden></div>
 
   <!-- P8 — one full-window flow replacing three separate, disconnected
        entry points: the connect message that used to live inside the
        file tree, the ambient install icon, and the identity modal (kept
        as-is, reused as this flow's own last step rather than rebuilt).
-       New shell only: old shell keeps rendering its connect message
-       into #sb-tree exactly as it always has (renderLocalPrompt), frozen.
        Pre-connect copy stays generic on purpose — the Pages repo is
        public, so nothing company-specific shows before the vault's own
        folder permission gate. A hashed setup code unlocking a more
@@ -4256,7 +4067,6 @@
          moved to the other side, but it can be reordered against its
          neighbours). -->
     <nav id="sidebar" aria-label="Left dock">
-      <div class="rp-tabs" id="left-rail"></div>
       <div class="rp-body" id="left-body">
         <!-- Vault Files pane. Everything inside it is exactly what #sidebar
              used to hold directly, IDs unchanged, so the tree renderer, the
@@ -4298,10 +4108,6 @@
 
     <!-- Sidebar resize handle -->
     <div class="resize-handle" id="rh-sidebar" title="Drag to resize">
-      <div class="rh-flare" title="Click to collapse, drag to resize" aria-label="Toggle sidebar">
-        <span class="rh-dots"><span></span><span></span><span></span></span>
-        <svg class="rh-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
     </div>
 
     <!-- Reader -->
@@ -4376,8 +4182,7 @@
       <div id="beta-pane-park" style="display:none">
         <!-- P9 -- the Admin screen's own pane. Not in WB_TOOLS (see the
              note above openAdminScreen()), so it starts life parked here
-             rather than ever sitting in #rp-body: it has no old-shell rail
-             icon and never should. renderAdminTab() moves #rp-review /
+             rather than ever sitting in #rp-body. renderAdminTab() moves #rp-review /
              #rp-usage into #admin-body the same way betaOpenSlide moves a
              pane into #beta-slide-body -- one more level of the same
              mechanism, not a new one. -->
@@ -4402,85 +4207,19 @@
         <div id="beta-palette-list"></div>
       </div>
 
-      <!-- Quick pass, 2026-09-05 -- Home's Saved door. A small anchored
-           list, not the full slide-over: pick a save and jump, or fall
-           through to the real pane via "See everything saved". Reuses
-           betaAnchorPanel(), the same positioning math the palette above
-           uses. -->
-      <div id="saved-flyout-scrim" onclick="closeSavedFlyout()" style="display:none"></div>
-      <div id="saved-flyout" style="display:none"></div>
-
       <!-- Corner controls (nav pill, fold pill, Edit, Properties) share this
            wrapper so they align to the document's own left/right text edge
            instead of the raw panel edge — same max-width/margin/padding as
            #reader-content, so it tracks automatically at any window width
            or sidebar/right-panel state with no JS needed. -->
-      <div id="reader-corner-align">
-      <!-- Back / Forward (previous/next note) — mirrors Properties/Edit, opposite corner -->
-      <div id="reader-nav-pill">
-        <button class="icon-btn" id="btn-back-reader" title="Back" aria-label="Back" onclick="goBack()" disabled>
-          <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-        </button>
-        <button class="icon-btn" id="btn-forward-reader" title="Forward" aria-label="Forward" onclick="goForward()" disabled>
-          <svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
-        </button>
-        <div class="reader-nav-sep"></div>
-        <span id="reader-filename" class="reader-filename"></span>
-      </div>
-
-      <!-- S34: the reader's fold pill is gone. Bulk folding lives in the
-           Outline panel only — the reader folds one heading at a time via
-           its own chevrons, which is what Word's Navigation Pane, Obsidian's
-           Outline and VS Code's Outline view all do. -->
-
-      <!-- Copy link (S-A) — the one genuinely old-shell-only addition of this
-           session. Everything else the old shell gains lives in the reading
-           column and arrives in both shells for free; this corner does not
-           exist in the beta shell, so its button has to be placed by hand.
-           It is here rather than deferred because most of the team stays on
-           this shell until 1.0, and a link mechanism nobody can reach is not
-           a link mechanism. -->
-      <button class="icon-btn" id="btn-copylink" title="Copy link to this page" aria-label="Copy link to this page" style="display:none" onclick="copyNoteLink('', this)">
-        <svg class="icon" viewBox="0 0 24 24">
-          <rect x="9" y="9" width="12" height="12" rx="2"/>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-        </svg>
-      </button>
-      <!-- Edit button (S9) — floats top-right of the reader -->
-      <button class="icon-btn" id="btn-edit" title="Edit this file" aria-label="Edit this file" style="display:none" onclick="enterEdit()">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-          <path d="m15 5 4 4"/>
-        </svg>
-      </button>
-      <!-- Properties button (S13) — next to Edit -->
-      <button class="icon-btn" id="btn-props" title="File properties" aria-label="File properties" style="display:none" onclick="togglePropsPanel()">
-        <svg class="icon" viewBox="0 0 24 24">
-          <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/>
-          <line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/>
-          <line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
-        </svg>
-      </button>
-      </div><!-- /#reader-corner-align -->
-      <!-- Properties flyout (S13). Session D bug fix: moved out from INSIDE
-           #reader-corner-align to here, a sibling of it. That container is
-           hidden wholesale in the beta shell (body.beta-shell
-           #reader-corner-align { display: none; } — Session A, since its
-           OTHER contents are old-shell-only corner buttons the beta shell
-           replaced with its own Tools menu). This panel is shared by BOTH
-           shells — the beta Tools menu's Properties button still calls the
-           same togglePropsPanel() — so nesting it inside that container
-           meant the beta shell could open it (display:block set correctly,
-           content populated correctly) while it stayed invisible at zero
-           size the whole time, display:none on the ancestor collapsing it
-           regardless of its own display value. Moved here, it keeps the
-           exact same on-screen position (#reader-corner-align sits at
-           top:0/left:0/right:0 with no padding, so this panel's own
-           top:44px/right:48px resolves to the same point against
-           #reader-wrap either way) and is now unaffected by that rule. -->
+      <!-- P11 — the floating corner controls are gone: back and forward, the
+           filename, Copy link, Edit and Properties all live in the reader head
+           and the overflow menu, which is where this layout has carried them
+           since Session A. -->
+      <!-- Properties flyout (S13). Opened from the overflow menu's
+           Properties button via togglePropsPanel(). Positioned against
+           #reader-wrap. -->
       <div id="props-panel" role="dialog" aria-label="File properties" style="display:none"></div>
-      <div id="reader-fade" aria-hidden="true"></div>
       <main id="reader">
         <!-- Round 2a -- see #beta-top-fade in the stylesheet. First child of
              #reader on purpose: position:sticky pins to the scrollport this
@@ -4515,7 +4254,6 @@
              updated in place rather than rebuilt with #reader-content on
              every openFile(), so its own sticky position and observer
              don't need re-wiring on every render. -->
-        <div id="reader-section-bar"></div>
         <div id="reader-content"></div>
         <!-- S9 Editor mode -->
         <div id="editor" style="display:none">
@@ -4565,15 +4303,10 @@
 
     <!-- Right panel resize handle -->
     <div class="resize-handle" id="rh-right" title="Drag to resize">
-      <div class="rh-flare" title="Click to collapse, drag to resize" aria-label="Toggle right panel">
-        <span class="rh-dots"><span></span><span></span><span></span></span>
-        <svg class="rh-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </div>
     </div>
 
     <!-- Right panel (Sections 4 + 5) -->
     <aside id="right-panel" aria-label="Right dock">
-      <div class="rp-tabs" id="right-rail"></div>
       <!-- B2 / R1 -- the companion tab strip. A node of its own rather than
            a second use of #right-rail, because that rail's buttons carry the
            count spans paintRailCounts() writes into, and renderRails()
@@ -4616,10 +4349,6 @@
       <!-- S41: the inbox strip that used to live here is gone. Both buttons
            moved inside their own panes (see PANE_FOOT), because a vault-wide
            view of comments is the Comments tool's, not the panel's. -->
-      <!-- Single manual version string in this file — the one thing to
-           bump on every ship, together with the changelog entry (this
-           has drifted before, see changelog 0.10.0 / was v0.9g). -->
-      <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.61.0</button>
     </aside>
 
   </div>
@@ -4798,31 +4527,15 @@
       </div>
     </div>
 
-    <!-- S-A — the beta channel. Its own section rather than a line in
-         Navigation, because it changes the whole interface rather than one
-         behaviour, and because a person who turns it on should be able to
-         find it again to turn it off. -->
+    <!-- P11 — the layout choice is gone: there is one layout. What is left
+         here are the two rows that used to be shown only while it was on. -->
     <div class="s-section">
-      <div class="s-label">New look</div>
-      <div class="toggle-row">
-        Try the new layout
-        <label class="toggle">
-          <input type="checkbox" id="tgl-beta-shell">
-          <div class="toggle-track"></div>
-          <div class="toggle-thumb"></div>
-        </label>
-      </div>
-      <p class="s-help">Same vault, same pages, nothing removed. Search moves
-        into the top bar, the maintainer panels move behind one button, and
-        every page gains a Home. Turn it off any time — this only changes
-        this computer.</p>
+      <div class="s-label">Display</div>
       <!-- P8 — moved here from the Theme panel's Headings section, which
            the new shell's cut-to-five panel no longer has room for. Off
            by default still (the open bug this was filed against was the
-           default, never the toggle's existence); shown only while the
-           new layout is on, since the old shell keeps the toggle in its
-           own full Theme panel. See applyShellMode(). -->
-      <div class="toggle-row" id="s-row-inline-title" style="display:none">
+           default, never the toggle's existence). -->
+      <div class="toggle-row" id="s-row-inline-title">
         Show page title
         <label class="toggle">
           <input type="checkbox" id="tgl-inline-title">
@@ -4833,14 +4546,12 @@
       <!-- 0.45.0 — re-run the walkthrough. Here rather than in Advanced
            because staff are a real audience for it, not just testing: the
            six screens are the only place several of these controls are ever
-           named. New shell only, like everything else in this section, since
-           the walkthrough does not exist in the frozen old shell — shown and
-           hidden by applyShellMode() alongside the row above.
+           named.
            It checks setup health BEFORE replaying, and a failing check is
            the only thing that offers a full reset. Folio never takes that
            decision on its own: a reset drops the folder connection, and
            doing that on a guess costs more than the problem it fixes. -->
-      <div class="toggle-row" id="s-row-rerun" style="display:none">
+      <div class="toggle-row" id="s-row-rerun">
         Walkthrough
         <button class="ed-btn" onclick="rerunWalkthrough()">Run again</button>
       </div>
@@ -5005,7 +4716,6 @@ const state = {
   // rather than two. histIdx is the index carried inside the current
   // history entry; histMax is the furthest forward the chain reaches, which
   // is what makes Forward knowable without guessing at popstate direction.
-  betaShell:    false, // S-A — opt-in new shell, see readShellPref
   histIdx:      0,
   histMax:      0,
   histScroll:   {},    // { histIdx: scrollTop } — where you were reading on each entry
@@ -7015,15 +6725,7 @@ function wbDelegatedClick(e) {
   const savedJump = e.target.closest('[data-wb-savedjump]');
   if (savedJump) {
     e.preventDefault();
-    closeSavedFlyout(); // no-op if the row was in the full pane, not the flyout
     jumpToBookmark(savedJump.dataset.wbSavedjump, savedJump.dataset.wbSavedjumpid);
-    return;
-  }
-  const savedFlySeeAll = e.target.closest('[data-wb-savedflyseeall]');
-  if (savedFlySeeAll) {
-    e.preventDefault();
-    closeSavedFlyout();
-    destOpen('bookmarks');   // round 2c -- exitConsoleHome() is inside destOpen
     return;
   }
   const closeCmt = e.target.closest('[data-wb-closecmt]');
@@ -8441,12 +8143,6 @@ let readerJumpSuppressUntil = 0; // performance.now() cutoff — scroll events b
 // hide — otherwise the very first heading in a file reads as dimmed even
 // though nothing is scrolled behind it (the fade is a fixed decorative
 // overlay, not scroll-aware on its own).
-function updateReaderFadeVisibility() {
-  const reader = $('reader');
-  const fade = $('reader-fade');
-  if (!reader || !fade) return;
-  fade.style.opacity = reader.scrollTop <= 2 ? '0' : '1';
-}
 
 // Bound once at boot. Covers two things that both hinge on "did the reader
 // just scroll": the fade's visibility, and releasing a pinned jump
@@ -8456,10 +8152,8 @@ function initReaderScrollHandling() {
   const reader = $('reader');
   if (!reader) return;
   reader.addEventListener('scroll', () => {
-    updateReaderFadeVisibility();
     if (state.jumpPinnedId && performance.now() >= readerJumpSuppressUntil) clearJumpHighlight();
   });
-  updateReaderFadeVisibility();
 }
 
 function revealHeading(id) {
@@ -8557,88 +8251,26 @@ function scrollToAnchor(e, targetId) {
   revealHeading(id);
 }
 
-// ── The beta switch (Session A) ──────────────────────────────────
-// Opt-in, off by default, remembered per device like every other
-// preference. It exists so the new shell can be tried by a few people
-// while everyone else keeps the shell they know.
-//
-// What makes two shells affordable is not this switch, it is the policy
-// beside it: the old shell is FROZEN the day this ships. All new work
-// targets the beta shell only, so nothing is ever built twice. Without
-// that rule a toggle doubles the cost of every future change; with it,
-// the cost is a second layout that is never touched again.
-//
-// The generation stamp is the part that is easy to leave out and painful
-// to add later. When the beta shell becomes the default, the switch turns
-// off for everyone and is reused for the next round. Without a stamp,
-// anyone who left it on in round one is silently enrolled in round two
-// without ever opting in. The stamp lives INSIDE the stored value rather
-// than in a new key name, so the frozen wb_* key list stays as it is and
-// a stale opt-in reads as off rather than as on.
-const WB_SHELL_GEN = 1;
-
-function readShellPref() {
-  try {
-    const raw = localStorage.getItem('wb_shell');
-    // Session 1 (S60): nobody-stored now defaults ON. Existing values —
-    // on or off, from anyone who has ever touched this control — are
-    // never touched by this change; only a device with no wb_shell key
-    // at all moves.
-    if (raw === null) return true;
-    const v = JSON.parse(raw);
-    // Shape is { gen, on }. Anything else — an older value, a hand-edited
-    // one, a half-written one — reads as off. Failing closed here is right:
-    // the cost of wrongly reading "off" is one toggle click, the cost of
-    // wrongly reading "on" is a person moved to a new interface without
-    // asking for it.
-    if (!v || typeof v !== 'object') return false;
-    if (v.gen !== WB_SHELL_GEN) return false;
-    return v.on === true;
-  } catch (_) { return false; }
-}
-
-function writeShellPref(on) {
-  persist('wb_shell', { gen: WB_SHELL_GEN, on: !!on });
-}
-
-function betaShellOn() { return state.betaShell === true; }
-
-function setBetaShell(on) {
-  state.betaShell = !!on;
-  writeShellPref(state.betaShell);
-  applyShellMode();
-}
-
-// One class on the body, and the CSS does the rest. The beta shell is a
-// different arrangement of the SAME panels and the same reader, not a
-// second copy of them: there is one vault tree, one reading column, one
-// Outline, and one of everything else. That is what keeps the frozen old
-// shell from being a maintenance cost — it is a layout, not a fork.
+// One class on the body, and the CSS does the rest. The old opt-in switch
+// and its stored wb_shell value were deleted at P11; a stale value left in a
+// browser is inert because nothing reads it.
 function applyShellMode() {
-  document.body.classList.toggle('beta-shell', betaShellOn());
-  const t = $('tgl-beta-shell');
-  if (t) t.checked = betaShellOn();
-  // P8 — the relocated inline-title toggle only makes sense (and only has
-  // room) in the new shell; the old shell's own Theme panel still carries it.
-  const titleRow = $('s-row-inline-title');
-  if (titleRow) titleRow.style.display = betaShellOn() ? '' : 'none';
-  // 0.45.0 — the walkthrough is new-shell only, so its re-run entry is too.
-  const rerunRow = $('s-row-rerun');
-  if (rerunRow) rerunRow.style.display = betaShellOn() ? '' : 'none';
+  // P11 -- there is one layout now, so nothing here chooses one. The class
+  // stays on the body because the stylesheet is written against it.
+  document.body.classList.add('beta-shell');
   const titleTgl = $('tgl-inline-title');
   // themePrefs is still null the first time this runs at boot (it loads
   // later in loadPersistedState) — loadThemePrefs() below syncs the real
   // value once it lands, this just has to not throw before then.
   if (titleTgl) titleTgl.checked = !!(state.themePrefs && state.themePrefs.inlineTitle);
   if (typeof renderBetaTopbar === 'function') renderBetaTopbar();
-  if (typeof renderAppBanner === 'function') renderAppBanner(); // P6 — new shell only
+  if (typeof renderAppBanner === 'function') renderAppBanner();
   updateBackButtons();
 }
 
 // ── Beta shell chrome (Session A) ────────────────────────────────
-// Everything here draws the beta shell's own controls. None of it builds a
-// second copy of anything: the tools it opens, the panes it shows and the
-// reader it sits above are the ones the old shell uses.
+// Everything here draws the layout's own controls: top bar, palette,
+// overflow menu.
 
 // Which tools live behind the overflow. Outline is not here because it
 // stays in the right pane; Comments is not here because it earned its own
@@ -8650,7 +8282,6 @@ function applyShellMode() {
 const BETA_MORE_TOOLS = ['backlinks'];
 
 function renderBetaTopbar() {
-  if (!betaShellOn()) { betaCloseMore(); return; }
   renderBetaCrumbs();
   updateBetaCommentCount();
   updateBetaSaveButton();
@@ -8835,7 +8466,6 @@ function betaPaletteEmptyHTML() {
 function consoleHomeOn() { return state.consoleHome === true; }
 
 function openConsoleHome() {
-  if (!betaShellOn()) return;   // the old shell has no front door and is frozen
   rightResetTabs();             // B2 -- after the guard, never before it
   if (!guardLeaveEdit()) return;
   wnCommitPending();
@@ -9111,8 +8741,8 @@ function chSavedCount() {
 }
 
 // Quick pass, 2026-09-05 -- same flat "file, then section, color coded"
-// rows as the flyout and the full pane (savedItemRowHTML / chSavedFlyoutRows),
-// reused rather than re-derived, so all three saved surfaces read alike.
+// rows as the full pane (savedItemRowHTML / chSavedFlyoutRows),
+// reused rather than re-derived, so both saved surfaces read alike.
 // "Show all" expands in place: going to the full Saved list to read a few
 // more rows costs you the whole front door.
 const CH_SAVED_SHOWN = 3;
@@ -9207,14 +8837,6 @@ function chVaultsHTML() {
 function renderAppBanner() {
   const el   = $('app-banner');
   if (!el) return;
-  if (!betaShellOn()) {
-    el.hidden = true; el.innerHTML = '';
-    // 0.52.0 — this used to hide the header's version button here too. That
-    // button is gone and its replacement (#ud-version) lives in the account
-    // menu, which BOTH shells share and which shows it unconditionally, so
-    // there is nothing left for the old-shell branch to turn off.
-    return;
-  }
 
   const needsFolder = configIsPlaceholder() && !LOCAL.on;
   // B3 -- ...&& !ranInstalledHere(). Offering to install an app the person is
@@ -9277,9 +8899,11 @@ function renderAppBanner() {
   el.hidden    = !html;
 
   // 0.52.0 -- the version indicator is no longer one of this slot's states.
-  // It moved to #ud-version in the account menu and is shown there
-  // unconditionally, so nothing about install or update state gates it any
-  // more. syncVersionRow() owns it; refreshAccountMenu() calls that.
+  // It lives in the account menu and is shown there unconditionally, so
+  // nothing about install or update state gates it any more. P11 -- it is the
+  // version BUTTON itself down there now, not a row copying the button's text
+  // out of the old header, so there is no writer to call and still exactly one
+  // version literal in this file.
 }
 
 // One writer for the account menu's version line. Reads #app-version rather
@@ -9290,12 +8914,7 @@ function renderAppBanner() {
 // it replaced needed. That button was part of the banner's install/update
 // priority and so had to be repainted whenever either changed; this row is
 // unconditional, and its text cannot change within a session.
-function syncVersionRow() {
-  const txt = $('ud-version-txt');
-  if (!txt) return;
-  const src = $('app-version');
-  txt.textContent = src ? src.textContent : '';
-}
+
 
 // "Not now" lasts until the next launch, never forever. One click at the
 // wrong moment must not cost the install permanently — install is what makes
@@ -9350,9 +8969,7 @@ function chDoor(which, anchorEl) {
     // anchored flyout over Home, back when the only alternative was the 290px
     // slide-over and a picker beat that; with Saved a real destination in the
     // reading column the flyout is the narrower of two answers to one
-    // question. openSavedFlyout() stays -- it is the same rows through the
-    // same renderer -- but nothing routes to it, so it comes out at P11 with
-    // the rest of the frozen shell if nothing has claimed it by then.
+    // question. The flyout itself was deleted at P11.
     destOpen('bookmarks');
     return;
   }
@@ -9487,10 +9104,10 @@ function betaOpenTool(id) {
   betaCloseMore();
   const t = toolById(id);
   if (!t || !toolVisible(t)) return;
-  if (betaShellOn() && RIGHT_COMPANIONS.includes(id)) { rightSummon(id); return; }
+  if (RIGHT_COMPANIONS.includes(id)) { rightSummon(id); return; }
   // Round 2c -- a companion goes to the right column, a destination takes the
   // reading column, and only what is neither is still a slide-over.
-  if (betaShellOn() && DESTINATIONS.includes(id)) { destOpen(id); return; }
+  if (DESTINATIONS.includes(id)) { destOpen(id); return; }
   betaOpenSlide(id);
 }
 
@@ -9503,8 +9120,6 @@ function rightStack() {
   const rest = (state.rightTabs || []).filter(t => t !== 'outline');
   return ['outline', ...rest];
 }
-
-function rightIsStacked() { return rightStack().length > 1; }
 
 // Summon a companion into the right column. Clicking the same trigger again
 // CLOSES it, which is what keeps the reader-head button a toggle rather than
@@ -9569,9 +9184,8 @@ function applyRightColumn() {
 // close. A strip listing those same names would be a second set of labels for
 // panes you can already see, and a selector for a choice that no longer
 // exists. Emptied rather than deleted: the element and its :not(:empty) CSS
-// stay, so the old shell's behaviour and every layout that reads this node
-// are untouched, and there is one obvious place for it to come back if the
-// column ever holds more than it can show at once.
+// stay, so there is one obvious place for it to come back if the column ever
+// holds more than it can show at once.
 function renderRightTabs() {
   const rail = $('right-tabs');
   if (!rail) return;
@@ -9652,16 +9266,12 @@ let destReturn = null;   // the page to come back to, captured before it is clea
 
 
 function destOpen(id) {
-  // The old shell is frozen and has no reading-column destinations. It keeps
-  // the slide-over, which is what it has always had.
-  if (!betaShellOn()) { betaOpenSlide(id); return; }
   if (!guardLeaveEdit()) return;
   const pane = $('rp-' + id);
   const host = $('cd-body');
   if (!pane || !host) return;
 
   betaClosePalette(); betaCloseMore(); betaCloseSlide();
-  try { closeSavedFlyout(); } catch (_) { /* never opened this visit */ }
 
   // Captured BEFORE exitConsoleHome/state clearing, or Close has nowhere to
   // go back to. Null on Home, which is exactly when Home is the right answer.
@@ -9746,10 +9356,7 @@ async function destOpenSearch(q) {
 // -- both removed below, now that Home's Admin door reaches both).
 //
 // The screen itself is NOT registered in WB_TOOLS. It isn't a per-file
-// companion or a dock-able tool, and registering it there would also hand
-// the old shell a new rail icon it was never designed to carry -- the old
-// shell stays frozen until P11 deletes it. Home's Admin door calls
-// openAdminScreen() directly, the same way Saved's flyout is reached
+// companion or a dock-able tool. Home's Admin door calls openAdminScreen()
 // directly rather than through betaOpenTool().
 //
 // The door is reachable at every tier (chDoorsHTML) -- what gates is each
@@ -9808,9 +9415,8 @@ function adminTabRenderFns() {
 }
 
 function renderAdminTab(tab) {
-  // Round 2c -- Admin answers to either host now: the reading column in the
-  // new shell, the slide-over in the frozen old one. A stray click after
-  // whichever one closed still renders nothing.
+  // Round 2c -- Admin lives in the reading column. A stray click after it
+  // closed renders nothing.
   if (betaSlideId !== 'admin' && destId !== 'admin') return;
   adminActiveTab = tab;
   const slideTitle = $('beta-slide-title');
@@ -10551,17 +10157,19 @@ function betaMoreMenuHTML() {
   BETA_MORE_TOOLS.forEach(id => {
     const t = toolById(id);
     if (!t || !toolVisible(t)) return;   // same gate the rails use, not a second one
-    const cnt = t.countId ? $(t.countId) : null;
-    const n   = cnt && cnt.style.display !== 'none' ? (cnt.textContent || '') : '';
+    // P11 -- this used to read the number out of the tool's count SPAN, which
+    // lives inside a rail button the console shell hides. The rail is going, so
+    // the menu now asks the tool for its own number, which is where
+    // paintRailCounts has read it from since 0.60.0. One source, not a DOM
+    // lookup against something invisible.
+    const c = typeof t.count === 'function' ? t.count() : 0;
+    const n = c ? String(c) : '';
     h += `<button data-wb-btmore="${escHtml(id)}">${escHtml(t.label)}${n ? `<span class="bt-mnum">${escHtml(n)}</span>` : ''}</button>`;
   });
   h += '<div class="bt-msep"></div>';
   h += '<button data-wb-btprops="1">Properties</button>';
   // Edit keeps exactly the rule it has everywhere else, and it is HIDDEN
-  // rather than shown-and-disabled. The old shell greys it, which means a
-  // reader looks at a dead button on every page they open; that is a
-  // separate fix in the access-tier session and this shell simply does not
-  // reproduce it.
+  // rather than shown-and-disabled, so a reader never looks at a dead button.
   if (editingAllowed()) h += '<button data-wb-btedit="1">Edit</button>';
   return h;
 }
@@ -10771,7 +10379,7 @@ async function wbOpenFromHash(opts) {
   // B3 -- before the note branch, because '#home' carries no note= part and
   // would otherwise read as "no address" and leave whatever page was on screen
   // still sitting there after a Back that was supposed to reach Home.
-  if (location.hash === HOME_HASH && betaShellOn()) {
+  if (location.hash === HOME_HASH) {
     openConsoleHome();
     return true;
   }
@@ -10825,17 +10433,11 @@ function wbCopyFallback(text, done) {
   } catch (_) { done(); }
 }
 
-// Sets both title displays at once: the top app-header breadcrumb (keeps
-// the full name/label, unchanged) and the new reader-panel filename (S —
-// reader header bar), which drops a trailing .md since the app already
-// makes clear every vault file is Markdown. Used for real files and for
-// the fixed-label views (Help/Changelog/All changes/All comments).
-function setReaderTitle(label) {
-  const bc = $('breadcrumb');
-  if (bc) bc.textContent = '/ ' + label;
-  const fn = $('reader-filename');
-  if (fn) fn.textContent = label.replace(/\.md$/i, '');
-}
+// P11 -- the two places this wrote to, the header breadcrumb and the reader's
+// floating filename, both belonged to the old interface. The reader head draws
+// the page name and its folder path from the file itself, so this is now the
+// one thing still worth doing centrally: nothing.
+function setReaderTitle(_label) { /* no display of its own any more */ }
 
 // Both shells read this. Back stays disabled until Folio has pushed at
 // least one entry of its own, so pressing it can never walk out of the app
@@ -10844,10 +10446,8 @@ function setReaderTitle(label) {
 function updateBackButtons() {
   const hasBack    = state.histIdx > 0;
   const hasForward = state.histIdx < state.histMax;
-  const b = $('btn-back-reader');    if (b) b.disabled = !hasBack;
-  const f = $('btn-forward-reader'); if (f) f.disabled = !hasForward;
-  const b2 = $('bt-back');           if (b2) b2.disabled = !hasBack;
-  const f2 = $('bt-fwd');            if (f2) f2.disabled = !hasForward;
+  const b = $('bt-back'); if (b) b.disabled = !hasBack;
+  const f = $('bt-fwd');  if (f) f.disabled = !hasForward;
 }
 
 // ── Open file ────────────────────────────────────────────────────
@@ -11010,13 +10610,11 @@ document.addEventListener('click', e => {
 // ── Resize handles ───────────────────────────────────────────────
 // side: 'left' = panel on left (drag right edge), 'right' = panel on right (drag left edge)
 const HANDLE_TOTAL    = 8;   // two 4px handles
-const SNAP_THRESHOLD  = 80;  // drag below this → snap panel closed
+const SNAP_THRESHOLD  = 80;  // the drag floor: a column never drags narrower than this
 const CLICK_THRESHOLD = 4;   // mouse moved less than this → treat as a click, not a drag
-const DEFAULT_PANEL_W = 220; // matches --sb-width / --rp-width in CSS
 
-// B3 -- the new shell's drag floor. In the old shell a drag below
-// SNAP_THRESHOLD closes the panel, which is a fine gesture where the panel's
-// visibility is the person's to control. In the new shell it is not: the right
+// B3 -- the drag floor. A drag never closes a column, because a column's
+// visibility is not the person's to control: the right
 // column is shown and hidden by whether there is anything to outline (0.44.2),
 // and Jayson's B3 instruction was that adjustment comes back while hide-and-show
 // does not change. So a drag here stops at a floor instead of falling through
@@ -11026,7 +10624,6 @@ const PANEL_FLOOR_W = 180;
 
 // True where a panel's visibility is NOT the drag's business. Reads the shell
 // rather than the panel, because that is what the rule is actually about.
-function fixedVisibility() { return typeof betaShellOn === 'function' && betaShellOn(); }
 
 // Reader floor scales with viewport — matches CSS media queries above
 function getReaderMin() {
@@ -11109,8 +10706,7 @@ const FIT_ROW_SEL = [
 // The reader is protected without any of this. Both gestures already clamp
 // against `bodyWidth - otherWidth - handles - readerMin`, so the squeeze was
 // never what kept the reading column alive; it only took room from a
-// neighbour to give it away. The old shell keeps the squeeze, because there a
-// stored width is the only memory a panel has and that shell dies at P11.
+// neighbour to give it away.
 //
 // Returns the width the CALLER must use for its ceiling. Never re-read the
 // neighbour from the DOM after calling this: it carries a width transition,
@@ -11120,12 +10716,10 @@ const FIT_ROW_SEL = [
 function squeezeNeighbour(otherPanel, otherKey) {
   if (otherPanel.classList.contains('closed')) return 0;
   const w = otherPanel.offsetWidth;
-  if (fixedVisibility()) return w;            // console shell: hands off
-  if (w <= DEFAULT_PANEL_W) return w;
-  otherPanel.style.width    = DEFAULT_PANEL_W + 'px';
-  otherPanel.style.minWidth = DEFAULT_PANEL_W + 'px';
-  persist(otherKey, DEFAULT_PANEL_W);
-  return DEFAULT_PANEL_W;
+  // P11 -- the columns are independent and a drag never shoves its neighbour.
+  // This reports the neighbour's width and touches nothing, which is what the
+  // ceiling calculation needs from it.
+  return w;
 }
 
 function fitPanelToContent(panel, side, max) {
@@ -11201,25 +10795,7 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
   const panel      = $(panelId);
   const otherPanel = side === 'left' ? $('right-panel') : $('sidebar');
   const otherKey   = side === 'left' ? 'wb_rp_width'   : 'wb_sb_width';
-  let collapseTimer = null; // pending single-click collapse, cancellable by a following dblclick — see isOnFlare below
-
-  // Session D bug fix: the grip is a small (11x28) element, but
-  // .resize-handle::after (S41's own wider 16px drag strip, "easy to grab
-  // even when panel is wide") sits ON TOP of it in paint order and is now
-  // WIDER than the grip itself — so a real click's e.target always
-  // resolved to the handle (the pseudo-element's host), never to a
-  // descendant of .rh-flare, and e.target.closest('.rh-flare') could never
-  // succeed. The old, much bigger flare shape (24x64) poked out past the
-  // 16px strip on both sides, which is the only reason that version's
-  // clicks ever landed on the flare itself. Checking against the flare's
-  // own geometry instead of the DOM hit-test target fixes this regardless
-  // of which element the browser says received the click.
-  function isOnFlare(e) {
-    const flare = handle.querySelector('.rh-flare');
-    if (!flare) return false;
-    const r = flare.getBoundingClientRect();
-    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-  }
+  let collapseTimer = null; // P11 -- nothing schedules this any more; the dblclick handler still clears it, which is harmless and keeps the handler shape intact
 
   // Double-click the handle line to size the panel to its widest visible row,
   // so a long file name stops being truncated without hunting for the edge.
@@ -11258,15 +10834,13 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
     panel.style.transition = 'none';
     handle.classList.add('dragging');
 
-    // J1 -- one call, and the width comes back rather than being re-read. In
-    // the console shell this leaves the neighbour completely alone, which is
-    // the whole of Jayson's item 2; in the old shell it squeezes exactly as
-    // it always did. See squeezeNeighbour().
+    // J1 -- one call, and the width comes back rather than being re-read. It
+    // leaves the neighbour completely alone (Jayson's item 2). See
+    // squeezeNeighbour().
     const otherWidthAtStart = squeezeNeighbour(otherPanel, otherKey);
 
     const startX     = e.clientX;
     const startWidth = panel.offsetWidth;
-    const fromFlare  = isOnFlare(e);
     let moved = false;
 
     function onMove(e) {
@@ -11287,7 +10861,7 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
       // Allow down to 0 (snap fires on mouseup) -- except in the new shell,
       // where there is no snap to fire and dragging to nothing would be an
       // unlabelled way to hide a column. See PANEL_FLOOR_W.
-      w = Math.max(fixedVisibility() ? PANEL_FLOOR_W : 0, w);
+      w = Math.max(PANEL_FLOOR_W, w);
 
       panel.style.width    = w + 'px';
       panel.style.minWidth = w + 'px';
@@ -11298,53 +10872,16 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
       panel.style.transition = '';
       handle.classList.remove('dragging');
 
-      if (!moved) {
-        // S41 — three gestures, two targets, no overlap:
-        //   drag the handle (from anywhere on it, flare included) = resize
-        //   click the flare without moving                        = collapse
-        //   double-click anywhere on the handle                   = fit to content
-        //
-        // What changed and why: the flare used to swallow mousedown and toggle
-        // on any click, so aiming at the flare to START a drag collapsed the
-        // panel instead — the reported bug. The fix is distance, not duration.
-        // A time threshold fights the drag: a slow, careful resize is exactly
-        // the gesture a long-press rule would misread as a hold. Movement past
-        // CLICK_THRESHOLD means drag, full stop, however long you took over it.
-        //
-        // Session D: collapsing now waits out the browser's own double-click
-        // window before it actually happens, and the dblclick handler above
-        // cancels it — otherwise the two single clicks inside a double-click
-        // would collapse the panel and then immediately reopen it (via the
-        // closed-panel click-to-reopen branch below) before the dblclick
-        // event even fires, which is the "expands fully then shrinks" flicker
-        // that was reported once the grip moved to where people double-click.
-        // B3: fixedVisibility() is belt and braces. The flare is display:none
-        // in the new shell, so isOnFlare's zeroed rect already makes fromFlare
-        // false for every real click -- but a collapse that depends on a
-        // measurement of a hidden element is a silent thing to rely on.
-        if (fromFlare && !fixedVisibility()) {
-          clearTimeout(collapseTimer);
-          collapseTimer = setTimeout(() => {
-            panel.style.width    = '';
-            panel.style.minWidth = '';
-            panel.classList.add('closed');
-            handle.classList.add('handle-closed');
-            onClose();
-          }, 320);
-        }
-      } else if (!fixedVisibility() && panel.offsetWidth < SNAP_THRESHOLD) {
-        // Snap closed — clear inline widths so CSS closed state takes over cleanly
-        // B3: old shell only. The new shell cannot reach this anyway (onMove
-        // floors the width well above the threshold), and the guard is here so
-        // that stays true if either number is ever changed.
-        panel.style.width    = '';
-        panel.style.minWidth = '';
-        panel.classList.add('closed');
-        handle.classList.add('handle-closed');
-        onClose();
-      } else {
-        persist(storageKey, panel.offsetWidth);
-      }
+      // P11 -- a press that does not move used to collapse the column via the
+      // flare, and a drag that ended narrow used to snap it closed. Both
+      // belonged to the old interface's collapse control, which is gone: there
+      // is no second way to hide a column, and onMove floors the width well
+      // above where a snap could ever fire. What is left is the one thing a
+      // release means now, which is remember the width the person chose.
+      //
+      // The distance rule stays and still matters: it is what makes a drag a
+      // drag rather than a click, so a press that never moved writes nothing.
+      if (moved) persist(storageKey, panel.offsetWidth);
 
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
@@ -11433,10 +10970,7 @@ function setPanelOpen(panelId, handleId, storageKey, open) {
 //      render that filled the column, and rows that have not been laid out yet
 //      measure as nothing -- which is how the Outline pane spent every release
 //      up to 0.32.1 fitting to its own header (see FIT_ROW_SEL).
-//
-// Old shell is frozen, so this is new-shell only.
 function fitPanelIfUnsized(panelId, side, storageKey) {
-  if (!fixedVisibility()) return;
   if (localStorage.getItem(storageKey)) return;
   const panel = $(panelId);
   if (!panel || panel.classList.contains('closed')) return;
@@ -11707,17 +11241,12 @@ function refreshAccountMenu() {
   const menuItem = $('ud-install');
   if (menuItem) menuItem.style.display = installedNow ? 'none' : 'flex';
 
-  // P9 -- Usage moved inside the Admin screen. The old shell has no Admin
-  // door, so it keeps this menu item exactly as before; the new shell hides
-  // it, since Home's Admin door reaches the same pane now.
-  const usageItem = $('ud-usage');
-  if (usageItem) usageItem.style.display = (atLeast('admin') && !betaShellOn()) ? 'flex' : 'none';
+  // P9 -- Usage moved inside the Admin screen; Home's Admin door reaches it.
   const defaultPageItem = $('ud-defaultpage');
   if (defaultPageItem) defaultPageItem.style.display = atLeast('admin') ? 'flex' : 'none';
 
   // P6 — install state just moved, and the banner is the loud half of it.
   renderAppBanner();
-  syncVersionRow();
 }
 
 function fixIdentity() {
@@ -11745,18 +11274,11 @@ async function tryInstall() {
   }
 }
 
-// Usage has no home in the beta shell's right dock -- BETA_HIDDEN_RIGHT
-// hides it there on purpose (see WB_TOOLS). The old shell reaches it through
-// its own right-rail icon; toggleRPTab() there is the exact mechanism that
-// icon already calls, not a new one. P9 -- the menu item itself is hidden
+// Usage has no home in the right column on purpose; it lives in Admin. P9 -- the menu item itself is hidden
 // while beta is on (refreshAccountMenu()), so the beta branch below is
 // belt-and-braces rather than a real path; it routes to the Admin screen's
 // Usage tab instead of the old standalone slide-over, which no longer has a
 // button pointed at it.
-function openUsageFromMenu() {
-  closeUserDropdown();
-  if (betaShellOn()) { openAdminScreen('usage'); } else { toggleRPTab('usage'); }
-}
 
 $('btn-help').addEventListener('click', () => {
   // Close settings, the theme panel and the user dropdown if any is open
@@ -11835,6 +11357,48 @@ $('settings-panel').addEventListener('click', e => e.stopPropagation());
 // Jayson set this value.
 const WB_LEGACY_USER_CREATED = '2026-07-01';
 
+// 0.62.1 -- how long the profile write may take before it counts as failed,
+// and what the last failure said (shown small on the no-access screen).
+const IDENTITY_SAVE_TIMEOUT_MS = 15000;
+let identitySaveError = '';
+
+function wbWithTimeout(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('Timed out saving to the vault folder')), ms);
+    promise.then(v => { clearTimeout(t); resolve(v); }, e => { clearTimeout(t); reject(e); });
+  });
+}
+
+// 0.62.1 -- the one place a failed profile save is handled, for the
+// walkthrough card and the account-setup modal alike. With nobody signed in
+// it is the no-access screen, whose only way out is closing Folio. With
+// someone already signed in (a changed email from the account menu) it is a
+// plain note, because that person clearly has access.
+function handleIdentitySaveFailed(inModal) {
+  if (state.user) {
+    if (inModal) {
+      $('id-note').textContent = 'That change could not be saved to the vault folder, so nothing was changed.';
+      $('id-note').classList.add('show');
+    }
+    return;
+  }
+  if (inModal) closeIdentityModal();
+  showFirstRunStep('noaccess');
+}
+
+// Installed, Folio's window closes. A browser tab usually refuses a script's
+// close, so if the page is still here a moment later it says so instead.
+function closeFolio() {
+  try { window.close(); } catch (_) {}
+  setTimeout(() => {
+    const body = $('first-run-body');
+    if (!body) return;
+    body.innerHTML = '<h1>You can close this window</h1>' +
+      '<p>Folio is stopped. Close this tab or window, and open Folio again once ' +
+      'your administrator has given you access.</p>';
+  }, 400);
+}
+
 function userFileUrl(email) {
   // Unlike changesUrlFor/commentsUrlFor, this isn't derived from an existing
   // file's own (already-absolute, in SharePoint mode) url — it's built from
@@ -11875,10 +11439,13 @@ async function checkIdentity() {
   openIdentityModal('');
 }
 
+const ID_NOTE_RECOGNIZED = 'Recognized — this email already has a profile in the vault. Your saved name and saved pages were restored.';
+
 function openIdentityModal(prefillEmail) {
   $('id-name').value  = '';
   $('id-email').value = prefillEmail || '';
   $('id-note').classList.remove('show');
+  $('id-note').textContent = ID_NOTE_RECOGNIZED;
   $('identity-overlay').style.display = 'flex';
 }
 
@@ -11924,8 +11491,18 @@ async function saveIdentityFrom(rawName, rawEmail) {
   // measurement resets itself. Nothing reads it yet; the staged onboarding
   // it exists for is 1.1, and the properties had to land first.
   record = { name, email, created: new Date().toISOString().slice(0, 10), saved: { pages: {} } };
-  await ensureUserSystemDir();
-  await spWriteFile(url, JSON.stringify(record, null, 2));
+  // 0.62.1 -- a write that throws or stalls used to leave Continue doing
+  // nothing at all. Writing the profile is the access check: a person whose
+  // copy of the vault is view-only cannot, and is told to ask for access.
+  try {
+    await wbWithTimeout((async () => {
+      await ensureUserSystemDir();
+      await spWriteFile(url, JSON.stringify(record, null, 2));
+    })(), IDENTITY_SAVE_TIMEOUT_MS);
+  } catch (e) {
+    identitySaveError = (e && (e.message || e.name)) || String(e);
+    return 'failed';
+  }
   state.user = record;
   persist('wb_user_email', email);
   updateUserBadge();
@@ -11939,6 +11516,7 @@ async function submitIdentity() {
   const r = await saveIdentityFrom($('id-name').value, $('id-email').value);
   if (r === 'invalid')    return;               // no inline validation UI yet
   if (r === 'recognized') { $('id-note').classList.add('show'); return; }
+  if (r === 'failed')     { handleIdentitySaveFailed(true); return; }
   closeIdentityModal();
 }
 
@@ -12003,7 +11581,6 @@ $('tgl-list-folds').addEventListener('change', e => {
 // S-A. No reload: the beta shell is a class on the body over the same
 // panels, so switching is instant and switching back is instant, which is
 // what makes it safe to try.
-$('tgl-beta-shell').addEventListener('change', e => { setBetaShell(e.target.checked); });
 
 // ── Theme (S7) — Dark/Light via header sun/moon icon, Header colors via Settings select ──
 // ================================================================
@@ -12216,20 +11793,10 @@ function refreshEditControls() {
 function updateEditBtn() {
   // P9 — hidden when not allowed, not just disabled, same rule New/Move
   // already followed and the beta shell's overflow menu already applied to
-  // this same button (see betaMoreMenuHTML). A dead button on every page a
-  // reader opens was the old shell's own gap; this was the session that
-  // closed it.
-  const canEdit = editingAllowed();
-  $('btn-edit').style.display =
-    (state.activeUrl && !state.editing && canEdit) ? '' : 'none';
-  $('btn-edit').disabled = !canEdit;
-  // S13 — properties button rides the same lifecycle (viewable by all)
-  $('btn-props').style.display =
-    (state.activeUrl && !state.editing) ? '' : 'none';
-  // S-A — Copy link rides it too. Viewable by all on purpose: sending
-  // somebody a page is a reading act, not an editing one.
-  const cl = $('btn-copylink');
-  if (cl) cl.style.display = (state.activeUrl && !state.editing) ? '' : 'none';
+  // this same button (see betaMoreMenuHTML).
+  // P11 -- Edit, Properties and Copy link were three floating buttons in the
+  // reader's corner, which this layout has never shown: they live in the
+  // reader head and the overflow menu, and those follow the same rule below.
   // The beta header's own buttons follow the same rule: nothing to copy and
   // nothing to comment on until a page is open.
   // Round 2c -- bt-save joins them. It always belonged in this list (its own
@@ -14911,15 +14478,6 @@ function rvGapNote(it) {
   return bits.join(' · ');
 }
 
-function rvAuditTicks(c) {
-  c = c || {};
-  let h = '';
-  if (c.added)    h += `<span class="rv-tick" style="background:var(--co-green-bg);color:var(--co-green-txt)">+${c.added}</span>`;
-  if (c.modified) h += `<span class="rv-tick" style="background:var(--co-yellow-bg);color:var(--co-yellow-txt)">~${c.modified}</span>`;
-  if (c.removed)  h += `<span class="rv-tick" style="background:var(--co-red-bg);color:var(--co-red-txt)">−${c.removed}</span>`;
-  return h;
-}
-
 // Approve straight from a row, without opening the file. Only offered on
 // band 2, where the item is additive — band 1 has no bulk and no
 // approve-without-reading, because the whole value of the audit is that
@@ -15594,24 +15152,6 @@ async function approveNewFileCore(f, opts) {
     if (!state.auditBaseline[auditPathKey(f.url)]) await auditRecord(f.url, text);
   } catch (_) {}
   if (!(opts && opts.skipScan)) await scanBadges();
-}
-
-async function inboxEntryAction(fileIdx, entryIdx, value) {
-  const r = state.reviewChanges[fileIdx];
-  if (!r) return;
-  try {
-    if (value === 'rejected') {
-      const done = await rejectChangeCore(r.url, r.changesUrl, entryIdx);
-      if (!done) return;
-    } else {
-      await setEntryReviewed(r.changesUrl, entryIdx, value);
-    }
-    await maybeFlipFileReviewed(r.url, r.changesUrl);
-    await scanBadges();
-    rvRefreshDashboard();
-  } catch (e) {
-    alert('Could not update: ' + e.message);
-  }
 }
 
 // Core accept-all: accepts every open entry (rejected entries stay rejected);
@@ -17381,9 +16921,8 @@ async function updateProp(key, value) {
 
 // Close the flyout when clicking elsewhere in the reader.
 //
-// [data-wb-btprops] added here (Session D bug fix): the beta shell's Tools
-// menu opens Properties through that attribute, not through #btn-props —
-// the old shell's own icon button, which is all this used to check for.
+// [data-wb-btprops] added here (Session D bug fix): the overflow menu opens
+// Properties through that attribute.
 // Missing it meant this same click that opened the panel also counted as
 // "elsewhere" and closed it again immediately, so Properties looked like it
 // did nothing from the beta shell's menu.
@@ -17456,10 +16995,6 @@ const PRESETS = {
 // Accent alternates offered next to the preset's own accent (which is
 // always the first chip). Tuned per mode — a light-mode accent needs
 // more depth to stay legible on a near-white surface.
-const ACCENTS = {
-  dark:  ['#5FD98A','#D0BCFF','#EF9F27','#F0997B','#F2555A','#98989D'],
-  light: ['#2E7D32','#5E4FC4','#B26A00','#C2410C','#C0392B','#6E6E73'],
-};
 
 const READ_WIDTHS = { narrow: '820px', normal: '1290px', wide: '1600px' };
 const BODY_SIZES  = { s: '14px', m: '15px', l: '17px' };
@@ -17937,23 +17472,11 @@ function copyHeadingsToOtherMode() {
   saveThemePrefs();
 }
 
-function isCustomHeadings() {
-  const h = state.themePrefs.headings;
-  return !!(h && h[resolvedMode()]);
-}
-
 function themeSegHTML(key, opts) {
   const cur = state.themePrefs[key];
   return '<div class="tp-seg">' + opts.map(o =>
     `<button type="button" class="tp-seg-btn${o[0] === cur ? ' on' : ''}" data-wb-tset="${key}" data-wb-tval="${o[0]}">${escHtml(o[1])}</button>`
   ).join('') + '</div>';
-}
-
-function themeToggleHTML(label, key) {
-  const on = !!state.themePrefs[key];
-  return `<div class="tp-toggle-row">${escHtml(label)}
-    <span class="tp-toggle${on ? ' on' : ''}" role="switch" aria-checked="${on}" tabindex="0" data-wb-ttoggle="${key}"><span class="tp-toggle-thumb"></span></span>
-  </div>`;
 }
 
 function themeSectionHeadHTML(name, label, extra) {
@@ -17971,13 +17494,8 @@ function renderThemePanel() {
   if (!body) return;
   const p    = state.themePrefs;
   const mode = resolvedMode();
-  // P8 — the beta shell's panel is cut to five fields: Mode, Preset, Width,
-  // Text size, Line spacing. Everything else (accent, body font, headings
-  // editor, navigation icons, interface chrome, share) stays exactly as it
-  // is for the old shell, which is frozen and keeps the full panel until
-  // it is deleted at P11 — see wikibase-dock-model.md / the P11 tracker
-  // item for the cleanup this leaves behind.
-  const betaCut = betaShellOn();
+  // P8 — the panel is cut to five fields: Mode, Preset, Width, Text size,
+  // Line spacing. The rest went with the old interface at P11.
   const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
   const heads  = (p.headings && p.headings[mode]) || set.h;
   const accent = (p.accent && p.accent[mode]) || set.ac;
@@ -17995,10 +17513,9 @@ function renderThemePanel() {
 
     html += '<div class="tp-lb">Preset</div><div class="tp-presets">';
     // P8 — cut to the two presets the locked project spec ever named.
-    // The other six (Default, Ocean, Frost, Clay, Mica, Marble) were
-    // exploration that never made it into that spec; still selectable
-    // from the old shell's full panel, just not offered here.
-    const presetKeys = betaCut ? ['things', 'minimal'] : Object.keys(PRESETS);
+    // The other six were exploration that never made it into that spec.
+    // P11 -- two presets, which is what this panel has actually offered since P8.
+    const presetKeys = ['things', 'minimal'];
     presetKeys.forEach(key => {
       const sw = PRESETS[key][mode];
       html += `<button type="button" class="tp-preset${key === p.preset ? ' on' : ''}" data-wb-tpreset="${key}" title="${escHtml(PRESETS[key].label)}">
@@ -18007,16 +17524,6 @@ function renderThemePanel() {
     });
     html += '</div>';
 
-    // P8 — Accent cut from the beta panel; each preset carries its own,
-    // frozen to today's value. Full picker stays for the old shell.
-    if (!betaCut) {
-      html += '<div class="tp-lb">Accent</div><div class="tp-swatches">';
-      html += `<span class="tp-sw${p.accent[mode] ? '' : ' on'}" style="background:${set.ac}" role="button" tabindex="0" title="Preset accent" data-wb-taccent=""></span>`;
-      ACCENTS[mode].forEach(c => {
-        html += `<span class="tp-sw${p.accent[mode] === c ? ' on' : ''}" style="background:${c}" role="button" tabindex="0" title="${c}" data-wb-taccent="${c}"></span>`;
-      });
-      html += '</div>';
-    }
     html += '</div>';
   }
 
@@ -18027,113 +17534,11 @@ function renderThemePanel() {
     html += '<div class="tp-lb">Width</div>'   + themeSegHTML('width', [['narrow','Narrow'],['normal','Normal'],['wide','Wide']]);
     html += '<div class="tp-lb">Text size</div>' + themeSegHTML('size',  [['s','Small'],['m','Medium'],['l','Large']]);
     html += '<div class="tp-lb">Line spacing</div>' + themeSegHTML('lead', [['tight','Tight'],['normal','Normal'],['relaxed','Relaxed']]);
-    // P8 — Body font cut from the beta panel, frozen at System sans.
-    if (!betaCut) {
-      html += '<div class="tp-lb">Body font</div>' +
-        `<select class="s-select tp-select" data-wb-tselect="font">
-          <option value="sans"${p.font === 'sans' ? ' selected' : ''}>System sans</option>
-          <option value="serif"${p.font === 'serif' ? ' selected' : ''}>Serif</option>
-          <option value="mono"${p.font === 'mono' ? ' selected' : ''}>Monospace</option>
-        </select>`;
-    }
     html += '</div>';
   }
 
-  // ── Headings, Navigation, Interface, Share — cut from the beta panel
-  // entirely (P8). Old shell keeps all four, untouched, until it is
-  // deleted at P11 (see the P11 tracker item for the cleanup this owes).
-  if (!betaCut) {
-  // ── Headings ──
-  const badge = isCustomHeadings() ? '<span class="tp-badge">Custom</span>' : '';
-  html += themeSectionHeadHTML('headings', 'Headings', badge);
-  if (state.themeSection === 'headings') {
-    html += '<div class="tp-sec-body">';
-    html += `<div class="tp-note">Editing ${mode} mode</div>`;
-    html += '<div class="tp-hrow tp-hhead"><span class="tp-hlvl">Level</span><span class="tp-hcol">Color</span><span class="tp-hcap">Caps</span><span class="tp-hund">Underline</span></div>';
-    for (let i = 0; i < 6; i++) {
-      const un = !!p.underlines[i];
-      const cp = !!p.caps[i];
-      html += `<div class="tp-hrow">
-        <span class="tp-hlvl">H${i + 1}</span>
-        <input type="color" class="tp-color" value="${heads[i]}" aria-label="H${i + 1} color" data-wb-thead="${i}">
-        <code class="tp-hex">${escHtml(String(heads[i]).toUpperCase())}</code>
-        <span class="tp-hcap"><span class="tp-toggle tp-toggle-sm${cp ? ' on' : ''}" role="switch" aria-checked="${cp}" aria-label="H${i + 1} capitals" tabindex="0" data-wb-tcaps="${i}"><span class="tp-toggle-thumb"></span></span></span>
-        <span class="tp-hund"><span class="tp-toggle${un ? ' on' : ''}" role="switch" aria-checked="${un}" aria-label="H${i + 1} underline" tabindex="0" data-wb-tund="${i}"><span class="tp-toggle-thumb"></span></span></span>
-      </div>`;
-    }
-    html += `<button type="button" class="tp-copy" data-wb-tcopy="1">Copy these to ${mode === 'dark' ? 'light' : 'dark'} mode</button>`;
-    html += '<div class="tp-lb">Heading scale</div>' + themeSegHTML('scale', [['compact','Compact'],['normal','Normal'],['large','Large']]);
-    html += themeToggleHTML('Show inline title', 'inlineTitle');
-    html += '</div>';
-  }
-
-  // ── Navigation icons ──
-  html += themeSectionHeadHTML('navigation', 'Navigation icons');
-  if (state.themeSection === 'navigation') {
-    html += '<div class="tp-sec-body">';
-    html += '<div class="tp-lb">Icon style</div>' +
-      `<select class="s-select tp-select" data-wb-tselect="navIcons">
-        <option value="folder"${p.navIcons === 'folder' ? ' selected' : ''}>Folder and file</option>
-        <option value="chevron"${p.navIcons === 'chevron' ? ' selected' : ''}>Chevron</option>
-        <option value="dot"${p.navIcons === 'dot' ? ' selected' : ''}>Dot</option>
-        <option value="none"${p.navIcons === 'none' ? ' selected' : ''}>None</option>
-      </select>`;
-    html += '<div class="tp-lb">Folder color</div>' +
-      `<select class="s-select tp-select" data-wb-tselect="navColor">
-        <option value="rainbow"${p.navColor === 'rainbow' ? ' selected' : ''}>Rainbow by position</option>
-        <option value="accent"${p.navColor === 'accent' ? ' selected' : ''}>Accent</option>
-        <option value="single"${p.navColor === 'single' ? ' selected' : ''}>Single color</option>
-        <option value="muted"${p.navColor === 'muted' ? ' selected' : ''}>Muted</option>
-      </select>`;
-    if (p.navColor === 'single') {
-      html += '<div class="tp-lb">Color</div><div class="tp-swatches">';
-      RAINBOW[mode].forEach((c, i) => {
-        html += `<span class="tp-sw${p.navSingle === i ? ' on' : ''}" style="background:${c}" role="button" tabindex="0" title="${c}" data-wb-tsingle="${i}"></span>`;
-      });
-      html += '</div>';
-    }
-    if (p.navIcons === 'none' || p.navIcons === 'chevron') {
-      html += `<div class="tp-note">File icons are hidden in this style.</div>`;
-    } else {
-      html += themeToggleHTML('Color file icons too', 'navFileColor');
-    }
-    html += '</div>';
-  }
-
-  // ── Interface ──
-  html += themeSectionHeadHTML('interface', 'Interface');
-  if (state.themeSection === 'interface') {
-    html += '<div class="tp-sec-body">';
-    html += '<div class="tp-lb">Chrome tone</div>' +
-      `<select class="s-select tp-select" data-wb-tselect="chrome">
-        <option value="contrast"${p.chrome === 'contrast' ? ' selected' : ''}>Contrast</option>
-        <option value="match"${p.chrome === 'match' ? ' selected' : ''}>Match reader</option>
-        <option value="flat"${p.chrome === 'flat' ? ' selected' : ''}>Flat</option>
-      </select>`;
-    html += '<div class="tp-lb">Borders</div>'    + themeSegHTML('borders',   [['none','None'],['hairline','Hairline'],['strong','Strong']]);
-    html += '<div class="tp-lb">Active row</div>' + themeSegHTML('activeRow', [['bar','Bar'],['tint','Tint'],['both','Both']]);
-    html += '<div class="tp-lb">Density</div>'    + themeSegHTML('density',   [['compact','Compact'],['normal','Normal'],['roomy','Roomy']]);
-    html += '</div>';
-  }
-
-  // ── Share ──
-  html += themeSectionHeadHTML('share', 'Share');
-  if (state.themeSection === 'share') {
-    html += '<div class="tp-sec-body">';
-    html += '<div class="tp-note">Mode stays personal — dark or light never travels with a shared theme.</div>';
-    html += `<textarea class="tp-share" id="tp-share-str" spellcheck="false" aria-label="Theme string">${escHtml(exportThemeString())}</textarea>`;
-    html += '<div class="tp-share-btns">';
-    html += '<button type="button" class="tp-btn" data-wb-tcopystr="1">Copy</button>';
-    html += '<button type="button" class="tp-btn" data-wb-timport="1">Apply pasted</button>';
-    html += '</div>';
-    html += '<button type="button" class="tp-btn tp-btn-wide" data-wb-tvault="1">Set as vault default</button>';
-    html += '<div class="tp-note">Saved to zSystem/theme.json. Anyone opening Folio for the first time starts with it; nobody\'s existing theme is touched.</div>';
-    if (state.themeShareMsg) {
-      html += `<div class="tp-msg${state.themeShareMsg.error ? ' err' : ''}">${escHtml(state.themeShareMsg.text)}</div>`;
-    }
-    html += '</div>';
-  }
-  } // end !betaCut (Headings/Navigation/Interface/Share)
+  // ── Headings, Navigation, Interface and Share were cut from this panel at
+  // P8 and deleted at P11 with the interface that still carried them.
 
   body.innerHTML = html;
 }
@@ -18256,7 +17661,6 @@ function loadPersistedState() {
     // S-A — the beta shell. readShellPref does its own parsing because the
     // stored value carries a generation stamp and anything unexpected has
     // to read as off, not throw.
-    state.betaShell = readShellPref();
     applyShellMode();
 
     // B3 -- the one moment Folio can answer "is this app installed on this
@@ -18437,13 +17841,6 @@ const WB_TOOLS = [
 
 const RP_TABS   = WB_TOOLS.map(t => t.id);
 
-// Everything that must never render in the old right-hand pane while the
-// beta shell is on, Outline excepted — Comments/Links/Review live in the
-// sliding panel now, Usage moved to the account menu, and none of them are
-// reachable through the right rail's own tab switcher any more (it's
-// hidden). Derived here rather than hand-listed a second time — a
-// duplicate list is a list that goes stale the next tool gets added.
-const BETA_HIDDEN_RIGHT = WB_TOOLS.filter(t => t.home === 'right' && t.id !== 'outline').map(t => t.id);
 const DOCK_SIDES = ['left', 'right'];
 
 function toolById(id) { return WB_TOOLS.find(t => t.id === id) || null; }
@@ -18475,7 +17872,7 @@ function isSavedPaneOpen() {
 function isCommentsPaneOpen() {
   return isToolOpen('comments') || betaSlideId === 'comments' ||
          (typeof destId !== 'undefined' && destId === 'comments') ||
-         (betaShellOn() && state.rightActive === 'comments');
+         state.rightActive === 'comments';
 }
 
 // A gated tool is only ever offered at Contributor and above. This is the one
@@ -18488,7 +17885,6 @@ function toolVisible(t) {
 }
 
 function dockBody(side) { return side === 'left' ? $('left-body') : $('rp-body'); }
-function dockRail(side) { return side === 'left' ? $('left-rail') : $('right-rail'); }
 
 function rpRenderFns() {
   return { files: null, outline: renderOutlineTab, bookmarks: renderSavedTab, comments: renderCommentsTab, backlinks: renderBacklinksTab, review: renderReviewTab, search: null, usage: renderUsageTab };
@@ -18513,8 +17909,7 @@ function paneHead(toolId, opts) {
   const t = toolById(toolId);
   if (!t) return '';
   // Session B — the slide-over supplies its own title bar and Close
-  // button; this one's move/close buttons would be a second, non-working
-  // set (closeTool()/moveTool() know nothing about the slide-over). Every
+  // button; this one's close button would be a second, non-working one. Every
   // render function that embeds paneHead() just gets less back, not a
   // second call to make.
   if (typeof betaSlideId !== 'undefined' && betaSlideId === toolId) return '';
@@ -18532,21 +17927,12 @@ function paneHead(toolId, opts) {
   const count = (o.count === undefined || o.count === null || o.count === '')
     ? '' : `<span class="badge">${escHtml(String(o.count))}</span>`;
 
-  // J1b -- the arrows move a pane to the OTHER dock, which is a thing only
-  // the old shell has. In the console shell there is one companion column,
-  // so the control pointed at nothing and Jayson quite reasonably asked what
-  // it was. A control whose destination does not exist is not a control.
-  const moveBtn = (t.pinned || fixedVisibility()) ? '' :
-    `<button class="icon-btn ph-move" title="Move to ${other} panel" aria-label="Move to ${other} panel"` +
-    ` onclick="event.stopPropagation();moveTool('${toolId}','${other}')">` +
-    (other === 'right'
-      ? '<svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>'
-      : '<svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>') +
-    '</button>';
+  // P11 -- the move-between-panels control is gone with the second dock.
+  const moveBtn = '';
 
   // Outline is permanent in the console shell (see rightStack), so it gets no
   // ✕ there. Offering one that refuses is worse than not offering one.
-  const outlinePermanent = fixedVisibility() && toolId === 'outline';
+  const outlinePermanent = toolId === 'outline';
   const closeBtn = (t.pinned || outlinePermanent) ? '' :
     `<button class="icon-btn ph-close" title="Close ${escHtml(t.label)}" aria-label="Close ${escHtml(t.label)}"` +
     ` onclick="event.stopPropagation();closeTool('${toolId}')">` +
@@ -18572,33 +17958,15 @@ function paneHead(toolId, opts) {
 // already has one, sitting inside a per-page pane. R1's rule is that the pane
 // is per-file and the page is vault-wide; the door between them stopped being
 // needed when Admin got the board and Home got a link to it.
-//
-// A function, not a constant, so the one place that decides can decide -- the
-// old shell keeps it, because there Admin is not where people go.
-const PANE_FOOT_COMMENTS_HTML =
-  '<div class="pane-foot"><button class="pane-foot-btn" id="btn-cmt-inbox" onclick="openAdminScreen(\'comments\')">' +
-  '<svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
-  'All comments<span class="cmt-pill" id="cmt-inbox-count" style="display:none">0</span></button></div>';
-
-const PANE_FOOT_COMMENTS = () => fixedVisibility() ? '' : PANE_FOOT_COMMENTS_HTML;
 
 const PANE_FOOT_REVIEW =
   '<div class="pane-foot"><button class="pane-foot-btn" id="btn-review-inbox" onclick="openChangesView()">' +
   '<svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>' +
   'Review dashboard</button></div>';
 
-let rpClickTimers = {};
-const RP_DBLCLICK_MS = 220;
-
-function rpTabClick(tab) {
-  if (rpClickTimers[tab]) { clearTimeout(rpClickTimers[tab]); rpClickTimers[tab] = null; return; }
-  rpClickTimers[tab] = setTimeout(() => { rpClickTimers[tab] = null; toggleRPTab(tab); }, RP_DBLCLICK_MS);
-}
-
-function rpTabDblClick(tab) {
-  if (rpClickTimers[tab]) { clearTimeout(rpClickTimers[tab]); rpClickTimers[tab] = null; }
-  soloRPTab(tab);
-}
+// P11 -- the rail buttons and their click/double-click pair went with the rails
+// themselves. toggleRPTab() below is still how a tool is opened, from the
+// palette and the top bar rather than from an icon strip.
 
 function ensureDockOpen(side) {
   if (side === 'left') {
@@ -18639,38 +18007,7 @@ function toggleRPTab(tab) {
   persistDocks();
 }
 
-// Solo clears the tool's OWN dock only. The other dock is left alone, because
-// double-clicking Outline to see it by itself should not also close the file
-// tree on the opposite side of the window.
-function soloRPTab(tab) {
-  const t = toolById(tab);
-  if (!t) return;
-  const side = dockOf(tab) || t.home;
-  ensureDockOpen(side);
-  const pinnedKeep = state.docks[side].filter(id => id !== tab && (toolById(id) || {}).pinned);
-  state.docks[side] = [...pinnedKeep, tab];
-  state.dockFlex[side] = {};
-  renderDocks();
-  const fn = rpRenderFns()[tab];
-  if (fn) fn();
-  persistDocks();
-}
 
-// Move a tool to the other dock, keeping it open. Pinned tools stay put.
-function moveTool(tab, toSide) {
-  const t = toolById(tab);
-  if (!t || t.pinned) return;
-  const from = dockOf(tab);
-  if (!from || from === toSide) return;
-  state.docks[from].splice(state.docks[from].indexOf(tab), 1);
-  delete state.dockFlex[from][tab];
-  state.docks[toSide].push(tab);
-  ensureDockOpen(toSide);
-  renderDocks();
-  const fn = rpRenderFns()[tab];
-  if (fn) fn();
-  persistDocks();
-}
 
 function closeTool(tab) {
   const t = toolById(tab);
@@ -18679,7 +18016,7 @@ function closeTool(tab) {
   // state.docks, so a close that only edits state.docks silently does
   // nothing there. One entry point, two models underneath, rather than a
   // second ✕ that knows which shell it is in.
-  if (betaShellOn() && rightStack().includes(tab)) { rightClose(tab); return; }
+  if (rightStack().includes(tab)) { rightClose(tab); return; }
   const side = dockOf(tab);
   if (!side) return;
   state.docks[side].splice(state.docks[side].indexOf(tab), 1);
@@ -18765,6 +18102,31 @@ function applyDrop(tab, target) {
   if (t.pinned && target.side !== from) return; // pinned tools never change side
   if (target.overId === tab) return;
 
+  // P11 -- the right column is a STACK drawn from rightStack(), which is
+  // Outline plus whatever companions are summoned beside it. state.docks.right
+  // is not what that column renders, so a drop reordered here used to move
+  // nothing on screen: the same fault S84 found in the ✕ and the move arrows,
+  // a control acting on a model nobody draws. A drop into the right column now
+  // reorders the list that IS drawn, and Outline stays first because
+  // rightStack() puts it there however this list ends up ordered.
+  if (target.side === 'right') {
+    const rest = (state.rightTabs || []).filter(x => x !== tab);
+    if (target.overId === null || target.overId === 'outline') {
+      rest.push(tab);
+    } else {
+      const i = rest.indexOf(target.overId);
+      if (i === -1) rest.push(tab);
+      else rest.splice(target.before ? i : i + 1, 0, tab);
+    }
+    state.rightTabs = rest.includes(tab) ? rest : [...rest, tab];
+    if (!state.rightTabs.includes('outline')) state.rightTabs.unshift('outline');
+    renderDocks();
+    applyRightColumn();
+    const fnR = rpRenderFns()[tab];
+    if (fnR) fnR();
+    return;
+  }
+
   state.docks[from].splice(state.docks[from].indexOf(tab), 1);
   if (from !== target.side) delete state.dockFlex[from][tab];
 
@@ -18785,39 +18147,9 @@ function applyDrop(tab, target) {
 // Builds both rails from WB_TOOLS. A tool's icon appears in the rail of the
 // dock it currently sits in, or in its home rail when it is closed, so a tool
 // you moved left stays reachable from the left after you close it.
-function renderRails() {
-  DOCK_SIDES.forEach(side => {
-    const rail = dockRail(side);
-    if (!rail) return;
-    const ids = WB_TOOLS
-      .filter(t => toolVisible(t) && (dockOf(t.id) || t.home) === side)
-      .map(t => t.id);
-    rail.innerHTML = ids.map(id => {
-      const t = toolById(id);
-      const open = isToolOpen(id);
-      const count = t.countId ? `<span class="tab-count" id="${t.countId}" style="display:none">0</span>` : '';
-      const hint = t.pinned ? 'always available' : 'click to toggle, double-click to view alone';
-      return `<button class="rp-tab${open ? ' active' : ''}" id="tab-${id}" data-tab="${id}"` +
-             ` title="${escHtml(t.label)} — ${hint}" aria-label="${escHtml(t.label)}"` +
-             ` onclick="rpTabClick('${id}')" ondblclick="rpTabDblClick('${id}')">` +
-             `<svg class="rp-tab-ic" viewBox="0 0 24 24">${t.icon}</svg>${count}</button>`;
-    }).join('');
-  });
-  // v0.32.1 — and repaint the counts, because the line above just destroyed
-  // them. The count spans are created by this render, hidden and reading "0",
-  // and until now the only thing that ever wrote a real number into them was
-  // the end of a full vault scan. So the badge was correct right after a scan
-  // and blank after ANY dock action in between — opening a tool, closing one,
-  // dragging a pane to the other side. That is why the Review bell showed
-  // nothing while the dashboard said 19. Counts are derived state; the render
-  // that builds the element they live in is the render that must fill it.
-  paintRailCounts();
-}
 
-// The one place counts are written into the rails. Called by renderRails (so a
-// re-render never loses them) and by updateBadges (so a completed scan updates
-// them without a re-render). Every lookup is null-guarded: a gated tool's span
-// does not exist at User, and reading it blind used to throw.
+// The one place derived counts are painted. Called by updateBadges, so a
+// completed scan updates them. Every lookup is null-guarded.
 function paintRailCounts() {
   const set = (id, n) => {
     const el = $(id);
@@ -18832,7 +18164,8 @@ function paintRailCounts() {
   // rule is the same one this project has now paid for six times: put it in
   // one place that every caller goes through, not in a line each caller has
   // to remember.
-  WB_TOOLS.forEach(t => { if (t.countId && t.count) set(t.countId, t.count()); });
+  // P11 -- the per-tool count spans lived inside the rail buttons and went with
+  // them. Every surface that shows a tool's number now asks the tool for it.
   // Not a tool badge, deliberately: the inbox belongs to the vault-wide
   // comments board, so the vault-wide total is the right number here and
   // always was. It is the one that stays.
@@ -18845,22 +18178,10 @@ function paintRailCounts() {
 // Lays out both docks — rail highlight, pane visibility and flex share, DOM
 // order (which is stack order), and the resize handle between each adjacent
 // pair. Pure layout: it does not re-render pane CONTENT, callers that open a
-// tool do that separately. Replaces renderRPStack, which only knew about the
-// right panel.
+// tool do that separately.
 function renderDocks() {
-  renderRails();
   document.querySelectorAll('.rp-stack-handle').forEach(h => h.remove());
 
-  // Filtered here, at render, rather than stripped out of the saved layout
-  // itself — so a device that had Comments or Review pinned to the right
-  // dock before the beta shell existed gets that layout back untouched the
-  // moment the switch goes off again. See BETA_HIDDEN_RIGHT above; this was
-  // the actual bug behind the right pane still showing Comments/Review
-  // after Session B shipped.
-  // B2 / R1 -- the beta shell's right dock is no longer a saved layout at
-  // all, it is whichever companion is active. BETA_HIDDEN_RIGHT stays for
-  // the old shell's saved layouts, which are untouched and still restored
-  // the moment the switch goes off.
   // J1b -- Jayson's item 6. The console shell's right column used to be
   // whichever single companion was active, which is why summoning Comments
   // took Outline off screen and why "Comments becomes the default" was a
@@ -18871,9 +18192,7 @@ function renderDocks() {
   // drag-to-resize handles between them and per-pane heights since v0.28.0.
   // The console shell was throwing all of that away by collapsing the list
   // to one entry. Widening the list IS the feature.
-  const docks = betaShellOn()
-    ? { left: state.docks.left, right: rightStack() }
-    : state.docks;
+  const docks = { left: state.docks.left, right: rightStack() };
 
   const openAll = [...docks.left, ...docks.right];
   document.querySelectorAll('.rp-pane').forEach(p => {
@@ -18955,9 +18274,6 @@ function renderPaneChrome() {
   });
 }
 
-// Back-compat alias. Several call sites (search, tier changes, boot) still say
-// "render the stack"; they all mean the same thing now.
-function renderRPStack() { renderDocks(); }
 
 // New and Move follow the Vault Files pane between docks, because they act on
 // the tree. Their VISIBILITY is still updateEditBtn()'s tier check and is not
@@ -18968,8 +18284,11 @@ function renderDockActions() {
   const side = dockOf('files') || 'left';
   const host = side === 'left' ? $('sidebar') : $('right-panel');
   if (host && row.parentElement !== host) {
-    const anchor = side === 'left' ? null : $('app-version');
-    if (anchor) host.insertBefore(row, anchor); else host.appendChild(row);
+    // P11 -- the row used to be inserted ABOVE the old header's version button
+    // when the tree sat on the right, which was the only thing that button was
+    // doing for the layout. The button has moved into the account menu, so the
+    // row simply lands at the end of its host.
+    host.appendChild(row);
   }
 }
 
@@ -19019,9 +18338,7 @@ function refreshRightPanel() {
   // so a companion stacked there was never in this list. It mattered less
   // when a companion could not be on screen beside Outline; now that it can,
   // a stale one is visible rather than merely wrong.
-  const open = betaShellOn()
-    ? [...state.docks.left, ...rightStack()]
-    : [...state.docks.left, ...state.docks.right];
+  const open = [...state.docks.left, ...rightStack()];
   [...new Set(open)].forEach(tab => { const fn = fns[tab]; if (fn) fn(); });
   // Session B — the slide-over holds its tool outside the dock arrays
   // above, so without this line it would keep showing the file you left.
@@ -19334,12 +18651,10 @@ function setupOutlineObserver(headings) {
 // are actually in #reader-content right now.
 function setupSectionBarObserver(headings) {
   if (state.sectionBarObserver) state.sectionBarObserver.disconnect();
-  const bar = $('reader-section-bar');
-  // P7 — activeHeadingId tracks scroll position independently of whether the
-  // bar itself is mounted, because the comment post form needs it in the new
-  // shell, where the bar is hidden. Reset here so a page with no headings (or
-  // no bar) never leaves a stale id from the page before it.
-  if (!bar || !headings.length) { state.activeHeadingId = ''; return; }
+  // P7 / P11 — the you-are-here bar itself belonged to the old interface and is
+  // gone. What this observer is FOR now is activeHeadingId, which the comment
+  // post form reads to know which section a comment belongs to.
+  if (!headings.length) { state.activeHeadingId = ''; return; }
   state.activeHeadingId = headings[0].id;
 
   state.sectionBarObserver = new IntersectionObserver(entries => {
@@ -19378,19 +18693,11 @@ function finishReaderRender() {
     if (table && table.scrollWidth > wrap.clientWidth + 1) wrap.classList.add('wide');
   });
 
-  const bar = $('reader-section-bar');
+  // P11 -- the you-are-here bar above the reader belonged to the old interface
+  // and is gone; the reader head names the page and its folder path instead.
+  // The heading walk stays, because the observer it feeds is what tracks which
+  // section you are in, which the comment form needs.
   const headings = [...rc.querySelectorAll('h1, h2, h3, h4, h5, h6')];
-  if (bar) {
-    if (headings.length) {
-      reader.classList.add('has-section-bar');
-      bar.classList.add('on');
-      bar.textContent = headings[0].textContent;
-    } else {
-      reader.classList.remove('has-section-bar');
-      bar.classList.remove('on');
-      bar.textContent = '';
-    }
-  }
   setupSectionBarObserver(headings);
 }
 
@@ -19851,7 +19158,7 @@ function submitSavedRepair() {
 // section IS the whole-page state); a section save appends it after an
 // em dash. The dot colour is the only thing telling the two apart, per
 // Jayson's call to colour-code rather than add a word. Shared by the full
-// Saved pane (renderSavedGroup, below) and the Home flyout (chSavedFlyoutHTML).
+// Saved pane (renderSavedGroup, below) and Home's Saved list.
 function savedItemRowHTML(url, name, sectionId, sectionTitle, broken) {
   const cls  = 'saved-row' + (sectionId ? ' section' : ' whole') + (broken ? ' bm-broken' : '');
   const jump = broken ? '' : ` data-wb-savedjump="${escHtml(url)}"` +
@@ -19896,36 +19203,6 @@ function chSavedFlyoutRows(cap) {
       .forEach(id => rows.push(savedItemRowHTML(u, p.name || u, id, p.sections[id], broken)));
   });
   return rows;
-}
-
-function chSavedFlyoutHTML() {
-  if (!state.user) return '<div class="sf-empty">Sign in to see what you\'ve saved.</div>';
-  const rows = chSavedFlyoutRows();
-  if (!rows.length) {
-    return '<div class="sf-empty">Nothing saved yet. Use the Save button on a page, or the bookmark icon beside a heading.</div>';
-  }
-  const CAP   = 10;
-  const shown = rows.slice(0, CAP);
-  const rest  = rows.length - shown.length;
-  return '<div class="sf-list">' + shown.join('') + '</div>' +
-    (rest > 0 ? `<div class="sf-more">+${rest} more saved</div>` : '') +
-    '<button class="sf-seeall" data-wb-savedflyseeall="1">See everything saved \u2192</button>';
-}
-
-function openSavedFlyout(anchor) {
-  betaCloseMore(); betaCloseSlide(); betaClosePalette();
-  const scrim = $('saved-flyout-scrim'), el = $('saved-flyout');
-  if (!scrim || !el) return;
-  el.innerHTML = chSavedFlyoutHTML();
-  scrim.style.display = 'block';
-  el.style.display = 'block';
-  betaAnchorPanel(el, anchor);
-}
-
-function closeSavedFlyout() {
-  const scrim = $('saved-flyout-scrim'), el = $('saved-flyout');
-  if (scrim) scrim.style.display = 'none';
-  if (el) el.style.display = 'none';
 }
 
 function renderSavedTab() {
@@ -20316,24 +19593,6 @@ async function buildSearchIndex() {
   searchIndex = out;
 }
 
-function openSearch() {
-  // Adds search to the stack alongside whatever's already open, rather
-  // than replacing it — ⌘K shouldn't close tools you already had open.
-  // Opens whichever dock search currently lives in, which is not always the
-  // right panel any more: its home is the left rail and the user can move it.
-  const side = dockOf('search');
-  if (side) {
-    ensureDockOpen(side);
-  } else {
-    const home = toolById('search').home;
-    ensureDockOpen(home);
-    state.docks[home].push('search');
-    renderDocks();
-    persistDocks();
-  }
-  setTimeout(() => $('search-input').focus(), 30);
-}
-
 function clearSearch(focus) {
   $('search-input').value = '';
   $('search-clear').style.display = 'none';
@@ -20477,12 +19736,11 @@ $('search-input').addEventListener('keydown', e => {
 });
 
 // ⌘K / Ctrl+K anywhere → open the search tab and focus the field.
-// Session B — in the beta shell this opens the palette instead, the same
-// place the top bar control opens; the old shell is untouched.
+// Session B — opens the palette, the same place the top bar control opens.
 document.addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();
-    if (betaShellOn()) betaOpenPalette(); else openSearch();
+    betaOpenPalette();
   }
 });
 
@@ -20582,14 +19840,14 @@ const RP_HEADER_COMMENTS = () => paneHead('comments');
 async function renderCommentsTab() {
   const pane = $('rp-comments');
   if (!state.activeUrl) {
-    pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Open a file to see comments.</div>' + PANE_FOOT_COMMENTS();
+    pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Open a file to see comments.</div>';
     return;
   }
 
   const commentsUrl = commentsUrlFor(state.activeUrl);
   let comments = [];
 
-  pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Loading…</div>' + PANE_FOOT_COMMENTS();
+  pane.innerHTML = RP_HEADER_COMMENTS() + '<div class="rp-empty">Loading…</div>';
 
   const cText = await readVaultFileOrNull(commentsUrl);
   if (cText !== null) comments = parseComments(cText);
@@ -20707,7 +19965,7 @@ async function renderCommentsTab() {
     <button class="comment-submit" onclick="postComment()">${replyParent ? 'Reply' : 'Post'}</button>
   </div>`;
 
-  pane.innerHTML = RP_HEADER_COMMENTS() + html + PANE_FOOT_COMMENTS();
+  pane.innerHTML = RP_HEADER_COMMENTS() + html;
 }
 
 // P7 — flips between auto (post to whatever heading is in view) and a
@@ -21241,8 +20499,8 @@ async function bootVault() {
     scanBadges().then(() => wnScan()).catch(() => {});
     // P8 — mid-flow, the first-run overlay owns what happens next (the
     // Install screen), and it calls checkIdentity() itself once past
-    // that. Outside the flow (old shell, or a returning device that
-    // skipped straight to a loaded vault) this is unchanged from S15.
+    // that. Outside the flow (a returning device that skipped straight
+    // to a loaded vault) this is unchanged from S15.
     // 0.45.0 — the vault just finished loading. Who gets what next:
     //   returning device  it only ever wanted the folder back, so it is done
     //   mid-walkthrough   the vault is connected, so screen 3 (who you are)
@@ -21269,19 +20527,16 @@ async function bootVault() {
     // everything, because someone followed an address to a specific page
     // and showing them a different one makes the link worthless.
     //
-    // Section 18 changes only what happens with NO link. The new shell now
-    // lands on the front door rather than reopening the last note, which is
-    // the point of having a front door at all: the last note is one click
-    // away in Recently opened, and the vault is not. The frozen old shell
-    // keeps reopening the last note exactly as it did.
+    // Section 18 changes only what happens with NO link. Folio lands on the
+    // front door rather than reopening the last note, which is the point of
+    // having a front door at all: the last note is one click away in
+    // Continue reading, and the vault is not.
     const deep = parseNoteHash(location.hash);
     if (deep) {
       state.navFromHistory = true;   // suppress the push for the arrival page
       wbOpenFromHash({ fromHistory: true });
-    } else if (betaShellOn()) {
+    } else {
       openConsoleHome();
-    } else if (last) {
-      openFile(last.url, last.name);
     }
   } catch (e) {
     vaultLoadFailed(e);
@@ -21592,6 +20847,22 @@ function showFirstRunStep(step, ctx) {
       '<button type="button" class="local-pick-btn" onclick="finishFirstRun()">Take me to Home</button>' +
       '<a onclick="finishFirstRunToHelp();return false">Open the full guide</a></div>';
 
+  } else if (step === 'noaccess') {
+    // 0.62.1, Jayson's call: no way past this screen. Folio opens only for
+    // people who can write their profile into the vault, and anyone who
+    // cannot is sent to the administrator.
+    body.innerHTML =
+      '<h1>You do not have access yet</h1>' +
+      '<p>Folio could not set up your account in this vault. It only opens ' +
+      'for people who have been given access to the vault folder.</p>' +
+      '<p><b>Contact your system administrator</b> and ask to be added. ' +
+      'Once they have, open Folio again.</p>' +
+      '<div class="fr-actions"><button type="button" class="local-pick-btn" ' +
+      'onclick="closeFolio()">Close Folio</button></div>' +
+      (identitySaveError
+        ? '<p class="fr-note">Details for your administrator: ' + escHtml(identitySaveError) + '</p>'
+        : '');
+
   } else if (step === 'health') {
     // 0.45.0 — Jayson's call at S70: the re-run entry checks first, and a
     // FULL reset is never taken silently on Folio's own judgement. A clean
@@ -21643,7 +20914,11 @@ function frSpotlight(sel) {
 async function submitFirstRunIdentity() {
   const msg = $('fr-id-msg');
   if (msg) msg.textContent = '';
+  const btn = document.querySelector('#first-run-body .fr-actions .local-pick-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
   const r = await saveIdentityFrom($('fr-name').value, $('fr-email').value);
+  if (btn) { btn.disabled = false; btn.textContent = 'Continue'; }
+  if (r === 'failed') { handleIdentitySaveFailed(false); return; }
   if (r === 'invalid') {
     if (msg) msg.textContent = 'A name and a valid email address are both needed.';
     return;
@@ -21712,11 +20987,7 @@ const FR_TOUR = [
     text: 'Searches the whole vault, and lists what you saved and what you read recently before you type anything. Ctrl and K opens it from the keyboard.' },
   { sel: '#sidebar',         title: 'The vault',
     text: 'Every folder and page, the same shape as the folder on disk. The button at the far left of the top bar hides this column when you want the room.' },
-  // 0.45.0 -- #bt-back/#bt-fwd, NOT #reader-nav-pill. The pill is the frozen
-  // old shell's pair; the new shell hides its whole container outright
-  // (body.beta-shell #reader-corner-align { display:none }), so a bubble
-  // aimed there pointed at nothing and the filter silently dropped the
-  // callout. Two ids because the arrows are two buttons: sel2 unions the
+  // 0.45.0 -- #bt-back/#bt-fwd, the only back and forward controls. Two ids because the arrows are two buttons: sel2 unions the
   // rects so the ring goes round the pair rather than half of it.
   { sel: '#bt-back', sel2: '#bt-fwd', title: 'Back and forward',
     text: 'Steps through the pages you have opened, like a browser. Folio installs with no address bar, so these are how you retrace your path.' },
@@ -22057,45 +21328,18 @@ async function firstRunFullReset() {
 }
 
 
-async function renderLocalPrompt() {
-  renderAppBanner(); // P6 — nothing is connected yet, so this is the connect state
-  const fsOk  = !!window.showDirectoryPicker;
-  const saved = fsOk ? await savedVaultHandle() : null;
-  if (saved) {
-    // queryPermission needs no user gesture — safe to check silently on boot.
-    let perm = 'prompt';
-    try { perm = await saved.queryPermission({ mode: 'readwrite' }); } catch (e) { /* stale handle — fall through to prompt */ }
-    if (perm === 'granted') {
-      // Already authorized — skip straight to the loaded state, no click.
-      await startLocalVault(saved);
-      return;
-    }
-    // Not granted — a user gesture is required, so show one button.
-    $('sb-tree').innerHTML = `<div class="sb-msg">
-      <button class="local-pick-btn" onclick="reopenLocalVault()">Reconnect to vault</button><br><br>
-      <a href="#" style="font-size:11px" onclick="pickLocalVault();return false">Open a different folder…</a>
-    </div>`;
-    return;
-  }
-  $('sb-tree').innerHTML = `<div class="sb-msg">
-    Open your vault folder to get started:<br><br>
-    <button class="local-pick-btn" onclick="pickLocalVault()"${fsOk ? '' : ' disabled'}>Open vault folder…</button>
-    ${fsOk ? '' : '<br><br><span style="font-size:11px">Needs Chrome or Edge.</span>'}
-  </div>`;
-}
 
 async function boot() {
   const vName = configIsPlaceholder() && CONFIG.vaultName.startsWith('[')
     ? 'Folio' : CONFIG.vaultName;
   document.title = vName;
-  $('vault-title').innerHTML = `${vName} <span id="breadcrumb"></span>`;
+  $('vault-title').textContent = vName;
 
   loadPersistedState();
 
   if (configIsPlaceholder()) {
-    // P8 — new shell walks the three-screen first-run flow; old shell
-    // keeps today's in-panel connect message, frozen, untouched.
-    if (betaShellOn()) { await renderFirstRunEntry(); } else { await renderLocalPrompt(); }
+    // P8 — the first-run flow.
+    await renderFirstRunEntry();
     return; // real vault load happens after the user picks/reopens a folder
   }
 
@@ -22259,10 +21503,9 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
     let hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (hadController) {
-        const btn = $('btn-update');
-        if (btn) btn.style.display = ''; // the frozen old shell's own indicator
-        // P6 — the new shell carries this in the banner slot instead, at its
-        // small weight, and only once nothing more urgent is in the way.
+        // P6 / P11 — the banner slot carries this, at its small weight and only
+        // once nothing more urgent is in the way. The header arrow that used to
+        // say the same thing a second time is gone.
         state.updateReady = true;
         renderAppBanner();
       }

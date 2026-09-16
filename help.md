@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.61.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.62.1**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -47,11 +47,11 @@ Folio is a web app at a link, not a file to copy around. Installing it as an app
 
 **Teams tab:** your team lead can add Folio to a channel via **+ Add a tab → Website**, pasting the same link.
 
-*On the new layout (see [Trying the new layout](#trying-the-new-layout)), a brand new device walks steps 3–4 above, installing, and your first launch below as one connected sequence instead of three separate prompts — the steps themselves are unchanged, just presented together.*
+*On a brand new device, Folio walks steps 3–4 above, installing, and your first launch below as one connected sequence instead of three separate prompts. The steps themselves are unchanged, just presented together.*
 
 ### Your first launch
 
-The first time you open Folio it asks for your **name and email**. This is not a login and there is no password. Folio inherits whatever access you already have to the folder. The name is what appears on comments you post; the email is the key your bookmarks and favorites are filed under.
+The first time you open Folio it asks for your **name and email**. This is not a login and there is no password. Folio inherits whatever access you already have to the folder. The name is what appears on comments you post; the email is the key your bookmarks and favorites are filed under. Folio saves that into the vault folder, so if your access to the folder is view-only it stops here and asks you to contact your system administrator. **Close Folio** is the only way out until access is given.
 
 Your profile is stored in the vault itself, so typing the same email on a different PC brings your saved name and bookmarks back. You will see a "Recognized" note and one more click to confirm.
 
@@ -130,16 +130,13 @@ A **destination**, the full Search results, **Saved**, and **Admin**, isn't abou
 
 ### The guided tour
 
-The first time anyone opens this layout on a device, Folio walks through it: Home, search, Vault Files, where Comments lives, a handful of highlighted stops with a line of text each. It runs once, automatically, and there's no button to replay it. If you'd like to see it again, ask whoever manages Folio, or just explore. Everything it covers is written up in this page.
+The first time anyone opens Folio on a device, it walks through the screen: Home, search, Vault Files, where Comments lives, a handful of highlighted stops with a line of text each. It runs once, automatically. To see it again, use **Settings → Walkthrough → Run again**.
 
 ### Moving between notes
 
 **Back** and **Forward**, top left above the page, work like a browser's and restore your scroll position, not just the file. The history is session-only and resets when you reload.
 
-**Open last note** (Settings → Navigation, on by default) reopens the note you were last reading when you launch, expanding whatever folders are needed to reach it **on top of** the tree you left open.
-
-> [!NOTE] Still on the old layout?
-> A few installs still run Folio's original two-panel look; everything above describes the current one instead. Switch at **Settings → New look → Try the new layout**. It's on by default for anyone new, and the old layout is being retired soon.
+**Continue reading** on Home reopens the note you were last reading, expanding whatever folders are needed to reach it.
 
 ---
 
@@ -351,14 +348,6 @@ Because the write happens when you leave, your own reading appears quickly and o
 ## 5. Making it yours
 
 Two separate places. **Theme** is how Folio looks; **Settings** is how it behaves. Both live under your initials badge, top right.
-
-### Switching layouts
-
-Folio has two looks: the current one, which is everything this page describes, and the original two-panel layout it replaced. New installs start on the current one; a device that was already running Folio before it existed stays on the old one until you switch it.
-
-**Settings → New look → Try the new layout** switches either way, instantly, and only for the computer you're on. Same vault, same pages, nothing removed. Switching back leaves everything exactly as you had it.
-
-The old layout is on its way out and won't be around much longer, so there's little reason to switch to it now.
 
 ### Theme panel
 

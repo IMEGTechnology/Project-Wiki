@@ -8,6 +8,48 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.62.1 — 2026-09-16
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; `supporting/tests/p8-first-run.test.js` (+15 checks).
+
+*Fix: a new person could not get past "Tell Folio who you are". Continue did nothing when their profile could not be written to the vault (view-only access to the synced folder), because the failed write was never caught.*
+
+### Fixed
+
+- A failed or stalled profile save (15 seconds) no longer leaves Continue silent. Continue shows "Saving…" while it works.
+
+### Added
+
+- A no-access screen, Jayson's call: "You do not have access yet", contact your system administrator, the error detail for the administrator, and one button, **Close Folio**. No way past it. The walkthrough and the account-setup popup both land on it.
+- Close Folio closes an installed window; a browser tab that refuses says to close it.
+- Someone already signed in who changes their email and hits a failed save gets a note in the popup instead.
+
+## 0.62.0 — 2026-09-16
+
+**Changed:** `index.html`, `manifest.json`, `README.md`, `help.md`, `help-edit.md`; tests updated for the deletion; `supporting/tests/tracker-persistence.test.js` retired with the HTML tracker.
+
+*P11, the old interface deleted. Folio has one layout, and its code is 44 KB smaller than 0.61.0 (1,101,059 to 1,057,298 bytes).*
+
+### Removed
+
+- The original two-panel interface, its layout switch in Settings and the stored preference that chose it. A stale value in a browser is left alone and read by nothing.
+- The tool rails, the move-between-panels control, the "show this alone" double-click, the flare collapse and the neighbour squeeze on drag.
+- The old connect message drawn into the file tree; first run is the only entry.
+- Home's Saved flyout, which nothing had opened since Saved became a full destination.
+- About 80 code comments describing the old interface as still present.
+
+### Kept, each with a check that fails if removed
+
+Drag to resize either column, double-click to fit, per-side width memory, columns opening fitted to their content, the drag floor, the right column as a stack with Outline permanent, its divider and remembered heights.
+
+### Help
+
+The "Switching layouts" section and the "Still on the old layout?" note are gone. The last-note line now points at Home's **Continue reading**, and the guided tour says it can be replayed from **Settings → Walkthrough → Run again**.
+
+### Also
+
+`manifest.json` no longer calls Folio a "wiki". A check that the overflow menu uses the shared tool and editing gates only passed because an unused line fell inside its search window; it now reads the function itself, and was confirmed to go red when the gate is removed.
+
 ## 0.61.0 — 2026-09-13
 
 **Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; updated `supporting/button-scale-sample.html`, `supporting/tests/b2-home.test.js`, `supporting/tests/round2-destinations.test.js`.

@@ -1,7 +1,7 @@
 {
   "name": "Folio",
   "short_name": "Folio",
-  "description": "Team wiki reader for the Obsidian Markdown vault",
+  "description": "Folio, the team reader for the Obsidian Markdown vault",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
