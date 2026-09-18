@@ -4065,7 +4065,7 @@
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.64.2</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.65.0</button>
       </div>
 
       <div class="ud-actions">
@@ -8504,6 +8504,7 @@ function betaOpenPalette(anchor) {
 }
 
 function betaClosePalette() {
+  srEndSearch('closed');
   $('beta-palette-scrim').style.display = 'none';
   $('beta-palette').style.display = 'none';
 }
@@ -9203,7 +9204,9 @@ function betaPaletteSearchHTML(q) {
       `${later.length === 1 ? 'is' : 'are'} not connected yet, so ${later.length === 1 ? 'it was' : 'they were'} not searched.</div>`
     : '';
 
-  if (!html) { zrNoteQuery(q); return '<div class="bp-empty">Nothing in the vault matches that.</div>' + laterNote; }
+  // S96 — logging moved out of the draw. This function runs on every
+  // keystroke, and a query that was never finished is not a search.
+  if (!html) { return '<div class="bp-empty">Nothing in the vault matches that.</div>' + laterNote; }
   // Round 2c -- the palette stops at 30 rows and never had anywhere to
   // send you for the rest. Same shape as "See everything saved" in the empty
   // state: the short list stays a quick jump, this opens the real thing.
@@ -9214,7 +9217,7 @@ function betaPaletteSearchHTML(q) {
 async function betaPaletteInput(v) {
   const q = v.trim();
   const box = $('beta-palette-list');
-  if (!q) { box.innerHTML = betaPaletteEmptyHTML(); return; }
+  if (!q) { srEndSearch('closed'); box.innerHTML = betaPaletteEmptyHTML(); return; }
   if (!searchIndex) {
     if (searchBusy) return;
     searchBusy = true;
@@ -9223,11 +9226,17 @@ async function betaPaletteInput(v) {
     if ($('beta-palette-input').value.trim() !== q) return; // query moved on
   }
   box.innerHTML = betaPaletteSearchHTML(q);
+  srNoteRender(q, betaPaletteHits.length > 0);
 }
 
 async function betaPaletteGo(idx) {
   const h = betaPaletteHits[idx];
   if (!h) return;
+  // S96 — before the palette closes, because closing it is what ends a search
+  // that nobody clicked. "See all results" is the same query moving to the
+  // other surface, not a search ending.
+  if (h.kind === 'search-all') srKeepSession = true;
+  else if (h.url) srNoteClick(h.url, idx + 1);
   betaClosePalette();
   if (h.kind === 'fav') await jumpToBookmark(h.file, h.id);
   else if (h.kind === 'bookmarks-all') destOpen('bookmarks');
@@ -14106,15 +14115,31 @@ function wnCommitPending() {
 // every session would stay unseen forever — the one page you definitely
 // read. pagehide fires on tab close, navigation and mobile backgrounding,
 // where beforeunload is unreliable.
-window.addEventListener('pagehide', () => { wnCommitPending(); usageCommitPending(); usageFlush(); zrFlush(); });
+window.addEventListener('pagehide', () => { wnCommitPending(); srEndSearch('closed'); usageCommitPending(); usageFlush(); zrFlush(); });
+// S45 — leaving the tab is the flush point. Not per page open: that would have
+// OneDrive syncing a small file every few seconds. The page being read is
+// folded first, so the sitting you are ending is included in it.
+//
+// S96 — folded, NOT ended, and coming back resumes the same visit. Before this
+// the handler committed and cleared the page being timed and nothing ever
+// restarted it, so everything read after an alt-tab was lost.
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'hidden') return;
+  if (document.visibilityState !== 'hidden') { usageResume(); return; }
   wnCommitPending();
-  // S45 — leaving the tab is the flush point. Not per page open: that would
-  // have OneDrive syncing a small file every few seconds. The page being read
-  // is committed first, so the sitting you are ending is included in it.
-  usageCommitPending();
+  usagePause();
+  usageFoldPending(false);
   usageFlush();
+});
+window.addEventListener('blur',  () => usagePause());
+window.addEventListener('focus', () => usageResume());
+// The signs of life the engaged clock reads. Passive listeners, and each one
+// does a little arithmetic and nothing else.
+['scroll', 'click', 'keydown', 'mousemove', 'wheel', 'touchstart'].forEach(ev => {
+  document.addEventListener(ev, () => {
+    if (!usagePending) return;
+    if (ev === 'mousemove' && Date.now() - usageLastActive < 500) return; // throttle the noisy one
+    usageNoteActivity();
+  }, { passive: true, capture: true });
 });
 
 // Mark-all skips must-reads and says what it skipped. Jayson's call: an
@@ -14666,6 +14691,15 @@ const USAGE_BUF_KEY  = 'wb_usage_buf';
 // dwell per visit keeps one forgotten tab from drowning out a week of real
 // use. Opens are the honest signal; seconds are the supporting one.
 const USAGE_MAX_DWELL = 1800;
+// S96 — a READ, as distinct from an open. An open is a page that rendered,
+// which a wrong click earns as fully as an hour of study. A read is fifteen
+// seconds of ENGAGED time: the tab visible, the window focused, and something
+// moved in the last thirty seconds. This is the news industry's engaged-time
+// rule and it is chosen for what it throws away — bounces, background tabs,
+// and the tab left open over lunch. Scroll depth was considered and rejected:
+// a short page is read without scrolling at all.
+const USAGE_READ_SECS = 15;
+const USAGE_IDLE_MS   = 30000;
 // v0.33.0 — the log now carries the reader's display name in a comment line.
 // The filename has always identified the person, but it identifies them by
 // SLUG (an email with its @ and dots mangled into hyphens), and a slug is not
@@ -14682,8 +14716,8 @@ function usageHead(who) {
     '<!-- Folio usage log. One row per page per day. Written by the app; safe to delete. -->',
     `<!-- WBUSER name="${name}" -->`,
     '',
-    '| day | path | opens | seconds |',
-    '|---|---|---|---|',
+    '| day | path | opens | reads | seconds |',
+    '|---|---|---|---|---|',
   ].join('\n');
 }
 
@@ -14725,26 +14759,101 @@ function usageLoadBuf() {
   catch (_) { usageBuf = {}; }
 }
 
+// S96 — the engaged clock. There is deliberately NO timer behind this: time
+// is worked out at the moments that already happen (a scroll, a click, leaving
+// the tab, opening another page), which is exact, costs nothing while idle,
+// and is the reason a test can drive it without waiting in real time.
+//
+// The rule it enforces: only the stretch that falls inside the thirty seconds
+// AFTER the last sign of life counts. So a page read with one scroll a minute
+// still accrues; a page left open while its reader is at lunch stops at thirty
+// seconds and then stops dead.
+let usageLastActive = Date.now();
+
+function usageEngageAllowed() {
+  if (typeof document.visibilityState === 'string' && document.visibilityState === 'hidden') return false;
+  if (typeof document.hasFocus === 'function' && !document.hasFocus()) return false;
+  return true;
+}
+
+// Bring the pending visit's engaged time up to now. Called BEFORE the activity
+// stamp is moved, so the gap being measured is the one that just ended.
+function usageTick() {
+  if (!usagePending) return;
+  const now = Date.now();
+  let delta = 0;
+  if (!usagePending.paused && usageEngageAllowed()) {
+    const end = Math.min(now, usageLastActive + USAGE_IDLE_MS);
+    delta = Math.max(0, end - usagePending.lastTick);
+  }
+  usagePending.lastTick = now;
+  usagePending.engagedMs += delta;
+}
+
+function usageNoteActivity() {
+  usageTick();
+  usageLastActive = Date.now();
+}
+
+// Leaving the tab or the window stops the clock where it stands; coming back
+// restarts it on the SAME visit. Before S96 leaving committed and cleared the
+// page being timed and nothing ever restarted it, so everything read after an
+// alt-tab was lost.
+function usagePause() {
+  if (!usagePending || usagePending.paused) return;
+  usageTick();
+  usagePending.paused = true;
+}
+function usageResume() {
+  if (!usagePending) return;
+  usagePending.lastTick = Date.now();
+  usagePending.paused = false;
+  usageLastActive = Date.now();
+}
+
+function usagePendingSecs() {
+  if (!usagePending) return 0;
+  return Math.min(USAGE_MAX_DWELL, Math.max(0, Math.round(usagePending.engagedMs / 1000)));
+}
+
 // Called when a page has actually rendered — same point What's New treats as
 // "you are on this page now". A file that failed to load is never counted.
 function usageNoteOpen(url) {
   usageCommitPending();
-  usagePending = { path: auditPathKey(url), t0: Date.now() };
+  const now = Date.now();
+  usageLastActive = now;
+  usagePending = { path: auditPathKey(url), t0: now, lastTick: now, engagedMs: 0,
+                   paused: false, key: null, wroteSecs: 0, wroteOpen: false, wroteRead: false };
 }
 
-// Called when leaving. The visit becomes one open plus its dwell, folded into
-// today's row for that path.
-function usageCommitPending() {
+// Fold what this visit has earned so far into today's row. Written to be safe
+// to call more than once for one visit, because leaving the tab folds without
+// ending it: the open is counted once, the read is counted once, and seconds
+// are topped up by the difference rather than added again.
+function usageFoldPending(ending) {
   if (!usagePending) return;
-  const p = usagePending;
-  usagePending = null;
-  const secs = Math.min(USAGE_MAX_DWELL, Math.max(0, Math.round((Date.now() - p.t0) / 1000)));
-  const day  = usageDay();
-  const key  = `${day}|${p.path}`;
-  const e = usageBuf[key] || (usageBuf[key] = { day, path: p.path, opens: 0, secs: 0 });
-  e.opens += 1;
-  e.secs  += secs;
+  usageTick();
+  const p    = usagePending;
+  const secs = usagePendingSecs();
+  const key  = p.key || (p.key = `${usageDay()}|${p.path}`);
+  const e = usageBuf[key] || (usageBuf[key] = { day: key.slice(0, 10), path: p.path, opens: 0, reads: 0, secs: 0 });
+  if (e.reads === null || e.reads === undefined) e.reads = 0;
+  if (!p.wroteOpen) { e.opens += 1; p.wroteOpen = true; }
+  e.secs += Math.max(0, secs - p.wroteSecs);
+  p.wroteSecs = secs;
+  if (!p.wroteRead && secs >= USAGE_READ_SECS) {
+    e.reads += 1;
+    p.wroteRead = true;
+    srNoteRead(p.path);          // a search click that led here has its answer
+  }
+  if (ending) usagePending = null;
   usageSaveBuf();
+}
+
+// Called when leaving a page for good. One visit adds at most one open and at
+// most one read however many times it was folded along the way.
+function usageCommitPending() {
+  usageFoldPending(true);
 }
 
 // Tolerant, same as the audit log: a human may open this in Obsidian and a
@@ -14756,13 +14865,23 @@ function usageParseLog(txt) {
     const c = line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(x => x.trim());
     if (c.length < 4) return;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(c[0])) return; // header and |---| both fail this
-    rows.push({ day: c[0], path: c[1], opens: parseInt(c[2], 10) || 0, secs: parseInt(c[3], 10) || 0 });
+    // S96 — a row written before reads existed has four columns and its read
+    // count is UNKNOWN, not zero. Reporting it as zero would say nobody read
+    // the page, when the truth is that nobody was counting. Unknown is null
+    // and survives a round trip as an empty cell.
+    if (c.length >= 5) {
+      const rd = c[3] === '' ? null : (parseInt(c[3], 10) || 0);
+      rows.push({ day: c[0], path: c[1], opens: parseInt(c[2], 10) || 0, reads: rd, secs: parseInt(c[4], 10) || 0 });
+    } else {
+      rows.push({ day: c[0], path: c[1], opens: parseInt(c[2], 10) || 0, reads: null, secs: parseInt(c[3], 10) || 0 });
+    }
   });
   return rows;
 }
 function usageSerialize(rows, who) {
   const sorted = rows.slice().sort((a, b) => (a.day === b.day ? a.path.localeCompare(b.path) : a.day.localeCompare(b.day)));
-  return usageHead(who) + '\n' + sorted.map(r => `| ${r.day} | ${r.path} | ${r.opens} | ${r.secs} |`).join('\n') + '\n';
+  const cell = v => (v === null || v === undefined) ? '' : v;
+  return usageHead(who) + '\n' + sorted.map(r => `| ${r.day} | ${r.path} | ${r.opens} | ${cell(r.reads)} | ${r.secs} |`).join('\n') + '\n';
 }
 
 // The name written into the log. Identity is optional in this app, so this
@@ -14781,7 +14900,12 @@ function usageMergeRows(existing, incoming) {
   incoming.forEach(r => {
     const k = `${r.day}|${r.path}`;
     const prev = by.get(k);
-    if (prev) { prev.opens += r.opens; prev.secs += r.secs; }
+    if (prev) {
+      prev.opens += r.opens;
+      prev.secs  += r.secs;
+      // unknown + unknown stays unknown; unknown + a number is that number
+      if (r.reads !== null && r.reads !== undefined) prev.reads = (prev.reads || 0) + r.reads;
+    }
     else by.set(k, { ...r });
   });
   return [...by.values()];
@@ -14850,14 +14974,113 @@ function zrLoadBuf() {
 // runSearch(). The 2-character floor matches what both callers already
 // require before they search at all ("Keep typing…"), so this never counts
 // a query that was never really run.
-function zrNoteQuery(q) {
+function zrNoteQuery(q) { zrNote(q, 'NO RESULTS', ''); }
+
+// S96 — the log grew from zero-result queries to EVERY search outcome. The
+// zr names are kept because the file, the folder and the flush are the same
+// ones; only the row got wider. The five outcomes are the whole vocabulary,
+// and anything else is refused rather than written, because a report that has
+// to guess what a word meant is not a report.
+const SR_OUTCOMES = ['NO RESULTS', 'ABANDONED', 'REFINED', 'WRONG PAGE', 'FOUND IT'];
+
+function zrNote(q, outcome, detail) {
   const query = String(q || '').trim();
   if (query.length < 2) return;
+  const oc  = SR_OUTCOMES.includes(outcome) ? outcome : 'NO RESULTS';
+  const dt  = String(detail || '').replace(/\|/g, '/').trim();
   const day = usageDay();
-  const key = `${day}|${query.toLowerCase()}`;
-  const e = zrBuf[key] || (zrBuf[key] = { day, query, count: 0 });
+  const key = `${day}|${query.toLowerCase()}|${oc}|${dt.toLowerCase()}`;
+  const e = zrBuf[key] || (zrBuf[key] = { day, query, outcome: oc, detail: dt, count: 0 });
   e.count += 1;
   zrSaveBuf();
+}
+
+// ── What happened to a search (S96) ────────────────────────────────
+// One search gets ONE outcome. The hard part is that four of the five are only
+// knowable later: whether you clicked, whether you typed something else first,
+// and whether the page you landed on turned out to be the one you wanted.
+//
+//   NO RESULTS  nothing matched
+//   REFINED     you changed the query before clicking anything
+//   ABANDONED   there were results and you left without clicking one
+//   WRONG PAGE  you clicked, and came back to search before it became a read
+//   FOUND IT    you clicked, and the page became a read
+//
+// "Became a read" is the engaged-time rule above, used verbatim. There is one
+// definition of reading in this app and a second timer here would quietly
+// become a second definition.
+const SR_SETTLE_MS = 900;
+let srSession = null;   // the query now on screen: { day, query, hasResults, clicked }
+let srWatch   = null;   // a click waiting to find out if it was the right one
+let srRender  = null;   // the last thing a search surface drew
+let srSettleTimer = null;
+let srKeepSession = false; // one-shot: the palette handing its query to the pane
+
+// Called by both search surfaces after they draw. Typing is not searching:
+// the query that counts is the one you paused on, so nothing is logged until
+// the typing stops. Otherwise "rack elevation" would log ten queries, nine of
+// them prefixes nobody ever meant to search for.
+function srNoteRender(q, hasResults) {
+  srRender = { q: String(q || '').trim(), hasResults: !!hasResults };
+  if (srSettleTimer) clearTimeout(srSettleTimer);
+  srSettleTimer = setTimeout(srSettle, SR_SETTLE_MS);
+}
+
+function srSettle() {
+  srSettleTimer = null;
+  const r = srRender;
+  if (!r || r.q.length < 2) return;
+  // Back at the search box, so a click that never became a read has its answer.
+  srWatchResolve();
+  if (srSession && srSession.query.toLowerCase() === r.q.toLowerCase()) {
+    srSession.hasResults = r.hasResults;   // same query, other surface
+    return;
+  }
+  if (srSession) srEndSearch('refined', r.q);
+  srSession = { day: usageDay(), query: r.q, hasResults: r.hasResults, clicked: false };
+  if (!r.hasResults) zrNote(r.q, 'NO RESULTS', '');
+}
+
+// A result was clicked. The session's outcome now rides on what happens to the
+// page, so the session itself is done.
+function srNoteClick(url, position) {
+  srWatchResolve();
+  if (!srSession) return;
+  srSession.clicked = true;
+  srWatch = { day: srSession.day, query: srSession.query, path: auditPathKey(url), position: position || 0 };
+  srSession = null;
+}
+
+// The read rule calls this the first time a page earns a read.
+function srNoteRead(path) {
+  if (!srWatch || srWatch.path !== path) return;
+  const wch = srWatch;
+  srWatch = null;
+  zrNote(wch.query, 'FOUND IT', `${wch.path}#${wch.position}`);
+}
+
+// Called when the reader is back at the search box. A page still open and
+// already read counts as found even though its visit has not ended yet,
+// which is why this asks the live clock rather than waiting for the fold.
+function srWatchResolve() {
+  if (!srWatch) return;
+  if (usagePending && usagePending.path === srWatch.path) {
+    usageTick();
+    if (usagePendingSecs() >= USAGE_READ_SECS) { srNoteRead(srWatch.path); return; }
+  }
+  const wch = srWatch;
+  srWatch = null;
+  zrNote(wch.query, 'WRONG PAGE', `${wch.path}#${wch.position}`);
+}
+
+// The search is over: the box was emptied, the palette closed, or the tab did.
+function srEndSearch(reason, detail) {
+  if (srKeepSession) { srKeepSession = false; return; }
+  const ses = srSession;
+  srSession = null;
+  if (!ses || ses.clicked) return;
+  if (reason === 'refined') { zrNote(ses.query, 'REFINED', detail || ''); return; }
+  if (ses.hasResults) zrNote(ses.query, 'ABANDONED', '');
 }
 
 function zrDirUrl() { return LOCAL.on ? ZR_SUBDIR : `${CONFIG.vaultRelPath}/${ZR_SUBDIR}`; }
@@ -14869,8 +15092,8 @@ function zrHead(who) {
     '<!-- Folio zero-result search log. One row per distinct query per day. Written by the app; safe to delete. -->',
     `<!-- WBUSER name="${name}" -->`,
     '',
-    '| day | query | count |',
-    '|---|---|---|',
+    '| day | query | outcome | count | detail |',
+    '|---|---|---|---|---|',
   ].join('\n');
 }
 
@@ -14883,19 +15106,24 @@ function zrParseLog(txt) {
     const c = line.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(x => x.trim());
     if (c.length < 3) return;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(c[0])) return; // header and |---| both fail this
-    rows.push({ day: c[0], query: c[1], count: parseInt(c[2], 10) || 0 });
+    // S96 — a three-column row was written before outcomes existed, and every
+    // one of them was a zero-result query, because that was all this file held.
+    if (c.length >= 5) rows.push({ day: c[0], query: c[1], outcome: c[2] || 'NO RESULTS', count: parseInt(c[3], 10) || 0, detail: c[4] || '' });
+    else               rows.push({ day: c[0], query: c[1], outcome: 'NO RESULTS', count: parseInt(c[2], 10) || 0, detail: '' });
   });
   return rows;
 }
 function zrSerialize(rows, who) {
   const sorted = rows.slice().sort((a, b) => (a.day === b.day ? a.query.localeCompare(b.query) : a.day.localeCompare(b.day)));
-  return zrHead(who) + '\n' + sorted.map(r => `| ${r.day} | ${r.query} | ${r.count} |`).join('\n') + '\n';
+  return zrHead(who) + '\n' + sorted.map(r =>
+    `| ${r.day} | ${r.query} | ${r.outcome || 'NO RESULTS'} | ${r.count} | ${r.detail || ''} |`).join('\n') + '\n';
 }
 function zrMergeRows(existing, incoming) {
   const by = new Map();
-  existing.forEach(r => by.set(`${r.day}|${r.query.toLowerCase()}`, { ...r }));
+  const k4 = r => `${r.day}|${r.query.toLowerCase()}|${r.outcome || 'NO RESULTS'}|${String(r.detail || '').toLowerCase()}`;
+  existing.forEach(r => by.set(k4(r), { ...r }));
   incoming.forEach(r => {
-    const k = `${r.day}|${r.query.toLowerCase()}`;
+    const k = k4(r);
     const prev = by.get(k);
     if (prev) prev.count += r.count;
     else by.set(k, { ...r });
@@ -20264,6 +20492,7 @@ async function buildSearchIndex() {
 }
 
 function clearSearch(focus) {
+  srEndSearch('closed');
   $('search-input').value = '';
   $('search-clear').style.display = 'none';
   $('search-results').innerHTML = '<div class="rp-empty">Type to search this file and the vault.<br>⌘K / Ctrl+K</div>';
@@ -20276,6 +20505,7 @@ async function runSearch() {
   $('search-clear').style.display = q ? '' : 'none';
   const box = $('search-results');
   if (q.length < 2) {
+    srEndSearch('closed');
     searchHits = [];
     box.innerHTML = '<div class="rp-empty">' + (q ? 'Keep typing…' : 'Type to search this file and the vault.<br>⌘K / Ctrl+K') + '</div>';
     return;
@@ -20357,16 +20587,17 @@ async function runSearch() {
     if (vh) html += (g.name ? `<div class="search-group"><span>${escHtml(g.name)}</span></div>` : '') + vh;
   });
 
-  // P9 -- capture only, no viewer yet (the tracker's own wording). Same
-  // gate the palette's own zero-result branch uses: genuinely nothing
-  // across every group, not "keep typing" or "indexing".
-  if (!html) zrNoteQuery(q);
+  // P9 kept the capture here; S96 moved it to the settle, so a query still
+  // being typed is not counted as one that was searched for. Same gate as
+  // before: genuinely nothing across every group, not "keep typing".
   box.innerHTML = html || '<div class="rp-empty">No matches.</div>';
+  srNoteRender(q, !!html);
 }
 
 async function gotoSearchHit(idx) {
   const h = searchHits[idx];
   if (!h) return;
+  srNoteClick(h.url, idx + 1);
   document.querySelectorAll('#rp-search .search-hit').forEach(el =>
     el.classList.toggle('selected', +el.dataset.si === idx));
   if (h.url !== state.activeUrl) await openFile(h.url, h.name);

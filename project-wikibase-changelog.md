@@ -8,6 +8,28 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.65.0 — 2026-09-18
+
+**Changed:** `index.html`; `supporting/tests/s96-reads-and-search.test.js` (new, 61 checks), `supporting/tests/usage-analytics.test.js` (2 checks changed), `supporting/tests/p9-admin.test.js` (3 checks changed, 2 added).
+
+*Folio starts counting reading rather than clicking, and records what happened to each search. Nothing on screen changes: the report these feed is the first item on the road to 1.1, and this release is what gives it something to report.*
+
+### Added
+
+- **A read, as distinct from an open.** An open is a page that rendered, which a wrong click earns as fully as an hour of study. A read is fifteen seconds of *engaged* time: the tab visible, the window focused, and some sign of life in the last thirty seconds. The usage log gains a `reads` column beside `opens`; both are kept, because a row written before today has an honest open count and an unknown read count, and reporting that as nought would rewrite history rather than extend it. An unknown read count is written as an empty cell and survives a round trip as unknown.
+- **One outcome per search**, written into the existing per-person `zSystem/SearchLog` file, which until now held zero-result queries only. The five: `NO RESULTS`, `REFINED` (the query changed before anything was clicked, and the pair is kept), `ABANDONED` (results, nothing clicked), `WRONG PAGE` (clicked, and back at the search box before the page became a read), `FOUND IT` (clicked, and the page became a read). "Became a read" is the read rule above, asked of the same clock — there is one definition of reading in the app and a second timer here would quietly have become a second definition. The row also records which result position was clicked, so a ranking that keeps sending people to the fourth result can be seen.
+- The clicked result's page and position ride in a new `detail` column. A three-column row written before outcomes existed still parses, as the zero-result query it was.
+
+### Fixed
+
+- **Reading after an alt-tab was thrown away.** Leaving the tab committed the page being timed and cleared it, and coming back never started it again, so a page opened, read for a minute, left for a coffee and finished afterwards recorded only the first minute. Leaving the tab now *folds* the visit rather than ending it: what it has earned is banked, the page stays the page being read, and returning resumes it. One visit still adds at most one open and at most one read however many times it is folded along the way.
+
+### Changed
+
+- **The search log is written when the typing stops, not while it is drawn.** Every keystroke used to be a search, so narrowing towards a real query wrote a failed search for each prefix on the way. The query that counts is the one the reader paused on or clicked from.
+- The engaged clock has **no timer behind it**. Time is worked out at the moments that already happen — a scroll, a click, leaving the tab, opening another page — which costs nothing while a tab sits idle and is why the rule can be tested without waiting in real time.
+- No staff-update line for this release. Nothing about it is visible to a reader, and a release that earns no line adds none.
+
 ## 0.64.2 — 2026-09-18
 
 **Changed:** `index.html`; `supporting/tests/session-b-shell.test.js` (+1 check, 1 reworded), `supporting/tests/multi-vault.test.js` (2 checks reshaped).
