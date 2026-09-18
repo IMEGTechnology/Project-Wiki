@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.63.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.64.2**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -263,6 +263,8 @@ The row above the vault tree, with a count of pages you have not seen yet. Click
 - **Renaming or moving a page in Obsidian does not resurface it** for the whole team — it is matched by its contents, so it keeps whatever seen state it already had. Deleting one removes it from the list.
 - **If hundreds of pages change at once** — usually OneDrive rewriting timestamps rather than anyone editing — the list says so in one line instead of flooding.
 
+**Marking a must read.** There is no separate button: **opening the page is what clears it** from your Required reading group. Mark all seen deliberately skips required pages, so the only way one comes off your list is that you read it. If a staff update email pointed you here, that is the whole answer — click the page, read it, done.
+
 **Required reading and onboarding.** Two optional properties an author can put on a note:
 
 | Property | What it does |
@@ -290,7 +292,9 @@ Neither the outline's folds nor the reader's survive a reload.
 
 Press **⌘K** (Mac) or **Ctrl+K** (Windows), or click **Search, saved, recent…** in the header, to open quick search.
 
-Empty, it shows your saved pages and what you've opened recently. Start typing and it searches the whole vault, filename matches first, then a snippet of matching text, up to 30 results. **See all results** at the bottom opens the full Search destination with everything the quick list left out.
+Empty, it shows your saved pages and what you've opened recently. Start typing and it searches the whole vault, pages whose name matches first, then pages that match in their text.
+
+**Results group under the page they came from.** The page name is the heading, with the folder beside it and a count of how many lines matched; the lines themselves are listed under it against a coloured rule, up to three per page, with your search term marked in each. Click the page name to open the page, or click a line to open it and land on that line. **See all results** at the bottom opens the full Search destination with everything the quick list left out.
 
 **Esc** closes it. Arrow keys move through results, Enter opens the highlighted one.
 
@@ -439,13 +443,39 @@ Folio has three levels, each one including everything below it. You pick yours f
 |---|---|
 | **User** | The default. Read, search, outline, bookmarks, comments, What's New, themes. Nothing in the vault changes. |
 | **Contributor** | New, Move, Edit, the Properties fields, clickable task checkboxes, and the Review and All comments tabs in Admin. |
-| **Administrator** | Everything in Admin: Usage, Access and Vault check, plus changing the two tier passwords. |
+| **Administrator** | Everything in Admin: Usage, Access, Vault check and Staff update, plus changing the two tier passwords. |
 
 **Moving up asks for that tier's password. Moving down never does**, so nobody is stuck in a mode they turned on by accident. Your tier is remembered on **this PC** and does not follow you to another machine.
 
 Anything your tier does not include is not shown at all, rather than shown greyed out.
 
 Editing and reviewing are both Contributor, deliberately. Only an edit made in the app writes the change record that Admin's Review tab exists to show, so a reviewer who cannot edit would be looking at an empty list.
+
+### Staff update (Administrator)
+
+The fifth Admin tab turns what has changed in the vault into an email you can send. It collects, you choose, and it copies. It never sends anything itself and there is no AI involved.
+
+**It is a list, not a schedule.** New pages, changed pages, must reads and app updates land on the list as they happen and stay there until you deal with each one. There is no weekly rhythm to keep up with: send when there is something worth sending.
+
+Each item has a tick box and three buttons:
+
+| Button | What it means |
+|---|---|
+| **Sent** (the **Mark sent** button, which takes everything ticked) | It went out in an email. It leaves the list. |
+| **Skip** | Too small to mention. It leaves the list. |
+| **Delay** | Real, but not ready to announce. It stays on the list, at the bottom, and is not included in a copy. |
+
+**Anything you mark comes back if the page changes again**, so a page you skipped in March is on the list again when somebody rewrites it. **Undo** reverses your last marking.
+
+**The opening paragraph is yours to edit**, and it is saved in the vault so it is the same on every PC. Reset to default brings back the standard wording. Everything else in the email is fixed, so it reads the same every time.
+
+To send one:
+
+1. Untick anything you do not want to mention. A section with nothing ticked disappears from the email entirely.
+2. **Copy for email**. This copies nothing off the list; it only fills your clipboard.
+3. **Open in Outlook** opens a new message, addressed to the list in **Send to** and titled for you. The message body arrives empty on purpose: a mailto link can only carry plain text, and a short one at that.
+4. Paste, read it once, send.
+5. **Mark sent**.
 
 ### Setting the passwords the first time
 

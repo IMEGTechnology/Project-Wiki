@@ -8,6 +8,59 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.64.2 — 2026-09-18
+
+**Changed:** `index.html`; `supporting/tests/session-b-shell.test.js` (+1 check, 1 reworded), `supporting/tests/multi-vault.test.js` (2 checks reshaped).
+
+*The search bar you could not see yourself typing in, and search results that group under the page they came from.*
+
+### Fixed
+
+- **The palette hid what you typed.** It lands on the bar that opened it, but it sat at layer 25 and `#header` sits at 100, so the header painted straight back over the palette's top strip. That strip is the input: the bar showed its own placeholder and Ctrl K chip while the text and the caret went in underneath them. The palette and its scrim now sit at 199/200, the same rung as the header-anchored dropdowns, and the scrim dims the header as its own note always claimed it did. Same class of bug as the 0.45.0 overlay, same fix.
+- **A folder path built from a root-level page no longer starts with a stray separator** (`paletteFolderOf` kept the empty segment before the first slash).
+
+### Changed
+
+- **A search result is a page, with the lines that matched as its rows** — the shape Saved and Recent already had, now in both the palette and the Search pane. A page with four matching lines was previously four near-identical rows in the pane, or one row carrying the first of them in the palette, with the other three unreachable from there. The heading opens the page; a line lands on that line.
+- **The heading carries a count** of every line that matched, not the number drawn. Up to three lines show per page, twenty for the page you already have open.
+- **The typed term is marked** wherever it appears, in the line and inside the page name, using a new `--accent-mark` tint computed from the reader's own accent. Nothing in the result list carries a fixed colour, so it follows whatever theme and accent is set.
+- **A vertical accent rule beside a page's lines** replaces the horizontal rule under each section header. With two lines per group the rules had turned the panel into a ladder; one vertical line per group says the same thing and reads quieter.
+- **The Search pane no longer labels a single vault.** It printed "Vault" above everything and earned nothing; with several vaults connected each still gets its name.
+- `revealSearchLine()` lifted out of `gotoSearchHit()` unchanged, so the palette reveals a line the same way the pane does rather than opening the page and leaving the reader at the top.
+
+## 0.64.1 — 2026-09-18
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; `supporting/tests/staff-update.test.js` (+4 checks).
+
+*One line for the person the email cannot otherwise reach.*
+
+### Added
+
+- **The staff update email ends with "Do not have Folio on your PC yet? Set it up here"**, linking to Folio itself. Somebody without it installed clicks a page link, gets nowhere, and until now the email had no answer for them.
+- The address is **read from where the app was loaded**, so there is nothing to configure and nothing to go stale. An installed app carries the address it was installed from.
+
+## 0.64.0 — 2026-09-18
+
+**Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; new `supporting/tests/staff-update.test.js` (87 checks); four suites updated for the sixth Admin tab and the new help hash.
+
+*Staff update: the vault's changes, turned into an email you can send, on a new Admin tab.*
+
+### Added
+
+- **Staff update, the fifth Admin tab** (Administrator). New pages, changed pages, must reads and app updates collect on one running list. It is a list, not a schedule: nothing expires and there is no weekly window.
+- **Three states per item.** **Sent** and **Skip** take an item off the list; **Delay** keeps it on the list, at the bottom, and out of the copy. Anything marked returns if the page changes again. **Undo** reverses the last marking.
+- **An editable opening paragraph**, saved in the vault so it is the same on every PC, with Reset to default. The rest of the email's wording is fixed.
+- **Copy for email** writes the email to the clipboard in both flavours, so it pastes into Outlook with real links. **Copy clears nothing** — only a mark moves the list.
+- **Open in Outlook** opens a new message addressed to the saved recipient list, with the subject filled in and the body deliberately empty (a mailto link carries plain text only, and not much of it).
+- **A live preview** of the email as it will paste, updating as items are ticked and as the opening is typed.
+- **`#help`**, the one address that opens the help page. `help.md` is not a vault note and had no address at all, so the email's "How must reads work" link had nowhere to land.
+- Help gains a **Staff update** section and a plain answer to "how do I mark a must read": open the page.
+
+### Changed
+
+- The What's New index stores each section's heading level. The email names the top level changed headings of a page and never their sub headings, so it points at the page rather than replacing it. An index written before this shows every changed heading, exactly as it did before.
+- One exemption to the Folio-not-"the wiki" rule, bounded to the staff update email and asserted as bounded: the email speaks to staff in the words staff use.
+
 ## 0.63.0 — 2026-09-16
 
 **Changed:** `index.html`, `README.md`, `help.md`, `help-edit.md`; new `supporting/tests/s92-review.test.js` (27 checks); ten suites updated for the removed Review panel.

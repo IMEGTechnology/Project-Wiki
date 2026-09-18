@@ -95,6 +95,7 @@
       --handle-rest:   #2c2c2a;
       --accent:        #5b9cf6;
       --accent-bg:     rgba(91,156,246,0.12);
+      --accent-mark:   rgba(91,156,246,0.30);
       --badge-bg:      rgba(255,255,255,0.08);
       --hover:         rgba(255,255,255,0.05);
       --highlight-bg:  #451a03;
@@ -139,6 +140,7 @@
       --handle-rest:   #e1e1e0;
       --accent:        #1a6ef5;
       --accent-bg:     #e8f0fe;
+      --accent-mark:   rgba(26,110,245,0.20);
       --badge-bg:      #e4e3e0;
       --hover:         rgba(0,0,0,0.04);
       --highlight-bg:  #fef3c7;
@@ -494,6 +496,71 @@
     .vc-noteform input.bad { border-color: var(--co-red-bd); }
     .vc-msg { font-size: 11.5px; color: var(--co-red-txt); padding: 6px 12px 0; }
 
+    /* S94 -- Staff update. Rows deliberately borrow the vault check's
+       shape: a row here is also a fact about a page with a decision
+       attached, and two row grammars behind one door would cost the
+       reader something for nothing. The preview is the one exception and
+       is NOT themed -- it is a picture of an email, and an email is
+       light, so a dark preview would be a lie about what will be sent. */
+    .su-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 9px 12px; margin: 10px 12px 0;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg-reader);
+    }
+    .su-bar-meta { flex: 1; min-width: 180px; font-size: 11.5px; color: var(--text-muted); }
+    .su-msg { font-size: 11.5px; color: var(--text-secondary); padding: 8px 12px 0; }
+    .su-btn {
+      font-size: 11.5px; padding: 5px 10px; border-radius: var(--radius);
+      border: 1px solid var(--border); background: var(--bg-reader);
+      color: var(--text-secondary); cursor: pointer;
+    }
+    .su-btn:hover:not([disabled]) { background: var(--hover); color: var(--text-primary); }
+    .su-btn[disabled] { opacity: .45; cursor: default; }
+    .su-btn.primary { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+    .su-field { margin: 14px 12px 0; }
+    .su-field-head {
+      font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+      font-weight: 600; color: var(--text-muted); margin-bottom: 6px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .su-reset {
+      font-size: 10.5px; letter-spacing: 0; text-transform: none; font-weight: 400;
+      border: none; background: none; color: var(--accent); cursor: pointer; padding: 0;
+    }
+    .su-field textarea, .su-field input {
+      width: 100%; box-sizing: border-box; font: inherit; font-size: 12.5px; line-height: 1.5;
+      padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg-reader); color: var(--text-primary); resize: vertical;
+    }
+    .su-field-note { font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
+    .su-group { margin: 16px 12px 0; }
+    .su-group-head {
+      font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+      font-weight: 600; color: var(--text-muted); margin-bottom: 7px;
+    }
+    .su-rows { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .su-row {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 9px 12px; border-bottom: 1px solid var(--border);
+    }
+    .su-row:last-child { border-bottom: none; }
+    .su-row:hover { background: var(--hover); }
+    .su-row.su-delayed { opacity: .62; }
+    .su-tick { flex: none; padding-top: 1px; }
+    .su-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .su-name { font-size: 12.5px; font-weight: 600; color: var(--accent); cursor: pointer; }
+    .su-name:hover { text-decoration: underline; }
+    .su-name-plain { font-size: 12.5px; color: var(--text-primary); }
+    .su-tag { font-size: 10.5px; color: var(--text-muted); margin-left: 8px; }
+    .su-tag-new { color: var(--accent); }
+    .su-sub { font-size: 11px; color: var(--text-muted); }
+    .su-act { display: flex; gap: 6px; flex: none; }
+    .su-preview {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px; background: #ffffff; overflow-x: auto;
+    }
+
     /* The reader's one and only sight of any of this. Deliberately quiet:
        it sits under the byline, it never carries a count of anything else,
        and it says what is wrong rather than who should fix it. */
@@ -588,19 +655,22 @@
     }
     #beta-slide-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 
-    /* Session B — the palette. z-index above the slide-over (15) and its
-       own scrim covers the full viewport (top:0), unlike the slide-over's
-       scrim which starts below the header — the palette can open over the
-       header controls too. */
+    /* Session B — the palette. It LANDS on the bar that opened it, so it has
+       to out-stack #header (100), not just the slide-over (15). At 24/25 it
+       did not: the header painted straight back over the palette's top strip,
+       which is its input, so the bar showed its own placeholder and Ctrl K
+       chip while you typed underneath them, caret included. 199/200 puts it
+       on the same rung as the header-anchored dropdowns, and the scrim now
+       dims the header as this note always claimed it did. */
     body.beta-shell #beta-palette-scrim {
-      position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 24;
+      position: fixed; inset: 0; background: rgba(0,0,0,.28); z-index: 199;
     }
     body.beta-shell #beta-palette {
       position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
       width: min(480px, 90vw); max-height: min(420px, 70vh);
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       border-radius: var(--radius); box-shadow: 0 22px 60px rgba(0,0,0,.3);
-      z-index: 25; overflow: hidden; display: flex; flex-direction: column;
+      z-index: 200; overflow: hidden; display: flex; flex-direction: column;
     }
     #beta-palette-input {
       flex-shrink: 0; border: none; border-bottom: 1px solid var(--border);
@@ -613,13 +683,42 @@
     body.beta-shell #beta-palette.landed { border-color: var(--accent); }
     body.beta-shell #beta-palette.landed #beta-palette-input { padding: 7px 11px; font-size: 12.5px; }
     #beta-palette-list { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 0; }
-    .bp-group { padding: 10px 14px 4px; font-size: 11px; color: var(--text-muted); }
+    .bp-group {
+      margin: 13px 14px 4px; padding: 0; font-size: 11px; font-weight: 600;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--accent);
+    }
+    .bp-group:first-child { margin-top: 9px; }
     .bp-row {
       padding: 6px 14px; font-size: 12.5px; color: var(--text-primary);
       cursor: pointer; display: flex; flex-direction: column; gap: 2px;
     }
     .bp-row:hover, .bp-row.selected { background: var(--accent-bg); }
     .bp-sub { font-size: 11px; color: var(--text-muted); }
+    /* S95 — a search result is a PAGE with the lines that matched under it,
+       the shape Saved and Recent already had. The page name is the heading
+       and the lines are its rows, so a page with four hits is one entry
+       rather than four near-identical ones. The vertical rule is the only
+       thing grouping them: there is no rule under the heading, because two
+       lines per group turned the panel into a ladder. */
+    .bp-head {
+      flex-direction: row; align-items: center; gap: 8px;
+      margin: 13px 0 3px; padding: 2px 14px; font-weight: 600; color: var(--accent);
+    }
+    #beta-palette-list .bp-head:first-child { margin-top: 5px; }
+    .bp-head .bp-path { font-weight: 400; font-size: 11px; }
+    .bp-n {
+      margin-left: auto; flex: none; font-size: 10.5px; color: var(--text-secondary);
+      background: var(--badge-bg); border-radius: 9px; padding: 1px 7px;
+    }
+    .bp-line {
+      display: block; padding: 4px 14px 4px 12px; margin: 0 14px 0 20px;
+      border-left: 2px solid var(--accent);
+      font-size: 12.5px; color: var(--text-muted); line-height: 1.5;
+    }
+    .bp-line b, .bp-head b {
+      background: var(--accent-mark); color: var(--accent);
+      font-weight: 600; border-radius: 2px; padding: 0 3px;
+    }
     /* P6 — which folder inside the vault. The group header says which vault,
        and two vaults can hold a page with the same name, so the name alone
        stops being an answer once the manifest lands. */
@@ -3328,12 +3427,35 @@
     #search-input:focus { border-bottom-color: var(--accent); }
     #search-clear { background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: 12px; padding: 2px 4px; }
     #search-clear:hover { color: var(--text-primary); }
-    .search-group { padding: 12px 12px 4px; font-size: 11px; color: var(--text-muted); }
-    .search-group span { border-bottom: 1px solid var(--text-muted); padding-bottom: 2px; }
+    .search-group {
+      margin: 14px 12px 4px; padding: 0; font-size: 11px; font-weight: 600;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--accent);
+    }
+    .search-group:first-child { margin-top: 8px; }
     .search-hit { padding: 5px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; line-height: 1.5; word-break: break-word; }
-    .search-hit .s-name { display: block; font-size: 11px; opacity: 0.8; }
-    .search-hit b { color: var(--accent); font-weight: 600; }
+    .search-hit b {
+      background: var(--accent-mark); color: var(--accent);
+      font-weight: 600; border-radius: 2px; padding: 0 3px;
+    }
     .search-hit:hover, .search-hit.selected { background: var(--accent-bg); color: var(--text-primary); }
+    /* S95 — the pane groups by page exactly as the palette does; these are
+       the same three parts under the ids this pane owns. */
+    .sh-head {
+      display: flex; align-items: center; gap: 8px;
+      margin: 13px 0 3px; padding: 2px 12px;
+      font-size: 12.5px; font-weight: 600; color: var(--accent);
+    }
+    #search-results .sh-head:first-child { margin-top: 4px; }
+    .sh-head .s-path { font-weight: 400; font-size: 11px; color: var(--text-muted); }
+    /* Sits next to the folder rather than pushed to the right edge: the pane
+       is three times the palette's width, and a badge parked over there
+       stops reading as belonging to the name. */
+    .sh-n {
+      margin-left: 2px; flex: none; font-size: 10.5px; font-weight: 400;
+      color: var(--text-secondary); background: var(--badge-bg);
+      border-radius: 9px; padding: 1px 7px;
+    }
+    .sh-line { padding: 4px 12px 4px 12px; margin: 0 12px 0 18px; border-left: 2px solid var(--accent); }
 
     /* Editor [[ autocomplete (S9+) */
     #ed-ac {
@@ -3943,7 +4065,7 @@
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.63.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.64.2</button>
       </div>
 
       <div class="ud-actions">
@@ -6527,6 +6649,27 @@ function wbDelegatedClick(e) {
   if (vcReviewEl) { e.preventDefault(); e.stopPropagation(); renderAdminTab('review'); return; }
   const vcFixEl = e.target.closest('[data-wb-vcfix]');
   if (vcFixEl) { e.preventDefault(); e.stopPropagation(); vcRepair(vcFixEl.dataset.wbVcfixop, vcFixEl.dataset.wbVcfix); return; }
+  // S94 -- Staff update. The page name inside a row goes first, same
+  // nested-target rule as Vault check's rows above.
+  const suOpenEl = e.target.closest('[data-wb-suopen]');
+  if (suOpenEl) { e.preventDefault(); e.stopPropagation(); vcOpenPage(suOpenEl.dataset.wbSuopen, suOpenEl.dataset.wbSuname); return; }
+  const suCopyEl = e.target.closest('[data-wb-sucopy]');
+  if (suCopyEl) { e.preventDefault(); e.stopPropagation(); suCopy(suCopyEl); return; }
+  const suOutEl = e.target.closest('[data-wb-suoutlook]');
+  if (suOutEl) { e.preventDefault(); e.stopPropagation(); suOpenOutlook(); return; }
+  const suSentEl = e.target.closest('[data-wb-susent]');
+  if (suSentEl) { e.preventDefault(); e.stopPropagation(); suMarkSent(); return; }
+  const suSkipEl = e.target.closest('[data-wb-suskip]');
+  if (suSkipEl) { e.preventDefault(); e.stopPropagation(); suMark([suSkipEl.dataset.wbSuskip], 'skip', 'skip'); return; }
+  const suDelayEl = e.target.closest('[data-wb-sudelay]');
+  if (suDelayEl) { e.preventDefault(); e.stopPropagation(); suMark([suDelayEl.dataset.wbSudelay], 'delay', 'delay'); return; }
+  const suUndelayEl = e.target.closest('[data-wb-suundelay]');
+  if (suUndelayEl) { e.preventDefault(); e.stopPropagation(); suMark([suUndelayEl.dataset.wbSuundelay], 'back', 'bring back'); return; }
+  const suUndoEl = e.target.closest('[data-wb-suundo]');
+  if (suUndoEl) { e.preventDefault(); e.stopPropagation(); suUndoLast(); return; }
+  const suResetEl = e.target.closest('[data-wb-suopenreset]');
+  if (suResetEl) { e.preventDefault(); e.stopPropagation(); suData.opening = ''; saveStaffUpdate(); renderStaffUpdateTab(); return; }
+
   const vcFillEl = e.target.closest('[data-wb-vcfillall]');
   if (vcFillEl) { e.preventDefault(); e.stopPropagation(); vcFillAllProps(); return; }
 
@@ -8375,10 +8518,40 @@ function betaPaletteRow(hit, name, sub, folder) {
          (sub ? `<span class="bp-sub">${sub}</span>` : '') + `</div>`;
 }
 
+// S95 — the page heading of a search group, and one matched line under it.
+// Both are .bp-row: hover, the selected class and the arrow keys all walk
+// them already, and a heading you cannot arrow onto is a heading you cannot
+// open. The count is every line that matched, not the three shown.
+function betaPaletteHead(hit, nameHTML, folder, count) {
+  const idx = betaPaletteHits.length;
+  betaPaletteHits.push(hit);
+  return `<div class="bp-row bp-head" data-si="${idx}" onclick="betaPaletteGo(${idx})">` +
+         `<span class="bp-name">${nameHTML}</span>` +
+         (folder ? `<span class="bp-path">\u00b7 ${escHtml(folder)}</span>` : '') +
+         (count ? `<span class="bp-n">${count}</span>` : '') +
+         `</div>`;
+}
+
+function betaPaletteLine(hit, html) {
+  const idx = betaPaletteHits.length;
+  betaPaletteHits.push(hit);
+  return `<div class="bp-row bp-line" data-si="${idx}" onclick="betaPaletteGo(${idx})">${html}</div>`;
+}
+
+// The typed term, marked inside a page name. Escaped first, then the one
+// occurrence wrapped — never the other way round, or the markup becomes the
+// thing being searched.
+function markMatch(text, q) {
+  const i = text.toLowerCase().indexOf(String(q).toLowerCase());
+  if (i < 0 || !q) return escHtml(text);
+  return escHtml(text.slice(0, i)) + '<b>' + escHtml(text.substr(i, q.length)) + '</b>' +
+         escHtml(text.slice(i + q.length));
+}
+
 // P6 — the folder a hit sits in, with the vault segment dropped because the
 // group header directly above the row already says it.
 function paletteFolderOf(url) {
-  const parts = String(auditPathKey(url) || '').split('/');
+  const parts = String(auditPathKey(url) || '').split('/').filter(Boolean);
   parts.pop(); // the filename itself
   if (vaultsOn() && parts.length && vaultFolderIds().includes(parts[0])) parts.shift();
   return parts.map(p => displayFolderName(p)).join(' / ');
@@ -8981,34 +9154,42 @@ function betaPaletteSearchHTML(q) {
   const snippet = line => {
     const i = line.toLowerCase().indexOf(lc);
     const s = Math.max(0, i - 30);
-    return (s ? '…' : '') + escHtml(line.slice(s, i)) +
+    return (s ? '\u2026' : '') + escHtml(line.slice(s, i)) +
       '<b>' + escHtml(line.substr(i, q.length)) + '</b>' +
       escHtml(line.slice(i + q.length, i + q.length + 60));
   };
   // P6 — every vault is searched at once and the results group under the
   // vault they came from, in vault-name order. The two rules INSIDE a group
   // are the ones this app has always used and are deliberately unchanged:
-  // filename matches first, then content matches with a snippet.
+  // filename matches first, then content matches.
   const groups = vaultsOn()
     ? groupByVault(searchIndex, f => f.url)
     : [{ id: '', name: '', items: searchIndex }];
 
+  // S95 — a result is a PAGE, and the lines that matched are rows under it.
+  // Before this, a page with four matching lines produced one row carrying
+  // the first of them and the other three were unreachable from here.
   groups.forEach(g => {
     let rows = '';
-    g.items.forEach(f => {
-      if (f.name.toLowerCase().includes(lc)) {
-        rows += betaPaletteRow({ kind: 'open', url: f.url, name: f.name }, f.name, '', paletteFolderOf(f.url));
-      }
-    });
-    g.items.forEach(f => {
-      if (f.name.toLowerCase().includes(lc) || betaPaletteHits.length >= 30) return;
+    const named = g.items.filter(f => f.name.toLowerCase().includes(lc));
+    const rest  = g.items.filter(f => !f.name.toLowerCase().includes(lc));
+    named.concat(rest).forEach(f => {
+      if (betaPaletteHits.length >= 30) return;
       const lines = f.text.split('\n');
+      const shown = [];
+      let total = 0;
       for (let ln = 0; ln < lines.length; ln++) {
-        if (lines[ln].toLowerCase().includes(lc)) {
-          rows += betaPaletteRow({ kind: 'open', url: f.url, name: f.name }, f.name, snippet(lines[ln]), paletteFolderOf(f.url));
-          break;
-        }
+        if (!lines[ln].toLowerCase().includes(lc)) continue;
+        total++;
+        if (shown.length < 3) shown.push(lines[ln]);
       }
+      if (!total && !f.name.toLowerCase().includes(lc)) return;
+      rows += betaPaletteHead({ kind: 'open', url: f.url, name: f.name },
+                              markMatch(f.name, q), paletteFolderOf(f.url), total);
+      shown.forEach(l => {
+        if (betaPaletteHits.length >= 30) return;
+        rows += betaPaletteLine({ kind: 'open', url: f.url, name: f.name, line: l }, snippet(l));
+      });
     });
     if (rows) html += (g.name ? `<div class="bp-group">${escHtml(g.name)}</div>` : '') + rows;
   });
@@ -9023,7 +9204,7 @@ function betaPaletteSearchHTML(q) {
     : '';
 
   if (!html) { zrNoteQuery(q); return '<div class="bp-empty">Nothing in the vault matches that.</div>' + laterNote; }
-  // Round 2c -- the palette stops at 30 content hits and never had anywhere to
+  // Round 2c -- the palette stops at 30 rows and never had anywhere to
   // send you for the rest. Same shape as "See everything saved" in the empty
   // state: the short list stays a quick jump, this opens the real thing.
   return html + laterNote +
@@ -9051,7 +9232,13 @@ async function betaPaletteGo(idx) {
   if (h.kind === 'fav') await jumpToBookmark(h.file, h.id);
   else if (h.kind === 'bookmarks-all') destOpen('bookmarks');
   else if (h.kind === 'search-all') await destOpenSearch(h.q);
-  else if (h.url !== state.activeUrl) await openFile(h.url, h.name);
+  else {
+    if (h.url !== state.activeUrl) await openFile(h.url, h.name);
+    // S95 — a row that shows a matched line has to land on that line.
+    // Same reveal the docked pane uses; opening the page and leaving the
+    // reader at the top would make the line decoration.
+    if (h.line) revealSearchLine(h.line);
+  }
 }
 
 $('beta-palette-input').addEventListener('input', e => betaPaletteInput(e.target.value));
@@ -9369,6 +9556,9 @@ const ADMIN_TABS = [
   // is the tab.
   { id: 'vault',  label: 'Vault check', min: 'admin',
     count: () => vcResults ? (vcResults.counts.hard + vcResults.counts.warn) : 0 },
+  // S94 -- after Vault check, Jayson's call. Administrator, like its two
+  // neighbours: it reads every page's state and writes to the vault.
+  { id: 'staff',  label: 'Staff update', min: 'admin', count: () => suCount() },
 ];
 
 // Which tab is currently showing inside the Admin screen, or null when it
@@ -9396,7 +9586,7 @@ function openAdminScreen(tab) {
 }
 
 function adminTabRenderFns() {
-  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab };
+  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab, staff: renderStaffUpdateTab };
 }
 
 function renderAdminTab(tab) {
@@ -10099,6 +10289,592 @@ function vcOpenPage(url, name) {
   openFile(url, name);
 }
 
+// ── Staff update ─────────────────────────────────────────────────
+// The fifth Admin tab, and the only one that writes something for people
+// OUTSIDE the app. Everything else behind this door reports on the vault;
+// this one turns what changed into an email and hands it to Outlook.
+//
+// Three rules, settled with Jayson 17-18 Sep, and each one closes off a
+// reversal that looks like an improvement:
+//
+//  1. A LIST, NOT A SCHEDULE. Changes collect here and keep collecting
+//     until each one is dealt with. There is no week, no cadence and no
+//     "since last Friday" window. A weekly digest would have to decide
+//     what to do with a week nobody sent, and every answer to that is
+//     worse than leaving the item on the list.
+//
+//  2. COPY CLEARS NOTHING. Copy puts the email on the clipboard, and
+//     that is all it does. The list changes only when a human says Sent,
+//     Skip or Delay. A Copy that also cleared would silently eat the
+//     times you copied to look at it.
+//
+//  3. NO AI AND NO SENDING. The opening is a text box, the items are
+//     tick boxes, and the send happens in Outlook where the person can
+//     see it before it goes. Open in Outlook addresses a compose window;
+//     the body travels by clipboard, because mailto: carries plain text
+//     only and dies at about 2,000 characters.
+//
+// An .eml draft was researched and rejected: New Outlook opens one read
+// only and strips the body when X-Unsent is present. See
+// rollout/staff-update-email-spec.md.
+
+const SU_SUBJECT = "What's new in the wiki";
+
+// Opening B, chosen 18 Sep from five. It is the DEFAULT, not the text:
+// whatever is in the box wins, and Reset brings this back.
+const SU_OPENING_DEFAULT =
+  'Here is the two minute version of what has happened in the wiki. Some new pages, a few ' +
+  'updates worth knowing about, and a short list that needs your eyes. Nothing below is long, ' +
+  'and every link lands you on the page itself rather than somewhere you have to search from.';
+
+// One staff-facing line per release, newest first, written in the same
+// pass that bumps the version badge and the changelog. The changelog
+// itself is a repo file the running app cannot read, and a second file in
+// the vault would drift from the version actually loaded, so the line
+// rides with the code that shipped it. A release that earns no line adds
+// none, which is the same judgement Skip makes on a page.
+const SU_APP_UPDATES = [
+  { v: '0.64.0', line: 'Staff updates are written from Folio itself, on the new Admin tab.' },
+  { v: '0.63.0', line: 'Review is now a single list, oldest first.' },
+];
+
+let suData   = { opening: '', recipients: '', marks: {} };
+let suLoaded = false;
+let suMsg    = '';
+let suTicks  = {};   // key -> false when un-ticked. Absent means ticked.
+let suUndo   = null; // { label, keys: { key: previousMarkOrNull } }
+
+function staffUpdateFileUrl() {
+  return LOCAL.on ? 'zSystem/staffupdate.json' : `${CONFIG.vaultRelPath}/zSystem/staffupdate.json`;
+}
+
+// Same shape as the vault check dismissals: one small JSON file at vault
+// root, read at boot, and a malformed one reads as "nothing marked"
+// rather than taking the tab down.
+async function loadStaffUpdate() {
+  suData = { opening: '', recipients: '', marks: {} };
+  suLoaded = true;
+  try {
+    const txt = await readVaultFileOrNull(staffUpdateFileUrl());
+    if (!txt) return;
+    const obj = JSON.parse(txt);
+    if (obj && typeof obj === 'object') {
+      suData.opening    = typeof obj.opening    === 'string' ? obj.opening    : '';
+      suData.recipients = typeof obj.recipients === 'string' ? obj.recipients : '';
+      suData.marks      = (obj.marks && typeof obj.marks === 'object') ? obj.marks : {};
+    }
+  } catch (_) {
+    suData = { opening: '', recipients: '', marks: {} };
+  }
+}
+
+async function saveStaffUpdate() {
+  if (!atLeast('admin')) return false;
+  try {
+    if (!LOCAL.on) { try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* exists */ } }
+    await spWriteFile(staffUpdateFileUrl(), JSON.stringify(suData, null, 2));
+    return true;
+  } catch (e) {
+    console.error('Folio: could not write the staff update file', e);
+    return false;
+  }
+}
+
+function suOpeningText() {
+  return (suData.opening && suData.opening.trim()) ? suData.opening : SU_OPENING_DEFAULT;
+}
+
+// ── What is on the list ──────────────────────────────────────────
+// Read from What's New rather than from a store of its own. The entries
+// already carry kind, changed sections and the must-read flag, and a
+// second copy of that would be wrong the moment somebody edited a page.
+//
+// The signature is the same one What's New uses to decide seen. It is
+// what makes "a page that changes again comes back": a mark is stored
+// against the signature it was made on, so an edit since then makes the
+// mark stale and the item returns to the list.
+
+function suPageSig(idx, url) { return wnSig(idx && idx[url]); }
+
+// The top level changed headings only. Jayson's rule: the email points at
+// the page, it does not replace reading it, so a heading's sub headings
+// never appear. Level is read from the index, where wnSectionMap stores
+// it; a record written before that (no level) reads as top level, which
+// keeps the pre-upgrade behaviour rather than emptying the section.
+function suTopSections(entry, idx) {
+  const secMap = (idx && idx[entry.url] && idx[entry.url].sec) || {};
+  const list   = entry.sections || [];
+  if (!list.length) return [];
+  const lv = s => {
+    const rec = secMap[s[0]];
+    const n = rec && rec[2];
+    return (typeof n === 'number' && n > 0) ? n : 1;
+  };
+  let min = 99;
+  list.forEach(s => { const n = lv(s); if (n < min) min = n; });
+  return list.filter(s => lv(s) === min).slice(0, 4);
+}
+
+function suMarkOf(key) { return (suData.marks && suData.marks[key]) || null; }
+
+// Sent and Skip take an item off the list until the page changes again.
+// Delay keeps it, which is the whole difference: delayed work is real
+// work that is not ready to announce, and forgetting it is the failure
+// mode Delay exists to prevent.
+function suIsDelayed(item) {
+  const m = suMarkOf(item.key);
+  return !!(m && m.state === 'delay' && m.sig === item.sig);
+}
+function suIsLive(item) {
+  const m = suMarkOf(item.key);
+  if (!m) return true;
+  if (m.state === 'delay') return true;
+  return m.sig !== item.sig;
+}
+function suIsTicked(item) {
+  if (suIsDelayed(item)) return false;
+  return suTicks[item.key] !== false;
+}
+
+function suCandidates() {
+  const idx  = wnRead(WN_INDEX_KEY, {});
+  const outs = { must: [], neu: [], upd: [], app: [] };
+  (state.wnEntries || []).forEach(e => {
+    const sig = suPageSig(idx, e.url);
+    if (e.mustRead) {
+      outs.must.push({ key: 'm:' + e.url, url: e.url, name: e.name, sig,
+        // The tag is about the PAGE, never about a person: "outstanding"
+        // would claim knowledge of who has read what, and seen state is
+        // per device today. New page, new assignment; otherwise it has
+        // been on the list a while.
+        tag: e.kind === 'new' ? 'newly assigned' : 'still assigned' });
+    }
+    if (e.kind === 'new') {
+      outs.neu.push({ key: 'n:' + e.url, url: e.url, name: e.name, sig });
+    } else if ((e.sections || []).length) {
+      outs.upd.push({ key: 'u:' + e.url, url: e.url, name: e.name, sig,
+        secs: suTopSections(e, idx) });
+    }
+  });
+  SU_APP_UPDATES.forEach(a => {
+    outs.app.push({ key: 'a:' + a.v, name: a.line, ver: a.v, sig: a.v, app: true });
+  });
+  Object.keys(outs).forEach(g => { outs[g] = outs[g].filter(suIsLive); });
+  return outs;
+}
+
+function suAllItems(c) { return [...c.must, ...c.neu, ...c.upd, ...c.app]; }
+
+// The tab strip's number. Delayed items are not counted: they are on the
+// list on purpose and counting them would make the badge unclearable.
+function suCount() {
+  if (!suLoaded) return 0;
+  try { return suAllItems(suCandidates()).filter(it => !suIsDelayed(it)).length; }
+  catch (_) { return 0; }
+}
+
+// ── The email ────────────────────────────────────────────────────
+// Layout B3, locked 18 Sep. Two rules live in the markup itself and
+// nowhere else, so read them here before changing any of it:
+//
+//   * THE OUTERMOST CONTAINER IS NEVER PAINTED. It carries width and
+//     font only. A background there draws a card edge against whatever
+//     Outlook paints behind the message, which in dark mode reads as a
+//     bright panel floating in the window.
+//   * AN EMPTY SECTION IS NOT RENDERED AT ALL. No heading, no "nothing
+//     this time" line. That is true of a section nobody ticked and of a
+//     section with no candidates, which is the same thing by the time it
+//     reaches here.
+//
+// Table markup with inline styles, 600px, no images and no web fonts,
+// because Outlook desktop renders with Word.
+
+// Where this copy of Folio lives, which is simply where it was loaded
+// from. Nothing is configured and nothing can go stale: an installed PWA
+// carries the same address it was installed from, so the app answers the
+// "where do I get this" question about ITSELF rather than about a URL
+// somebody typed into a settings box once.
+function suAppHome() {
+  return location.origin + location.pathname + location.search;
+}
+
+function suLink(url, hid) {
+  const root = suAppHome();
+  if (!url) return root + HOME_HASH;
+  return shareUrlFor(url, hid || '') || root;
+}
+
+function suEmailHTML(sel) {
+  const A = (href, text, style) =>
+    '<a href="' + escHtml(href) + '" style="' + style + '">' + escHtml(text) + '</a>';
+  const nameStyle = 'color:#22222a;font-weight:600;text-decoration:none;';
+  const secStyle  = 'color:#3a5f96;text-decoration:none;';
+  let out = '';
+
+  out += '<table width="600" cellpadding="0" cellspacing="0" border="0" ' +
+    'style="width:600px;max-width:600px;border-collapse:collapse;font-family:\'Segoe UI\',Arial,sans-serif;">' +
+    '<tr><td style="padding:24px 22px 4px 22px;">' +
+    A(suLink(''), SU_SUBJECT, 'color:#22222a;font-size:22px;font-weight:700;text-decoration:none;') +
+    '<div style="color:#6b6b77;font-size:14px;padding-top:9px;line-height:21px;">' +
+    escHtml(suOpeningText()) + '</div></td></tr>';
+
+  if (sel.must.length) {
+    out += '<tr><td style="padding:16px 22px 0 22px;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;' +
+      'background:#fdf2f6;border:1px solid #f0c4d5;border-left:4px solid #c2285a;">' +
+      '<tr><td style="padding:18px 20px;">' +
+      '<div style="color:#4a4a55;font-size:15px;line-height:23px;">' +
+      '<span style="color:#8f2347;font-weight:700;">Please read.</span> ' +
+      // The wording says what the app actually does TODAY. Opening a
+      // required page is what clears it; there is no separate mark, and
+      // What's New keeps seen state per device, not per person. An email
+      // promising that anyone can see who has read what would be a
+      // promise the app cannot keep until per-user must reads ship
+      // (STATUS: per-user must-reads and onboarding).
+      'Your must reads are waiting at the top of your Folio home page. Opening one is what clears ' +
+      'it, so work through the pages below whenever you get a window and they come off your list ' +
+      'as you go. ' +
+      A(suHelpLink(), 'How must reads work', 'color:#8f2347;font-weight:600;') +
+      '</div>' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;' +
+      'margin-top:15px;background:#ffffff;border:1px solid #f0c4d5;">' +
+      '<tr><td style="padding:13px 16px;font-size:15px;line-height:26px;">' +
+      sel.must.map(it =>
+        A(suLink(it.url), it.name, nameStyle) +
+        '<span style="color:' + (it.tag === 'newly assigned' ? '#8f2347' : '#9a9aa5') +
+        ';font-size:12px;">&nbsp;' + escHtml(it.tag) + '</span>').join('<br>') +
+      '</td></tr></table></td></tr></table></td></tr>';
+  }
+
+  if (sel.neu.length || sel.upd.length) {
+    out += '<tr><td style="padding:14px 22px 0 22px;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" ' +
+      'style="border-collapse:collapse;background:#ffffff;border:1px solid #e3e3ea;">' +
+      '<tr><td style="padding:18px 20px;">' +
+      '<div style="color:#22222a;font-size:15px;font-weight:700;">Also in the wiki</div>' +
+      '<div style="color:#5d5d68;font-size:13px;line-height:19px;padding:6px 0 14px 0;">' +
+      'Nothing to mark here, just worth knowing it exists.</div>';
+
+    if (sel.neu.length) {
+      out += '<div style="color:#3c7a5a;font-size:12px;font-weight:700;text-transform:uppercase;' +
+        'letter-spacing:.6px;">New pages</div>' +
+        '<div style="font-size:15px;line-height:24px;padding:6px 0 ' +
+        (sel.upd.length ? '14px' : '0') + ' 0;">' +
+        sel.neu.map(it => A(suLink(it.url), it.name, nameStyle)).join('<br>') + '</div>';
+    }
+    if (sel.upd.length) {
+      out += '<div style="color:#3a5f96;font-size:12px;font-weight:700;text-transform:uppercase;' +
+        'letter-spacing:.6px;">Updated</div>' +
+        '<div style="font-size:15px;line-height:22px;padding-top:6px;">' +
+        sel.upd.map((it, i) =>
+          A(suLink(it.url), it.name, nameStyle) +
+          (it.secs && it.secs.length
+            ? '<div style="font-size:13px;padding:3px 0 ' +
+              (i === sel.upd.length - 1 ? '0' : '9px') + ' 0;">' +
+              it.secs.map(s => A(suLink(it.url, s[0]), s[1], secStyle))
+                .join('<span style="color:#b6b6c0;">&nbsp;|&nbsp;</span>') + '</div>'
+            : '<div style="height:' + (i === sel.upd.length - 1 ? '0' : '9') + 'px;font-size:0;line-height:0;">&nbsp;</div>')
+        ).join('') + '</div>';
+    }
+    out += '</td></tr></table></td></tr>';
+  }
+
+  if (sel.app.length) {
+    out += '<tr><td style="padding:14px 22px 0 22px;">' +
+      '<table width="100%" cellpadding="0" cellspacing="0" border="0" ' +
+      'style="border-collapse:collapse;background:#efeff4;border:1px solid #e3e3ea;">' +
+      '<tr><td style="padding:12px 16px;color:#5d5d68;font-size:13px;line-height:20px;">' +
+      '<strong style="color:#22222a;">In the app:</strong> ' +
+      sel.app.map(it => escHtml(it.name)).join('<br>') + '</td></tr></table></td></tr>';
+  }
+
+  out += '<tr><td style="padding:16px 22px 26px 22px;color:#6b6b77;font-size:13px;line-height:19px;">' +
+    'Missing, wrong, or hard to find? Comment on the page in the wiki and it comes to me. ' +
+    A(suLink(''), 'Open Folio', 'color:#8f2347;') +
+    // The one line aimed at people who cannot use any of the links above.
+    // It goes last and it is emphasised, because a reader who has not
+    // installed Folio has just clicked a page link and got nowhere.
+    '<div style="padding-top:10px;">' +
+    '<strong style="color:#22222a;">Do not have Folio on your PC yet?</strong> ' +
+    A(suAppHome(), 'Set it up here', 'color:#8f2347;font-weight:600;') +
+    '<span style="color:#9a9aa5;">, it takes a minute.</span>' +
+    '</div></td></tr></table>';
+  return out;
+}
+
+// The help page, at the section that explains marking a must read. The
+// address is the app's own note hash, so it survives whatever Folio is
+// hosted at, and lands the reader inside Folio rather than on a file.
+function suHelpLink() {
+  return location.origin + location.pathname + location.search + HELP_HASH;
+}
+
+// The plain-text flavour. Not a fallback nobody sees: it is what lands in
+// a plain-text reply, in Teams' plain paste and in anything that refuses
+// HTML, so it carries the same items in the same order.
+function suEmailText(sel) {
+  const L = [];
+  L.push(SU_SUBJECT.toUpperCase());
+  L.push('');
+  L.push(suOpeningText());
+  if (sel.must.length) {
+    L.push('', 'PLEASE READ');
+    L.push('Your must reads are waiting at the top of your Folio home page. Opening one is what');
+    L.push('clears it. How must reads work: ' + suHelpLink());
+    sel.must.forEach(it => L.push('  ' + it.name + '  (' + it.tag + ')  ' + suLink(it.url)));
+  }
+  if (sel.neu.length) {
+    L.push('', 'NEW PAGES');
+    sel.neu.forEach(it => L.push('  ' + it.name + '  ' + suLink(it.url)));
+  }
+  if (sel.upd.length) {
+    L.push('', 'UPDATED');
+    sel.upd.forEach(it => {
+      L.push('  ' + it.name + '  ' + suLink(it.url));
+      if (it.secs && it.secs.length) L.push('    ' + it.secs.map(s => s[1]).join(', '));
+    });
+  }
+  if (sel.app.length) {
+    L.push('', 'IN THE APP');
+    sel.app.forEach(it => L.push('  ' + it.name));
+  }
+  L.push('', 'Missing, wrong, or hard to find? Comment on the page in the wiki.');
+  L.push('Do not have Folio on your PC yet? Set it up here: ' + suAppHome());
+  return L.join('\n');
+}
+
+function suSelection() {
+  const c = suCandidates();
+  const pick = arr => arr.filter(suIsTicked);
+  return { must: pick(c.must), neu: pick(c.neu), upd: pick(c.upd), app: pick(c.app) };
+}
+
+// ── The tab ──────────────────────────────────────────────────────
+
+function suRowHTML(item, group) {
+  const delayed = suIsDelayed(item);
+  const ticked  = suIsTicked(item);
+  return '<div class="su-row' + (delayed ? ' su-delayed' : '') + '">' +
+    '<label class="su-tick">' +
+      '<input type="checkbox" data-wb-sutick="' + escHtml(item.key) + '"' +
+        (ticked ? ' checked' : '') + (delayed ? ' disabled' : '') + '>' +
+    '</label>' +
+    '<div class="su-main">' +
+      (item.app
+        ? '<div class="su-name-plain">' + escHtml(item.name) + '</div>' +
+          '<div class="su-sub">Version ' + escHtml(item.ver) + '</div>'
+        : '<span class="su-name" data-wb-suopen="' + escHtml(item.url) + '" data-wb-suname="' +
+          escHtml(item.name) + '">' + escHtml(item.name) + '</span>' +
+          (item.tag ? '<span class="su-tag' + (item.tag === 'newly assigned' ? ' su-tag-new' : '') +
+            '">' + escHtml(item.tag) + '</span>' : '') +
+          (item.secs && item.secs.length
+            ? '<div class="su-sub">' + item.secs.map(s => escHtml(s[1])).join(' &middot; ') + '</div>'
+            : '')) +
+    '</div>' +
+    '<div class="su-act">' +
+      (delayed
+        ? '<button class="su-btn" data-wb-suundelay="' + escHtml(item.key) + '">Bring back</button>'
+        : '<button class="su-btn" data-wb-sudelay="' + escHtml(item.key) + '" ' +
+            'title="Real, but not ready to announce. Stays on the list.">Delay</button>' +
+          '<button class="su-btn" data-wb-suskip="' + escHtml(item.key) + '" ' +
+            'title="Too small to mention. Comes back only if the page changes again.">Skip</button>') +
+    '</div>' +
+  '</div>';
+}
+
+function suGroupHTML(label, items, group) {
+  const live = items.filter(it => !suIsDelayed(it));
+  if (!live.length) return '';
+  return '<div class="su-group"><div class="su-group-head">' + escHtml(label) +
+    ' &middot; ' + live.length + '</div><div class="su-rows">' +
+    live.map(it => suRowHTML(it, group)).join('') + '</div></div>';
+}
+
+function suDelayedHTML(c) {
+  const all = suAllItems(c).filter(suIsDelayed);
+  if (!all.length) return '';
+  return '<div class="su-group"><div class="su-group-head">Delayed &middot; ' + all.length +
+    '</div><div class="su-rows">' + all.map(it => suRowHTML(it, 'delay')).join('') + '</div></div>';
+}
+
+function suTabHTML() {
+  const c   = suCandidates();
+  const sel = suSelection();
+  const n   = sel.must.length + sel.neu.length + sel.upd.length + sel.app.length;
+  const nothing = !suAllItems(c).length;
+
+  const bar = '<div class="su-bar">' +
+    '<div class="su-bar-meta">' + (nothing
+      ? 'Nothing waiting. New pages, changed sections and must reads land here as they happen.'
+      : n + ' item' + (n === 1 ? '' : 's') + ' ticked. Copy never clears anything; the list changes ' +
+        'only when you mark something.') + '</div>' +
+    '<button class="su-btn primary" data-wb-sucopy="1"' + (n ? '' : ' disabled') + '>Copy for email</button>' +
+    '<button class="su-btn" data-wb-suoutlook="1">Open in Outlook</button>' +
+    '<button class="su-btn" data-wb-susent="1"' + (n ? '' : ' disabled') + '>Mark sent</button>' +
+    (suUndo ? '<button class="su-btn" data-wb-suundo="1">Undo ' + escHtml(suUndo.label) + '</button>' : '') +
+    '</div>' +
+    (suMsg ? '<div class="su-msg">' + escHtml(suMsg) + '</div>' : '');
+
+  const opening = '<div class="su-field">' +
+    '<div class="su-field-head">Opening <button class="su-reset" data-wb-suopenreset="1">Reset to default</button></div>' +
+    '<textarea id="su-opening" rows="3" maxlength="700">' + escHtml(suOpeningText()) + '</textarea>' +
+    '<div class="su-field-note">Saved in the vault, so it is the same on every PC. The rest of the ' +
+    'wording is fixed so the email reads the same every time.</div></div>';
+
+  const to = '<div class="su-field">' +
+    '<div class="su-field-head">Send to</div>' +
+    '<input id="su-to" type="text" autocomplete="off" placeholder="name@example.com; name@example.com" value="' +
+      escHtml(suData.recipients || '') + '">' +
+    '<div class="su-field-note">Used by Open in Outlook, which addresses a new message and leaves the ' +
+    'body empty. Paste into it after Copy: a mailto link cannot carry formatting.</div></div>';
+
+  const list = nothing ? '' :
+    suGroupHTML('Must read', c.must, 'must') +
+    suGroupHTML('New pages', c.neu, 'neu') +
+    suGroupHTML('Updated', c.upd, 'upd') +
+    suGroupHTML('App updates', c.app, 'app') +
+    suDelayedHTML(c);
+
+  const preview = n
+    ? '<div class="su-group"><div class="su-group-head">Preview</div>' +
+      '<div class="su-preview" id="su-preview">' + suEmailHTML(sel) + '</div></div>'
+    : '';
+
+  return bar + opening + to + list + preview;
+}
+
+function renderStaffUpdateTab() {
+  const bodyEl = $('admin-body');
+  if (!bodyEl) return;
+  if (!atLeast('admin')) { bodyEl.innerHTML = ''; return; }
+  if (!suLoaded) {
+    bodyEl.innerHTML = '<div class="rp-empty" style="padding:22px 12px">Reading the list&hellip;</div>';
+    loadStaffUpdate().then(() => { if (adminActiveTab === 'staff') renderStaffUpdateTab(); });
+    return;
+  }
+  bodyEl.innerHTML = suTabHTML();
+
+  const op = $('su-opening');
+  if (op) {
+    // The preview repaints as you type; the vault write waits for blur.
+    // Writing per keystroke would put a file write behind every character.
+    op.addEventListener('input', () => { suData.opening = op.value; suRepaintPreview(); });
+    op.addEventListener('blur',  () => { saveStaffUpdate(); });
+  }
+  const to = $('su-to');
+  if (to) {
+    to.addEventListener('input', () => { suData.recipients = to.value; });
+    to.addEventListener('blur',  () => { saveStaffUpdate(); });
+  }
+}
+
+// Only the preview, so typing in the opening box never loses the caret
+// and a tick never rebuilds the list under the pointer.
+function suRepaintPreview() {
+  const el = $('su-preview');
+  if (!el) return;
+  const sel = suSelection();
+  el.innerHTML = suEmailHTML(sel);
+}
+
+function suTick(key, on) {
+  if (on) delete suTicks[key]; else suTicks[key] = false;
+  suRepaintPreview();
+  const bar = document.querySelector('.su-bar-meta');
+  const sel = suSelection();
+  const n = sel.must.length + sel.neu.length + sel.upd.length + sel.app.length;
+  if (bar) bar.textContent = n + ' item' + (n === 1 ? '' : 's') + ' ticked. Copy never clears ' +
+    'anything; the list changes only when you mark something.';
+}
+
+// One step back on the last marking action. Skip is the one that loses an
+// item quietly, so the way to make the buttons safe to press is to make
+// them reversible rather than to ask first.
+async function suMark(keys, state_, label) {
+  const prev = {};
+  keys.forEach(k => { prev[k] = suData.marks[k] ? JSON.parse(JSON.stringify(suData.marks[k])) : null; });
+  const c   = suCandidates();
+  const all = suAllItems(c);
+  keys.forEach(k => {
+    const item = all.find(x => x.key === k);
+    if (!item) return;
+    suData.marks[k] = { state: state_, sig: item.sig, at: new Date().toISOString(),
+      by: (state.user && (state.user.name || state.user.email)) || 'Unknown' };
+  });
+  const ok = await saveStaffUpdate();
+  if (!ok) {
+    Object.keys(prev).forEach(k => { if (prev[k]) suData.marks[k] = prev[k]; else delete suData.marks[k]; });
+    suMsg = 'Could not write to the vault, so nothing was marked. Check your folder permission and try again.';
+    suUndo = null;
+  } else {
+    suMsg = '';
+    suUndo = { label, keys: prev };
+  }
+  renderStaffUpdateTab();
+}
+
+async function suUndoLast() {
+  if (!suUndo) return;
+  const keys = suUndo.keys;
+  const now  = {};
+  Object.keys(keys).forEach(k => {
+    now[k] = suData.marks[k] || null;
+    if (keys[k]) suData.marks[k] = keys[k]; else delete suData.marks[k];
+  });
+  const ok = await saveStaffUpdate();
+  if (!ok) {
+    Object.keys(now).forEach(k => { if (now[k]) suData.marks[k] = now[k]; else delete suData.marks[k]; });
+    suMsg = 'Could not write to the vault, so nothing changed.';
+  } else {
+    suMsg = '';
+    suUndo = null;
+  }
+  renderStaffUpdateTab();
+}
+
+async function suMarkSent() {
+  const sel  = suSelection();
+  const keys = [...sel.must, ...sel.neu, ...sel.upd, ...sel.app].map(i => i.key);
+  if (!keys.length) return;
+  await suMark(keys, 'sent', 'mark sent');
+}
+
+async function suCopy(btn) {
+  const sel = suSelection();
+  const n = sel.must.length + sel.neu.length + sel.upd.length + sel.app.length;
+  if (!n) return;
+  const ok = await writeClipboardRich(suEmailHTML(sel), suEmailText(sel));
+  if (ok && typeof showCopiedTip === 'function') showCopiedTip(btn, 'Email copied');
+  suMsg = ok
+    ? 'Copied. Paste into Outlook, send it, then Mark sent. Nothing has left the list yet.'
+    : 'The clipboard refused the copy. Select the preview and copy it by hand.';
+  const m = document.querySelector('.su-msg');
+  if (m) m.textContent = suMsg; else renderStaffUpdateTab();
+}
+
+// mailto carries the addresses and the subject and nothing else. The body
+// is deliberately empty: it is plain text only and capped near 2,000
+// characters by the Windows shell, so a formatted email cannot travel in
+// it. The clipboard does that part.
+// Built apart from the navigation so it can be read back and checked. The
+// two unescapes are cosmetic and safe: an address list is only readable in
+// the Outlook window if @ and ; survive as themselves.
+function suMailtoHref() {
+  const to = (suData.recipients || '').trim();
+  return 'mailto:' + encodeURIComponent(to).replace(/%40/g, '@').replace(/%3B/gi, ';') +
+    '?subject=' + encodeURIComponent(SU_SUBJECT);
+}
+
+function suOpenOutlook() {
+  const to = (suData.recipients || '').trim();
+  try { location.href = suMailtoHref(); } catch (_) {}
+  suMsg = to
+    ? 'Outlook should be opening, addressed and titled. Paste the copy into it.'
+    : 'No addresses saved yet, so the message opens empty. Fill in Send to above.';
+  const m = document.querySelector('.su-msg');
+  if (m) m.textContent = suMsg; else renderStaffUpdateTab();
+}
+
 // ── The reader's half ────────────────────────────────────────────
 // Jayson's call: a reader sees nothing of any of this except a quiet notice
 // on a page carrying a hard failure, and that notice is worked out LIVE for
@@ -10321,6 +11097,11 @@ function wbHistoryReplace(url, hid) {
 //   stacked on top of the one being returned to. That is what stops the loop,
 //   and it is why this needs no "am I in a popstate" flag.
 const HOME_HASH = '#home';
+// S94 -- help.md is not a vault note, so it has no note= address and could
+// not be linked from outside the app at all. The staff update email's
+// "How to mark a page read" has to land ON the instructions rather than
+// near them, so this one hash opens the help page.
+const HELP_HASH = '#help';
 
 function wbHistoryPushHome() {
   const atHome = location.hash === HOME_HASH;
@@ -10366,6 +11147,13 @@ async function wbOpenFromHash(opts) {
   // still sitting there after a Back that was supposed to reach Home.
   if (location.hash === HOME_HASH) {
     openConsoleHome();
+    return true;
+  }
+  // S94 -- same shape as Home: no note= part, so it has to be answered
+  // before the note branch reads it as "no address" and leaves whatever
+  // was on screen sitting there.
+  if (location.hash === HELP_HASH) {
+    openHelpDoc('help.md');
     return true;
   }
   const parsed = parseNoteHash(location.hash);
@@ -12803,7 +13591,10 @@ async function wnSectionMap(raw) {
   const m = {};
   for (const s of wnSplitSections(raw)) {
     if (!s.uid) continue;                       // preamble belongs to the file
-    m[s.uid] = [s.title, await wnHash(s.body.join('\n').trim())];
+    // S94 -- level is the third element. Nothing reads a section record
+    // by length and the change detector compares [1], so a record
+    // written before this still compares equal and no vault re-seeds.
+    m[s.uid] = [s.title, await wnHash(s.body.join('\n').trim()), s.level];
   }
   return m;
 }
@@ -16991,6 +17782,10 @@ function applyThemePrefs() {
 
   s.setProperty('--accent', accent);
   s.setProperty('--accent-bg', hexToRgba(accent, mode === 'dark' ? 0.12 : 0.10));
+  // The mark on a search term. Deliberately stronger than --accent-bg:
+  // that tint is a hover state and disappears against one, and the mark
+  // has to survive sitting INSIDE a hovered row.
+  s.setProperty('--accent-mark', hexToRgba(accent, mode === 'dark' ? 0.30 : 0.20));
   // Tags followed the accent by coincidence before (both were hardcoded
   // to the same blue). Now they follow it on purpose, so a green accent
   // doesn't leave blue tag chips behind.
@@ -19502,50 +20297,64 @@ async function runSearch() {
       '<b>' + escHtml(line.substr(i, q.length)) + '</b>' +
       escHtml(line.slice(i + q.length, i + q.length + 60));
   };
-  const hitRow = (h, showName) => {
-    const idx  = searchHits.length;
-    searchHits.push(h);
-    const body = h.line === null
-      ? `<b>${escHtml(h.name)}</b>`
-      : (showName ? `<span class="s-name">${escHtml(h.name)}</span>` : '') + snippet(h.line);
-    return `<div class="search-hit" data-si="${idx}" onclick="gotoSearchHit(${idx})">${body}</div>`;
+  // S95 — one entry per PAGE, with the lines that matched as its rows, the
+  // shape Saved and Recent already had and the palette now shares. The old
+  // shape repeated the page name above every line, which made three hits in
+  // one page look like three pages.
+  const headRow = (f, count) => {
+    const idx = searchHits.length;
+    searchHits.push({ url: f.url, name: f.name, line: null });
+    return `<div class="search-hit sh-head" data-si="${idx}" onclick="gotoSearchHit(${idx})">` +
+           `<span>${markMatch(f.name, q)}</span>` +
+           (paletteFolderOf(f.url) ? `<span class="s-path">\u00b7 ${escHtml(paletteFolderOf(f.url))}</span>` : '') +
+           (count ? `<span class="sh-n">${count}</span>` : '') + `</div>`;
   };
-  const fileHits = (entry, cap) => {
-    const hits  = [];
-    const lines = entry.text.split('\n');
-    for (let ln = 0; ln < lines.length && hits.length < cap; ln++) {
-      if (lines[ln].toLowerCase().includes(lc)) hits.push({ url: entry.url, name: entry.name, line: lines[ln] });
+  const lineRow = (f, line) => {
+    const idx = searchHits.length;
+    searchHits.push({ url: f.url, name: f.name, line });
+    return `<div class="search-hit sh-line" data-si="${idx}" onclick="gotoSearchHit(${idx})">${snippet(line)}</div>`;
+  };
+  // Every matching line is counted; only the first `cap` are drawn. The count
+  // on the heading is the honest total, which is the whole point of it.
+  const pageBlock = (f, cap) => {
+    const lines = f.text.split('\n');
+    const shown = [];
+    let total = 0;
+    for (let ln = 0; ln < lines.length; ln++) {
+      if (!lines[ln].toLowerCase().includes(lc)) continue;
+      total++;
+      if (shown.length < cap) shown.push(lines[ln]);
     }
-    return hits;
+    if (!total && !f.name.toLowerCase().includes(lc)) return '';
+    return headRow(f, total) + shown.map(l => lineRow(f, l)).join('');
   };
 
   let html = '';
-  // group 1 — the open file
+  // group 1 — the open file, which gets a deeper cap because you are in it
   if (state.activeUrl) {
     const cur = searchIndex.find(f => f.url === state.activeUrl);
-    if (cur) {
-      const rows = fileHits(cur, 20).map(h => hitRow(h, false)).join('');
-      if (rows) html += `<div class="search-group"><span>${escHtml(cur.name)}</span></div>` + rows;
-    }
+    if (cur) html += pageBlock(cur, 20);
   }
   // group 2 — the vault, or one group per vault once the manifest names them
   // (P6). The ranking inside a group is untouched: filename matches first,
   // then content matches. Groups run in vault-name order, and General last.
+  // The vault label only appears when there is more than one vault to tell
+  // apart; with a single vault it said "Vault" above everything and earned
+  // nothing.
   const rest   = searchIndex.filter(f => f.url !== state.activeUrl);
   const groups = vaultsOn()
     ? groupByVault(rest, f => f.url)
-    : [{ id: '', name: vaultLabel(), items: rest }];
+    : [{ id: '', name: '', items: rest }];
 
   groups.forEach(g => {
     let vh = '';
-    g.items.forEach(f => {
-      if (f.name.toLowerCase().includes(lc)) vh += hitRow({ url: f.url, name: f.name, line: null }, true);
-    });
-    g.items.forEach(f => {
+    const named = g.items.filter(f => f.name.toLowerCase().includes(lc));
+    const other = g.items.filter(f => !f.name.toLowerCase().includes(lc));
+    named.concat(other).forEach(f => {
       if (searchHits.length >= 60) return;
-      fileHits(f, 3).forEach(h => { if (searchHits.length < 60) vh += hitRow(h, true); });
+      vh += pageBlock(f, 3);
     });
-    if (vh) html += `<div class="search-group"><span>${escHtml(g.name)}</span></div>` + vh;
+    if (vh) html += (g.name ? `<div class="search-group"><span>${escHtml(g.name)}</span></div>` : '') + vh;
   });
 
   // P9 -- capture only, no viewer yet (the tracker's own wording). Same
@@ -19561,9 +20370,16 @@ async function gotoSearchHit(idx) {
   document.querySelectorAll('#rp-search .search-hit').forEach(el =>
     el.classList.toggle('selected', +el.dataset.si === idx));
   if (h.url !== state.activeUrl) await openFile(h.url, h.name);
-  if (h.line === null) return; // filename match — opening the file is the result
+  if (h.line === null || h.line === undefined) return; // page heading — opening the file is the result
+  revealSearchLine(h.line);
+}
+
+// S95 — lifted out of gotoSearchHit() unchanged so the palette can reveal a
+// line too. It was already the only copy; it was just locked inside the
+// pane's own click handler.
+function revealSearchLine(line) {
   clearChangeHighlights();
-  const text = normalizeMdLine(h.line);
+  const text = normalizeMdLine(line);
   if (text.length < 2) return;
   for (const el of document.querySelectorAll(READER_BLOCKS)) {
     const t = el.textContent.replace(/\s+/g, ' ').trim();
@@ -20332,6 +21148,7 @@ async function bootVault() {
     // knows about a default page before Home's first paint.
     await loadAppSettings();
     await loadVaultCheckDismissals(); // P10 -- the reader notice honours dismissals
+    await loadStaffUpdate();          // S94 -- the tab strip's count needs it
 
     // P6 — the vault folders themselves, one directory listing each, so the
     // tree can show what is inside a vault without the vault's own folder row
@@ -20406,8 +21223,11 @@ async function bootVault() {
     // front door rather than reopening the last note, which is the point of
     // having a front door at all: the last note is one click away in
     // Continue reading, and the vault is not.
-    const deep = parseNoteHash(location.hash);
-    if (deep) {
+    const deep     = parseNoteHash(location.hash);
+    // S94 -- a #help arrival is a link too, and it carries no note=
+    // part, so it has to be named here or it lands on Home instead.
+    const helpLink = location.hash === HELP_HASH;
+    if (deep || helpLink) {
       state.navFromHistory = true;   // suppress the push for the arrival page
       wbOpenFromHash({ fromHistory: true });
     } else {
@@ -21250,6 +22070,7 @@ async function refreshVaultTree() {
   // reaches everyone else's next glance at the app without a reload.
   await loadAppSettings();
   await loadVaultCheckDismissals(); // P10 -- see the note at the other call site
+  await loadStaffUpdate();          // S94 -- see the note at the other call site
 
   // Mark every loaded folder stale so it re-fetches next time it's opened —
   // but leave its cached files/kids/badge count in place until then. Wiping
