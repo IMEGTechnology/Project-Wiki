@@ -388,6 +388,33 @@
     .seg2 button.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
     .seg2 button.locked { color: var(--text-muted); opacity: .55; cursor: not-allowed; }
     .admin-lock { font-size: 9px; }
+
+    /* Admin > Users (S97). The roster rows; the tab reuses .s-select for the
+       access control and .ed-btn for the password, so only the list is new. */
+    .us-intro { padding: 12px 14px 2px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+    .us-sub {
+      padding: 16px 14px 6px; font-size: 10px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .us-list { border-top: 1px solid var(--border); }
+    .us-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 9px 14px; border-bottom: 1px solid var(--border);
+    }
+    .us-row:hover { background: var(--hover); }
+    .us-who { flex: 1; min-width: 0; }
+    .us-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .us-you {
+      margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 10px;
+      font-weight: 600; background: var(--badge-bg); color: var(--text-secondary);
+    }
+    .us-mail { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+    .us-since { font-size: 11px; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .us-row .s-select { width: auto; min-width: 132px; margin-top: 0; padding: 5px 8px; font-size: 12px; }
+    .us-row.is-you .s-select { opacity: 0.55; cursor: not-allowed; }
+    .us-foot { padding: 10px 14px; font-size: 11.5px; line-height: 1.6; color: var(--text-muted); }
+    .us-pw { border-top: 1px solid var(--border-strong); margin-top: 6px; }
+    .us-pw-note { padding: 12px 14px 4px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
     #admin-tabs {
       display: flex; gap: 4px; flex-wrap: wrap;
       padding: 8px 9px; border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -1061,6 +1088,9 @@
       max-width: 100%; min-width: 0;
     }
     .ch-door-lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* S99 -- How it works is the least-used door of the six and reads as a
+       footnote to the other five. Relative, so it follows the base size. */
+    .ch-door-lab.ch-lab-sm { font-size: 92%; }
     .ch-door .icon {
       width: 15px; height: 15px; stroke: currentColor; fill: none;
       stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none;
@@ -1117,7 +1147,7 @@
       display: flex; flex-direction: column; gap: 18px; min-width: 0;
     }
     .ch-grow { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-    .ch-col h4 {
+    .ch-col h4, .ch-sec h4 {
       font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
       color: var(--text-muted); font-weight: 600; margin: 0 0 8px;
       display: flex; align-items: center; gap: 7px;
@@ -1157,7 +1187,30 @@
       font-size: 10.5px; font-weight: 600;
     }
     .ch-empty { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; padding: 6px 0; }
-    .ch-rule { height: 1px; background: var(--border); }
+
+    /* S99 -- the trade-space Home. Sections inside a panel share one height
+       and hand it to whichever one the cursor is on. The PANEL's height never
+       changes, so nothing below it moves and the page never jumps. Heights are
+       written by chTradeApply() at runtime; with nothing measurable (jsdom, a
+       hidden tab, before the first paint) none of it runs and every section
+       keeps its natural height, which still reads correctly. */
+    .ch-trade { gap: 0; }
+    .ch-trade .ch-sec { display: flex; flex-direction: column; min-height: 0; }
+    /* PADDING, never margin. A margin between two sections is panel space and
+       belongs to neither of them, so a cursor crossing it reads as "off both",
+       drops the focus and kills the handover -- which is rule 4 failing again
+       through a styling detail rather than through the code. Only a real
+       render showed it. The sections must touch. */
+    .ch-trade .ch-sec + .ch-sec {
+      padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    .ch-sec-body { min-height: 0; }
+    /* Only once a real height has been written does the body clip or animate.
+       Before that it must not hide anything. */
+    .ch-trade.ch-measured .ch-sec-body {
+      overflow: hidden; transition: height .16s cubic-bezier(.2,0,0,1);
+    }
+    .ch-trade.ch-measured .ch-sec-head { cursor: pointer; }
 
     /* The obligation meters. They hide themselves at zero and come back
        when something new arrives, and they never READ zero while showing --
@@ -1185,19 +1238,13 @@
     .ch-fill.must { background: var(--co-yellow-bd); }
     .ch-fill.onb  { background: var(--co-green-bd); }
     .ch-msub { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
-    .ch-mlist { margin-top: 9px; padding-top: 2px; border-top: 1px solid var(--border); }
     .ch-mdone { font-size: 11px; color: var(--text-muted); padding: 5px 0; }
     .ch-mdone .ch-tick { color: var(--co-green-bd); margin-right: 6px; }
     .ch-clear { font-size: 11.5px; color: var(--text-muted); }
     .ch-clear .ch-tick { color: var(--co-green-bd); margin-right: 7px; }
 
     /* Saved, flat. Same savedItemRowHTML rows the flyout and full pane use
-       (file -- section, color coded), so all three surfaces read alike. */
-    .ch-more {
-      background: none; border: 0; padding: 6px 0 0; margin: 0; cursor: pointer;
-      font: inherit; font-size: 11.5px; color: var(--accent); text-align: left;
-    }
-    .ch-more:hover { text-decoration: underline; }
+       (file, then section, colour coded), so all three surfaces read alike. */
 
     /* Narrow: the rail stacks BELOW the left panel, never beside it at half
        width. Also the arrangement that survives if mobile is ever revisited. */
@@ -4065,7 +4112,7 @@
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.65.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.68.0</button>
       </div>
 
       <div class="ud-actions">
@@ -4497,7 +4544,12 @@
     </div>
   </div>
 
-  <!-- ── Tier unlock / first-time setup modal (S14) ─────── -->
+  <!-- ── Tier unlock / first-time setup modal (S14; restored S98) ─────
+       S97 cut this down to a single "Claim Administrator" prompt and deleted
+       the second password along with the Contributor rung's self-service.
+       That was a replacement where an addition was asked for, so both are
+       back. What is NOT back is where an unlock lands: it writes the
+       person's profile, never this browser. See applyTierSelf(). -->
   <div id="tier-overlay" style="display:none" onclick="closeTierModal()">
     <div id="tier-modal" role="dialog" aria-label="Access" onclick="event.stopPropagation()">
       <div class="cm-title" id="tier-m-title">Unlock Contributor</div>
@@ -4670,9 +4722,12 @@
       <div id="s-vaults"></div>
     </div>
 
-    <!-- Advanced Settings — Access tier (S14, 0.27.0). Replaced the
-         separate "Show review tools" and "Enable editing" toggles: both
-         were the same question asked twice, with no ladder between them. -->
+    <!-- Advanced Settings — Access (S14, 0.27.0; rebuilt S97).
+         Access is no longer chosen here. It belongs to the PERSON, is set by
+         an Administrator in Admin > Users, and arrives with the profile at
+         sign-in. What is left here is the one thing a person can do for
+         themselves: claim Administrator on a vault that has none, which is
+         also the way back in if the last Administrator is removed. -->
     <div class="s-section">
       <div class="s-label s-label-collapsible" id="adv-settings-toggle" onclick="toggleAdvancedSettings()">
         <svg class="s-adv-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -4689,10 +4744,11 @@
           <span class="tier-badge" id="tier-badge">User</span>
         </div>
         <p class="tier-note" id="tier-desc"></p>
+        <p class="tier-note" id="tier-who">Recorded against your name, not this PC, so it follows you to any machine you sign in on. An Administrator can change it in Admin &rarr; Users.</p>
         <div class="tier-warn" id="tier-unarmed" style="display:none">
           <b>Access isn't set up.</b> Every tier is open to anyone using this vault.
-          Switch to Administrator — you won't be asked for a password — and set both
-          passwords to turn the gate on.
+          Switch to Administrator, which will not ask you for a password, then set
+          both passwords below to turn the gate on.
         </div>
         <div id="tier-admin" style="display:none">
           <div class="s-sublabel">Passwords</div>
@@ -4703,10 +4759,10 @@
             </select>
             <button class="ed-btn" id="pw-change">Change…</button>
           </div>
-          <p class="tier-ok" id="pw-msg"></p>
         </div>
-        <!-- Recovery, 0.27.2. Deliberately OUTSIDE #tier-admin: the person who
-             needs this is locked out at User, so hiding it behind the rung
+        <p class="tier-ok" id="pw-msg"></p>
+        <!-- Recovery, 0.27.2. Deliberately visible at every level: the person
+             who needs this is locked out at User, so hiding it behind the rung
              they cannot reach would be the one placement that fails. It is a
              pointer, not a mechanism — the vault already IS the recovery, and
              any reset reachable from this browser without the password would
@@ -4714,10 +4770,10 @@
         <div class="tier-warn" id="tier-recovery">
           <b>Locked out?</b> The passwords are SHA-256 hashes in
           <code>zSystem/auth.json</code> in the vault. Delete that file in Obsidian
-          or in SharePoint and every tier opens again with no prompt, the same as a
-          vault that was never set up. Come back to this tab, switch to
-          Administrator and set both passwords again. Anyone who can be locked out
-          already has the vault access needed to undo it.
+          or in SharePoint and moving up a tier above stops asking for a password,
+          the same as a vault that was never set up. Move yourself to Administrator,
+          then set both passwords again. Anyone who can be locked out already has the
+          vault access needed to undo it.
         </div>
       </div>
     </div>
@@ -4786,8 +4842,6 @@ const state = {
   // B2 -- Home's own two bits of view state. Not persisted on purpose: an
   // expanded meter is a glance, not a setting, and it should not follow
   // someone to another machine or survive a week.
-  chOpenMeter:      null,   // 'must' | 'onb' | null
-  chSavedAll:       false,
   // B2 / R1 -- the right column. Outline is the only resident; a companion
   // is summoned from the page and leaves again the moment a different page
   // opens, which is what stops a stale pane sitting over the next file.
@@ -4829,12 +4883,13 @@ const state = {
   editUrl:      null,  // S9 — file being edited
   editName:     null,  // S9 — its display name
   editOriginal: '',    // S9 — content at editor open (dirty check + stale guard + diff)
-  // S14 access tiers (0.27.0). One ladder replaced the two independent
-  // toggles that used to live here (reviewTools, editingEnabled). tier is
-  // per device in wb_tier; authHashes is the vault's zSystem/auth.json,
-  // null until it has been read (or read and found missing).
+  // S14 access tiers (0.27.0), moved onto the person in S97. tier is
+  // derived from the signed-in profile's `access` field and held here for
+  // the whole app to ask atLeast() against; it is NOT persisted per device
+  // any more. authHashes is the vault's zSystem/auth.json, null until it
+  // has been read (or read and found missing).
   tier:         'user',
-  authHashes:   null,  // { contributor?: hex, admin?: hex } — {} means no file
+  authHashes:   null,  // { admin?: hex } — {} means no file
   authLoaded:   false, // false until the read has been attempted at least once
   reviewChanges: [],   // S14 — [{name,url,changesUrl,entries,unreviewed}]
   cmtOpenCount: 0,     // S14 — vault-wide open comments (badges)
@@ -6596,21 +6651,9 @@ function wbDelegatedClick(e) {
   // came from rather than opening at a fixed point on the screen.
   const chSearch = e.target.closest('[data-wb-chsearch]');
   if (chSearch) { e.preventDefault(); e.stopPropagation(); betaOpenPalette(chSearch); return; }
-  const chMeter = e.target.closest('[data-wb-chmeter]');
-  if (chMeter) {
-    e.preventDefault(); e.stopPropagation();
-    const id = chMeter.dataset.wbChmeter;
-    state.chOpenMeter = (state.chOpenMeter === id) ? null : id;
-    renderConsoleHome(false);
-    return;
-  }
-  const chMore = e.target.closest('[data-wb-chmore]');
-  if (chMore) {
-    e.preventDefault(); e.stopPropagation();
-    state.chSavedAll = !state.chSavedAll;
-    renderConsoleHome(false);
-    return;
-  }
+  // S99 -- the meters expand on hover now. The panel's own click handler is
+  // the touch fallback and it does NOT re-render, so this one is gone; leaving
+  // it here would re-render Home out from under the hover and lose the state.
   const chVault = e.target.closest('[data-wb-chvault]');
   if (chVault) {
     e.preventDefault(); e.stopPropagation();
@@ -8689,7 +8732,11 @@ function chRecentRows() {
     return '<div class="ch-empty">Nothing opened yet on this account. ' +
            'Pages you read show up here.</div>';
   }
-  return list.slice(0, 7).map(r => {
+  // S99 -- the vault's own Home page is dropped from this list. It is the page
+  // the front door stands in for, so listing it here is telling you about the
+  // room you are standing in. Everything else the person opened still shows.
+  return list.filter(r => !/(^|\/)home\.md$/i.test(String(noteAddrKey(r.url) || r.url || '')))
+             .slice(0, 7).map(r => {
     const folder = String(noteAddrKey(r.url) || '').split('/').slice(0, -1)
                      .map(displayNameOf).join(' / ');
     // The recent list has carried a timestamp since it was built, so this
@@ -8706,7 +8753,7 @@ function chRecentRows() {
     return '<div class="ch-item" data-wb-chopen="' + escHtml(r.url) + '" data-wb-chname="' + escHtml(r.name) + '">' +
              '<span class="ch-lead">' + escHtml(when) + '</span>' +
              '<span class="ch-body"><span class="ch-title">' + escHtml(displayFileName(r.name).replace(/\.md$/i, '')) +
-               (folder ? '<span class="ch-why"> \u2014 ' + escHtml(folder) + '</span>' : '') +
+               (folder ? '<span class="ch-why"> \u00b7 ' + escHtml(folder) + '</span>' : '') +
              '</span></span></div>';
   }).join('');
 }
@@ -8724,13 +8771,13 @@ function chNewRows(failed) {
   // Quick pass, 2026-09-05 -- the changed section(s) now ride inline after
   // the file name, same convention as Recently opened's folder suffix:
   // one ellipsis, one line, rather than a second stacked row.
-  return all.slice(0, 6).map(e => {
+  return all.slice(0, 14).map(e => {
     const secs = wnSecSort(e.sections || []).map(s => s[1]);
     const secText = secs.length ? secs.join(', ') : '';
     return '<div class="ch-item" data-wb-chopen="' + escHtml(e.url) + '" data-wb-chname="' + escHtml(e.file) + '">' +
       '<span class="ch-lead">' + escHtml(wnRelative(e.modified)) + '</span>' +
       '<span class="ch-body"><span class="ch-title">' + escHtml(e.name) +
-        (secText ? '<span class="ch-why"> \u2014 ' + escHtml(secText) + '</span>' : '') +
+        (secText ? '<span class="ch-why"> \u00b7 ' + escHtml(secText) + '</span>' : '') +
       '</span>' +
       (e.kind === 'new' ? '<span class="ch-new">new</span>' : '') +
       (e.seen ? '' : '<span class="ch-why">not read yet</span>') +
@@ -8769,13 +8816,227 @@ function renderConsoleHome(scanFailed) {
     chDoorsHTML() +
 
     '<div class="ch-split">' +
-      '<div class="ch-panel">' +
-        '<div class="ch-col"><h4>What\u2019s new' + chUnreadBadge() + '</h4>' + chNewRows(scanFailed) + '</div>' +
-        '<div class="ch-col ch-grow"><h4>Recently opened</h4>' + chRecentRows() + '</div>' +
+      // S99 -- swapped. The vault's two lists that answer "what changed" and
+      // "what did I keep" sit together on the left; everything the person is
+      // on the hook for sits on the right, with Recently opened underneath
+      // taking the slack, because it is the list that can run longest.
+      '<div class="ch-panel ch-trade" id="ch-left">' +
+        chSecHTML('new', 'What\u2019s new' + chUnreadBadge(), chNewRows(scanFailed)) +
+        chSecHTML('saved', 'Saved' + chSavedCount(), chSavedHTML()) +
       '</div>' +
-      '<div class="ch-panel" id="ch-rail">' + chRailHTML() + '</div>' +
+      '<div class="ch-panel ch-trade" id="ch-rail">' + chRailHTML() + '</div>' +
     '</div>';
+
+  chTradeSchedule();
 }
+
+// One section of a trade-space panel: a heading that does not move and a body
+// whose height is the thing being traded. headHTML replaces the <h4> for the
+// two obligation meters, which are their own heading.
+function chSecHTML(key, heading, rows, headHTML) {
+  return '<div class="ch-sec" data-ch-sec="' + key + '">' +
+    '<div class="ch-sec-head">' + (headHTML || '<h4>' + heading + '</h4>') + '</div>' +
+    '<div class="ch-sec-body">' + rows + '</div>' +
+  '</div>';
+}
+
+// ── S99: the trade-space Home ────────────────────────────────────
+// Sections inside a panel share ONE height and hand it to whichever one the
+// cursor is on. The panel's height never changes, so nothing on the page below
+// it moves. Five rules, and every one of them is a defect found by hovering a
+// sample rather than by reasoning about the code:
+//
+//   1. A section never grows past its own content. The leftover stays with its
+//      sibling instead of being thrown away, so a short list leaves no dead
+//      space and the sibling is not forced down to its heading for nothing.
+//   2. Handover between two sections is ONE state change, so both heights move
+//      together. Closing then opening plays as two motions and strands the
+//      cursor between them.
+//   3. The "nothing hidden" guard must never apply to the section ALREADY
+//      open. Once a list is fully shown nothing is hidden, and the guard then
+//      closed it the moment the cursor moved onto one of its own rows.
+//   4. Space comes from BELOW the focused section first. Collapsing a section
+//      ABOVE the cursor drags the cursor's own target upwards out from under
+//      it. Worst with a SHORT list, where the opening is smaller than the
+//      collapse, so the net movement is upward and further than the reach.
+//   5. Only the heading toggles. A click on a row is a click on the page it
+//      names and must not collapse the list under the finger.
+//
+// Nothing here runs without a real measurement: jsdom, a hidden tab and the
+// moment before first paint all measure zero, chTradeMeasure returns null, and
+// every section keeps its natural height, which still reads correctly.
+const CH_TRADE_DELAY = 110;   // before the first open, so a passing mouse is ignored
+const CH_TRADE_DAMP  = 150;   // a release this soon after a change is a wobble
+const CH_TRADE_CEIL  = 0.55;  // an obligation may maximise, not dominate
+let chTradeCache = [];
+let chTradeWired = false;
+const chTrade = { focus: null, panel: null, trail: false, at: 0, timer: null, last: null };
+
+function chTradeSchedule() {
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(chTradeInit);
+  else chTradeInit();
+}
+
+function chTradeInit() {
+  chTradeCache = [];
+  chTrade.focus = null; chTrade.panel = null; chTrade.trail = false; chTrade.last = null;
+  const panels = document.querySelectorAll('.ch-trade');
+  for (let i = 0; i < panels.length; i++) {
+    const m = chTradeMeasure(panels[i]);
+    if (m) { chTradeCache.push(m); chTradeBind(panels[i]); }
+  }
+  chTradeCache.forEach(chTradeApply);
+  if (!chTradeWired) {
+    chTradeWired = true;
+    // The rows move and the cursor does not, so once the motion settles,
+    // re-read what is actually beneath it. RELEASE ONLY: handing focus to a
+    // sibling from here would make a close instantly open its neighbour.
+    document.addEventListener('transitionend', e => {
+      if (!chTrade.last || chTrade.focus === null || !chTrade.panel) return;
+      if (!e.target.classList || !e.target.classList.contains('ch-sec-body')) return;
+      const k = chTradeKeyAt(document.elementFromPoint(chTrade.last.x, chTrade.last.y), chTrade.panel);
+      if (k === null) chTradeSet(chTrade.panel, null);
+    });
+    let rz;
+    window.addEventListener('resize', () => {
+      clearTimeout(rz);
+      rz = setTimeout(() => { if (consoleHomeOn()) chTradeInit(); }, 150);
+    });
+  }
+}
+
+// Measure with nothing forced: natural body heights, and where each row ends.
+function chTradeMeasure(panel) {
+  const secs = Array.prototype.slice.call(panel.querySelectorAll('.ch-sec'));
+  if (!secs.length) return null;
+  panel.classList.remove('ch-measured');
+  secs.forEach(x => { const b = x.querySelector('.ch-sec-body'); if (b) b.style.height = ''; });
+  const cs = getComputedStyle(panel);
+  const inner = panel.clientHeight - parseFloat(cs.paddingTop || 0) - parseFloat(cs.paddingBottom || 0);
+  if (!(inner > 0)) return null;
+  let overhead = 0;
+  const info = [];
+  for (const sec of secs) {
+    const b = sec.querySelector('.ch-sec-body');
+    if (!b) return null;
+    const br = b.getBoundingClientRect();
+    overhead += (sec.offsetHeight - b.offsetHeight) + parseFloat(getComputedStyle(sec).marginTop || 0);
+    info.push({
+      key: sec.getAttribute('data-ch-sec'), sec, body: b, full: b.offsetHeight,
+      ends: Array.prototype.slice.call(b.children).map(c => c.getBoundingClientRect().bottom - br.top),
+    });
+  }
+  const avail = inner - overhead;
+  if (!(avail > 0)) return null;
+  return { panel, secs: info, avail };
+}
+
+function chTradeApply(m) {
+  const f  = (chTrade.panel === m.panel) ? chTrade.focus : null;
+  const by = {}; m.secs.forEach(x => { by[x.key] = x; });
+  const rows = (k, n) => { const x = by[k]; if (!x) return 0; return x.ends[n - 1] || x.full; };
+  const h = {};
+
+  if (by['new'] && by.saved) {
+    // Left: What's new holds five, Saved fills the rest -- or What's new grows
+    // past five on its own when Saved is short. Rule 1 caps both.
+    if (f === 'new')        { h['new'] = Math.min(by['new'].full, m.avail); h.saved  = m.avail - h['new']; }
+    else if (f === 'saved') { h.saved  = Math.min(by.saved.full,  m.avail); h['new'] = m.avail - h.saved;  }
+    else {
+      // At rest BOTH are capped at their own content, so a short list ends
+      // where it ends instead of being padded out to fill the card. Any
+      // surplus simply sits at the bottom, which is what "cards end at their
+      // content" means once the two panels share one height.
+      const newWant = Math.max(rows('new', 5), m.avail - by.saved.full);
+      h['new'] = Math.min(by['new'].full, newWant);
+      h.saved  = Math.min(by.saved.full, m.avail - h['new']);
+    }
+  } else if (by.rec) {
+    // Right: the two obligations borrow from Recently opened, never from each
+    // other when the cursor is travelling downwards. Rule 4.
+    const ceiling = Math.floor(m.avail * CH_TRADE_CEIL);
+    const recMin  = Math.min(rows('rec', 3), m.avail);
+    const mustWant = by.must ? Math.min(rows('must', 4), ceiling) : 0;
+    h.must = (f === 'must' || (f === 'onb' && chTrade.trail)) ? mustWant : 0;
+    h.onb  = (f === 'onb' && by.onb) ? Math.min(rows('onb', 4), ceiling) : 0;
+    if (m.avail - h.must - h.onb < recMin) {
+      // The trail yields first, and in WHOLE rows: a half row reads as a bug.
+      const room = m.avail - h.onb - recMin;
+      let n = 0;
+      if (by.must) while (by.must.ends[n] !== undefined && by.must.ends[n] <= room) n++;
+      h.must = n ? by.must.ends[n - 1] : 0;
+    }
+    h.rec = Math.min(by.rec.full, m.avail - h.must - h.onb);   // same: no stretch
+  }
+
+  m.secs.forEach(x => {
+    if (h[x.key] === undefined) return;
+    x.body.style.height = Math.max(0, Math.round(h[x.key])) + 'px';
+    const mt = x.sec.querySelector('.ch-meter');
+    if (mt) mt.setAttribute('aria-expanded', h[x.key] > 0 ? 'true' : 'false');
+  });
+  m.panel.classList.add('ch-measured');
+}
+
+// Recently opened is the filler and never takes the focus.
+function chTradeKeyAt(el, panel) {
+  const sec = el && el.closest ? el.closest('.ch-sec') : null;
+  if (!sec || !panel || !panel.contains(sec)) return null;
+  const k = sec.getAttribute('data-ch-sec');
+  return (k === 'rec') ? null : k;
+}
+
+function chTradeHidden(panel, k) {
+  for (const m of chTradeCache) {
+    if (m.panel !== panel) continue;
+    for (const x of m.secs) if (x.key === k) return x.full > Math.round(x.body.offsetHeight) + 1;
+  }
+  return false;
+}
+
+function chTradeSet(panel, k) {
+  if (k === null && chTrade.focus !== null && Date.now() - chTrade.at < CH_TRADE_DAMP) return;
+  chTrade.trail = (k === 'onb') && (chTrade.focus === 'must' || chTrade.trail);
+  chTrade.focus = k;
+  chTrade.panel = (k === null) ? null : panel;
+  chTrade.at    = Date.now();
+  chTradeCache.forEach(chTradeApply);
+}
+
+function chTradeBind(panel) {
+  if (panel._chBound) return;
+  panel._chBound = true;
+
+  panel.addEventListener('mousemove', e => {
+    chTrade.last = { x: e.clientX, y: e.clientY };
+    let k = chTradeKeyAt(e.target, panel);
+    const isOpen = (k !== null && k === chTrade.focus && chTrade.panel === panel);
+    if (k !== null && !isOpen && !chTradeHidden(panel, k)) k = null;   // rule 3
+    if (k === chTrade.focus && (k === null || chTrade.panel === panel)) return;
+    clearTimeout(chTrade.timer);
+    if (chTrade.focus !== null && chTrade.panel === panel) chTradeSet(panel, k);   // rule 2
+    else if (k !== null) chTrade.timer = setTimeout(() => chTradeSet(panel, k), CH_TRADE_DELAY);
+  });
+
+  panel.addEventListener('mouseleave', () => {
+    clearTimeout(chTrade.timer);
+    chTrade.last = null;
+    if (chTrade.focus !== null) { chTrade.at = 0; chTradeSet(panel, null); }
+  });
+
+  // Touch fallback. Rule 5: the heading only.
+  panel.addEventListener('click', e => {
+    if (!e.target.closest || !e.target.closest('.ch-sec-head')) return;
+    e.preventDefault(); e.stopPropagation();
+    clearTimeout(chTrade.timer);
+    const k = chTradeKeyAt(e.target, panel);
+    if (k === null) return;
+    if (chTrade.focus !== k && !chTradeHidden(panel, k)) return;
+    chTrade.at = 0;
+    chTradeSet(panel, chTrade.focus === k ? null : k);
+  });
+}
+
 
 function chUnreadBadge() {
   const n = (state.wnEntries || []).filter(e => !e.seen).length;
@@ -8825,10 +9086,12 @@ function chOnbState() {
   return { total: rows.length, done: rows.filter(r => r.done).length, rows };
 }
 
-function chMeterHTML(id, name, done, total, sub, fillClass, listHTML) {
-  const open = state.chOpenMeter === id;
-  return '<div>' +
-    '<button class="ch-meter" data-wb-chmeter="' + id + '" aria-expanded="' + (open ? 'true' : 'false') + '">' +
+// S99 -- the meter is now the section's HEADING and nothing else. The list it
+// used to reveal on click is the section body, revealed by hover, so this
+// returns the button alone. aria-expanded is written by chTradeApply as the
+// height changes, rather than read from a stored open/closed flag.
+function chMeterHTML(id, name, done, total, sub, fillClass) {
+  return '<button class="ch-meter" data-wb-chmeter="' + id + '" aria-expanded="false">' +
       '<span class="ch-mtop">' +
         '<span class="ch-mcaret">' + (open ? '\u25bc' : '\u25b6') + '</span>' +
         '<span class="ch-mname">' + name + '</span>' +
@@ -8836,9 +9099,7 @@ function chMeterHTML(id, name, done, total, sub, fillClass, listHTML) {
       '</span>' +
       '<span class="ch-track"><span class="ch-fill ' + fillClass + '" style="width:' + chFillPct(done, total) + '%"></span></span>' +
       '<span class="ch-msub">' + escHtml(sub) + '</span>' +
-    '</button>' +
-    (open ? '<div class="ch-mlist">' + listHTML + '</div>' : '') +
-  '</div>';
+    '</button>';
 }
 
 // The right rail: what you owe, then what you kept.
@@ -8853,8 +9114,8 @@ function chRailHTML() {
         '<span class="ch-body"><span class="ch-title">' + escHtml(e.name) + '</span></span>' +
         '<span class="ch-lead" style="width:auto">' + escHtml(wnRelative(e.modified)) + '</span>' +
       '</div>').join('');
-    h += chMeterHTML('must', 'Must read', must.done, must.total,
-      must.left.length + ' left to read', 'must', rows);
+    h += chSecHTML('must', '', rows, chMeterHTML('must', 'Must read', must.done, must.total,
+      must.left.length + ' left to read', 'must'));
   }
 
   if (onb.done < onb.total) {
@@ -8866,8 +9127,8 @@ function chRailHTML() {
             '<span class="ch-body"><span class="ch-title">' + escHtml(r.label) + '</span></span></div>'
         : '<div class="ch-item"><span class="ch-body"><span class="ch-title">' + escHtml(r.label) + '</span></span></div>')
     ).join('');
-    h += chMeterHTML('onb', 'Onboarding', onb.done, onb.total,
-      (onb.total - onb.done) + ' left, next is ' + (next ? next.label : ''), 'onb', rows);
+    h += chSecHTML('onb', '', rows, chMeterHTML('onb', 'Onboarding', onb.done, onb.total,
+      (onb.total - onb.done) + ' left, next is ' + (next ? next.label : ''), 'onb'));
   }
 
   // Both meters gone means nothing is owed. Say so once, quietly, rather
@@ -8876,8 +9137,9 @@ function chRailHTML() {
     h = '<div class="ch-clear"><span class="ch-tick">\u2713</span>Nothing owed. You are current.</div>';
   }
 
-  return h + '<div class="ch-rule"></div>' +
-         '<div class="ch-col ch-grow"><h4>Saved' + chSavedCount() + '</h4>' + chSavedHTML() + '</div>';
+  // Recently opened is the filler: it never takes the focus, it simply holds
+  // whatever the two meters above are not using.
+  return h + chSecHTML('rec', 'Recently opened', chRecentRows());
 }
 
 function chSavedGroups() {
@@ -8894,8 +9156,13 @@ function chSavedGroups() {
     }));
 }
 
+// S99 bug fix -- this counted saved PAGES while the list below it renders one
+// row per page PLUS one per saved section, so a page saved whole and also by
+// heading drew twice against a count of 1. That is the duplicate dimmed
+// "Team Directory" Jayson reported. The count now counts the rows it labels.
+// The Saved DOOR still says pages, and says the word, so the two do not clash.
 function chSavedCount() {
-  const n = chSavedGroups().length;
+  const n = chSavedFlyoutRows().length;
   return n ? ' <span class="ch-count">' + n + '</span>' : '';
 }
 
@@ -8904,20 +9171,15 @@ function chSavedCount() {
 // reused rather than re-derived, so both saved surfaces read alike.
 // "Show all" expands in place: going to the full Saved list to read a few
 // more rows costs you the whole front door.
-const CH_SAVED_SHOWN = 3;
+// S99 -- the three-row cap and its Show all button are gone. The section is
+// now sized by the panel, so the cap is a height rather than a count, and one
+// more row of Saved is a hover instead of a click that re-rendered the page.
 function chSavedHTML() {
   const rows = chSavedFlyoutRows();
   if (!rows.length) {
     return '<div class="ch-empty">Nothing saved yet. Save a page or a heading and it lands here.</div>';
   }
-  const all  = state.chSavedAll === true;
-  const show = all ? rows : rows.slice(0, CH_SAVED_SHOWN);
-  let h = show.join('');
-  if (rows.length > CH_SAVED_SHOWN) {
-    h += '<button class="ch-more" data-wb-chmore="1">' +
-         (all ? 'Show fewer \u2190' : 'Show all ' + rows.length + ' \u2192') + '</button>';
-  }
-  return h;
+  return rows.join('');
 }
 
 // P9's "Admin is live for everyone, what gates is each tab inside" call is
@@ -8938,15 +9200,18 @@ function chDoorsHTML() {
   const vaults = vaultsOn() ? state.vaults.filter(v => vaultIsHere(v)).length : 1;
   const showAdmin = reviewAllowed();
 
-  const top = (icon, label) => '<span class="ch-door-top"><svg class="icon" viewBox="0 0 24 24">' +
-    icon + '</svg><span class="ch-door-lab">' + label + '</span></span>';
+  // S99 -- the label is the short form and the full wording rides on the
+  // button's title, so the row reads at a glance and still says what it means
+  // on hover. The <small> sub-line already carries the detail.
+  const top = (icon, label, sm) => '<span class="ch-door-top"><svg class="icon" viewBox="0 0 24 24">' +
+    icon + '</svg><span class="ch-door-lab' + (sm ? ' ch-lab-sm' : '') + '">' + label + '</span></span>';
 
   return '<div class="ch-doors' + (showAdmin ? '' : ' no-admin') + '">' +
-    '<button class="ch-door g-read" data-wb-chdoor="continue">' +
-      top('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>', 'Continue reading') +
+    '<button class="ch-door g-read" data-wb-chdoor="continue" title="Continue reading">' +
+      top('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>', 'Continue') +
       '<small>' + escHtml(last ? displayFileName(last.name).replace(/\.md$/i, '') : 'Nothing opened yet') + '</small></button>' +
-    '<button class="ch-door g-read" data-wb-chdoor="browse">' +
-      top('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>', 'Browse the vault') +
+    '<button class="ch-door g-read" data-wb-chdoor="browse" title="Browse the vault">' +
+      top('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>', 'Browse') +
       '<small>' + (state.defaultPage
         ? escHtml(displayFileName(state.defaultPage.name).replace(/\.md$/i, '')) + ' <span class="ch-tag">(Default)</span>'
         : (pages ? pages + ' page' + (pages === 1 ? '' : 's') +
@@ -8958,8 +9223,8 @@ function chDoorsHTML() {
     '<button class="ch-door g-new" data-wb-chdoor="whatsnew">' +
       top('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 'What\u2019s new') +
       '<small>' + (unread ? unread + ' not read yet' : 'Everything read') + '</small></button>' +
-    '<button class="ch-door g-help" data-wb-chdoor="help">' +
-      top('<circle cx="12" cy="12" r="9"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-2.8 2.4-2.8 4"/><path d="M12 17.5v.01"/>', 'How Folio works') +
+    '<button class="ch-door g-help" data-wb-chdoor="help" title="How Folio works">' +
+      top('<circle cx="12" cy="12" r="9"/><path d="M9.2 9a3 3 0 0 1 5.6 1c0 2-2.8 2.4-2.8 4"/><path d="M12 17.5v.01"/>', 'How it works', true) +
       '<small>Help File</small></button>' +
     (showAdmin ? '<button class="ch-door g-admin" data-wb-chdoor="admin">' +
       top('<path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/>', 'Admin') +
@@ -9559,8 +9824,12 @@ const ADMIN_TABS = [
   // a single file.
   { id: 'comments', label: 'All comments', min: 'contributor', count: () => state.cmtOpenCount },
   { id: 'usage',    label: 'Usage',        min: 'admin' },
-  { id: 'access', label: 'Access', min: 'admin' },
-  // P10 -- Administrator, like Usage and Access. The DOOR still opens at
+  // S97 -- was 'access', a password-rotation form with nothing to list.
+  // Access now belongs to the person, so this is the roster that sets it.
+  // No count: the badge means a queue (Review, comments, vault check), and
+  // a roster is a fact, not a queue -- same reason Usage carries none.
+  { id: 'users', label: 'Users', min: 'admin' },
+  // P10 -- Administrator, like Usage and Users. The DOOR still opens at
   // Contributor (chDoorsHTML) for the same reason it always has; what gates
   // is the tab.
   { id: 'vault',  label: 'Vault check', min: 'admin',
@@ -9595,7 +9864,7 @@ function openAdminScreen(tab) {
 }
 
 function adminTabRenderFns() {
-  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, access: renderAccessTab, vault: renderVaultCheckTab, staff: renderStaffUpdateTab };
+  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, users: renderUsersTab, vault: renderVaultCheckTab, staff: renderStaffUpdateTab };
 }
 
 function renderAdminTab(tab) {
@@ -9627,7 +9896,7 @@ function renderAdminTab(tab) {
   // parked, not discarded -- the rest of the app still looks it up by id
   // (renderReviewTab/renderUsageTab themselves, the badge counts), and
   // innerHTML = '' straight over one would detach it from the document
-  // entirely, where getElementById can never find it again. Access's own
+  // entirely, where getElementById can never find it again. Users' own
   // plain markup carries no id anything else needs, so it's fine to just
   // fall through to the innerHTML overwrite below with everything else.
   const park = $('beta-pane-park');
@@ -9653,33 +9922,182 @@ function renderAdminTab(tab) {
   if (fn) fn();
 }
 
-// Password changes only -- the dropdown that CLIMBS the ladder (User to
-// Contributor to Administrator) stays in Settings, unchanged, reachable at
-// every tier including User, because that's the one door a fresh vault's
-// only way up cannot be locked behind. This tab is the convenience for an
-// Administrator who is already here and wants to rotate a password without
-// a separate trip to Settings -- submitTierModal() and setPwMsg() are the
-// exact same functions Settings' own copy calls, not a second mechanism.
-function renderAccessTab() {
+// ── Admin > Users (S97) ──────────────────────────────────────────
+// The roster, and the only place access is set.
+//
+// Before this, access was a device fact: a tier picked from a dropdown in
+// Settings and unlocked with one of two shared passwords, remembered per
+// browser. Nobody could be listed and nothing could be changed centrally,
+// because the app never knew WHO had unlocked WHAT -- only that this browser
+// had typed a password once.
+//
+// Access is now a field on the person's own profile at zSystem/Users/<email>
+// .json, the record that already carries their name, email, start date and
+// saved pages. It is read at sign-in and applied as the tier. This tab lists
+// every profile in that folder and writes the field back.
+//
+// Three rules shape it:
+//
+//  1. THE PROFILE IS THE ONLY LADDER. Revised at S98: the Settings dropdown
+//     and the Contributor password are BACK, and this rule survives them
+//     intact, because what S40 got caught by was two MECHANISMS each
+//     deciding permission, not two controls. The dropdown grants by calling
+//     usersSetAccess() below, so it is a second door onto this field rather
+//     than a second ladder. The test is not "how many controls" but "how
+//     many places decide", and the answer is still one. If a future session
+//     adds a control that writes access anywhere else, that is the bug.
+//
+//  2. A CHANGE LANDS AT THEIR NEXT OPEN. There is no push in this
+//     architecture and inventing one would mean polling the vault. Sitting
+//     in Folio while someone revokes your access is not the threat model;
+//     this is an interface gate over a shared folder, the same as it always
+//     was, and the vault audit is what covers the rest.
+//
+//  3. WRITE THE FIELD, NEVER THE RECORD. Their saved pages live in the same
+//     file, so the write re-reads it, changes the one key and puts it back.
+//     Writing the row we rendered would hand everyone the saved-pages list
+//     they had at the moment this tab was opened.
+const USERS_SUBDIR = 'zSystem/Users';
+function usersDirUrl() { return LOCAL.on ? USERS_SUBDIR : `${CONFIG.vaultRelPath}/${USERS_SUBDIR}`; }
+
+// Last listing, so a select change can re-render without a second round trip.
+let usersCache = [];
+
+// Same shape as usageListLogs(): one folder listing per mode, and an absent
+// folder reads as an empty roster rather than an error -- a vault nobody has
+// signed in to yet is a valid state, not a fault.
+async function usersListProfiles() {
+  const out = [];
+  const files = [];
+  try {
+    if (LOCAL.on) {
+      const dir = await localGetDir(USERS_SUBDIR);
+      for await (const [name, h] of dir.entries()) {
+        if (h.kind === 'file' && name.endsWith('.json')) files.push(`local:/${USERS_SUBDIR}/${name}`);
+      }
+    } else {
+      const data = await spFetch(
+        `${CONFIG.siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(usersDirUrl())}')/Files?$select=Name,ServerRelativeUrl`
+      );
+      (data.value || []).forEach(f => { if (f.Name.endsWith('.json')) files.push(f.ServerRelativeUrl); });
+    }
+  } catch (_) { return out; }
+
+  for (const url of files) {
+    const txt = await readVaultFileOrNull(url);
+    if (!txt) continue;
+    let rec = null;
+    try { rec = JSON.parse(txt); } catch (_) { continue; } // a corrupt profile is skipped, not fatal
+    if (!rec || !rec.email) continue;
+    out.push({
+      name:    rec.name || rec.email,
+      email:   String(rec.email).toLowerCase(),
+      created: rec.created || '',
+      access:  WB_TIERS.includes(rec.access) ? rec.access : 'user',
+      url,
+    });
+  }
+  out.sort((a, b) => a.name.localeCompare(b.name));
+  return out;
+}
+
+function usersFmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+// Rule 3 above. Returns an error string, or '' on success.
+async function usersSetAccess(email, level) {
+  if (!WB_TIERS.includes(level)) return 'Unknown access level.';
+  const url = userFileUrl(email);
+  const txt = await readVaultFileOrNull(url);
+  if (!txt) return 'That profile is no longer in the vault.';
+  let rec;
+  try { rec = JSON.parse(txt); } catch (_) { return 'That profile could not be read.'; }
+  rec.access = level;
+  await spWriteFile(url, JSON.stringify(rec, null, 2));
+  return '';
+}
+
+function renderUsersTab() {
   const bodyEl = $('admin-body');
   if (!bodyEl) return;
   if (!atLeast('admin')) { bodyEl.innerHTML = ''; return; }
-  bodyEl.innerHTML =
-    '<div class="rp-empty" style="text-align:left;padding:12px 12px 4px">' +
-    'Tier passwords. The dropdown that moves someone up a tier stays in ' +
-    'Settings &rarr; Advanced Settings &rarr; Access, reachable at every ' +
-    'tier -- this is only for changing a password.</div>' +
-    '<div class="tier-row" style="padding:8px 12px">' +
-    '<select class="s-select" id="admin-pw-which">' +
-    '<option value="contributor">Contributor</option>' +
-    '<option value="admin">Administrator</option>' +
-    '</select>' +
-    '<button class="ed-btn" id="admin-pw-change">Change&hellip;</button>' +
-    '</div>' +
-    '<p class="tier-ok" id="admin-pw-msg" style="padding:0 12px"></p>';
-  $('admin-pw-change').addEventListener('click', () => {
-    openTierModal('change', $('admin-pw-which').value);
+  bodyEl.innerHTML = '<div class="us-intro">Reading the vault&hellip;</div>';
+  usersListProfiles().then(list => {
+    if (adminActiveTab !== 'users') return;   // they moved on while it read
+    usersCache = list;
+    usersPaint();
+  }).catch(() => {
+    if (adminActiveTab !== 'users') return;
+    bodyEl.innerHTML = '<div class="us-intro">The people folder could not be read.</div>';
   });
+}
+
+function usersPaint() {
+  const bodyEl = $('admin-body');
+  if (!bodyEl) return;
+  const me = (state.user && state.user.email || '').toLowerCase();
+
+  const rows = usersCache.map(u => {
+    const you = (u.email === me);
+    return '<div class="us-row' + (you ? ' is-you' : '') + '">' +
+      '<div class="us-who">' +
+        '<div class="us-name">' + escHtml(u.name) +
+          (you ? ' <span class="us-you">you</span>' : '') + '</div>' +
+        '<div class="us-mail">' + escHtml(u.email) + '</div>' +
+      '</div>' +
+      '<div class="us-since">' + escHtml(usersFmtDate(u.created)) + '</div>' +
+      '<select class="s-select us-access" data-wb-user="' + escHtml(u.email) + '"' +
+        (you ? ' disabled' : '') + '>' +
+        WB_TIERS.map(t => '<option value="' + t + '"' +
+          (t === u.access ? ' selected' : '') + '>' + TIER_NAME[t] + '</option>').join('') +
+      '</select>' +
+    '</div>';
+  }).join('');
+
+  bodyEl.innerHTML =
+    '<div class="us-intro">Everyone who has opened Folio on this vault. A change takes effect ' +
+      'the next time that person opens Folio.</div>' +
+    '<div class="us-sub">' + usersCache.length +
+      (usersCache.length === 1 ? ' person' : ' people') + '</div>' +
+    '<div class="us-list">' + rows + '</div>' +
+    '<div class="us-foot">People appear here the first time they open Folio and give their ' +
+      'name and email. Your own access is not editable here — claiming or removing an ' +
+      'Administrator is a password job, below. Removing someone is a job for the vault ' +
+      'folder, not Folio.</div>' +
+    '<p class="tier-ok" id="admin-pw-msg" style="padding:0 14px"></p>' +
+    '<div class="us-pw">' +
+      '<div class="us-pw-note"><b>Administrator password.</b> Anyone who knows it can make ' +
+        'themselves an Administrator from Settings &rarr; Advanced Settings. It is how the first ' +
+        'Administrator is set on a new vault, and how anyone gets back in if the last one ' +
+        'here is removed.</div>' +
+      '<div class="tier-row" style="padding:4px 14px 14px">' +
+        '<button class="ed-btn" id="admin-pw-change">' +
+          (authArmed() ? 'Change…' : 'Set a password…') + '</button>' +
+      '</div>' +
+    '</div>';
+
+  bodyEl.querySelectorAll('.us-access').forEach(sel => {
+    sel.addEventListener('change', async e => {
+      const email = e.target.getAttribute('data-wb-user');
+      const want  = e.target.value;
+      const was   = (usersCache.find(u => u.email === email) || {}).access || 'user';
+      e.target.disabled = true;
+      let err = '';
+      try { err = await usersSetAccess(email, want); }
+      catch (ex) { err = 'Could not write to the vault. Check your permissions.'; }
+      e.target.disabled = false;
+      if (err) { e.target.value = was; setPwMsg(err); return; }  // never show a change that did not land
+      const rec = usersCache.find(u => u.email === email);
+      if (rec) rec.access = want;
+      setPwMsg(TIER_NAME[want] + ' set for ' + ((rec && rec.name) || email) + '.');
+    });
+  });
+
+  $('admin-pw-change').addEventListener('click', () => openTierModal('change', 'admin'));
 }
 
 // ── P10 · Vault check ────────────────────────────────────────────
@@ -10181,7 +10599,7 @@ function vcTabHTML() {
   const bar = '<div class="vc-bar"><div class="vc-bar-meta">' +
     (vcRunning ? 'Reading every page&hellip;'
       : r ? escHtml(r.pages + ' page' + (r.pages === 1 ? '' : 's') + ' · checked ' + vcWhen(r.at) + ' · nothing was saved')
-          : 'Not run yet. The check reads every page in the browser and stores nothing but your dismissals.') +
+          : 'No results. The check reads every page in the browser and stores nothing but your dismissals.') +
     '</div><button class="vc-btn primary" data-wb-vcrun="1"' + (vcRunning ? ' disabled' : '') + '>' +
     (vcRunning ? 'Running…' : r ? 'Run again' : 'Run check') + '</button></div>' +
     (vcMsg ? '<div class="vc-msg">' + escHtml(vcMsg) + '</div>' : '');
@@ -10224,6 +10642,23 @@ function renderVaultCheckTab() {
   const bodyEl = $('admin-body');
   if (!bodyEl) return;
   if (!atLeast('admin')) { bodyEl.innerHTML = ''; return; }
+  // S98 -- the check runs on open. P10 shipped it behind a button because the
+  // run reads every page and that felt like something to ask permission for.
+  // It is not: the tab has exactly one purpose, a landing screen whose only
+  // control starts the thing you came for is a step with no decision in it,
+  // and an empty screen reads as broken rather than as ready. Jayson's call.
+  //
+  // Returning here rather than painting first is deliberate: vcRun() sets
+  // vcRunning and calls straight back, so the first thing drawn is "Reading
+  // every page", not a "Not run yet" bar for one frame.
+  //
+  // The three guards are the whole safety of it. vcResults -- a finished run
+  // is not re-run when the tab repaints after a dismissal. vcRunning -- the
+  // re-entry from vcRun() falls through to the paint instead of starting a
+  // second read of the vault. vcMsg -- a run that FAILED leaves its message
+  // and no results, and without this guard that pair would retry forever
+  // against a vault that has gone offline. The button is the retry.
+  if (!vcResults && !vcRunning && !vcMsg) { vcRun(); return; }
   bodyEl.innerHTML = vcTabHTML();
   const inp = $('vc-note-input');
   if (inp) {
@@ -12204,6 +12639,8 @@ async function checkIdentity() {
       try {
         state.user = JSON.parse(text);
         normalizeUserSavedData();
+        applyAccessFromProfile();
+        migrateDeviceTier();   // S98 -- fire and forget; it re-applies if it lands
         // v0.34.0 — the scan is fired from bootVault alongside this call and
         // usually wins the race, so any rename it found is sitting in the queue
         // waiting for a record to apply it to. This is that moment.
@@ -12219,6 +12656,57 @@ async function checkIdentity() {
     return;
   }
   openIdentityModal('');
+}
+
+// S97 — the profile is where access lives, and this is the one place it is
+// turned into a tier. Called on every path that produces a signed-in person:
+// the boot recognize, a returning user, and a first save.
+//
+// A profile with no `access` reads as User. That is every profile written
+// before this version, so the change lands closed rather than open: an
+// Administrator sets people back up from Admin > Users, and the vault's own
+// Administrator password is what gets the first one in. The alternative —
+// treating a missing field as "whatever this browser had last" — is the
+// device fact this session exists to remove.
+function applyAccessFromProfile() {
+  const want = (state.user && WB_TIERS.includes(state.user.access)) ? state.user.access : 'user';
+  applyTier(want, { noScan: true });
+}
+
+// S98 -- the one-time repair for what S97 did on the way past.
+//
+// 0.66.0 moved access onto the profile, and every profile written before it
+// had no `access` field, so everyone read as User the next time they opened
+// Folio. That was a silent demotion nobody asked for, and it is the reason
+// this session exists. S97 deliberately left the old wb_tier key in
+// localStorage ("reverting this file restores the previous behaviour
+// exactly"), which is what makes the repair possible without anyone editing
+// the vault by hand.
+//
+// The rule: a profile with NO access field, on a browser that still
+// remembers the tier its owner last held, gets that tier written onto it,
+// once. A profile that HAS the field is never touched, whatever the key
+// says, because an Administrator's decision outranks a leftover value on
+// somebody's PC. After the write the field exists, so this cannot fire twice
+// and cannot undo a later demotion.
+//
+// Not a second ladder: it writes through usersSetAccess() like everything
+// else, and it only ever restores a rung the person already held.
+async function migrateDeviceTier() {
+  if (!state.user || !state.user.email) return false;
+  if (WB_TIERS.includes(state.user.access)) return false;   // already decided
+  let old = null;
+  try { old = JSON.parse(localStorage.getItem('wb_tier')); } catch (_) { old = null; }
+  // 'user' is the floor, so there is nothing to restore and no write worth
+  // making. An unknown or absent value means this browser never held a tier.
+  if (!WB_TIERS.includes(old) || old === 'user') return false;
+  try {
+    const err = await usersSetAccess(state.user.email, old);
+    if (err) return false;   // a refused write leaves them at User, honestly
+  } catch (_) { return false; }
+  state.user.access = old;
+  applyTier(old, { noScan: true });   // boot runs its own scanBadges()
+  return true;
 }
 
 const ID_NOTE_RECOGNIZED = 'Recognized — this email already has a profile in the vault. Your saved name and saved pages were restored.';
@@ -12257,6 +12745,8 @@ async function saveIdentityFrom(rawName, rawEmail) {
     // was just typed, same as the Session 26 "new PC" simulation.
     state.user = record;
     normalizeUserSavedData();
+    applyAccessFromProfile();
+    await migrateDeviceTier();   // S98 -- see the note on that function
     wbDrainRenameQueue(); // same reason as checkIdentity -- see v0.34.0 note there
     persist('wb_user_email', email);
     updateUserBadge();
@@ -12272,7 +12762,10 @@ async function saveIdentityFrom(rawName, rawEmail) {
   // (a corrected name, say) keeps the date it was opened, or the whole
   // measurement resets itself. Nothing reads it yet; the staged onboarding
   // it exists for is 1.1, and the properties had to land first.
-  record = { name, email, created: new Date().toISOString().slice(0, 10), saved: { pages: {} } };
+  // S97 -- a new profile starts at User. Nobody is handed access by being
+  // first through the door; an Administrator gives it, or they claim
+  // Administrator with the vault's password.
+  record = { name, email, created: new Date().toISOString().slice(0, 10), access: 'user', saved: { pages: {} } };
   // 0.62.1 -- a write that throws or stalls used to leave Continue doing
   // nothing at all. Writing the profile is the access check: a person whose
   // copy of the vault is view-only cannot, and is told to ask for access.
@@ -12287,6 +12780,7 @@ async function saveIdentityFrom(rawName, rawEmail) {
   }
   state.user = record;
   persist('wb_user_email', email);
+  applyAccessFromProfile();
   updateUserBadge();
   updateSavedTabBadge();
   return 'saved';
@@ -12410,21 +12904,21 @@ const TIER_DESC = {
   // reviewAllowed(), unchanged); creating, moving and editing moved up to
   // Administrator, where they stay for the rare fix rather than everyday use.
   contributor: 'Everything above, plus the review tools — accepting changes, clearing flags, acknowledging edits made in Obsidian.',
-  admin:       'Everything above, plus creating, moving and editing pages, task checkboxes, and changing the tier passwords.',
+  admin:       'Everything above, plus creating, moving and editing pages, task checkboxes, and setting everyone\'s access in Admin > Users.',
 };
 const tierRank = t => WB_TIERS.indexOf(t);
 
 // The single question every gated surface asks.
 function atLeast(t) { return tierRank(state.tier) >= tierRank(t); }
 
-// The ADMINISTRATOR password is what arms the gate — not the file existing,
-// and not any password existing. Two rejected alternatives, both worse:
-//   "a tier with no hash is open" fails open in the case that matters, since
-//     a Contributor password with no Administrator password is decorative —
-//     anyone picks Administrator from the dropdown and changes it;
-//   "any hash present locks every tier without one" locks the person who
-//     just set one password out of setting the other.
-// Setup writes both at once, so a half-configured ladder never exists.
+// The ADMINISTRATOR password is what arms the claim — not the file existing.
+// S40 had to reason about half-configured ladders because there were two
+// passwords; S97 left one, so the only two states are "a password is set"
+// and "anyone can claim Administrator", and the second is what a brand new
+// vault has to be or nobody could ever set the first.
+//
+// This no longer gates ACCESS, which lives on each person's profile. It
+// gates the one act of raising your own: claiming Administrator.
 function authArmed() {
   return !!(state.authHashes && state.authHashes.admin);
 }
@@ -12481,10 +12975,30 @@ async function saveVaultAuth() {
 function applyTier(t, opts) {
   if (!WB_TIERS.includes(t)) t = 'user';
   state.tier = t;
-  if (!(opts && opts.noPersist)) persist('wb_tier', t);
+  // S97 -- nothing is persisted here any more. Access is a fact about the
+  // person, read from their profile at sign-in; a copy in localStorage would
+  // be a second source of truth that an Administrator's change could not
+  // reach, and it would hand this browser its old tier for the whole of the
+  // next boot before the profile lands.
   refreshEditControls();
   updateBadges();
   renderTierSettings();
+  // S98 bugfix -- Home's Admin door is baked into the Home MARKUP by
+  // chDoorsHTML(), so it is decided once, when Home is painted. Everything
+  // else a tier change touches is a style flip on a live element, which is
+  // why this was the one surface applyTier() never refreshed.
+  //
+  // It did not matter while the tier was a synchronous device fact. It does
+  // now: access arrives from the vault AFTER boot has already painted Home,
+  // and the S98 repair writes it later still. Home therefore renders with
+  // the door the person had a moment ago, and only a repaint agrees with
+  // the tier they actually hold -- which is exactly the "it appears after I
+  // click Home" report.
+  //
+  // Same guard and same shape as the wnScan() repaint above: if Home is what
+  // is on screen, paint it again. If it is not, it will be built fresh with
+  // the current tier whenever it next opens.
+  if (consoleHomeOn()) renderConsoleHome(false);
   // Unlocking Contributor reveals the review surfaces, which need the sweep
   // that fills them. Skipped on the boot restore (noScan) because boot runs
   // its own scanBadges() once the vault is loaded — calling it here would
@@ -17076,12 +17590,26 @@ async function qbCloseQuestion() {
   }
 }
 
-// ── S14 access tier UI ───────────────────────────────────────────
-// Locked surfaces are not rendered at all — no greyed-out controls in a
-// 220px column — which is how the Review tab already behaved when review
-// tools were off. The one exception is the Settings dropdown itself: every
-// tier is listed, because hiding the rung you are trying to climb makes
-// the ladder unreachable.
+// ── S14 access tier UI (restored S98) ─────────────────
+// Locked surfaces are not rendered at all, rather than rendered greyed out.
+//
+// S98 puts back what S97 removed. The ask had been to ADD a panel where an
+// Administrator sets other people's access; S97 also deleted the way a
+// person changed their own, and reset everyone to User on the way past.
+// The dropdown, the Contributor password and the unlock prompt are back
+// exactly as they were.
+//
+// ONE thing is deliberately not restored: where an unlock lands. It used to
+// write wb_tier, a fact about this browser, which is why nothing could list
+// who had what and why an Administrator could not change it. It now writes
+// the `access` field on the person's own profile, through the same call
+// Admin > Users uses. So there is still one record and one ladder. The
+// dropdown and the Users panel are two DOORS onto the same field, not two
+// mechanisms, which is the distinction S40 got wrong with canEdit().
+//
+// The S14 exception stands: the dropdown lists all three tiers at every
+// tier, because hiding the rung you are trying to climb makes the ladder
+// unreachable.
 function renderTierSettings() {
   const sel = $('sel-tier');
   if (!sel) return;
@@ -17090,26 +17618,55 @@ function renderTierSettings() {
   const badge = $('tier-badge');
   badge.textContent = TIER_NAME[state.tier];
   badge.className   = 'tier-badge' + (state.tier === 'user' ? '' : ' t-' + state.tier);
-
   $('tier-desc').textContent = TIER_DESC[state.tier];
 
   // Only claim "not set up" once the vault has actually been read. Before
-  // that the honest state is "unknown", and flashing a warning at every
-  // boot before the read lands would train people to ignore it.
+  // that the honest state is "unknown", and flashing a warning at every boot
+  // before the read lands would train people to ignore it.
   $('tier-unarmed').style.display = (state.authLoaded && !authArmed()) ? '' : 'none';
   $('tier-admin').style.display   = (state.tier === 'admin') ? '' : 'none';
 }
 
+// The one write that changes your OWN access, and the reason the dropdown is
+// not a second mechanism: it goes through usersSetAccess(), the same call the
+// Users panel makes, against the same field on the same profile.
+//
+// Returns true only when the vault took the write. A refused write changes
+// nothing and puts the dropdown back where it was, because a control showing
+// a tier the vault never granted is the failure this section exists to avoid.
+async function applyTierSelf(want) {
+  if (!state.user || !state.user.email) {
+    setPwMsg('Folio needs to know who you are first. Close Settings and enter your name and email.');
+    renderTierSettings();
+    return false;
+  }
+  try {
+    const err = await usersSetAccess(state.user.email, want);
+    if (err) { setPwMsg(err); renderTierSettings(); return false; }
+  } catch (_) {
+    setPwMsg('Could not write to the vault. Check your permissions.');
+    renderTierSettings();
+    return false;
+  }
+  state.user.access = want;
+  applyTier(want);
+  return true;
+}
+
 $('sel-tier').addEventListener('change', async e => {
   const want = e.target.value;
+  if (want === state.tier) return;
   // Down never asks. Up while the gate is unarmed never asks either: there
   // is nothing to ask for, and refusing would leave a fresh vault with no
   // route to the screen that sets the passwords.
-  if (tierRank(want) <= tierRank(state.tier) || !authArmed()) { applyTier(want); return; }
+  if (tierRank(want) <= tierRank(state.tier) || !authArmed()) {
+    await applyTierSelf(want);
+    return;
+  }
   if (!state.authHashes[want]) {
     // Armed, but this rung has no password. Setup writes both, so this only
     // happens to a hand-edited auth.json. Refuse rather than fail open.
-    alert(`No ${TIER_NAME[want]} password is set. An Administrator needs to set one.`);
+    setPwMsg('No ' + TIER_NAME[want] + ' password is set. An Administrator needs to set one.');
     renderTierSettings();
     return;
   }
@@ -17128,9 +17685,9 @@ let tierModalMode = null, tierModalWhich = null;
 
 function openTierModal(mode, which) {
   tierModalMode  = mode;
-  tierModalWhich = which;
-  const setup = (mode === 'change' && !authArmed());
-  if (setup) tierModalMode = 'setup';
+  tierModalWhich = which || 'admin';
+  // Asking to change a password that was never set is setting it.
+  if (mode === 'change' && !authArmed()) tierModalMode = 'setup';
 
   $('tier-m-err').textContent = '';
   $('tier-pw1').value = '';
@@ -17141,18 +17698,18 @@ function openTierModal(mode, which) {
 
   if (tierModalMode === 'setup') {
     $('tier-m-title').textContent = 'Set up access';
-    $('tier-m-sub').textContent   = 'Set both passwords together. One on its own leaves a door open, because anyone can pick Administrator and change the other.';
+    $('tier-m-sub').textContent   = 'Both passwords are set together. Until they are, every tier is open to anyone using this vault.';
     $('tier-pw1').placeholder     = 'Contributor password';
     $('tier-pw2').placeholder     = 'Administrator password';
     $('tier-m-ok').textContent    = 'Set up';
   } else if (tierModalMode === 'change') {
-    $('tier-m-title').textContent = `Change the ${TIER_NAME[which]} password`;
-    $('tier-m-sub').textContent   = 'Anyone already unlocked on their own PC stays unlocked. The new password applies the next time someone moves up.';
+    $('tier-m-title').textContent = 'Change the ' + TIER_NAME[tierModalWhich] + ' password';
+    $('tier-m-sub').textContent   = 'Nobody already at this tier loses it. The new password applies the next time someone moves up to it.';
     $('tier-pw1').placeholder     = 'New password';
     $('tier-m-ok').textContent    = 'Save';
   } else {
-    $('tier-m-title').textContent = `Unlock ${TIER_NAME[which]}`;
-    $('tier-m-sub').textContent   = `Enter the ${TIER_NAME[which]} password.`;
+    $('tier-m-title').textContent = 'Unlock ' + TIER_NAME[tierModalWhich];
+    $('tier-m-sub').textContent   = 'Enter the ' + TIER_NAME[tierModalWhich] + ' password. It is recorded against your name, not this PC.';
     $('tier-pw1').placeholder     = 'Password';
     $('tier-m-ok').textContent    = 'Unlock';
   }
@@ -17163,7 +17720,7 @@ function openTierModal(mode, which) {
 function closeTierModal() {
   $('tier-overlay').style.display = 'none';
   tierModalMode = tierModalWhich = null;
-  renderTierSettings();   // snaps the dropdown back if an unlock was abandoned
+  renderTierSettings();
 }
 
 async function submitTierModal() {
@@ -17175,19 +17732,22 @@ async function submitTierModal() {
     const h = await tierHash(p1);
     if (h === null) { err.textContent = 'This browser cannot hash passwords here. Open Folio over HTTPS.'; return; }
     if (h !== state.authHashes[tierModalWhich]) {
-      err.textContent = `That is not the ${TIER_NAME[tierModalWhich]} password.`;
+      err.textContent = 'That is not the ' + TIER_NAME[tierModalWhich] + ' password.';
       return;
     }
     const want = tierModalWhich;
+    // S98 -- the password is the gate; the WRITE is what grants. Close first
+    // so a slow vault does not look like a dead button, then let
+    // applyTierSelf() report its own failure into #pw-msg.
     $('tier-overlay').style.display = 'none';
     tierModalMode = tierModalWhich = null;
-    applyTier(want);
+    await applyTierSelf(want);
     return;
   }
 
   if (tierModalMode === 'setup') {
     if (p1.length < 4 || p2.length < 4) { err.textContent = 'Both passwords need at least 4 characters.'; return; }
-    // Two tiers sharing one password is two tiers wearing three names —
+    // Two tiers sharing one password is two tiers wearing three names --
     // the whole reason there are two passwords rather than one.
     if (p1 === p2) { err.textContent = 'Use two different passwords, or the two tiers are the same tier.'; return; }
     const hc = await tierHash(p1), ha = await tierHash(p2);
@@ -17213,22 +17773,22 @@ async function submitTierModal() {
       err.textContent = 'That is the other tier\'s password. Two tiers sharing one is two tiers.';
       return;
     }
-    const prev = { ...state.authHashes };
-    state.authHashes[tierModalWhich] = h;
+    const which = tierModalWhich;
+    const prev  = { ...state.authHashes };
+    state.authHashes = { ...state.authHashes, [which]: h };
     try { await saveVaultAuth(); } catch (e) {
-      state.authHashes = prev;
+      state.authHashes = prev;   // never claim a write that did not land
       err.textContent = 'Could not write to the vault. Check your permissions.';
       return;
     }
-    const which = tierModalWhich;
     closeTierModal();
-    setPwMsg(`${TIER_NAME[which]} password changed.`);
+    setPwMsg(TIER_NAME[which] + ' password changed.');
   }
 }
 
 let pwMsgTimer = null;
 // P9 — two possible homes now: Settings' own copy (#pw-msg) and the Admin
-// screen's Access tab (#admin-pw-msg), and submitTierModal() has no idea
+// screen's Users tab (#admin-pw-msg), and submitTierModal() has no idea
 // which one the click came from. Writes to whichever exists rather than
 // picking one, so the message lands beside whichever control was used.
 function setPwMsg(text) {
@@ -18675,21 +19235,17 @@ function loadPersistedState() {
     const advOpen = localStorage.getItem('wb_adv_open');
     if (advOpen !== null) toggleAdvancedSettings(JSON.parse(advOpen));
 
-    // S14 (0.27.0) — one tier replaces wb_review and wb_editing. Those two
-    // keys are deliberately NOT migrated: they were unprotected checkboxes,
-    // so carrying them forward would hand every existing device Contributor
-    // without ever asking for the password the tier now exists to require.
-    // Everyone starts at User and unlocks once. The old keys are left in
-    // localStorage untouched, so reverting this file restores the previous
-    // behaviour exactly.
-    const savedTier = localStorage.getItem('wb_tier');
-    if (savedTier) {
-      // noPersist: this is a restore, not a change, and applyTier's other
-      // work (badges, edit controls) has to run either way.
-      applyTier(JSON.parse(savedTier), { noPersist: true, noScan: true });
-    } else {
-      renderTierSettings();
-    }
+    // S97 — wb_tier is not restored HERE, and S98 did not change that.
+    // Access arrives with the profile (applyAccessFromProfile), so granting
+    // a device's last tier at boot would grant it before the vault has said
+    // whether the person still has it, and would keep granting it on a PC
+    // whose owner an Administrator has since moved down.
+    //
+    // S98 — the key is now read in exactly one place, migrateDeviceTier(),
+    // and only for a profile that has no access field at all. That is the
+    // one-time repair for the people S97 demoted, not a boot restore: it
+    // writes the tier onto the profile and then never fires again.
+    renderTierSettings();
 
     // 0.60.0 — the strip height used to be restored HERE and again in
     // restoreStripHeights(), two mechanisms for one setting, disagreeing
@@ -19674,7 +20230,21 @@ function migrateOldSavedData() {
 async function saveUserRecord() {
   if (!state.user) return;
   try {
-    await spWriteFile(userFileUrl(state.user.email), JSON.stringify(state.user, null, 2));
+    const url = userFileUrl(state.user.email);
+    // S97 -- this writes the whole in-memory record, and access is the one
+    // field in it that somebody ELSE owns. An Administrator who changes your
+    // access while Folio is open on your desk would otherwise have it undone
+    // by the next page you saved. So the vault's value wins here, always:
+    // this function saves pages and Recent, and has no business deciding
+    // what access anyone has.
+    const live = await readVaultFileOrNull(url);
+    if (live) {
+      try {
+        const rec = JSON.parse(live);
+        if (WB_TIERS.includes(rec.access)) state.user.access = rec.access;
+      } catch (_) { /* unreadable profile -- write ours rather than lose the save */ }
+    }
+    await spWriteFile(url, JSON.stringify(state.user, null, 2));
   } catch (e) {
     console.error('Folio: failed to save', e);
   }
@@ -20064,7 +20634,7 @@ function savedItemRowHTML(url, name, sectionId, sectionTitle, broken) {
   return `<div class="${cls}"${jump}>` +
     `<span class="saved-dot"></span>` +
     `<span class="saved-name">${escHtml(name || url)}</span>` +
-    (sectionId ? `<span class="saved-sec">\u2014 ${escHtml(sectionTitle)}</span>` : '') +
+    (sectionId ? `<span class="saved-sec">\u00b7 ${escHtml(sectionTitle)}</span>` : '') +
     (broken ? `<span class="bm-sub">file not found</span>` : '') +
   `</div>`;
 }

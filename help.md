@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.65.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.68.0**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -433,23 +433,26 @@ Open with **initials badge → Settings**.
 | Show file counts | On | The file-count badge on each folder |
 | Remember collapsed lists | On | Keeps folded list items folded next time you open that note. Off clears what is already saved |
 
-**Advanced Settings**, collapsed by default, holds one thing: **Access**.
+**Advanced Settings**, collapsed by default, is where your **Access** lives.
 
-### Access tiers
+### Access levels
 
-Folio has three levels, each one including everything below it. You pick yours from the dropdown in Advanced Settings.
+Folio has three levels, each one including everything below it.
 
-| Tier | What it adds |
+| Level | What it adds |
 |---|---|
 | **User** | The default. Read, search, outline, bookmarks, comments, What's New, themes. Nothing in the vault changes. |
-| **Contributor** | New, Move, Edit, the Properties fields, clickable task checkboxes, and the Review and All comments tabs in Admin. |
-| **Administrator** | Everything in Admin: Usage, Access, Vault check and Staff update, plus changing the two tier passwords. |
+| **Contributor** | The review tools: accepting changes, clearing flags, acknowledging edits made in Obsidian, and the Review and All comments tabs in Admin. |
+| **Administrator** | New, Move, Edit, the Properties fields, clickable task checkboxes, and the rest of Admin: Usage, Users, Vault check and Staff update. |
 
-**Moving up asks for that tier's password. Moving down never does**, so nobody is stuck in a mode they turned on by accident. Your tier is remembered on **this PC** and does not follow you to another machine.
+**Your access belongs to you, not to the PC you are on.** It is recorded against your name in the vault, so it follows you to every machine you open Folio on. That is the one thing that changed in 0.66.0, and it is why an Administrator can see and set everyone's access in **Admin → Users**.
 
-Anything your tier does not include is not shown at all, rather than shown greyed out.
+There are two ways it gets set, and they write the same thing:
 
-Editing and reviewing are both Contributor, deliberately. Only an edit made in the app writes the change record that Admin's Review tab exists to show, so a reviewer who cannot edit would be looking at an empty list.
+- **You change it yourself** in **Settings → Advanced Settings**, from the Access dropdown. Moving up asks for that level's password. Moving back down never asks.
+- **An Administrator changes it for you** in **Admin → Users**. That reaches you the next time you open Folio.
+
+Anything your level does not include is not shown at all, rather than shown greyed out.
 
 ### Staff update (Administrator)
 
@@ -477,17 +480,23 @@ To send one:
 4. Paste, read it once, send.
 5. **Mark sent**.
 
-### Setting the passwords the first time
+### Users (Administrator)
 
-A new vault has no passwords, and until an Administrator password exists **every tier is open to anyone**. That is the same as the old on/off switches, and Settings says so plainly while it is the case.
+**Admin → Users** lists everyone who has opened Folio on this vault, with the name and email they gave, the date they started, and their access. Change the dropdown beside a name and that is their access from the next time they open Folio.
 
-To turn the gate on: switch to **Administrator** (you will not be asked for anything), then set both passwords together. Setting only one leaves a door open, because anyone can pick Administrator and change the other.
+Access is stored with the person, in their own profile in the vault, so it follows them to every machine. You cannot change your own from this list; use the Access dropdown in **Settings → Advanced Settings** for that, which asks for the password and writes the same field.
 
-Afterwards, an Administrator can change either password from the same place.
+People appear on the list by using Folio, not by being added. Removing someone is a job for the vault folder, not for Folio.
 
-**What this is and is not.** This is an interface gate, not security. The passwords are stored as one-way hashes in your vault at `zSystem/auth.json`, never in the app, which is why an app update never wipes them. But the check runs in your browser and someone determined can get around it, and anyone who can reach the vault can edit any note in Obsidian no matter what tier they picked in Folio. Treat tiers as a way to keep people out of controls they do not need, not as a lock.
+### Setting the password the first time
 
-Both tiers above User are covered in [Help — Editing and Markdown](help-edit.md).
+A new vault has no passwords, and until they exist **every level is open to anyone**: anyone using the vault can pick Administrator from the dropdown and get it. Settings says so plainly while it is the case.
+
+To turn the gate on: **Settings → Advanced Settings**, move yourself to **Administrator** (you will not be asked for anything), then use **Change…** under Passwords. Both passwords are set together, and they have to be different: one password shared by two levels is two levels wearing three names. From then on, moving up a level asks for that level's password.
+
+**What this is and is not.** This is an interface gate, not security. The password is stored as a one-way hash in your vault at `zSystem/auth.json`, never in the app, which is why an app update never wipes it. But the check runs in your browser and someone determined can get around it, and anyone who can reach the vault can edit any note in Obsidian no matter what access they have in Folio. Treat access as a way to keep people out of controls they do not need, not as a lock.
+
+What Contributor and Administrator can do is covered in [Help — Editing and Markdown](help-edit.md).
 
 ### Forgetting a password
 
@@ -495,8 +504,8 @@ There is no reset button, and that is deliberate: a reset you could reach from t
 
 1. Open the vault in Obsidian, or in SharePoint in a browser.
 2. Delete `zSystem/auth.json`.
-3. Switch back to Folio. Every tier opens again with no prompt, exactly like a vault that was never set up.
-4. Go to **Settings → Access**, switch to **Administrator**, and set both passwords again.
+3. Switch back to Folio. Moving up a level stops asking for a password, exactly like a vault that was never set up.
+4. Go to **Settings → Advanced Settings**, move yourself to Administrator, then set both passwords again under Passwords.
 
 You do not need to reload Folio. It re-reads that file whenever you come back to the tab, so tabbing out to delete it and tabbing back is all it takes.
 
@@ -615,7 +624,7 @@ Its target is in a folder you have not expanded yet. Open that folder in Vault F
 The image must be in the attachments subfolder beside the note that references it, with the filename matching exactly, including case. If *every* image in the whole vault is broken, the attachments subfolder name configured in the app does not match what Obsidian actually created — flag it to whoever manages Folio.
 
 **New, Move or Edit will not work**
-You are on the **User** tier. Switch to **Contributor** in **Settings → Advanced Settings → Access**. You will be asked for the Contributor password, unless nobody has set one yet. See [Help — Editing and Markdown](help-edit.md).
+Those are Administrator. Ask whoever runs Folio to set your access in **Admin → Users**, and reopen Folio once they have. **Settings → Advanced Settings** shows the level you are on now. See [Help — Editing and Markdown](help-edit.md).
 
 **A panel width or fold state did not come back**
 Those save to this browser's local storage. Clearing browser data or using a private window resets them. Your bookmarks and profile are unaffected, they live in the vault.
@@ -630,7 +639,7 @@ The vault syncs through OneDrive, so there is a lag between their save and your 
 Switch to another window and back. That is when Folio re-reads the vault. If it still does not appear, OneDrive has not finished syncing the file to your machine yet.
 
 **Nobody knows the Administrator password**
-Nobody is locked out. See [Forgetting a password](#Forgetting a password) — you delete one file in the vault and set them again.
+Nobody is locked out. See [Forgetting a password](#Forgetting a password) — you delete one file in the vault and set it again.
 
 **I think I am on an old version**
 When a newer version is ready, an **up arrow** appears in the header. Click it to reload into it. Installed apps do not always pick up new versions on their own, which is what that arrow is for.

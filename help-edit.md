@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.65.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.68.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -26,11 +26,11 @@
 
 ## 1. Before you start
 
-Folio is **read-only until you move up a tier**, per person and per PC. On the default **User** tier, nothing you click can change a file.
+Folio is **read-only unless your access says otherwise**. On the default **User** level, nothing you click can change a file.
 
-**Settings → Advanced Settings → Access → Contributor.** Open Settings from your initials badge, top right, expand Advanced Settings, and pick Contributor from the dropdown. You will be asked for the Contributor password. If nobody has set one yet, it lets you straight through and Settings tells you so.
+**Editing is Administrator.** You cannot give it to yourself: an Administrator sets it against your name in **Admin → Users**, and it reaches you the next time you open Folio. To see where you stand, open Settings from your initials badge, top right, and expand Advanced Settings.
 
-Dropping back to User never asks for anything.
+Your access follows you to every PC you open Folio on, because it belongs to your name and not to the machine.
 
 That one change turns on all of it:
 

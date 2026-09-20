@@ -8,6 +8,117 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.68.0 — 2026-09-19
+
+**Changed:** `index.html`; `supporting/tests/s99-home-trade.test.js` (new, 45 checks); `supporting/tests/b2-home.test.js` (meter and Saved sections rewritten for the new model, 90 checks).
+
+*Home's two panels now trade space between their own sections on hover, instead of pushing each other down the page.*
+
+### Changed
+
+- **The columns are swapped.** What's new and Saved are the left panel, the two lists that answer "what changed" and "what did I keep". Must read, Onboarding and Recently opened are the right one: everything the person is on the hook for, with the list that can run longest underneath taking the slack.
+- **Sections trade space inside a panel.** The panel's height never changes, so nothing on the page below it moves. What's new holds five and Saved fills the rest, or What's new grows past five when Saved is short. Must read and Onboarding sit collapsed to a heading and a count until hovered. This replaces the click-to-open meters and the Saved three-row cap with its **Show all** button, both of which re-rendered Home to show one more row.
+- **The door labels are shorter.** *Continue reading* reads **Continue**, *Browse the vault* reads **Browse**, both keeping the full wording on hover. *How Folio works* reads **How it works**, set slightly smaller as the footnote of the six.
+- **Page labels use a dot, not an em dash**, on Home and in every saved row.
+- **The vault's own Home page is dropped from Recently opened.** It is the page the front door stands in for.
+
+### Fixed
+
+- **Saved showed a page twice against a count of 1.** The count counted saved PAGES while the list renders one row per page plus one per saved heading, so a page saved both ways drew two rows. The count now counts the rows it labels.
+
+### Notes
+
+- **Five hover rules, and every one is a defect found by hovering a sample rather than by reading code.** A section never grows past its own content, and the leftover stays with its sibling. Handover between two sections is ONE state change, so both heights move together; close-then-open strands the cursor. The nothing-hidden guard must never apply to the section already open, or moving onto its own rows closes it. **Space comes from below first** — collapsing a section ABOVE the cursor drags the target out from under it, worst with a short list where the opening is smaller than the collapse. And only the heading toggles; a row click opens the page.
+- **A margin between two sections is panel space and belongs to neither.** A cursor crossing it read as "off both", dropped the focus and killed the handover. The sections touch, and the separation is padding. Only a real Chromium render showed it; the whole harness stayed green through it.
+- **Nothing runs without a real measurement.** jsdom, a hidden tab and the frame before first paint all measure zero, `chTradeMeasure()` returns null, and every section keeps its natural height. Zero must mean "leave it alone", never "collapse everything".
+- The Vaults status strip and the `#app-banner` slot are guarded by name, after both were missing from the first sample.
+- Six reverts, one per rule plus the damp, all red. Suite 3,258 / 0.
+
+## 0.67.2 — 2026-09-19
+
+**Changed:** `index.html`; `supporting/tests/p10-vault-check.test.js` (section 9b added, one P10 assertion rewritten, 85 checks).
+
+*Admin → Vault check ran itself behind a button. Opening the tab now starts the check.*
+
+### Changed
+
+- **Vault check runs on open.** P10 put the run behind a button because it reads every page, and that felt like something worth asking permission for. It is not: the tab has exactly one purpose, a landing screen whose only control starts the thing you came for is a step with no decision in it, and an empty screen reads as broken rather than as ready. The button stays as **Run again**.
+
+### Notes
+
+- **Three guards, and each one is load-bearing**, because the failure mode of "a render starts work" is a render loop. A finished run is not re-run when the tab repaints after a dismissal. The re-entry from `vcRun()` itself falls through to the paint rather than starting a second read. And a run that FAILED leaves a message with no results, which without its own guard would retry forever against a vault that has gone offline; there, the button is the retry.
+- The first thing drawn is "Reading every page", not an idle bar for one frame: the auto-run returns before painting and lets `vcRun()` paint the running state itself.
+- Reverted twice, once removing the auto-run and once dropping the failed-run guard. Each went red on the checks that name it. Suite 3,211 / 0.
+
+## 0.67.1 — 2026-09-19
+
+**Changed:** `index.html`; `supporting/tests/access-tiers.test.js` (section 4d added, 168 checks).
+
+*Home's Admin door was missing at first open and appeared after clicking Home. One line, and a class of bug worth naming: everything else a tier change touches is a style flip on a live element, but this one is baked into markup.*
+
+### Fixed
+
+- **The Admin door on Home now follows the tier it was painted for.** `chDoorsHTML()` decides the door once, when Home's markup is built, so `applyTier()` refreshing badges and buttons never reached it. That was harmless while the tier was a synchronous fact about the browser. It stopped being harmless when access moved to the vault in 0.66.0: boot paints Home before the profile read lands, and 0.67.0's repair writes the level later still, so Home was showing the door for the level the person held a moment ago. `applyTier()` now repaints Home when Home is what is on screen, using the same guard and the same shape as the existing `wnScan()` repaint.
+
+### Notes
+
+- **The class of bug:** a permission surface rendered into markup rather than toggled on a live element is invisible to every check that asks "is the control shown", because at the moment it is asked the markup already agrees with itself. The door was right, on a Home that was built too early. Worth looking for the next time a tier change looks like it half-applied.
+- Reverted and confirmed red. Suite 3,204 / 0.
+- **Not a bug:** opening Admin does not ask for a password and never has. The door is open at every level and each TAB gates on the level instead. On top of that, no passwords are set on this vault yet, so nothing asks for anything anywhere.
+
+## 0.67.0 — 2026-09-19
+
+**Changed:** `index.html`; `help.md`; `supporting/tests/access-tiers.test.js` (sections 2, 3, 4, 4b, 4c, 5, 7 and 8 rewritten, 163 checks), `supporting/tests/s97-users.test.js` (section 7 inverted, 46 checks).
+
+*0.66.0 was asked for an addition and shipped a replacement. The Users panel was the ask; deleting the way a person changed their own access was not, and resetting everyone to User on the way past was the part that hurt. The panel stays. Everything it removed comes back, and the reset repairs itself.*
+
+### Added
+
+- **The Access dropdown is back in Settings → Advanced Settings.** All three levels listed at every level, because hiding the rung you are climbing makes the ladder unreachable. Moving up asks for that level's password; moving down never asks; an unarmed vault asks for nothing at all. This is the S14 behaviour, unchanged.
+- **The Contributor password is back**, and with it S40's rule that setup writes both passwords together and refuses a matching pair. One password shared by two levels is two levels wearing three names, which is why there were two.
+- **A one-time repair for the 0.66.0 demotion.** 0.66.0 left every pre-existing profile without an `access` field, so everyone silently read as User at their next open. It also left the old `wb_tier` key in localStorage. `migrateDeviceTier()` reads that key for a profile that has no access field, writes the level that person already held onto their profile, and is then finished for good: once the field exists it never fires again, so it cannot undo a demotion an Administrator makes later. Nobody has to edit a JSON file by hand.
+
+### Changed
+
+- **An unlock writes the profile, not the browser.** This is the one piece of 0.66.0 that was right and it is kept. `applyTierSelf()` grants through `usersSetAccess()`, the same call Admin → Users makes, against the same field on the same profile. The dropdown and the Users panel are two doors onto one record, not two mechanisms: S40 already paid for the version of this project where two gates each looked like the other's job, and this is not that. Nothing writes `wb_tier` any more, and the key is read in exactly one place.
+- **A refused write grants nothing.** The password is the gate; the vault write is what grants. If the profile write fails, the level does not change, the dropdown goes back where it was, and Settings says why. A control showing a level the vault never granted is the failure this whole section exists to avoid.
+
+### Removed
+
+- **Claim Administrator.** Not a reversal of the idea, a merge: the dropdown covers every case it covered, including the unarmed vault and the vault whose last Administrator was removed. Two controls for one act was the thing to subtract.
+
+### Notes
+
+- Suite 3,200 / 0. Five reverts through the real call sites, each one red on the checks that name it: the unlock writing localStorage, the repair never firing, the repair losing its already-decided guard, setup dropping the Contributor hash, and a refused write still granting.
+- **The lesson worth keeping:** "update the Access section to Users and list the users" was an addition. It was read as a licence to rebuild the section, and the removal rode along inside a session nobody would have approved on its own. Deleting a working path is its own decision and needs its own yes, even when the code it sits in is already open.
+
+## 0.66.0 — 2026-09-18
+
+**Changed:** `index.html`; `help.md`; `help-edit.md`; `supporting/tests/s97-users.test.js` (new, 42 checks), `supporting/tests/access-tiers.test.js` (sections 3, 4, 5 and 7 rewritten, 136 checks), `supporting/tests/p9-admin.test.js` and `supporting/tests/s92-review.test.js` (tab id), `supporting/tests/render-users.js` (new render harness).
+
+*Access stops being a fact about a PC and becomes a fact about a person. Admin's Access tab, which listed nothing and only rotated passwords, is now Users: everyone who has opened Folio, with their access beside their name, set by an Administrator.*
+
+### Added
+
+- **Admin → Users.** Every profile in `zSystem/Users/` listed with the name and email that person gave, the date they started, and a dropdown carrying their access. Changing it writes to that person's own profile and takes effect the next time they open Folio. There is no push in this architecture and inventing one would mean polling the vault; someone sitting in Folio while their access is revoked is not the threat model, and never was.
+- **Access on the profile.** The record that already held a person's name, email, start date and saved pages now holds `access` as well. It is read at sign-in and applied. Access therefore follows the person to every machine they use, which is what everyone assumed it did already.
+- **Claim Administrator**, in Settings → Advanced Settings, hidden from anyone who already is one. It asks for the Administrator password, or, on a vault where none has been set, lets the first person straight through and says so. This is the one thing a person can still do to their own access, and it exists because the panel that grants access sits behind the rung nobody would hold.
+
+### Changed
+
+- **The write re-reads before it writes.** Saved pages live in the same file as access, so both the Users tab and `saveUserRecord()` take the vault's copy, change their one field and put it back. The tab writing the row it rendered would have handed everyone the saved-pages list they had when it was opened; `saveUserRecord()` writing its whole in-memory record would have undone an Administrator's change the next time that person saved a page.
+- **A profile with no `access` reads as User.** That is every profile written before this release, so the change lands closed. Everyone is set up again from the Users tab, and the vault's Administrator password is what gets the first one in.
+
+### Removed
+
+- **The tier dropdown in Settings**, and with it the S14 exception that kept every rung listed. Nobody climbs from Settings any more.
+- **The Contributor password.** Three tiers needed two passwords when a password was how you reached a tier. Access is granted by name now, so the second one had nothing left to do, and a hash left in an older vault's `auth.json` is dropped rather than migrated. `auth.json` holds one hash.
+- **`wb_tier`.** Access is no longer remembered per device. Restoring it at boot would grant this browser its old level for the whole of boot before the vault could disagree, and would keep granting it to someone an Administrator had moved down. The key is left in localStorage untouched, so reverting this file restores the previous behaviour exactly — the same courtesy S14 paid `wb_review` and `wb_editing`.
+
+### Notes
+
+- The interface-gate ceiling is unchanged and still the honest description: the check runs in the browser, and anyone who can write to the vault can edit their own profile in Obsidian. What moved is where the answer is kept, not how strong it is.
+
 ## 0.65.0 — 2026-09-18
 
 **Changed:** `index.html`; `supporting/tests/s96-reads-and-search.test.js` (new, 61 checks), `supporting/tests/usage-analytics.test.js` (2 checks changed), `supporting/tests/p9-admin.test.js` (3 checks changed, 2 added).
