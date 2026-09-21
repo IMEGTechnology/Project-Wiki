@@ -219,7 +219,7 @@
     html, body {
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
+      font-size: 13.5px;
       background: var(--bg-app);
       color: var(--text-primary);
       overflow: hidden;
@@ -279,7 +279,7 @@
 
     #vault-title {
       flex: 1;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 500;
       color: var(--text-primary);
       white-space: nowrap;
@@ -344,7 +344,7 @@
       flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .bt-kbd {
-      flex-shrink: 0; font-size: 10px; letter-spacing: .04em;
+      flex-shrink: 0; font-size: 10.5px; letter-spacing: .04em;
       color: var(--text-muted); border: 1px solid var(--border);
       border-radius: 3px; padding: 1px 5px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -378,7 +378,7 @@
       border-radius: var(--radius); overflow: hidden;
     }
     .seg2 button {
-      font-family: inherit; font-size: 11px; padding: 4px 11px; border: none;
+      font-family: inherit; font-size: 11.5px; padding: 4px 11px; border: none;
       border-right: 1px solid var(--border); background: transparent;
       color: var(--text-secondary); cursor: pointer; white-space: nowrap;
       display: inline-flex; align-items: center; gap: 5px;
@@ -387,13 +387,13 @@
     .seg2 button:hover:not(.locked) { color: var(--accent); }
     .seg2 button.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
     .seg2 button.locked { color: var(--text-muted); opacity: .55; cursor: not-allowed; }
-    .admin-lock { font-size: 9px; }
+    .admin-lock { font-size: 10.5px; }
 
     /* Admin > Users (S97). The roster rows; the tab reuses .s-select for the
        access control and .ed-btn for the password, so only the list is new. */
-    .us-intro { padding: 12px 14px 2px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+    .us-intro { padding: 12px 14px 2px; font-size: 12.5px; line-height: 1.6; color: var(--text-muted); }
     .us-sub {
-      padding: 16px 14px 6px; font-size: 10px; font-weight: 600; color: var(--text-muted);
+      padding: 16px 14px 6px; font-size: 10.5px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.06em;
     }
     .us-list { border-top: 1px solid var(--border); }
@@ -405,16 +405,16 @@
     .us-who { flex: 1; min-width: 0; }
     .us-name { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
     .us-you {
-      margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 10px;
+      margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 10.5px;
       font-weight: 600; background: var(--badge-bg); color: var(--text-secondary);
     }
     .us-mail { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
-    .us-since { font-size: 11px; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .us-row .s-select { width: auto; min-width: 132px; margin-top: 0; padding: 5px 8px; font-size: 12px; }
+    .us-since { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .us-row .s-select { width: auto; min-width: 132px; margin-top: 0; padding: 5px 8px; font-size: 12.5px; }
     .us-row.is-you .s-select { opacity: 0.55; cursor: not-allowed; }
     .us-foot { padding: 10px 14px; font-size: 11.5px; line-height: 1.6; color: var(--text-muted); }
     .us-pw { border-top: 1px solid var(--border-strong); margin-top: 6px; }
-    .us-pw-note { padding: 12px 14px 4px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+    .us-pw-note { padding: 12px 14px 4px; font-size: 12.5px; line-height: 1.6; color: var(--text-muted); }
     #admin-tabs {
       display: flex; gap: 4px; flex-wrap: wrap;
       padding: 8px 9px; border-bottom: 1px solid var(--border); flex-shrink: 0;
@@ -465,7 +465,7 @@
       padding: 5px 10px; border-radius: var(--radius);
       border: 1px solid var(--border); color: var(--text-secondary);
     }
-    .vc-tally b { font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; }
+    .vc-tally b { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
     .vc-tally.hard { border-color: var(--co-red-bd);    background: var(--co-red-bg); }
     .vc-tally.hard b { color: var(--co-red-txt); }
     .vc-tally.warn { border-color: var(--co-yellow-bd); background: var(--co-yellow-bg); }
@@ -501,14 +501,14 @@
     .vc-note { font-size: 11.5px; color: var(--text-muted); font-style: italic; }
     .vc-act { flex: none; display: flex; gap: 6px; align-items: center; padding-top: 1px; }
     .vc-kind {
-      font-size: 9px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
       border-radius: 3px; padding: 1px 5px; border: 1px solid; white-space: nowrap;
     }
     .vc-k-hard { color: var(--co-red-txt);    border-color: var(--co-red-bd);    background: var(--co-red-bg); }
     .vc-k-warn { color: var(--co-yellow-txt); border-color: var(--co-yellow-bd); background: var(--co-yellow-bg); }
     .vc-k-info { color: var(--co-blue-txt);   border-color: var(--co-blue-bd);   background: var(--co-blue-bg); }
     .vc-btn {
-      font-family: inherit; font-size: 11px; padding: 2px 8px; cursor: pointer;
+      font-family: inherit; font-size: 11.5px; padding: 2px 8px; cursor: pointer;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: transparent; color: var(--text-primary);
     }
@@ -516,7 +516,7 @@
     .vc-btn:disabled { opacity: .5; cursor: default; }
     .vc-noteform { display: flex; gap: 6px; margin-top: 6px; }
     .vc-noteform input {
-      flex: 1; min-width: 0; padding: 5px 9px; font-size: 12px; font-family: inherit;
+      flex: 1; min-width: 0; padding: 5px 9px; font-size: 12.5px; font-family: inherit;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: var(--bg-app); color: var(--text-primary); outline: none;
     }
@@ -560,7 +560,7 @@
       padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius);
       background: var(--bg-reader); color: var(--text-primary); resize: vertical;
     }
-    .su-field-note { font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
+    .su-field-note { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
     .su-group { margin: 16px 12px 0; }
     .su-group-head {
       font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
@@ -581,7 +581,7 @@
     .su-name-plain { font-size: 12.5px; color: var(--text-primary); }
     .su-tag { font-size: 10.5px; color: var(--text-muted); margin-left: 8px; }
     .su-tag-new { color: var(--accent); }
-    .su-sub { font-size: 11px; color: var(--text-muted); }
+    .su-sub { font-size: 11.5px; color: var(--text-muted); }
     .su-act { display: flex; gap: 6px; flex: none; }
     .su-preview {
       border: 1px solid var(--border); border-radius: var(--radius);
@@ -711,7 +711,7 @@
     body.beta-shell #beta-palette.landed #beta-palette-input { padding: 7px 11px; font-size: 12.5px; }
     #beta-palette-list { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 0; }
     .bp-group {
-      margin: 13px 14px 4px; padding: 0; font-size: 11px; font-weight: 600;
+      margin: 13px 14px 4px; padding: 0; font-size: 11.5px; font-weight: 600;
       letter-spacing: .5px; text-transform: uppercase; color: var(--accent);
     }
     .bp-group:first-child { margin-top: 9px; }
@@ -720,7 +720,7 @@
       cursor: pointer; display: flex; flex-direction: column; gap: 2px;
     }
     .bp-row:hover, .bp-row.selected { background: var(--accent-bg); }
-    .bp-sub { font-size: 11px; color: var(--text-muted); }
+    .bp-sub { font-size: 11.5px; color: var(--text-muted); }
     /* S95 — a search result is a PAGE with the lines that matched under it,
        the shape Saved and Recent already had. The page name is the heading
        and the lines are its rows, so a page with four hits is one entry
@@ -732,7 +732,7 @@
       margin: 13px 0 3px; padding: 2px 14px; font-weight: 600; color: var(--accent);
     }
     #beta-palette-list .bp-head:first-child { margin-top: 5px; }
-    .bp-head .bp-path { font-weight: 400; font-size: 11px; }
+    .bp-head .bp-path { font-weight: 400; font-size: 11.5px; }
     .bp-n {
       margin-left: auto; flex: none; font-size: 10.5px; color: var(--text-secondary);
       background: var(--badge-bg); border-radius: 9px; padding: 1px 7px;
@@ -750,10 +750,10 @@
        and two vaults can hold a page with the same name, so the name alone
        stops being an answer once the manifest lands. */
     .bp-path { color: var(--text-muted); font-weight: 400; }
-    .bp-empty { padding: 20px 14px; color: var(--text-muted); font-size: 12px; text-align: center; }
+    .bp-empty { padding: 20px 14px; color: var(--text-muted); font-size: 12.5px; text-align: center; }
     .bt-grow { flex: 1; }
     #bt-crumbs {
-      font-size: 12px; color: var(--text-muted);
+      font-size: 12.5px; color: var(--text-muted);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       min-width: 0; max-width: 46%;
     }
@@ -770,7 +770,7 @@
       height: 28px; padding: 0 10px; flex-shrink: 0;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: transparent; color: var(--text-secondary);
-      font-size: 12px; font-weight: 500; cursor: pointer;
+      font-size: 12.5px; font-weight: 500; cursor: pointer;
     }
     .bt-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--hover); }
     .bt-btn .icon { width: 13px; height: 13px; }
@@ -782,7 +782,7 @@
        the per-heading toolbar already use. Same accent rule those two use. */
     .bt-btn.on { color: var(--accent); }
     .bt-num {
-      font-size: 10px; font-weight: 700; color: var(--accent);
+      font-size: 10.5px; font-weight: 700; color: var(--accent);
       background: var(--accent-wash); border-radius: 8px; padding: 1px 6px;
     }
 
@@ -800,7 +800,7 @@
       font-size: 12.5px; color: var(--text-primary);
     }
     #bt-more-menu button:hover { background: var(--hover); color: var(--accent); }
-    #bt-more-menu .bt-mnum { margin-left: auto; font-size: 10px; color: var(--text-muted); }
+    #bt-more-menu .bt-mnum { margin-left: auto; font-size: 10.5px; color: var(--text-muted); }
     #bt-more-menu .bt-msep { height: 1px; background: var(--border); margin: 5px 4px; }
 
     /* ── Console shell (Section 18, session 1) ─────────────────
@@ -871,6 +871,15 @@
       width: clamp(240px, 22vw, 360px);
       min-width: 240px;
     }
+    /* S103 (item 14) -- the column never runs off the window. Its width is
+       fitted ONCE, when it first appears, against whatever else was open at
+       that moment. Fitted on Home (no tree) and then joined by the tree, it
+       kept its width and pushed the comment box, the note picker and "Post to
+       General" past the right edge. The inline width stays the column's
+       preferred size; when the window is tight it now gives way instead of
+       the page falling off. !important for the reason the rules below give:
+       setPanelOpen() and the fit write min-width inline. */
+    body.beta-shell #right-panel:not(.closed) { flex-shrink: 1; min-width: 240px !important; }
 
     /* 0.44.2 -- B1b item 2. Outline is the only thing this column ever
        shows in the new shell, and there is no manual way to close it, so
@@ -956,7 +965,7 @@
       padding: 26px 0 14px; margin-bottom: 4px;
       border-bottom: 1px solid var(--border);
     }
-    #cd-title { font-size: 17px; font-weight: 650; color: var(--text-primary); letter-spacing: -0.008em; }
+    #cd-title { font-size: 16px; font-weight: 650; color: var(--text-primary); letter-spacing: -0.008em; }
     /* The pane keeps its own scrollport in the slide-over, where it has a
        fixed height to scroll inside. Here #reader is the scrollport and the
        pane simply grows, so its own overflow has to stand down or a long
@@ -1007,12 +1016,12 @@
       width: 100%; padding: 13px 15px;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: var(--bg-reader); color: var(--text-muted);
-      font-size: 14px; cursor: text; text-align: left;
+      font-size: 13.5px; cursor: text; text-align: left;
     }
     #ch-search:hover { border-color: var(--accent); }
     #ch-search .icon { width: 16px; height: 16px; flex-shrink: 0; }
     #ch-search .ch-k {
-      margin-left: auto; font-size: 10px; letter-spacing: .04em;
+      margin-left: auto; font-size: 10.5px; letter-spacing: .04em;
       border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
@@ -1031,7 +1040,7 @@
     .ch-chip {
       display: inline-flex; align-items: center; gap: 7px;
       border: 1px solid var(--border-strong); border-radius: 20px;
-      padding: 4px 12px; font-size: 12px; color: var(--text-primary);
+      padding: 4px 12px; font-size: 12.5px; color: var(--text-primary);
       background: var(--bg-reader); cursor: pointer;
     }
     .ch-chip:hover { border-color: var(--accent); }
@@ -1050,7 +1059,7 @@
        At phase 2, when each vault has its own grant, this becomes the
        reconnect and the markup does not change. */
     .ch-vnote {
-      margin: 10px 0 0; padding: 9px 12px; font-size: 12px;
+      margin: 10px 0 0; padding: 9px 12px; font-size: 12.5px;
       color: var(--text-secondary); background: var(--bg-reader);
       border: 1px solid var(--border); border-left: 2px solid var(--co-yellow-bd);
       border-radius: var(--radius);
@@ -1099,7 +1108,7 @@
        display, so the button's own height never changes and nothing
        below the row moves when it appears. */
     .ch-door small {
-      display: block; color: var(--text-muted); font-size: 11px; font-weight: 400;
+      display: block; color: var(--text-muted); font-size: 11.5px; font-weight: 400;
       line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       max-width: 100%; opacity: 0; max-height: 0; margin-top: 0;
       transition: opacity .18s ease, max-height .18s ease, margin-top .18s ease;
@@ -1124,7 +1133,7 @@
     /* P9 -- .ghost is gone with it: the Admin door was its only user, and
        it's a real door now (see chDoorsHTML()). */
     .ch-soon {
-      font-size: 9px; letter-spacing: .07em; text-transform: uppercase;
+      font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase;
       border: 1px solid var(--border); border-radius: 3px;
       padding: 1px 4px; color: var(--text-muted); margin-left: 5px;
       font-weight: 500; vertical-align: 1px;
@@ -1159,7 +1168,7 @@
     .ch-item:last-child { border-bottom: none; }
     .ch-item:hover .ch-title { color: var(--accent); }
     .ch-lead {
-      font-size: 11px; color: var(--text-muted); flex: none; width: 76px;
+      font-size: 11.5px; color: var(--text-muted); flex: none; width: 76px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .ch-body { min-width: 0; flex: 1; }
@@ -1176,7 +1185,7 @@
        has set a default page. */
     .ch-tag { color: var(--text-muted); font-weight: 400; }
     .ch-new {
-      font-size: 10px; font-weight: 700; margin-left: 6px; padding: 0 5px;
+      font-size: 10.5px; font-weight: 700; margin-left: 6px; padding: 0 5px;
       border-radius: 8px; color: var(--co-green-txt);
       background: var(--co-green-bg); border: 1px solid var(--co-green-bd);
     }
@@ -1221,7 +1230,7 @@
        design, and the endowed progress effect is the reason it works. */
     .ch-meter { display: block; width: 100%; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; }
     .ch-mtop { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-    .ch-mcaret { font-size: 9px; color: var(--text-muted); flex: none; }
+    .ch-mcaret { font-size: 10.5px; color: var(--text-muted); flex: none; }
     .ch-meter[aria-expanded="true"] .ch-mcaret { color: var(--accent); }
     .ch-mname { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
     .ch-mval { margin-left: auto; font-size: 11.5px; color: var(--text-secondary); }
@@ -1238,7 +1247,7 @@
     .ch-fill.must { background: var(--co-yellow-bd); }
     .ch-fill.onb  { background: var(--co-green-bd); }
     .ch-msub { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 6px; }
-    .ch-mdone { font-size: 11px; color: var(--text-muted); padding: 5px 0; }
+    .ch-mdone { font-size: 11.5px; color: var(--text-muted); padding: 5px 0; }
     .ch-mdone .ch-tick { color: var(--co-green-bd); margin-right: 6px; }
     .ch-clear { font-size: 11.5px; color: var(--text-muted); }
     .ch-clear .ch-tick { color: var(--co-green-bd); margin-right: 7px; }
@@ -1278,17 +1287,17 @@
     }
     .ab-mark .icon { width: 19px; height: 19px; }
     .ab-body { min-width: 0; }
-    .ab-body h3 { margin: 0 0 3px; font-size: 15px; font-weight: 650; color: var(--text-primary); }
+    .ab-body h3 { margin: 0 0 3px; font-size: 16px; font-weight: 650; color: var(--text-primary); }
     .ab-body p  { margin: 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; max-width: 52rem; }
     .ab-act { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: none; }
     .ab-cta {
       height: 34px; padding: 0 16px; border-radius: var(--radius);
       border: 1px solid var(--accent); background: var(--accent); color: #fff;
-      font-size: 13px; font-weight: 650; cursor: pointer;
+      font-size: 13.5px; font-weight: 650; cursor: pointer;
     }
     .ab-ghost {
       background: none; border: none; cursor: pointer;
-      font-size: 12px; color: var(--text-muted);
+      font-size: 12.5px; color: var(--text-muted);
     }
     .ab-ghost:hover { color: var(--text-secondary); }
 
@@ -1305,9 +1314,9 @@
       border: 1px solid var(--border-strong);
     }
     .ab.small .ab-mark .icon { width: 11px; height: 11px; }
-    .ab.small .ab-txt { font-size: 12px; color: var(--text-secondary); }
+    .ab.small .ab-txt { font-size: 12.5px; color: var(--text-secondary); }
     .ab.small .ab-cta {
-      height: 24px; padding: 0 10px; font-size: 12px; font-weight: 500;
+      height: 24px; padding: 0 10px; font-size: 12.5px; font-weight: 500;
       background: transparent; color: var(--accent); border-color: var(--border-strong);
     }
 
@@ -1349,7 +1358,7 @@
       flex-shrink: 0;
     }
     #sb-toolbar .sbt-label {
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      font-size: 13.5px; font-weight: 500; color: var(--text-primary);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     #sb-toolbar .sbt-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
@@ -1366,7 +1375,7 @@
       padding: var(--row-pad) 10px;
       cursor: pointer;
       color: var(--text-secondary);
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 500;
       user-select: none;
       white-space: nowrap;
@@ -1415,7 +1424,7 @@
     .folder-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 
     .badge {
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--text-muted);
       background: var(--badge-bg);
       border-radius: 10px;
@@ -1433,7 +1442,7 @@
       padding: var(--row-pad-file) 10px var(--row-pad-file) 0;
       cursor: pointer;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 13.5px;
       white-space: nowrap;
       border-right: 2px solid transparent;
     }
@@ -1460,7 +1469,7 @@
       padding: var(--row-pad) 10px;
       cursor: pointer;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 13.5px;
       white-space: nowrap;
       border-right: 2px solid transparent;
     }
@@ -1477,7 +1486,7 @@
     .sb-vault-head {
       display: flex; align-items: center; gap: 7px;
       padding: 9px 12px 6px 10px; margin-top: 4px;
-      font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+      font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase;
       color: var(--text-muted); font-weight: 600;
       border-top: 1px solid var(--border-strong);
     }
@@ -1499,7 +1508,7 @@
     .sb-msg {
       padding: 16px 12px;
       color: var(--text-muted);
-      font-size: 12px;
+      font-size: 12.5px;
       text-align: center;
       line-height: 1.6;
     }
@@ -1512,7 +1521,7 @@
       border-bottom: 1px solid var(--border);
       position: sticky; top: 0; background: var(--bg-reader); z-index: 5;
     }
-    .ed-note { flex: 1; font-size: 12px; color: var(--text-muted); }
+    .ed-note { flex: 1; font-size: 12.5px; color: var(--text-muted); }
     .ed-btn {
       padding: 5px 14px; font-size: 12.5px; font-family: inherit;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
@@ -1524,7 +1533,7 @@
     .ed-body { position: relative; }
     #ed-hl, #ed-ta {
       font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-      font-size: 13px; line-height: 1.7; tab-size: 2;
+      font-size: 13.5px; line-height: 1.7; tab-size: 2;
       margin: 0; padding: 8px 0; border: 0; width: 100%;
       white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;
       background: transparent;
@@ -1555,7 +1564,7 @@
     .cmt-pill {
       display: inline-block; margin-left: 5px; min-width: 14px; padding: 0 4px;
       border-radius: 7px; background: var(--co-red-bd); color: #fff;
-      font-size: 9.5px; font-weight: 600; line-height: 14px; text-align: center;
+      font-size: 10.5px; font-weight: 600; line-height: 14px; text-align: center;
       vertical-align: 1px;
     }
     /* review view */
@@ -1567,7 +1576,7 @@
     .rv-file-name { flex: 1; font-size: 13.5px; font-weight: 600; color: var(--text-primary); cursor: pointer; }
     .rv-file-name:hover { color: var(--accent); }
     .rv-mark-btn {
-      padding: 4px 12px; font-size: 12px; font-family: inherit; cursor: pointer;
+      padding: 4px 12px; font-size: 12.5px; font-family: inherit; cursor: pointer;
       border: 1px solid var(--co-green-bd); border-radius: var(--radius);
       background: var(--co-green-bg); color: var(--co-green-txt);
     }
@@ -1577,13 +1586,13 @@
     .rv-meta { font-size: 11.5px; color: var(--text-muted); margin-bottom: 6px; }
     .rv-diff {
       font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-      font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; margin: 0;
+      font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; margin: 0;
     }
     .rv-add { display: block; background: var(--co-green-bg); color: var(--co-green-txt); padding: 0 6px; border-radius: 2px; }
     .rv-del { display: block; background: var(--co-red-bg); color: var(--co-red-txt); padding: 0 6px; border-radius: 2px; text-decoration: line-through; }
     .fr-add {
       display: none; margin-left: auto; padding: 0 4px; border: 0; background: none;
-      color: var(--text-muted); cursor: pointer; font-size: 14px; line-height: 1;
+      color: var(--text-muted); cursor: pointer; font-size: 13.5px; line-height: 1;
     }
     .folder-row:hover .fr-add { display: block; }
     .fr-add:hover { color: var(--text-primary); }
@@ -1617,7 +1626,7 @@
     }
     .sr-row:last-child { border-bottom: none; }
     .sr-what { flex: 1 1 auto; min-width: 0; }
-    .sr-name { font-size: 12px; color: var(--text-primary); }
+    .sr-name { font-size: 12.5px; color: var(--text-primary); }
     .sr-from {
       font-size: 10.5px; color: var(--text-muted);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1627,13 +1636,13 @@
        saved"; a name match is a guess. They must not look alike in a list
        someone is about to confirm in bulk. */
     .sr-how {
-      flex: 0 0 auto; font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+      flex: 0 0 auto; font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase;
       padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border-strong);
       color: var(--text-muted);
     }
     .sr-how.exact { color: var(--co-green-txt); border-color: var(--co-green-txt); }
-    .sr-none { font-size: 11px; color: var(--text-muted); padding: 10px 0; }
-    .cm-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
+    .sr-none { font-size: 11.5px; color: var(--text-muted); padding: 10px 0; }
+    .cm-title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; }
     .cm-row { display: flex; gap: 6px; align-items: stretch; }
     .cm-type {
       flex: 0 0 34px; display: flex; align-items: center; justify-content: center;
@@ -1642,7 +1651,7 @@
     }
     .cm-type.active { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
     #cm-name {
-      flex: 1; min-width: 0; padding: 7px 10px; font-size: 13px; font-family: inherit;
+      flex: 1; min-width: 0; padding: 7px 10px; font-size: 13.5px; font-family: inherit;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: var(--bg-app); color: var(--text-primary); outline: none; display: block;
     }
@@ -1664,18 +1673,18 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
     .tier-input {
-      width: 100%; padding: 7px 10px; font-size: 13px; font-family: inherit;
+      width: 100%; padding: 7px 10px; font-size: 13.5px; font-family: inherit;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: var(--bg-app); color: var(--text-primary); outline: none;
       display: block; margin-bottom: 8px; box-sizing: border-box;
     }
     .tier-input:focus { border-color: var(--accent); }
-    .tier-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.45; }
-    .tier-err { font-size: 12px; color: #e06c75; margin: 0; min-height: 15px; }
-    .tier-ok  { font-size: 12px; color: var(--accent); margin: 0; min-height: 15px; }
+    .tier-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 10px; line-height: 1.45; }
+    .tier-err { font-size: 12.5px; color: #e06c75; margin: 0; min-height: 15px; }
+    .tier-ok  { font-size: 12.5px; color: var(--accent); margin: 0; min-height: 15px; }
     .tier-badge {
       display: inline-block; padding: 1px 7px; border-radius: 999px;
-      font-size: 11px; font-weight: 600; letter-spacing: .02em;
+      font-size: 11.5px; font-weight: 600; letter-spacing: .02em;
       border: 1px solid var(--border-strong); color: var(--text-muted);
     }
     .tier-badge.t-contributor { border-color: var(--accent); color: var(--accent); }
@@ -1701,7 +1710,7 @@
       border-radius: 6px;
       background: transparent;
       color: var(--text-secondary);
-      font-size: 12px;
+      font-size: 12.5px;
       font-family: inherit;
       cursor: pointer;
     }
@@ -1804,7 +1813,7 @@
     .badge.accent { background: var(--accent); color: #fff; font-weight: 600; }
 
     .wn-wrap { padding-bottom: 40px; }
-    .wn-sub { font-size: 13px; color: var(--text-secondary); margin: -4px 0 16px; }
+    .wn-sub { font-size: 13.5px; color: var(--text-secondary); margin: -4px 0 16px; }
     .wn-bar {
       display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px;
       padding-bottom: 12px; margin-bottom: 8px;
@@ -1812,27 +1821,27 @@
     }
     .wn-filters { display: flex; gap: 2px; }
     .wn-filter {
-      font-family: inherit; font-size: 12px; padding: 3px 9px;
+      font-family: inherit; font-size: 12.5px; padding: 3px 9px;
       color: var(--text-secondary); background: none;
       border: 1px solid transparent; border-radius: var(--radius); cursor: pointer;
     }
     .wn-filter:hover { background: var(--hover); color: var(--text-primary); }
     .wn-filter.on { color: var(--accent); border-color: var(--accent); }
     .wn-marklink {
-      font-family: inherit; font-size: 12px; padding: 3px 6px; margin-left: auto;
+      font-family: inherit; font-size: 12.5px; padding: 3px 6px; margin-left: auto;
       color: var(--text-muted); background: none; border: none; cursor: pointer;
       text-decoration: underline; text-underline-offset: 2px;
     }
     .wn-marklink:hover { color: var(--text-primary); }
-    .wn-note { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.5; }
-    .wn-empty { font-size: 13px; color: var(--text-muted); padding: 24px 0; }
+    .wn-note { font-size: 12.5px; color: var(--text-muted); margin: 0 0 12px; line-height: 1.5; }
+    .wn-empty { font-size: 13.5px; color: var(--text-muted); padding: 24px 0; }
     .wn-group { margin-bottom: 22px; }
     .wn-group-head {
       display: flex; align-items: center; gap: 8px;
       padding: 0 0 6px; margin-bottom: 2px;
     }
     .wn-group-title {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
       text-transform: uppercase; color: var(--text-muted);
     }
     .wn-row {
@@ -1874,7 +1883,7 @@
       display: flex; flex-wrap: wrap; gap: 4px;
     }
     .wn-sec {
-      font: inherit; font-size: 12px; line-height: 1.3;
+      font: inherit; font-size: 12.5px; line-height: 1.3;
       color: var(--text-secondary); background: var(--bg-secondary);
       border: 1px solid var(--border); border-radius: 5px;
       padding: 2px 8px; cursor: pointer; max-width: 100%;
@@ -1892,7 +1901,7 @@
     .wn-sec.read:hover { opacity: 1; background: var(--hover); color: var(--text-secondary); }
     .wn-sec-more { font-size: 11.5px; color: var(--text-muted); align-self: center; padding-left: 2px; }
     .wn-pill {
-      font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
       text-transform: uppercase; padding: 1px 6px; border-radius: 9px;
       border: 1px solid;
     }
@@ -1924,7 +1933,7 @@
     .pp-ro { font-size: 12.5px; color: var(--text-secondary); padding: 2px 0; }
     .pp-check { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-primary); }
     .pp-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-    .pp-tag { font-size: 11px; padding: 1px 8px; border-radius: 9px; color: var(--tag-color); background: var(--tag-bg); }
+    .pp-tag { font-size: 11.5px; padding: 1px 8px; border-radius: 9px; color: var(--tag-color); background: var(--tag-bg); }
     /* accept / reject */
     .rv-accept-btn { border-color: var(--co-green-bd); background: var(--co-green-bg); color: var(--co-green-txt); padding: 3px 10px; font-size: 11.5px; }
     .rv-reject-btn { border-color: var(--co-red-bd); background: var(--co-red-bg); color: var(--co-red-txt); padding: 3px 10px; font-size: 11.5px; }
@@ -1983,7 +1992,7 @@
        that wraps makes the bar taller, which is the one-shape break by
        another route, so every one of them is nowrap. */
     #rvb-acts button, #rvb-walk button {
-      white-space: nowrap; font-family: inherit; font-size: 11px; padding: 3px 9px;
+      white-space: nowrap; font-family: inherit; font-size: 11.5px; padding: 3px 9px;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: transparent; color: var(--text-secondary); cursor: pointer;
     }
@@ -2000,7 +2009,7 @@
     .rvb-chip.due  { border-color: var(--co-yellow-bd); color: var(--co-yellow-txt); background: var(--co-yellow-bg); }
     .rvb-chip.sec  { border-color: var(--co-blue-bd);   color: var(--co-blue-txt);   background: var(--co-blue-bg); }
     #rvb-x { flex: none; border: 0; background: none; cursor: pointer;
-      color: var(--text-muted); font-size: 12px; padding: 2px 6px; }
+      color: var(--text-muted); font-size: 12.5px; padding: 2px 6px; }
     #rvb-x:hover { color: var(--text-primary); }
     #rvb-body {
       flex-shrink: 0; height: 38vh; min-height: 160px; overflow-y: auto; /* S92: was 180px, too small to read a diff */
@@ -2015,18 +2024,18 @@
     .rvb-pg { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 8px 14px; }
     .rvb-pf { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .rvb-pf label { font-size: 10px; font-weight: 700; letter-spacing: .05em;
+    .rvb-pf label { font-size: 10.5px; font-weight: 700; letter-spacing: .05em;
       text-transform: uppercase; color: var(--text-muted); }
     .rvb-pf input[type=text], .rvb-pf input[type=date],
     .rvb-pf input[type=number], .rvb-pf select {
-      font: inherit; font-size: 12px; padding: 4px 7px; min-width: 0;
+      font: inherit; font-size: 12.5px; padding: 4px 7px; min-width: 0;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: var(--bg-app); color: var(--text-primary); outline: none;
       color-scheme: var(--input-scheme);
     }
     .rvb-pf.gap input, .rvb-pf.gap select {
       border-color: var(--co-yellow-bd); background: var(--co-yellow-bg); }
-    .rvb-chk { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 4px 0; }
+    .rvb-chk { display: flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 0; }
     .rvd-gap   { color: var(--co-red-txt); font-style: italic; }
 
     /* The question and escalation banner (J2b). The thread and the reply box
@@ -2036,17 +2045,17 @@
       padding: 8px 10px; background: var(--bg-app); }
     .rvb-qcard.reply { margin-left: 22px; background: transparent; }
     .rvb-qmeta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-      font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+      font-size: 11.5px; color: var(--text-muted); margin-bottom: 4px; }
     .rvb-qwho { font-weight: 650; color: var(--text-secondary); }
     .rvb-qbody { font-size: 12.5px; color: var(--text-primary); line-height: 1.55;
       white-space: pre-wrap; word-break: break-word; }
     .rvb-qreply { display: flex; gap: 8px; align-items: flex-start; }
-    .rvb-qreply textarea { flex: 1; font: inherit; font-size: 12px; min-height: 46px;
+    .rvb-qreply textarea { flex: 1; font: inherit; font-size: 12.5px; min-height: 46px;
       resize: vertical; padding: 6px 8px; border: 1px solid var(--border-strong);
       border-radius: var(--radius); background: var(--bg-app);
       color: var(--text-primary); outline: none; }
     .rvb-qreply button, .rvb-qfields button {
-      font-family: inherit; font-size: 11px; padding: 3px 9px; align-self: flex-start;
+      font-family: inherit; font-size: 11.5px; padding: 3px 9px; align-self: flex-start;
       border: 1px solid var(--border); border-radius: var(--radius);
       background: transparent; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
     .rvb-qreply button:hover, .rvb-qfields button:hover { border-color: var(--accent); color: var(--accent); }
@@ -2076,7 +2085,7 @@
     .wb-ch-add { background: var(--co-green-bg);  box-shadow: inset 3px 0 0 var(--co-green-bd);  border-radius: 3px; }
     .wb-ch-mod { background: var(--co-yellow-bg); box-shadow: inset 3px 0 0 var(--co-yellow-bd); border-radius: 3px; }
     .wb-ch-add::after, .wb-ch-mod::after {
-      margin-left: 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+      margin-left: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em;
       padding: 1px 6px; border-radius: 8px; vertical-align: middle;
     }
     .wb-ch-add::after { content: 'NEW SECTION'; background: var(--co-green-bg);  color: var(--co-green-txt);  border: 1px solid var(--co-green-bd); }
@@ -2092,7 +2101,7 @@
     }
     .wb-ch-ghost .wb-ch-gut { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 700; text-decoration: none; }
     .wb-ch-tag {
-      padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700;
+      padding: 1px 6px; border-radius: 8px; font-size: 10.5px; font-weight: 700;
       letter-spacing: 0.05em; background: var(--co-red-bd); color: #fff; text-decoration: none;
     }
     .wb-ch-hint { margin-left: auto; font-size: 10.5px; color: var(--text-muted); text-decoration: none; }
@@ -2107,7 +2116,7 @@
       justify-content: center;
       height: 100%;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 13.5px;
     }
 
     #reader-content {
@@ -2600,7 +2609,7 @@
     }
     #rpt-body {
       width: 100%; box-sizing: border-box; min-height: 96px; resize: vertical;
-      font-family: inherit; font-size: 13px; line-height: 1.5;
+      font-family: inherit; font-size: 13.5px; line-height: 1.5;
       padding: 8px 10px; border-radius: var(--radius);
       border: 1px solid var(--border-strong);
       background: var(--bg-sidebar); color: var(--text-primary);
@@ -2649,7 +2658,7 @@
     #user-badge {
       background: var(--accent-bg);
       color: var(--accent);
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       border-radius: 50%;
     }
@@ -2667,7 +2676,7 @@
       display: none;
     }
     #user-dropdown.open { display: block; }
-    .ud-name  { font-size: 13px; font-weight: 500; color: var(--text-primary); margin: 0; }
+    .ud-name  { font-size: 13.5px; font-weight: 500; color: var(--text-primary); margin: 0; }
     .ud-email { font-size: 11.5px; color: var(--text-secondary); margin: 0 0 8px; }
     .ud-actions { border-top: 1px solid var(--border); padding-top: 6px; display: flex; flex-direction: column; }
     .ud-item {
@@ -2684,12 +2693,12 @@
       border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
       padding: 8px 2px; margin: 4px 0 6px; display: flex; flex-direction: column; gap: 5px;
     }
-    .health-row { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+    .health-row { display: flex; align-items: center; gap: 7px; font-size: 12.5px; }
     .health-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: var(--co-red-txt); }
     .health-dot.ok { background: var(--co-green-txt); }
     .health-label { flex: 1; color: var(--text-primary); }
     .health-fix {
-      font-size: 11px; color: var(--accent); background: none; border: none;
+      font-size: 11.5px; color: var(--accent); background: none; border: none;
       cursor: pointer; font-family: inherit; padding: 0;
     }
     .health-fix:hover { text-decoration: underline; }
@@ -2714,16 +2723,16 @@
     }
     #first-run-card { width: 100%; max-width: 400px; padding: 0 28px; }
     #first-run-card .fr-step {
-      font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
       color: var(--text-muted); margin: 0 0 10px;
     }
-    #first-run-card h1 { font-size: 21px; font-weight: 650; color: var(--text-primary); margin: 0 0 10px; }
+    #first-run-card h1 { font-size: 26px; font-weight: 650; color: var(--text-primary); margin: 0 0 10px; }
     #first-run-card p { font-size: 13.5px; line-height: 1.6; color: var(--text-secondary); margin: 0 0 22px; }
     #first-run-card .fr-actions { display: flex; align-items: center; gap: 16px; }
     #first-run-card .fr-actions a { font-size: 12.5px; color: var(--text-muted); cursor: pointer; }
     #first-run-card .fr-actions a:hover { color: var(--text-secondary); text-decoration: underline; }
-    #first-run-card .fr-note { font-size: 11px; color: var(--text-muted); margin-top: 12px; }
-    #first-run-card .fr-msg  { font-size: 12px; color: var(--text-secondary); margin: 0 0 14px; min-height: 16px; }
+    #first-run-card .fr-note { font-size: 11.5px; color: var(--text-muted); margin-top: 12px; }
+    #first-run-card .fr-msg  { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; min-height: 16px; }
 
     /* 0.55.1 -- the connect screen's failure report. --border-strong, not
        --border, so it survives the "borders: none" theme setting: this is
@@ -2750,7 +2759,7 @@
        one thing. The SAVE is still that modal's own function. */
     #first-run-card .fr-field { margin: 0 0 14px; }
     #first-run-card .fr-field label {
-      display: block; font-size: 11px; font-weight: 600; letter-spacing: .04em;
+      display: block; font-size: 11.5px; font-weight: 600; letter-spacing: .04em;
       text-transform: uppercase; color: var(--text-muted); margin: 0 0 6px;
     }
     #first-run-card .fr-field .pp-input { width: 100%; box-sizing: border-box; }
@@ -2834,7 +2843,7 @@
       font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
       color: var(--text-muted); margin: 0 0 6px;
     }
-    #fr-bubble h2 { font-size: 15px; font-weight: 650; color: var(--text-primary); margin: 0 0 7px; }
+    #fr-bubble h2 { font-size: 16px; font-weight: 650; color: var(--text-primary); margin: 0 0 7px; }
     #fr-bubble p  { font-size: 12.5px; line-height: 1.55; color: var(--text-secondary); margin: 0 0 14px; }
     /* 0.45.2 — the page tools are hidden by refreshEditControls() whenever no
        vault page is open, and the help page behind the tour is exactly that.
@@ -2875,17 +2884,17 @@
       border: 1px solid var(--border-strong); border-radius: 6px; color: var(--text-primary);
     }
     #fr-bubble .fr-leg-ic svg { width: 15px; height: 15px; }
-    #fr-bubble .fr-leg-tx { flex: 1; font-size: 12px; line-height: 1.45; color: var(--text-secondary); }
+    #fr-bubble .fr-leg-tx { flex: 1; font-size: 12.5px; line-height: 1.45; color: var(--text-secondary); }
     #fr-bubble .fr-leg-tx b { color: var(--text-primary); font-weight: 600; display: block; }
     #fr-bubble .fr-leg-soon {
       display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px;
-      font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
       border: 1px solid var(--border-strong); color: var(--text-muted);
     }
     #fr-bubble .fr-bub-act { display: flex; align-items: center; gap: 14px; }
     #fr-bubble .fr-bub-sp  { flex: 1; }
     #fr-bubble .fr-bub-act a {
-      font-size: 12px; color: var(--text-muted); cursor: pointer;
+      font-size: 12.5px; color: var(--text-muted); cursor: pointer;
     }
     #fr-bubble .fr-bub-act a:hover { color: var(--text-secondary); text-decoration: underline; }
 
@@ -2900,8 +2909,8 @@
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
     }
-    .id-sub { font-size: 12px; color: var(--text-secondary); margin: 2px 0 14px; }
-    .id-note { font-size: 11px; color: var(--co-green-txt); margin: 8px 0 0; display: none; }
+    .id-sub { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 14px; }
+    .id-note { font-size: 11.5px; color: var(--co-green-txt); margin: 8px 0 0; display: none; }
     .id-note.show { display: block; }
 
     /* === Theme panel (S32, pass 1) ===========================
@@ -2935,12 +2944,12 @@
       border-bottom: 1px solid var(--border);
       position: sticky; top: 0; background: var(--bg-sidebar); z-index: 2;
     }
-    .tp-title { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .tp-title { flex: 1; font-size: 13.5px; font-weight: 500; color: var(--text-primary); }
 
     .tp-sec-head {
       display: flex; align-items: center; gap: 7px;
       padding: 11px 14px;
-      font-size: 12px; color: var(--text-primary);
+      font-size: 12.5px; color: var(--text-primary);
       cursor: pointer; user-select: none;
       border-bottom: 1px solid var(--border);
     }
@@ -2956,16 +2965,16 @@
 
     .tp-reset {
       background: none; border: none; padding: 0;
-      font-size: 11px; font-family: inherit; color: var(--text-muted);
+      font-size: 11.5px; font-family: inherit; color: var(--text-muted);
       cursor: pointer;
     }
     .tp-reset:hover { color: var(--accent); }
     .tp-badge {
-      font-size: 9.5px; font-weight: 600;
+      font-size: 10.5px; font-weight: 600;
       background: var(--accent); color: var(--bg-reader);
       border-radius: 9px; padding: 1px 7px;
     }
-    .tp-lb { font-size: 11px; color: var(--text-secondary); margin: 14px 0 6px; }
+    .tp-lb { font-size: 11.5px; color: var(--text-secondary); margin: 14px 0 6px; }
     .tp-lb:first-child { margin-top: 12px; }
     .tp-note { font-size: 10.5px; color: var(--text-muted); margin: 8px 0 2px; }
 
@@ -2974,7 +2983,7 @@
     .tp-seg { display: flex; border: 1px solid var(--border-strong); border-radius: var(--radius); overflow: hidden; }
     .tp-seg-btn {
       flex: 1; border: none; border-radius: 0; padding: 6px 2px;
-      font-size: 11px; font-family: inherit;
+      font-size: 11.5px; font-family: inherit;
       background: transparent; color: var(--text-secondary); cursor: pointer;
     }
     .tp-seg-btn:hover { background: var(--hover); color: var(--text-primary); }
@@ -2998,7 +3007,7 @@
       border: 1px solid; border-radius: 4px; position: relative; overflow: hidden;
     }
     .tp-preset-sw span { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; }
-    .tp-preset-name { display: block; font-size: 9.5px; color: var(--text-secondary); }
+    .tp-preset-name { display: block; font-size: 10.5px; color: var(--text-secondary); }
     .tp-preset.on .tp-preset-name { color: var(--text-primary); }
 
     .tp-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -3012,10 +3021,10 @@
     /* Heading rows — level, colour, hex, underline, one line each. */
     .tp-hrow { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
     .tp-hhead {
-      font-size: 10px; color: var(--text-muted);
+      font-size: 10.5px; color: var(--text-muted);
       padding: 0 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 2px;
     }
-    .tp-hlvl { width: 22px; font-size: 11px; color: var(--text-secondary); flex-shrink: 0; }
+    .tp-hlvl { width: 22px; font-size: 11.5px; color: var(--text-secondary); flex-shrink: 0; }
     .tp-hcol { flex: 1; }
     /* Caps and Underline sit as two right-aligned toggle columns. Caps is
        the smaller, secondary switch of the pair — it changes the shape of
@@ -3030,14 +3039,14 @@
       background: none; cursor: pointer;
     }
     .tp-hex {
-      flex: 1; font-size: 10px; color: var(--text-muted);
+      flex: 1; font-size: 10.5px; color: var(--text-muted);
       font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
     }
     .tp-copy {
       display: block; width: 100%; margin: 10px 0 2px;
       background: none; border: 1px solid var(--border-strong);
       border-radius: var(--radius); padding: 6px;
-      font-size: 11px; font-family: inherit; color: var(--text-secondary); cursor: pointer;
+      font-size: 11.5px; font-family: inherit; color: var(--text-secondary); cursor: pointer;
     }
     .tp-copy:hover { color: var(--accent); border-color: var(--accent); }
 
@@ -3071,7 +3080,7 @@
     /* Share section */
     .tp-share {
       width: 100%; margin-top: 10px; height: 62px; resize: vertical;
-      padding: 6px 8px; font-size: 10px; line-height: 1.4;
+      padding: 6px 8px; font-size: 10.5px; line-height: 1.4;
       font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
       word-break: break-all;
       background: var(--bg-app); color: var(--text-secondary);
@@ -3082,7 +3091,7 @@
     .tp-btn {
       flex: 1; background: none; border: 1px solid var(--border-strong);
       border-radius: var(--radius); padding: 6px;
-      font-size: 11px; font-family: inherit; color: var(--text-secondary); cursor: pointer;
+      font-size: 11.5px; font-family: inherit; color: var(--text-secondary); cursor: pointer;
     }
     .tp-btn:hover { color: var(--accent); border-color: var(--accent); }
     .tp-btn-wide { width: 100%; margin-top: 6px; }
@@ -3091,11 +3100,11 @@
 
     .tp-foot {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 9px 14px; font-size: 10px; color: var(--text-muted);
+      padding: 9px 14px; font-size: 10.5px; color: var(--text-muted);
     }
     #tp-reset-all {
       background: none; border: none; padding: 0;
-      font-size: 10px; font-family: inherit; color: var(--text-muted); cursor: pointer;
+      font-size: 10.5px; font-family: inherit; color: var(--text-muted); cursor: pointer;
     }
     #tp-reset-all:hover { color: var(--accent); }
 
@@ -3121,7 +3130,7 @@
     .s-section:last-child { border-bottom: none; padding-bottom: 6px; }
 
     .s-label {
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -3132,7 +3141,7 @@
     /* Sub-grouping label within a settings section — e.g. "Header colors"
        and "Background color" both living under the "Theme" section label. */
     .s-sublabel {
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--text-secondary);
       margin: 10px 0 4px;
     }
@@ -3141,7 +3150,7 @@
     /* S-A. One short paragraph under a toggle, for the one setting that
        needs a sentence of explanation rather than a label. */
     .s-help {
-      font-size: 11px; line-height: 1.5;
+      font-size: 11.5px; line-height: 1.5;
       color: var(--text-muted);
       margin: 6px 0 0;
     }
@@ -3168,7 +3177,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 5px 0;
-      font-size: 13px;
+      font-size: 13.5px;
       color: var(--text-primary);
     }
 
@@ -3238,7 +3247,7 @@
     #app-version {
       display: flex; align-items: center; gap: 7px; width: 100%;
       margin: 0; padding: 7px 0 0 14px; border: none; background: transparent;
-      cursor: pointer; font-family: inherit; font-size: 11px; text-align: left;
+      cursor: pointer; font-family: inherit; font-size: 11.5px; text-align: left;
       color: var(--text-muted);
     }
     #app-version:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
@@ -3402,7 +3411,7 @@
       position: absolute; top: 1px; right: 0;
       min-width: 13px; height: 13px; padding: 0 3px;
       border-radius: 7px; background: var(--co-red-bd); color: #fff;
-      font-size: 9px; font-weight: 600; line-height: 13px; text-align: center;
+      font-size: 10.5px; font-weight: 600; line-height: 13px; text-align: center;
       pointer-events: none;
     }
 
@@ -3413,45 +3422,67 @@
     .rp-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
     .rp-pane { display: none; }
     .rp-pane.active { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; min-height: 44px; }
-    .rp-empty { padding: 20px 14px; color: var(--text-muted); font-size: 12px; text-align: center; line-height: 1.6; }
+    .rp-empty { padding: 20px 14px; color: var(--text-muted); font-size: 12.5px; text-align: center; line-height: 1.6; }
     /* Usage pane (S45). No colour functions here — the standing rule in this
        file is hardcoded values per theme variable only, because an older
        embedded WebView treats an unsupported colour function as an invalid
        variable and falls back to solid black. */
-    .usage-body { padding: 4px 0 10px; overflow-y: auto; }
-    .usage-sect { margin-bottom: 6px; }
-    .usage-sect-head {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 10.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
-      color: var(--text-muted); padding: 12px 12px 6px;
+    .usage-body { padding: 0 0 10px; overflow-y: auto; }
+    /* S100 -- the pane's own bands, tallies, rows and stripes are Vault
+       check's (.vc-band / .vc-tally / .vc-row / .vc-stripe), not a second set
+       of the same thing: a report row and a check row are both a FACT about a
+       page, and a yellow stripe has to mean one thing everywhere. What is
+       left below is only what Usage needs on top of that. */
+    .usage-body .vc-row[data-wb-usage-open] { cursor: pointer; }
+    /* Sub navigation. Level one in this app is the ENCLOSED segmented control
+       (.seg2, the Admin strip); a second one stacked under it reads as the
+       same level. Underline tabs are the step down in weight, which is the
+       pairing every design system uses to say "one level deeper". */
+    .ug-sub { display: flex; gap: 18px; padding: 0 12px; border-bottom: 1px solid var(--border); }
+    .ug-sub button {
+      font-family: inherit; font-size: 12.5px; padding: 9px 1px 8px; margin-bottom: -1px;
+      background: none; border: none; border-bottom: 2px solid transparent;
+      color: var(--text-secondary); cursor: pointer;
     }
-    .usage-count { font-weight: 600; letter-spacing: 0; opacity: 0.75; }
-    .usage-none  { padding: 6px 12px 8px; text-align: left; }
-    .usage-row   { padding: 5px 12px; cursor: pointer; border-radius: 4px; }
-    .usage-row:hover { background: var(--hover); }
-    .usage-row-top { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; }
-    .usage-name  { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .usage-val   { flex: 0 0 auto; color: var(--text-muted); font-variant-numeric: tabular-nums; }
-    .usage-meta  { flex: 0 0 auto; color: var(--text-muted); font-size: 11.5px; }
-    .usage-track { height: 4px; border-radius: 2px; background: var(--border); margin-top: 4px; overflow: hidden; }
+    .ug-sub button:hover { color: var(--text-primary); }
+    .ug-sub button.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+    /* Numbers are right aligned in their own column with tabular figures, so
+       they line up down a band instead of floating inside the prose. */
+    .ug-num { font-size: 12.5px; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .ug-num .dim { color: var(--text-muted); }
+    .ug-q { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--text-primary); }
+    .ug-arrow { color: var(--text-muted); padding: 0 2px; }
+    /* .vc-main is a COLUMN flex container, so every child of it starts a new
+       line. A query, its arrow and the page it points at are one sentence and
+       have to be ONE flex item, or they stack three deep. Found by a real
+       render; jsdom applies no cascade and had nothing to say about it. */
+    .ug-pair { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; min-width: 0; }
+    /* One explanation per band, under its head. The same sentence repeated on
+       every row is the noise that made the first sample unreadable. */
+    .ug-note { font-size: 11.5px; color: var(--text-muted); margin: -2px 0 7px; line-height: 1.5; }
+    .usage-none  { padding: 10px 12px; text-align: left; }
+    .usage-track { height: 3px; border-radius: 2px; background: var(--border); margin-top: 5px; overflow: hidden; }
     .usage-fill  { height: 100%; border-radius: 2px; background: var(--accent); }
+    /* A bar for a page whose read count was never taken. It is drawn from
+       opens, so it must not look like the reads bars beside it. */
+    .usage-fill.unk { background: var(--border-strong); }
     .usage-more  {
-      display: block; margin: 6px 12px 2px; padding: 3px 0;
+      display: block; margin: 7px 0 0; padding: 2px 0;
       background: none; border: none; cursor: pointer;
-      color: var(--text-muted); font-size: 11.5px; font-family: inherit; text-align: left;
+      color: var(--accent); font-size: 11.5px; font-weight: 600; font-family: inherit; text-align: left;
     }
-    .usage-more:hover { color: var(--accent); text-decoration: underline; }
+    .usage-more:hover { text-decoration: underline; }
     .usage-who   {
-      flex: 0 0 auto; margin-left: auto; padding: 0 6px 0 0;
-      background: none; border: none; cursor: pointer;
-      color: var(--text-muted); font-size: 11px; font-family: inherit; white-space: nowrap;
+      flex: 0 0 auto; padding: 0 7px; border-radius: 10px;
+      background: none; border: 1px solid var(--border-strong); cursor: pointer;
+      color: var(--text-secondary); font-size: 11.5px; font-family: inherit; white-space: nowrap;
     }
-    .usage-who:hover { color: var(--accent); }
-    .usage-by      { margin: 5px 0 2px 10px; padding-left: 8px; border-left: 1px solid var(--border); }
-    .usage-by-row  { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; padding: 2px 0; color: var(--text-muted); }
+    .usage-who:hover { color: var(--accent); border-color: var(--accent); }
+    .usage-by      { margin: 6px 0 2px; padding: 6px 9px; background: var(--hover); border-radius: var(--radius); }
+    .usage-by-row  { display: flex; justify-content: space-between; gap: 10px; font-size: 11.5px; padding: 1px 0; color: var(--text-secondary); }
     .usage-by-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .usage-by-val  { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
-    .usage-foot { padding: 12px 12px 0; margin-top: 6px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11px; line-height: 1.5; }
+    .usage-by-val  { flex: 0 0 auto; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+    .usage-foot { padding: 11px 12px 0; margin: 18px 12px 0; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11.5px; line-height: 1.65; }
     .rp-stack-handle {
       height: 4px; flex-shrink: 0; cursor: row-resize;
       background: var(--border); position: relative; z-index: 5;
@@ -3469,17 +3500,17 @@
     #search-input {
       flex: 1; min-width: 0; background: transparent; border: 0; outline: none;
       border-bottom: 1px solid var(--border-strong); border-radius: 0;
-      padding: 4px 2px; font-size: 13px; color: var(--text-primary);
+      padding: 4px 2px; font-size: 13.5px; color: var(--text-primary);
     }
     #search-input:focus { border-bottom-color: var(--accent); }
-    #search-clear { background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: 12px; padding: 2px 4px; }
+    #search-clear { background: none; border: 0; color: var(--text-muted); cursor: pointer; font-size: 12.5px; padding: 2px 4px; }
     #search-clear:hover { color: var(--text-primary); }
     .search-group {
-      margin: 14px 12px 4px; padding: 0; font-size: 11px; font-weight: 600;
+      margin: 14px 12px 4px; padding: 0; font-size: 11.5px; font-weight: 600;
       letter-spacing: .5px; text-transform: uppercase; color: var(--accent);
     }
     .search-group:first-child { margin-top: 8px; }
-    .search-hit { padding: 5px 12px; font-size: 12px; color: var(--text-muted); cursor: pointer; line-height: 1.5; word-break: break-word; }
+    .search-hit { padding: 5px 12px; font-size: 12.5px; color: var(--text-muted); cursor: pointer; line-height: 1.5; word-break: break-word; }
     .search-hit b {
       background: var(--accent-mark); color: var(--accent);
       font-weight: 600; border-radius: 2px; padding: 0 3px;
@@ -3493,7 +3524,7 @@
       font-size: 12.5px; font-weight: 600; color: var(--accent);
     }
     #search-results .sh-head:first-child { margin-top: 4px; }
-    .sh-head .s-path { font-weight: 400; font-size: 11px; color: var(--text-muted); }
+    .sh-head .s-path { font-weight: 400; font-size: 11.5px; color: var(--text-muted); }
     /* Sits next to the folder rather than pushed to the right edge: the pane
        is three times the palette's width, and a badge parked over there
        stops reading as belonging to the name. */
@@ -3526,7 +3557,7 @@
       padding: 7px 8px 7px 12px;
     }
     #ot-toolbar .ot-lead { display: flex; align-items: center; gap: 6px; min-width: 0; }
-    #ot-toolbar .ot-label { font-size: 13px; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
+    #ot-toolbar .ot-label { font-size: 13.5px; font-weight: 500; color: var(--text-primary); white-space: nowrap; }
     #ot-toolbar .ot-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
     #ot-toolbar .ot-group.hidden { display: none; }
     #ot-toolbar .icon-btn { width: 24px; height: 24px; }
@@ -3536,7 +3567,7 @@
     .wb-copied-tip {
       position: absolute; z-index: 50;
       background: var(--text-primary); color: var(--bg-reader);
-      font-size: 12px; padding: 4px 8px; border-radius: var(--radius);
+      font-size: 12.5px; padding: 4px 8px; border-radius: var(--radius);
       opacity: 0; transform: translateY(-4px);
       transition: opacity 0.15s ease, transform 0.15s ease;
       pointer-events: none;
@@ -3568,7 +3599,7 @@
     .rp-outline-item {
       display: block; flex: 1; min-width: 0;
       padding: var(--row-pad) 12px var(--row-pad) 4px;
-      font-size: 12px; color: var(--text-secondary);
+      font-size: 12.5px; color: var(--text-secondary);
       cursor: pointer; text-align: left;
       background: none; border: none;
       text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
@@ -3623,7 +3654,7 @@
     .rp-outline-cmt-count {
       position: absolute; top: -2px; right: -3px; min-width: 11px; height: 11px;
       padding: 0 2px; border-radius: 6px; background: var(--accent);
-      color: var(--bg-reader); font-size: 8px; font-weight: 700; line-height: 11px;
+      color: var(--bg-reader); font-size: 10.5px; font-weight: 700; line-height: 11px;
       text-align: center;
     }
 
@@ -3661,7 +3692,7 @@
        made or undone at its source (the page's reader-head button, or the
        Outline row), never from inside this list. Personal per-user, saved
        into the identity record (S15). */
-    .bm-sub { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+    .bm-sub { font-size: 10.5px; color: var(--text-muted); flex-shrink: 0; }
     /* Quick pass, 2026-09-05 — one row per save (whole page or a section),
        file and section on the same line rather than a header plus child
        rows. Colour is the only thing telling a whole-page save from a
@@ -3683,7 +3714,7 @@
     }
     .saved-row.section .saved-name { color: var(--text-secondary); }
     .saved-sec {
-      font-size: 12px; color: var(--text-muted); min-width: 0;
+      font-size: 12.5px; color: var(--text-muted); min-width: 0;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     /* v0.34.1 — a saved item whose file is gone. Dimmed rather than hidden:
@@ -3694,11 +3725,11 @@
     .bm-broken-bar {
       display: flex; align-items: center; gap: 8px; justify-content: space-between;
       margin: 2px 10px 6px; padding: 5px 8px; border-radius: 5px;
-      background: var(--hover); font-size: 11px; color: var(--text-muted);
+      background: var(--hover); font-size: 11.5px; color: var(--text-muted);
     }
     .bm-broken-clear {
       background: none; border: 1px solid var(--border); color: var(--text-primary);
-      border-radius: 4px; padding: 2px 7px; font-size: 11px; cursor: pointer;
+      border-radius: 4px; padding: 2px 7px; font-size: 11.5px; cursor: pointer;
     }
     .bm-broken-clear:hover { border-color: var(--accent); color: var(--accent); }
     .saved-pin-hd {
@@ -3721,25 +3752,25 @@
     .comment-card.type-action   { border-left-color: #22c55e; }
     .comment-card.type-flag     { border-left-color: #ef4444; }
     .comment-card.status-closed { opacity: 0.45; }
-    .comment-meta { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; gap: 4px; }
-    .comment-type-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
-    .comment-body { font-size: 12px; color: var(--text-secondary); line-height: 1.5; word-break: break-word; }
-    .comment-close-btn { font-size: 10px; margin-top: 5px; background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 1px 6px; cursor: pointer; color: var(--text-muted); display: inline-block; }
+    .comment-meta { font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+    .comment-type-badge { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .comment-body { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; word-break: break-word; }
+    .comment-close-btn { font-size: 10.5px; margin-top: 5px; background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 1px 6px; cursor: pointer; color: var(--text-muted); display: inline-block; }
     .comment-close-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
     .comment-form { padding: 8px; border-top: 1px solid var(--border); background: var(--bg-sidebar); }
-    .comment-select { width: 100%; padding: 4px 6px; font-size: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-reader); color: var(--text-primary); margin-bottom: 6px; }
-    .comment-textarea { width: 100%; padding: 6px 8px; font-size: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-reader); color: var(--text-primary); resize: vertical; min-height: 64px; line-height: 1.5; font-family: inherit; display: block; }
+    .comment-select { width: 100%; padding: 4px 6px; font-size: 12.5px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-reader); color: var(--text-primary); margin-bottom: 6px; }
+    .comment-textarea { width: 100%; padding: 6px 8px; font-size: 12.5px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-reader); color: var(--text-primary); resize: vertical; min-height: 64px; line-height: 1.5; font-family: inherit; display: block; }
     .comment-textarea:focus { outline: none; border-color: var(--accent); }
-    .comment-submit { margin-top: 6px; padding: 5px 12px; font-size: 12px; font-weight: 500; background: var(--accent); color: white; border: none; border-radius: var(--radius); cursor: pointer; }
+    .comment-submit { margin-top: 6px; padding: 5px 12px; font-size: 12.5px; font-weight: 500; background: var(--accent); color: white; border: none; border-radius: var(--radius); cursor: pointer; }
     .comment-submit:hover { opacity: 0.85; }
     /* P7 — the section chip. Same card, one more line; "General" renders
        muted rather than being omitted, so a page-level comment still reads
        as placed on purpose, not like a bug. */
-    .comment-anchor { display: block; font-size: 10px; font-weight: 600; color: var(--accent); margin-bottom: 3px; }
+    .comment-anchor { display: block; font-size: 10.5px; font-weight: 600; color: var(--accent); margin-bottom: 3px; }
     .comment-anchor.general { color: var(--text-muted); font-weight: 500; }
     /* P7 — states where the next comment will land, so nobody has to
        guess or pick from a list; the one link is the only way to change it. */
-    .comment-post-target { display: flex; align-items: center; gap: 6px; font-size: 11px;
+    .comment-post-target { display: flex; align-items: center; gap: 6px; font-size: 11.5px;
       color: var(--text-secondary); margin-bottom: 7px; }
     .comment-post-target b { color: var(--text-primary); font-weight: 600; }
     .comment-post-target a { margin-left: auto; color: var(--accent); text-decoration: none; font-size: 10.5px; }
@@ -3754,19 +3785,19 @@
     .comment-card.folded .comment-body,
     .comment-card.folded .comment-card-actions { display: none; }
     .comment-card-actions { display: flex; gap: 6px; margin-top: 5px; }
-    .comment-reply-btn { font-size: 10px; margin-top: 5px; background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 1px 6px; cursor: pointer; color: var(--text-muted); display: inline-block; }
+    .comment-reply-btn { font-size: 10.5px; margin-top: 5px; background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 1px 6px; cursor: pointer; color: var(--text-muted); display: inline-block; }
     .comment-reply-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
 
     /* Backlinks */
     .backlink-item {
       display: flex; align-items: center; gap: 6px;
       padding: 7px 12px;
-      font-size: 12px; color: var(--text-secondary);
+      font-size: 12.5px; color: var(--text-secondary);
       cursor: pointer;
       border-bottom: 1px solid var(--border);
     }
     .backlink-item:hover { background: var(--hover); color: var(--accent); }
-    .backlink-note { padding: 8px 12px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 4px; line-height: 1.5; }
+    .backlink-note { padding: 8px 12px; font-size: 11.5px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 4px; line-height: 1.5; }
 
     /* Review pane — the vault-wide board that sits above the per-file card
        list. Rows reuse .backlink-item. v0.32.1 dropped .rv-ov-name,
@@ -3774,11 +3805,11 @@
        renderReviewOverview() that was their only writer. */
     .rv-ov-label {
       padding: 10px 12px 4px;
-      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      font-size: 10.5px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.06em;
     }
     .rv-ov-btn {
-      flex-shrink: 0; padding: 2px 7px; font-size: 11px; font-family: inherit;
+      flex-shrink: 0; padding: 2px 7px; font-size: 11.5px; font-family: inherit;
       border: 1px solid var(--border-strong); border-radius: var(--radius);
       background: transparent; color: var(--text-secondary); cursor: pointer;
     }
@@ -3805,7 +3836,7 @@
     .pane-head {
       display: flex; align-items: center; gap: 6px;
       padding: 7px 6px 7px 12px;
-      font-size: 13px; font-weight: 500; color: var(--text-primary);
+      font-size: 13.5px; font-weight: 500; color: var(--text-primary);
       flex-shrink: 0; min-width: 0;
       cursor: grab;
     }
@@ -3847,7 +3878,7 @@
        jsdom measures every element as zero and cannot see a clip. */
     .review-filter-bar { display: flex; gap: 4px; flex-wrap: wrap; min-width: 0; }
     .review-chip {
-      padding: 4px 10px; font-size: 11px; font-weight: 500;
+      padding: 4px 10px; font-size: 11.5px; font-weight: 500;
       background: var(--badge-bg); border: 1px solid var(--border);
       border-radius: 10px; cursor: pointer; color: var(--text-secondary);
     }
@@ -3858,12 +3889,12 @@
     .review-file-header {
       display: flex; align-items: center; gap: 6px;
       cursor: pointer; color: var(--accent);
-      font-size: 14px; font-weight: 500; margin-bottom: 8px;
+      font-size: 13.5px; font-weight: 500; margin-bottom: 8px;
     }
     .review-file-header:hover { opacity: 0.8; }
     .review-action-row { display: flex; gap: 6px; margin-top: 6px; }
     .review-open-btn {
-      font-size: 11px; padding: 2px 8px;
+      font-size: 11.5px; padding: 2px 8px;
       background: none; border: 1px solid var(--border);
       border-radius: var(--radius); cursor: pointer; color: var(--text-muted);
     }
@@ -3871,7 +3902,7 @@
     .review-alert-box {
       margin-top: 2.5rem; padding: 12px 16px;
       background: var(--bg-sidebar); border: 1px solid var(--border);
-      border-radius: var(--radius); font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+      border-radius: var(--radius); font-size: 13.5px; color: var(--text-secondary); line-height: 1.6;
     }
 
     /* === S42 Review dashboard — bands + Previous + queue bar === */
@@ -3880,10 +3911,9 @@
        tokens are the callout palette the review types already use, so a
        chip and its type's filter dot are the same colour in both themes. */
     .rv-owe-row { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 2px; }
-    .rv-owe {
-      font-size: 11px; line-height: 1.5; padding: 1px 7px; border-radius: 10px;
-      border: 1px solid var(--border); color: var(--text-secondary); white-space: nowrap;
-    }
+    /* Box now comes from the shared pill rule (S104); this keeps only the border,
+       which the shared rule does not set. */
+    .rv-owe { border: 1px solid var(--border); }
     .rv-owe-red    { border-color: var(--co-red-bd);    background: var(--co-red-bg);    color: var(--co-red-txt); }
     .rv-owe-orange { border-color: var(--co-orange-bd); background: var(--co-orange-bg); color: var(--co-orange-txt); }
     .rv-owe-purple { border-color: var(--co-purple-bd); background: var(--co-purple-bg); color: var(--co-purple-txt); }
@@ -3895,19 +3925,19 @@
     .rv-band-head {
       display: flex; align-items: center; gap: 8px; cursor: pointer;
       padding: 8px 4px; border-bottom: 1px solid var(--border-strong);
-      font-size: 13px; font-weight: 700; color: var(--text-primary);
+      font-size: 13.5px; font-weight: 700; color: var(--text-primary);
       user-select: none;
     }
     .rv-band-head:hover { color: var(--accent); }
-    .rv-band-caret { display: inline-block; width: 10px; font-size: 10px; color: var(--text-muted); }
+    .rv-band-caret { display: inline-block; width: 10px; font-size: 10.5px; color: var(--text-muted); }
     .rv-band-count {
       min-width: 20px; padding: 1px 6px; border-radius: 10px; text-align: center;
-      font-size: 11px; font-weight: 700; background: var(--badge-bg); color: var(--text-secondary);
+      font-size: 11.5px; font-weight: 700; background: var(--badge-bg); color: var(--text-secondary);
     }
     .rv-band-body { padding: 10px 2px 2px; }
     .rv-band.collapsed .rv-band-body { display: none; }
     .rv-sub-head {
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
       color: var(--text-muted); margin: 14px 0 6px;
     }
     .rv-sub-head:first-child { margin-top: 0; }
@@ -3963,13 +3993,229 @@
     .icon.icon-fill { fill:currentColor; stroke:none; }
     .icon-sm { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
   </style>
+<style id="doors">
+/* S102 -- doors. Home and Admin draw every door the same way, coloured by what
+   it opens (DECISIONS: door colours keep their Home meaning). The style is
+   one attribute on <body>, data-doors, Block by default. Spine, Corner and
+   Fold stay selectable from a TEMPORARY switch at the foot of the Admin door
+   row until Jayson picks one; S104 removes the switch and the three losers. */
+.ch-door.g-read,.ch-door.g-ins{--c:var(--co-blue-bd);--cb:var(--co-blue-bg);--ct:var(--co-blue-txt)}
+.ch-door.g-new,.ch-door.g-tell{--c:var(--co-green-bd);--cb:var(--co-green-bg);--ct:var(--co-green-txt)}
+.ch-door.g-help{--c:var(--co-purple-bd);--cb:var(--co-purple-bg);--ct:var(--co-purple-txt)}
+.ch-door.g-admin,.ch-door.g-team{--c:var(--co-rose-bd);--cb:var(--co-rose-bg);--ct:var(--co-rose-txt)}
+.ch-door.g-act{--c:var(--co-orange-bd);--cb:var(--co-orange-bg);--ct:var(--co-orange-txt)}
+.ch-door.g-act .icon,.ch-door.g-team .icon,.ch-door.g-ins .icon,.ch-door.g-tell .icon,.ch-door.g-act small,.ch-door.g-team small,.ch-door.g-ins small,.ch-door.g-tell small{color:var(--ct)}
+/* Admin as a row of doors */
+#admin-tabs .ad-doors{display:flex;align-items:stretch;gap:8px;width:100%}
+#admin-tabs .ad-doors .sp{flex:0 0 4px}
+#admin-tabs .ch-door{flex:0 1 auto;min-height:44px;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--text-primary);cursor:pointer;font-family:inherit}
+#admin-tabs .ch-door:hover,#admin-tabs .ch-door.on{flex-grow:1}
+#admin-tabs .ad-doors:hover .ch-door.on:not(:hover){flex-grow:0}
+#admin-tabs .ch-door small{width:0;min-width:100%;text-align:center}
+/* S102 -- the sub-line shows on hover only, the active door included: six
+   doors in a report-width column leave no room for a permanent second line. */
+/* 0.71.1 -- the open door's name stays in the normal text colour (Jayson);
+   only its sub-line takes the door colour. */
+#admin-tabs .ch-door.on .ch-door-lab{color:var(--text-primary)}
+#admin-tabs .ch-door.locked{opacity:.5;cursor:not-allowed}
+#admin-tabs .ch-door .ch-count{margin-left:2px}
+/* shared: the arrow */
+body[data-doors="spine"] .ch-door::after,body[data-doors="block"] .ch-door::after{content:"\203A";position:absolute;right:9px;top:50%;transform:translateY(-56%);font-size:16px;font-weight:400;line-height:1;color:var(--ct);transition:right .15s}
+body[data-doors="spine"] .ch-door:hover::after,body[data-doors="block"] .ch-door:hover::after,body[data-doors] #admin-tabs .ch-door.on::after{right:5px}
+body[data-doors="spine"] .ch-door,body[data-doors="block"] .ch-door,body[data-doors="corner"] .ch-door,body[data-doors="fold"] .ch-door{position:relative}
+/* 3 · Spine, transparent */
+body[data-doors="spine"] .ch-door{background:transparent;border:1px solid var(--border-strong);box-shadow:inset 5px 0 0 var(--c);padding-left:16px;padding-right:22px}
+body[data-doors="spine"] .ch-door:hover,body[data-doors="spine"] #admin-tabs .ch-door.on{background:var(--cb);border-color:var(--c);color:var(--text-primary)}
+/* 1 · Turned corner, no fill */
+body[data-doors="corner"] .ch-door{--k:14px;border:none;border-radius:0;box-shadow:none;background:var(--c);clip-path:polygon(0 0,calc(100% - var(--k)) 0,100% var(--k),100% 100%,0 100%)}
+body[data-doors="corner"] .ch-door::before{content:"";position:absolute;inset:1px;background:var(--bg-reader);clip-path:polygon(0 0,calc(100% - var(--k) + .6px) 0,100% calc(var(--k) - .6px),100% 100%,0 100%)}
+body[data-doors="corner"] .ch-door::after{content:"";position:absolute;top:0;right:0;width:var(--k);height:var(--k);background:var(--c);opacity:.55;clip-path:polygon(0 0,0 100%,100% 100%)}
+body[data-doors="corner"] .ch-door>*{position:relative;z-index:1}
+body[data-doors="corner"] .ch-door:hover,body[data-doors="corner"] #admin-tabs .ch-door.on{--k:20px;color:var(--text-primary)}
+body[data-doors="corner"] #admin-tabs .ch-door.on::before{background:var(--cb)}
+/* 3b · Wide spine carrying the icon, and 3b + fold */
+body[data-doors="block"] .ch-door,body[data-doors="fold"] .ch-door{border:none;box-shadow:none;overflow:hidden;background-color:var(--bg-reader);background-image:linear-gradient(var(--hover),var(--hover));padding-left:46px;padding-right:22px}
+body[data-doors="block"] .ch-door .icon,body[data-doors="fold"] .ch-door .icon{position:absolute;left:0;top:0;bottom:0;height:100%;width:34px;padding:0 9.5px;box-sizing:border-box;background:var(--c);color:var(--bg-reader);stroke:var(--bg-reader)}
+body[data-doors="block"] .ch-door:hover,body[data-doors="block"] #admin-tabs .ch-door.on,body[data-doors="fold"] .ch-door:hover,body[data-doors="fold"] #admin-tabs .ch-door.on{background:var(--cb);color:var(--text-primary)}
+body[data-doors="fold"] .ch-door{--k:13px;border-radius:0;clip-path:polygon(0 0,calc(100% - var(--k)) 0,100% var(--k),100% 100%,0 100%);padding-right:16px}
+body[data-doors="fold"] .ch-door::after{content:"";position:absolute;top:0;right:0;width:var(--k);height:var(--k);background:var(--c);clip-path:polygon(0 0,0 100%,100% 100%);transition:width .15s,height .15s}
+body[data-doors="fold"] .ch-door:hover,body[data-doors="fold"] #admin-tabs .ch-door.on{--k:19px}
+body[data-doors="fold"] .ch-door .icon{border-radius:0}
+#admin-tabs .ch-door{flex-shrink:0}
+/* S102 -- a narrow window wraps the doors onto a second row rather than
+   squeezing labels under the icon block. */
+#admin-tabs .ad-doors{flex-wrap:wrap;gap:6px}
+#admin-tabs .ad-doors .sp{flex:0 0 2px}
+#admin-tabs .ch-door-top{max-width:none}
+body[data-doors="block"] #admin-tabs .ch-door{padding-right:20px}
+body[data-doors="spine"] #admin-tabs .ch-door{padding-left:14px;padding-right:20px}
+body[data-doors="block"] .ch-door .icon,body[data-doors="fold"] .ch-door .icon{width:30px;padding:0 7.5px}
+body[data-doors="block"] .ch-door{padding-left:38px;padding-right:18px}
+body[data-doors="fold"] .ch-door{padding-left:38px;padding-right:14px}
+body[data-doors="block"] #admin-tabs .ch-door,body[data-doors="fold"] #admin-tabs .ch-door{padding-left:38px}
+.ad-doorstyle{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11.5px;color:var(--text-muted)}
+.ad-doorstyle .tp-seg{display:inline-flex}
+.ad-doorstyle .tp-seg-btn{font-size:11.5px;padding:2px 10px}
+</style>
+<style id="controls">
+/* S102 -- one set of controls. Written last so it wins over the older
+   per-screen rules it replaces; those stay only for layout (margins, flex).
+   Sizes (S101 item 4): Small 26px for anything on a row or in a panel,
+   Standard 30px for dialogs and cards, the Home door for navigation.
+   Small buttons are one quiet box (S102, option A). One main-button style
+   (item 11): the blue tint. Home stays the only filled control. */
+.vc-btn, .su-btn, .review-open-btn, .rv-ov-btn, .rv-mark-btn, .bm-broken-clear,
+.comment-close-btn, .comment-reply-btn, #rvb-acts button, #rvb-walk button,
+.rvb-qreply button, .rvb-qfields button, .wn-marklink, .health-fix, .tp-btn, .tp-copy,
+.ab.small .ab-cta {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  height: 26px; padding: 0 10px; margin-top: 0;
+  font-family: inherit; font-size: 11.5px; font-weight: 500; line-height: 1; white-space: nowrap;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
+  background: transparent; color: var(--text-secondary); text-decoration: none; cursor: pointer;
+}
+.ed-btn, .local-pick-btn, .comment-submit, .ab-cta {
+  box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  height: 30px; padding: 0 14px;
+  font-family: inherit; font-size: 12.5px; font-weight: 500; line-height: 1; white-space: nowrap;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
+  background: transparent; color: var(--text-secondary); cursor: pointer; opacity: 1;
+}
+.vc-btn:hover:not(:disabled), .su-btn:hover:not([disabled]), .review-open-btn:hover, .rv-ov-btn:hover,
+.bm-broken-clear:hover, .comment-close-btn:hover, .comment-reply-btn:hover,
+#rvb-acts button:hover:not(:disabled), #rvb-walk button:hover:not(:disabled),
+.rvb-qreply button:hover, .rvb-qfields button:hover, .wn-marklink:hover, .health-fix:hover,
+.tp-btn:hover, .tp-copy:hover, .ed-btn:hover:not(:disabled), .local-pick-btn:hover:not(:disabled) {
+  background: var(--hover); color: var(--text-primary); border-color: var(--border-strong); text-decoration: none; opacity: 1;
+}
+/* the main action */
+.vc-btn.primary, .su-btn.primary, #rvb-acts button.go, .rv-mark-btn, .ed-save,
+.local-pick-btn, .comment-submit, .ab-cta, .ab.small .ab-cta {
+  border-color: var(--accent); background: var(--accent-bg); color: var(--accent); font-weight: 600;
+}
+.vc-btn.primary:hover:not(:disabled), .su-btn.primary:hover:not([disabled]), #rvb-acts button.go:hover:not(:disabled),
+.rv-mark-btn:hover:not(:disabled), .ed-save:hover:not(:disabled), .local-pick-btn:hover:not(:disabled),
+.comment-submit:hover, .ab-cta:hover {
+  border-color: var(--accent); background: var(--accent-mark); color: var(--accent); opacity: 1;
+}
+/* a warning keeps its colour, not its shape */
+#rvb-acts button.warn { border-color: var(--co-red-bd); color: var(--co-red-txt); }
+.ab.warn .ab-cta { border-color: var(--co-yellow-bd); background: var(--co-yellow-bg); color: var(--co-yellow-txt); }
+
+/* Tags: one pill size (item 12). Navigation stays square.
+   S104 -- Review's rv-owe tags joined the family: capitals in a capsule,
+   no emoji, colour carried by the rv-owe-<tone> classes as before. */
+.pp-tag, .wn-pill, .tier-badge, .vc-kind, .rv-owe {
+  display: inline-flex; align-items: center; box-sizing: border-box;
+  height: 18px; padding: 0 8px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 600; line-height: 1; letter-spacing: .03em; white-space: nowrap;
+  text-transform: uppercase;
+}
+/* Filter chips: one size. */
+.review-chip, .ch-chip {
+  display: inline-flex; align-items: center; box-sizing: border-box;
+  height: 24px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; line-height: 1;
+}
+/* Counts: one style, colour keeps its meaning. */
+.ch-count, .badge, .cmt-pill, .rp-outline-cmt-count, .tp-badge, .tab-count {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+  min-width: 16px; height: 16px; padding: 0 5px; border-radius: 8px;
+  font-size: 10.5px; font-weight: 600; line-height: 1;
+}
+
+/* Counts (S101): a headline number and a breakdown, never boxed -- a box
+   read as a button. Zeros collapse into one quiet line; a meter only when two
+   or more parts split the headline. The headline takes the colour of the most
+   serious thing present, green at zero; Usage is always blue. */
+.ct-lead { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; padding: 12px 12px 4px; }
+.ct-h { display: flex; align-items: center; gap: 12px; flex: none; min-width: 170px; }
+.ct-n { font-size: 26px; font-weight: 650; line-height: 1; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.ct-n.t-hard { color: var(--co-red-txt); } .ct-n.t-warn { color: var(--co-yellow-txt); }
+.ct-n.t-info { color: var(--co-blue-txt); } .ct-n.t-ok { color: var(--co-green-txt); }
+.ct-h span { font-size: 11.5px; line-height: 1.4; color: var(--text-muted); }
+.ct-h strong { font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+.ct-r { flex: 1; min-width: 200px; }
+.ct-meter { display: flex; gap: 2px; height: 6px; border-radius: 999px; overflow: hidden; background: var(--border); margin-bottom: 8px; }
+.ct-meter span { display: block; }
+.ct-legend { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; font-size: 12.5px; color: var(--text-secondary); }
+.ct-legend b { color: var(--text-primary); font-weight: 600; margin-right: 3px; font-variant-numeric: tabular-nums; }
+.ct-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.ct-legend .quiet { color: var(--text-muted); }
+.ct-hard { background: var(--co-red-bd); } .ct-warn { background: var(--co-yellow-bd); }
+.ct-info { background: var(--co-blue-bd); } .ct-gone { background: var(--text-muted); }
+
+/* S103 -- one screen title. Every screen you visit from Home uses #cd-head's
+   small title and Close; What's New renders in the reader, so it borrows the
+   same look under its own class rather than a page heading. */
+.scr-head { display: flex; align-items: center; gap: 8px; padding: 26px 0 14px; margin-bottom: 4px; }
+.scr-title { font-size: 16px; font-weight: 650; color: var(--text-primary); letter-spacing: -0.008em; }
+.wn-wrap { max-width: 872px; margin: 0 auto; }
+.wn-wrap .scr-head { padding-top: 0; }  /* the reader already pads its top; this lines the title up with the destinations' */
+/* Views of one list: underline tabs, sitting straight under the title. */
+.ug-sub.scr-views { padding: 0; margin: 0 0 12px; }
+.scr-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 12px; }
+.review-filter-bar.scr-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 14px; }
+/* What's New: the bar is status text on the left, the range chips and Mark
+   all seen on the right, one row, no second rule under the tabs. */
+.wn-bar { border-bottom: none; padding-bottom: 0; margin-bottom: 12px; gap: 8px 12px; }
+.wn-bar .wn-sub { margin: 0; flex: 1; min-width: 160px; font-size: 12.5px; color: var(--text-muted); }
+.wn-bar .wn-filters { gap: 6px; }
+.wn-bar .wn-marklink { margin-left: 0; }
+/* Rows take Home's list style (item 17): a hairline between rows, the name
+   turns accent on hover. */
+.wn-row { border-radius: 0; border-bottom: 1px solid var(--border); padding: 7px 4px; }
+.wn-group .wn-row:last-child { border-bottom: none; }
+.wn-row:hover { background: transparent; }
+.wn-row:hover .wn-name { color: var(--accent); }
+/* Admin (item 6): the door row is its own divider. The title's rule above it
+   and the tab strip's own rule below it drew two lines a few pixels apart. */
+body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; margin-bottom: 0; padding-bottom: 8px; }
+#admin-tabs { padding: 4px 0 12px; }
+
+/* S103 (item 10) -- one frame for the three header panels: one width, one
+   head (title and Close), sentence-case section labels like Theme's. */
+#user-dropdown, #settings-panel, #theme-panel { width: 300px; border-radius: 10px; }
+#user-dropdown { padding: 0 0 8px; }
+#user-dropdown > :not(.tp-head) { margin-left: 12px; margin-right: 12px; }
+#user-dropdown .ud-head { margin-bottom: 8px; }
+.ud-head .tp-title { min-width: 0; }
+.ud-head .ud-name { display: block; font-size: 13.5px; font-weight: 600; margin: 0; }
+.ud-head .ud-email { display: block; font-size: 11.5px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#settings-panel { padding: 0 0 6px; max-height: calc(100vh - 72px); overflow-y: auto; }
+#settings-panel .s-section { padding-top: 10px; }
+.s-label { font-size: 12.5px; font-weight: 600; color: var(--text-primary); text-transform: none; letter-spacing: 0; }
+.tp-title { font-weight: 600; }
+#bt-more-menu { min-width: 190px; }
+#bt-more-menu button .icon { width: 15px; height: 15px; color: var(--text-muted); flex: none; }
+#bt-more-menu button:hover .icon { color: var(--accent); }
+
+/* S103 (item 16) -- the walkthrough looks like Folio: Home's measure, a
+   colour mark per step, the main button and its link on one line. */
+#first-run-card { max-width: 460px; }
+.fr-marks { display: flex; gap: 4px; margin: 0 0 14px; }
+.fr-mark { flex: 1; height: 4px; border-radius: 2px; background: var(--border-strong); }
+.fr-mark.on.fr-m-blue   { background: var(--co-blue-bd); }
+.fr-mark.on.fr-m-rose   { background: var(--co-rose-bd); }
+.fr-mark.on.fr-m-green  { background: var(--co-green-bd); }
+.fr-mark.on.fr-m-purple { background: var(--co-purple-bd); }
+#first-run-card .fr-actions .local-pick-btn { margin-top: 0; }
+#first-run-card .fr-actions a { line-height: 30px; }
+
+/* Fields: lighter, like the comment box (item 13). */
+.pp-input, .pp-select, .vc-noteform input, .tier-input, #cm-name, .s-select,
+.rvb-pf input[type=text], .rvb-pf input[type=date], .rvb-pf input[type=number], .rvb-pf select,
+.su-field textarea, .su-field input, .comment-select, .comment-textarea {
+  background: var(--bg-reader); border: 1px solid var(--border-strong); color: var(--text-primary);
+}
+</style>
+
 </head>
 <!-- data-headers/data-bg are gone (S32): one preset now drives headings,
      backgrounds and accent together, applied as inline custom properties
      by applyThemePrefs(). h2-underline-on and h5-caps-on are the shipped
      defaults so the pre-JS render matches what every existing install
      already looks like. -->
-<body data-theme="dark" class="h2-underline-on h5-caps-on">
+<body data-theme="dark" class="h2-underline-on h5-caps-on" data-doors="block">
 <div id="app">
 
   <!-- ── Header ─────────────────────────────────────────── -->
@@ -4076,8 +4322,12 @@
     <button class="icon-btn" id="user-badge" title="Account" aria-label="Account" style="display:none" onclick="toggleUserDropdown(event)"></button>
 
     <div id="user-dropdown" onclick="event.stopPropagation()">
-      <p class="ud-name" id="ud-name"></p>
-      <p class="ud-email" id="ud-email"></p>
+      <!-- S103 (item 10) -- one panel frame: title and Close on top, the same
+           head Theme has. Here the title is you. -->
+      <div class="tp-head ud-head">
+        <span class="tp-title"><span class="ud-name" id="ud-name"></span><span class="ud-email" id="ud-email"></span></span>
+        <button class="icon-btn" title="Close" aria-label="Close" onclick="closeUserDropdown()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
 
       <!-- Setup health (Session 1, S60). Three checks, each hidden once
            it's fine — see setHealthRow()/refreshAccountMenu(). Computed
@@ -4087,7 +4337,7 @@
       <div class="ud-health">
         <div class="health-row" id="hr-connected">
           <span class="health-dot"></span>
-          <span class="health-label">Connected<span id="hr-connected-folder" style="display:block;font-size:11px;font-weight:400;color:var(--text-muted)"></span></span>
+          <span class="health-label">Connected<span id="hr-connected-folder" style="display:block;font-size:11.5px;font-weight:400;color:var(--text-muted)"></span></span>
           <button class="health-fix" onclick="reconnectVault()">Fix</button>
         </div>
         <div class="health-row" id="hr-identified">
@@ -4112,7 +4362,7 @@
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.68.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.71.2</button>
       </div>
 
       <div class="ud-actions">
@@ -4410,7 +4660,7 @@
         <!-- S9 Editor mode -->
         <div id="editor" style="display:none">
           <div class="ed-bar">
-            <span class="ed-note">Editing — saving flags this file for review</span>
+            <span class="ed-note">Editing, saving flags this file for review</span>
             <button class="ed-btn" onclick="cancelEdit()">Cancel</button>
             <button class="ed-btn ed-save" id="ed-save-btn" onclick="saveEdit()">Save</button>
           </div>
@@ -4517,7 +4767,7 @@
         <div class="pp-label">Email</div>
         <input type="email" id="id-email" class="pp-input" placeholder="name@company.com" autocomplete="email">
       </div>
-      <p class="id-note" id="id-note">Recognized — this email already has a profile in the vault. Your saved name and saved pages were restored.</p>
+      <p class="id-note" id="id-note">Recognized. This email already has a profile in the vault. Your saved name and saved pages were restored.</p>
       <div class="cm-actions">
         <button class="ed-btn ed-save" id="id-continue-btn" onclick="submitIdentity()">Continue</button>
       </div>
@@ -4647,6 +4897,10 @@
   </div>
 
   <div id="settings-panel" role="dialog" aria-label="Settings">
+    <div class="tp-head">
+      <span class="tp-title">Settings</span>
+      <button class="icon-btn" title="Close" aria-label="Close" onclick="closeSettingsPanel()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
 
     <div class="s-section">
       <div class="s-label">Navigation</div>
@@ -5316,7 +5570,7 @@ async function startLocalVault(root, fresh = false) {
 
 async function pickLocalVault(fresh = false) {
   if (!window.showDirectoryPicker) {
-    alert('Local mode needs Chrome or Edge — this browser does not support the File System Access API.');
+    alert('Local mode needs Chrome or Edge. This browser does not support the File System Access API.');
     return;
   }
   let root;
@@ -5705,9 +5959,9 @@ function renderSidebar() {
     if (isOpen) {
       out += '<div class="file-list">';
       if (!loaded) {
-        out += '<div class="sb-msg" style="font-size:11px;padding:6px 0">Loading…</div>';
+        out += '<div class="sb-msg" style="font-size:11.5px;padding:6px 0">Loading…</div>';
       } else if (!files.length && !kids.length) {
-        out += '<div class="sb-msg" style="font-size:11px;padding:6px 0">Empty folder</div>';
+        out += '<div class="sb-msg" style="font-size:11.5px;padding:6px 0">Empty folder</div>';
       } else {
         kids.forEach((k, ki) => { out += renderFolderBlock(k, ki); });
         files.forEach(f => {
@@ -5751,7 +6005,7 @@ function renderSidebar() {
       let body = '';
       kids.forEach((k, ki) => { body += renderFolderBlock(k, ki); });
       files.forEach(f => { body += fileRowHTML(f); });
-      html += body || '<div class="sb-msg" style="font-size:11px;padding:4px 0 8px">Empty</div>';
+      html += body || '<div class="sb-msg" style="font-size:11.5px;padding:4px 0 8px">Empty</div>';
     });
 
     const strays = vaultFolders.filter(f => !vaultIds.includes(f.id));
@@ -6133,7 +6387,7 @@ function headingActionsHTML(hid, text) {
     `<button class="md-h-act${on ? ' on' : ''}" data-wb-bmtoggle="${id}" data-wb-bmtext="${escHtml(text)}" title="${on ? 'Remove from Saved' : 'Save this section'}" aria-label="${on ? 'Remove from Saved' : 'Save this section'}">${on ? ICON.bookmarkFilled : ICON.bookmark}</button>` +
     `<span class="md-h-act-sep"></span>` +
     `<button class="md-h-act" data-wb-hcmt="${id}" title="Comment on this section" aria-label="Comment on this section">${ICON.commentSm}</button>` +
-    `<button class="md-h-act soon" disabled title="Highlight, private to you — not built yet" aria-label="Highlight, not built yet">${ICON.highlightSm}</button>` +
+    `<button class="md-h-act soon" disabled title="Highlight, private to you, not built yet" aria-label="Highlight, not built yet">${ICON.highlightSm}</button>` +
     `</span>`;
 }
 
@@ -6370,9 +6624,9 @@ function renderInline(text) {
     // link that reloads Folio, which is the bug this release is fixing;
     // showing it dead is the same treatment a blocked scheme already got.
     if (clean && !/^[a-z][a-z0-9+\-]*:/i.test(clean) && !clean.startsWith('#')) {
-      return slot(`<span class="md-ilink-dead" title="Link goes nowhere — a path relative to the page, which Folio cannot open">${text}</span>`);
+      return slot(`<span class="md-ilink-dead" title="Link goes nowhere. It is a path relative to the page, which Folio cannot open">${text}</span>`);
     }
-    if (!clean) return slot(`<span class="md-ilink-dead" title="Link removed — unsupported or unsafe URL scheme">${text}</span>`);
+    if (!clean) return slot(`<span class="md-ilink-dead" title="Link removed, unsupported or unsafe URL scheme">${text}</span>`);
     return slot(`<a class="md-ilink" href="${escHtml(clean)}" target="_blank" rel="noopener noreferrer">${text}</a>`);
   });
 
@@ -6669,6 +6923,16 @@ function wbDelegatedClick(e) {
   const chDoorEl = e.target.closest('[data-wb-chdoor]');
   if (chDoorEl) { e.preventDefault(); e.stopPropagation(); chDoor(chDoorEl.dataset.wbChdoor, chDoorEl); return; }
 
+  // S102 TEMPORARY -- the door style switch under the Admin doors.
+  const doorStyleEl = e.target.closest('[data-wb-doorstyle]');
+  if (doorStyleEl) {
+    e.preventDefault(); e.stopPropagation();
+    state.themePrefs.doors = doorStyleEl.dataset.wbDoorstyle;
+    persist('wb_theme_v2', state.themePrefs);
+    applyThemePrefs();
+    if (adminActiveTab) renderAdminTab(adminActiveTab);
+    return;
+  }
   // P9 — the Admin screen's own tab strip.
   const adminTabEl = e.target.closest('[data-wb-admintab]');
   if (adminTabEl) { e.preventDefault(); e.stopPropagation(); renderAdminTab(adminTabEl.dataset.wbAdmintab); return; }
@@ -6742,6 +7006,13 @@ function wbDelegatedClick(e) {
   // Usage pane (S45). "Show more" is tested before the row, same nested-first
   // rule as the What's New section buttons above — the button sits inside the
   // section, and a row match would swallow it.
+  // S100 -- the sub navigation and Refresh are tested first: both sit inside
+  // the pane and one of them (Refresh) inside the .vc-bar, and a later row
+  // match would swallow either.
+  const uView = e.target.closest('[data-wb-usage-view]');
+  if (uView) { e.preventDefault(); e.stopPropagation(); usageSetView(uView.dataset.wbUsageView); return; }
+  const uFresh = e.target.closest('[data-wb-usage-refresh]');
+  if (uFresh) { e.preventDefault(); e.stopPropagation(); usageRefresh(); return; }
   const uMore = e.target.closest('[data-wb-usage-more]');
   if (uMore) { e.preventDefault(); e.stopPropagation(); usageToggleSection(uMore.dataset.wbUsageMore); return; }
   // Tested BEFORE the open target, because the reader-count button sits inside
@@ -6915,7 +7186,7 @@ function buildEmbedStub(name, inline) {
   if (url) {
     return `<${tag} class="md-embed-stub" data-wb-open="${escHtml(url)}" data-wb-name="${escHtml(name)}">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note</span><span class="md-embed-stub-open">Open →</span></${tag}>`;
   }
-  return `<${tag} class="md-embed-stub">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note — not found</span></${tag}>`;
+  return `<${tag} class="md-embed-stub">${ICON.embedFile}<span class="md-embed-stub-name">${escHtml(name)}</span><span class="md-embed-stub-sub">embedded note, not found</span></${tag}>`;
 }
 
 // ── [!copy] plain-text serializer (v0.19.2) ──────────────────────
@@ -8636,7 +8907,7 @@ function betaRecentRows() {
 function betaPaletteEmptyHTML() {
   betaPaletteHits = [];
   const h = betaFavRows() + betaRecentRows();
-  const body = h || '<div class="bp-empty">Nothing yet — save a page or heading to see it here.</div>';
+  const body = h || '<div class="bp-empty">Nothing yet. Save a page or heading to see it here.</div>';
   // Session D — the full Saved pane had no way in at all once the beta
   // shell hid the left rail's tab switcher. This is that way in: the
   // top-5 list above stays a quick jump, this opens the real thing.
@@ -9413,11 +9684,30 @@ function chDoor(which, anchorEl) {
 // Search pane's own DOM ids and carries a within-this-file group the
 // palette doesn't have — but the ranking is the same on purpose, and both
 // read the same searchIndex built by buildSearchIndex().
+// S103 (item 15) -- a result reads as words, not page markup. Heading marks,
+// list and task markers, quote marks, emphasis, inline code ticks and
+// wiki-link brackets come off ([[Page|shown]] keeps the shown text). The match
+// was found in the raw line, so if stripping would remove the very thing that
+// matched (someone searching for "[[" or "##"), the raw line is kept.
+function searchPlainLine(line, lc) {
+  const plain = String(line)
+    .replace(/^\s*>+\s?/, '')
+    .replace(/^\s*#{1,6}\s+/, '')
+    .replace(/^\s*(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/, '')
+    .replace(/!?\[\[([^\]|]*)\|([^\]]*)\]\]/g, '$2')
+    .replace(/!?\[\[([^\]]*)\]\]/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/(\*\*|__|==|~~)(.+?)\1/g, '$2')
+    .replace(/`([^`]*)`/g, '$1');
+  return (!lc || plain.toLowerCase().indexOf(lc) !== -1) ? plain : String(line);
+}
+
 function betaPaletteSearchHTML(q) {
   betaPaletteHits = [];
   const lc = q.toLowerCase();
   let html = '';
-  const snippet = line => {
+  const snippet = raw => {
+    const line = searchPlainLine(raw, lc);
     const i = line.toLowerCase().indexOf(lc);
     const s = Math.max(0, i - 30);
     return (s ? '\u2026' : '') + escHtml(line.slice(s, i)) +
@@ -9727,6 +10017,11 @@ function destOpen(id) {
   rightResetTabs();
 
   destId = id;
+  // S103 (item 15) -- the static pane headers (Search's) were filled once at
+  // boot, before any destination was open, so paneHead() never got to see
+  // that #cd-head already titles the screen. Refill them now it can.
+  try { renderPaneChrome(); } catch (_) {}
+  document.body.setAttribute('data-dest', id);   // S103: lets CSS tell destinations apart without :has()
   state.activeUrl     = null;
   state.activeName    = null;
   state.helpOpen      = false;
@@ -9769,6 +10064,7 @@ function destClose() {
     if (park) park.appendChild(pane);   // kept in the DOM, just off-screen --
   }                                     // counts read their own element, never
   document.body.classList.remove('console-dest');   // the pane.
+  document.body.removeAttribute('data-dest');
   destId = null;
 }
 
@@ -9867,6 +10163,36 @@ function adminTabRenderFns() {
   return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, users: renderUsersTab, vault: renderVaultCheckTab, staff: renderStaffUpdateTab };
 }
 
+// S104 -- the door row is built once, synchronously, when Admin opens --
+// before a tab's own scanBadges() (a vault-wide read) has resolved. The
+// Review door's count comes from that same scan, so on the FIRST Admin open
+// in a session it read blank: the body repainted once the scan finished
+// (renderAdminReviewTab already does that) but nothing told the door row to.
+// This patches each open door's count badge in place, in the DOM the initial
+// render already built, without touching the door-style switch, the active
+// door, or the lock icon on a door the current tier cannot open.
+function refreshAdminDoorCounts() {
+  const tabsEl = $('admin-tabs');
+  if (!tabsEl) return;
+  ADMIN_TABS.forEach(t => {
+    if (!t.count || !atLeast(t.min)) return;
+    const top = tabsEl.querySelector('[data-wb-admintab="' + t.id + '"] .ch-door-top');
+    if (!top) return;
+    let badge = top.querySelector('.ch-count');
+    const count = t.count();
+    if (count) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'ch-count';
+        top.appendChild(badge);
+      }
+      badge.textContent = count;
+    } else if (badge) {
+      badge.remove();
+    }
+  });
+}
+
 function renderAdminTab(tab) {
   // Round 2c -- Admin lives in the reading column. A stray click after it
   // closed renders nothing.
@@ -9881,16 +10207,34 @@ function renderAdminTab(tab) {
   const bodyEl = $('admin-body');
   if (!tabsEl || !bodyEl) return;
 
-  // J3, 13 Sep -- one segmented control instead of loose pills (sample 2),
-  // each tab carrying its own vault-wide count where it has one (sample 3).
-  tabsEl.innerHTML = '<div class="seg2">' + ADMIN_TABS.map(t => {
+  // S102 -- the Admin tabs are doors, the same object as Home's, compact.
+  // Colour is the Home meaning (orange work waiting, rose access, blue
+  // reading, green telling people). Replaces J3's segmented strip.
+  const AD_DOORS = { review: ['act', 'Pages waiting on you', '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>'],
+    comments: ['act', 'Every open comment', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'],
+    vault: ['act', 'Broken links and orphans', '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8.5 11l1.8 1.8 3.2-3.3"/>'],
+    users: ['team', 'Who has access to what', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'],
+    usage: ['ins', 'What gets read and missed', '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/>'],
+    staff: ['tell', 'Email the team what changed', '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'] };
+  const AD_ORDER = ['review', 'comments', 'vault', '|', 'users', '|', 'usage', '|', 'staff'];
+  tabsEl.innerHTML = '<div class="ad-doors">' + AD_ORDER.map(id => {
+    if (id === '|') return '<span class="sp"></span>';
+    const t = ADMIN_TABS.find(x => x.id === id); const v = AD_DOORS[id];
+    if (!t || !v) return '';
     const open  = atLeast(t.min);
     const count = (open && t.count) ? t.count() : 0;
-    return '<button class="' + (tab === t.id ? 'on' : '') + (open ? '' : ' locked') +
-           '" data-wb-admintab="' + t.id + '">' + escHtml(t.label) +
-           (count ? ' <span class="ch-count">' + count + '</span>' : '') +
-           (open ? '' : ' <span class="admin-lock">&#128274;</span>') + '</button>';
-  }).join('') + '</div>';
+    return '<button class="ch-door g-' + v[0] + (tab === id ? ' on' : '') + (open ? '' : ' locked') +
+           '" data-wb-admintab="' + id + '" title="' + escHtml(v[1]) + '">' +
+           '<span class="ch-door-top"><svg class="icon" viewBox="0 0 24 24">' + v[2] + '</svg><span class="ch-door-lab">' + escHtml(t.label) + '</span>' +
+           (count ? '<span class="ch-count">' + count + '</span>' : '') +
+           (open ? '' : ' <span class="admin-lock">&#128274;</span>') + '</span><small>' + escHtml(v[1]) + '</small></button>';
+  }).join('') + '</div>' +
+  // S102 TEMPORARY -- door style switch. 0.71.1: Jayson picked Block and asked
+  // for the switch hidden for now; it only draws while DOOR_SWITCH_ON is true.
+  (!DOOR_SWITCH_ON ? '' : '<div class="ad-doorstyle">Door style, temporary <div class="tp-seg">' +
+    [['spine', 'Spine'], ['corner', 'Corner'], ['block', 'Block'], ['fold', 'Fold']].map(o =>
+      '<button type="button" class="tp-seg-btn' + (doorStyle() === o[0] ? ' on' : '') + '" data-wb-doorstyle="' + o[0] + '">' + o[1] + '</button>'
+    ).join('') + '</div></div>');
 
   // A real pane left over from the last tab (#rp-review / #rp-usage) gets
   // parked, not discarded -- the rest of the app still looks it up by id
@@ -10065,7 +10409,7 @@ function usersPaint() {
       (usersCache.length === 1 ? ' person' : ' people') + '</div>' +
     '<div class="us-list">' + rows + '</div>' +
     '<div class="us-foot">People appear here the first time they open Folio and give their ' +
-      'name and email. Your own access is not editable here — claiming or removing an ' +
+      'name and email. Your own access is not editable here, claiming or removing an ' +
       'Administrator is a password job, below. Removing someone is a job for the vault ' +
       'folder, not Folio.</div>' +
     '<p class="tier-ok" id="admin-pw-msg" style="padding:0 14px"></p>' +
@@ -10594,6 +10938,32 @@ function vcDismissedHTML() {
     }).join('') + '</div></div>';
 }
 
+// S102 -- the one way a screen states its counts (Vault check, Review, Usage).
+// o = { n, noun, sub, parts: [[tone, count, label, zeroText]], always: 'info' }
+// tone is hard / warn / info / gone. Parts above zero go in the legend; the
+// zeros collapse into one quiet line. The meter appears only when two or more
+// parts are above zero AND they add up to the headline, so a bar never claims
+// to split something it does not.
+function countsHTML(o) {
+  const parts = o.parts.filter(Boolean);
+  const live  = parts.filter(p => p[1] > 0);
+  const zeros = parts.filter(p => !(p[1] > 0) && p[3]).map(p => p[3]);
+  const worst = ['hard', 'warn', 'info'].find(k => live.some(p => p[0] === k));
+  const tone  = o.always ? o.always : (o.n > 0 ? (worst || '') : 'ok');
+  const inMeter = live.filter(p => p[0] !== 'gone' || o.meterGone);
+  const sum = inMeter.reduce((s, p) => s + p[1], 0);
+  const meter = (inMeter.length >= 2 && sum === o.n)
+    ? '<div class="ct-meter">' + inMeter.map(p => '<span class="ct-' + p[0] + '" style="flex:' + p[1] + '"></span>').join('') + '</div>' : '';
+  let quiet = zeros.join(', ');
+  if (!live.length && o.empty) quiet = o.empty;
+  if (quiet) quiet = quiet.charAt(0).toUpperCase() + quiet.slice(1) + '.';
+  return '<div class="ct-lead"><div class="ct-h"><b class="ct-n' + (tone ? ' t-' + tone : '') + '">' + o.n + '</b>' +
+    '<span><strong>' + escHtml(o.noun) + '</strong>' + (o.sub ? '<br>' + escHtml(o.sub) : '') + '</span></div>' +
+    '<div class="ct-r">' + meter + '<div class="ct-legend">' +
+    live.map(p => '<span><i class="ct-' + p[0] + '"></i><b>' + p[1] + '</b> ' + escHtml(p[2]) + '</span>').join('') +
+    (quiet ? '<span class="quiet">' + escHtml(quiet) + '</span>' : '') + '</div></div></div>';
+}
+
 function vcTabHTML() {
   const r   = vcResults;
   const bar = '<div class="vc-bar"><div class="vc-bar-meta">' +
@@ -10606,12 +10976,13 @@ function vcTabHTML() {
 
   if (!r) return bar + vcDismissedHTML();
 
-  const tallies = '<div class="vc-tallies">' +
-    '<div class="vc-tally hard"><b>' + r.counts.hard + '</b> hard failures</div>' +
-    '<div class="vc-tally warn"><b>' + r.counts.warn + '</b> warnings</div>' +
-    '<div class="vc-tally info"><b>' + r.counts.info + '</b> information</div>' +
-    '<div class="vc-tally gone"><b>' + Object.keys(vcDismissed || {}).length + '</b> dismissed</div>' +
-    '</div>';
+  const nFind = r.counts.hard + r.counts.warn + r.counts.info;
+  const tallies = countsHTML({ n: nFind, noun: nFind === 1 ? 'finding' : 'findings',
+    sub: 'across ' + r.pages + ' page' + (r.pages === 1 ? '' : 's'),
+    parts: [['hard', r.counts.hard, 'hard failures', 'no hard failures'],
+            ['warn', r.counts.warn, 'warnings', 'no warnings'],
+            ['info', r.counts.info, 'information', 'no notes'],
+            ['gone', Object.keys(vcDismissed || {}).length, 'dismissed', 'nothing dismissed']] });
 
   // J2 -- the Open Review pointer row is GONE. P10 put it here because the
   // missing-property fact lived in Review and printing it twice would have
@@ -11357,6 +11728,13 @@ function betaCloseMore() {
   if (m) { m.style.display = 'none'; m.innerHTML = ''; }
 }
 
+// S103 (item 10) -- the page menu carries icons, like the account menu.
+const BT_MORE_ICON = {
+  backlinks: '<svg class="icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
+  props: '<svg class="icon" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>',
+  edit: '<svg class="icon" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+};
+
 function betaMoreMenuHTML() {
   let h = '';
   BETA_MORE_TOOLS.forEach(id => {
@@ -11369,13 +11747,13 @@ function betaMoreMenuHTML() {
     // lookup against something invisible.
     const c = typeof t.count === 'function' ? t.count() : 0;
     const n = c ? String(c) : '';
-    h += `<button data-wb-btmore="${escHtml(id)}">${escHtml(t.label)}${n ? `<span class="bt-mnum">${escHtml(n)}</span>` : ''}</button>`;
+    h += `<button data-wb-btmore="${escHtml(id)}">${BT_MORE_ICON[id] || ''}${escHtml(t.label)}${n ? `<span class="bt-mnum">${escHtml(n)}</span>` : ''}</button>`;
   });
   h += '<div class="bt-msep"></div>';
-  h += '<button data-wb-btprops="1">Properties</button>';
+  h += '<button data-wb-btprops="1">' + BT_MORE_ICON.props + 'Properties</button>';
   // Edit keeps exactly the rule it has everywhere else, and it is HIDDEN
   // rather than shown-and-disabled, so a reader never looks at a dead button.
-  if (editingAllowed()) h += '<button data-wb-btedit="1">Edit</button>';
+  if (editingAllowed()) h += '<button data-wb-btedit="1">' + BT_MORE_ICON.edit + 'Edit</button>';
   return h;
 }
 
@@ -11900,7 +12278,7 @@ function fitToolbarLabel(containerId, labelSel, groupId) {
 const FIT_ROW_SEL = [
   '.file-row', '.folder-row', '.rp-outline-item', '.saved-row', '.search-hit',
   '.backlink-item', '.comment-card', '.rv-file-name', '.rvp-row',
-  '.ph-label', '.sbt-label', '.wn-row', '.usage-row',
+  '.ph-label', '.sbt-label', '.wn-row', '.vc-row',
 ].join(', ');
 
 // ── The neighbour squeeze, in ONE place (J1) ──────────────────────
@@ -12233,7 +12611,7 @@ function toggleSidebar() {
 // vault called "help-something.md" can never hijack the reader.
 const HELP_DOCS = {
   'help.md':      'Help',
-  'help-edit.md': 'Help — Editing and Markdown',
+  'help-edit.md': 'Help, Editing and Markdown',
 };
 
 function openHelp() { return openHelpDoc('help.md'); }
@@ -12258,7 +12636,7 @@ async function loadAppDoc(file, rc) {
     rc.innerHTML =
       '<p class="md-p" style="padding-top:32px"><b>' + escHtml(what) + '</b></p>' +
       '<p class="md-p" style="color:var(--text-muted)">' + escHtml(detail) + '</p>' +
-      '<p class="md-p" style="color:var(--text-muted);font-size:12px">Address tried: <code class="md-code">' +
+      '<p class="md-p" style="color:var(--text-muted);font-size:12.5px">Address tried: <code class="md-code">' +
       escHtml(url) + '</code></p>';
   };
 
@@ -12511,6 +12889,12 @@ $('btn-help').addEventListener('click', () => {
 // ── Settings ─────────────────────────────────────────────────────
 // Settings now opens from the user badge dropdown (S15) rather than its
 // own header gear — see .ud-item onclick="openSettingsFromBadge()".
+// S103 -- the Close in Settings' new head.
+function closeSettingsPanel() {
+  state.settingsOpen = false;
+  $('settings-panel').classList.remove('open');
+}
+
 function openSettingsFromBadge() {
   closeUserDropdown();
   closeThemePanel(); // only one anchored popup at a time — they share a corner
@@ -12709,7 +13093,7 @@ async function migrateDeviceTier() {
   return true;
 }
 
-const ID_NOTE_RECOGNIZED = 'Recognized — this email already has a profile in the vault. Your saved name and saved pages were restored.';
+const ID_NOTE_RECOGNIZED = 'Recognized. This email already has a profile in the vault. Your saved name and saved pages were restored.';
 
 function openIdentityModal(prefillEmail) {
   $('id-name').value  = '';
@@ -12903,7 +13287,7 @@ const TIER_DESC = {
   // P9 — reversed from S40. Review moved down here (it always ran on
   // reviewAllowed(), unchanged); creating, moving and editing moved up to
   // Administrator, where they stay for the rare fix rather than everyday use.
-  contributor: 'Everything above, plus the review tools — accepting changes, clearing flags, acknowledging edits made in Obsidian.',
+  contributor: 'Everything above, plus the review tools, accepting changes, clearing flags, acknowledging edits made in Obsidian.',
   admin:       'Everything above, plus creating, moving and editing pages, task checkboxes, and setting everyone\'s access in Admin > Users.',
 };
 const tierRank = t => WB_TIERS.indexOf(t);
@@ -12965,7 +13349,7 @@ async function saveVaultAuth() {
   if (!LOCAL.on) { try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* exists */ } }
   await spWriteFile(vaultAuthUrl(), JSON.stringify({
     version: 1,
-    note: 'Folio access tiers. SHA-256 hashes only — no passwords are stored here. Interface gate, not security.',
+    note: 'Folio access tiers. SHA-256 hashes only. No passwords are stored here. Interface gate, not security.',
     hashes: state.authHashes || {},
   }, null, 2));
 }
@@ -14792,10 +15176,12 @@ function renderWhatsNew() {
   const groups = { required: [], week: [], month: [], older: [] };
   vis.forEach(e => groups[wnGroupOf(e)].push(e));
 
+  // S103 (item 2) -- Unseen / New / Updated / All are views of one list, so
+  // underline tabs. The time window picks a range, so it stays a chip.
   const filterBtn = (val, label) =>
-    `<button class="wn-filter${state.wnFilter === val ? ' on' : ''}" data-wb-wnfilter="${val}">${label}</button>`;
+    `<button class="${state.wnFilter === val ? 'on' : ''}" data-wb-wnfilter="${val}">${label}</button>`;
   const windowBtn = (val, label) =>
-    `<button class="wn-filter${state.wnWindow === val ? ' on' : ''}" data-wb-wnwindow="${val}">${label}</button>`;
+    `<button class="review-chip${state.wnWindow === val ? ' active' : ''}" data-wb-wnwindow="${val}">${label}</button>`;
 
   const row = e => {
     const pills = [];
@@ -14854,10 +15240,11 @@ function renderWhatsNew() {
 
   rc.innerHTML = `
     <div class="wn-wrap">
-      <h1 class="md-h1">What's New</h1>
-      <p class="wn-sub">${total ? `${total} page${total === 1 ? '' : 's'} you haven't seen` : 'You are up to date.'}</p>
+      <div class="scr-head"><span class="scr-title">What's New</span><span class="bt-grow"></span>
+        <button class="icon-btn" onclick="openConsoleHome()" title="Close" aria-label="Close"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div class="ug-sub scr-views">${filterBtn('unseen','Unseen')}${filterBtn('new','New')}${filterBtn('updated','Updated')}${filterBtn('all','All')}</div>
       <div class="wn-bar">
-        <div class="wn-filters">${filterBtn('unseen','Unseen')}${filterBtn('new','New')}${filterBtn('updated','Updated')}${filterBtn('all','All')}</div>
+        <p class="wn-sub">${total ? `${total} page${total === 1 ? '' : 's'} you haven't seen` : 'You are up to date.'}</p>
         <div class="wn-filters">${windowBtn(30,'30 days')}${windowBtn(90,'90 days')}${windowBtn(0,'All time')}</div>
         ${total ? '<button class="wn-marklink" data-wb-wnmark="">Mark all seen</button>' : ''}
       </div>
@@ -15678,22 +16065,35 @@ async function zrFlush() {
 // predictably; it is read ONLY when the Usage pane is opened, never on boot
 // and never from scanBadges. The approval-log replay used to be called from
 // the scan and that is exactly the cost 0.31.0 had to undo.
-async function usageListLogs() {
+// S100 -- takes the folder now, because the search log is read the same way
+// from the same two modes. One lister rather than a near-copy: the SharePoint
+// branch is the fiddly half and nobody wants it written twice.
+async function usageListLogs(subdir) {
+  const sub = subdir || USAGE_SUBDIR;
+  const rel = LOCAL.on ? sub : `${CONFIG.vaultRelPath}/${sub}`;
   const out = [];
   try {
     if (LOCAL.on) {
-      const dir = await localGetDir(USAGE_SUBDIR);
+      const dir = await localGetDir(sub);
       for await (const [name, h] of dir.entries()) {
-        if (h.kind === 'file' && name.endsWith('.md')) out.push({ name, url: `local:/${USAGE_SUBDIR}/${name}` });
+        if (h.kind === 'file' && name.endsWith('.md')) out.push({ name, url: `local:/${sub}/${name}` });
       }
     } else {
       const data = await spFetch(
-        `${CONFIG.siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(usageDirUrl())}')/Files?$select=Name,ServerRelativeUrl`
+        `${CONFIG.siteUrl}/_api/web/GetFolderByServerRelativeUrl('${encodeURIComponent(rel)}')/Files?$select=Name,ServerRelativeUrl`
       );
       (data.value || []).forEach(f => { if (f.Name.endsWith('.md')) out.push({ name: f.Name, url: f.ServerRelativeUrl }); });
     }
   } catch (_) { /* folder absent = nothing recorded yet, a valid state */ }
   return out;
+}
+
+// The log file is named for its owner's email SLUG, which is also what
+// auditSlug() gives for a profile's email. That shared slug is the join
+// between a log and a person in zSystem/Users, and it is why People can
+// name someone who has a profile but has never read anything.
+function usageLogSlug(fileName) {
+  return String(fileName || '').replace(/\.md$/i, '').replace(/^\d{4}-\d{2}-/, '');
 }
 
 // Everyone's logs, summed per path, and as of v0.33.0 the per-person split is
@@ -15722,27 +16122,123 @@ let usageAggCache = { at: 0, data: null };
 async function usageAggregate(force) {
   if (!force && usageAggCache.data && (Date.now() - usageAggCache.at) < 60000) return usageAggCache.data;
   const logs = await usageListLogs();
-  const byPath = new Map(); // path → { opens, secs, days:Set, last, by:Map }
+  const byPath = new Map(); // path → { opens, reads, readsKnown, secs, days:Set, last, by:Map, byReads:Map }
+  const byPerson = new Map(); // email slug → one row for the People view
   const people = new Set();
   for (const f of logs) {
     const txt = await readVaultFileOrNull(f.url);
     if (!txt) continue;
-    const who = usageLogPerson(f.name, txt);
+    const who  = usageLogPerson(f.name, txt);
+    const slug = usageLogSlug(f.name);
     people.add(who);
+    const pr = byPerson.get(slug) ||
+      { slug, name: who, opens: 0, reads: 0, readsKnown: false, pages: new Set(), last: '' };
+    pr.name = who;   // a newer log carries the better name
+    byPerson.set(slug, pr);
     usageParseLog(txt).forEach(r => {
-      const e = byPath.get(r.path) || { path: r.path, opens: 0, secs: 0, days: new Set(), last: '', by: new Map() };
+      const e = byPath.get(r.path) ||
+        { path: r.path, opens: 0, reads: 0, readsKnown: false, secs: 0, days: new Set(), last: '', by: new Map(), byReads: new Map() };
       e.opens += r.opens;
       e.secs  += r.secs;
       e.days.add(r.day);
       if (r.day > e.last) e.last = r.day;
+      // S100 -- a read count of null is UNKNOWN (the row predates v0.65.0) and
+      // must never be added in as a nought. `readsKnown` is what lets the view
+      // draw a dash instead, and summing only known rows is what stops one old
+      // row dragging a page's total down for ever.
+      if (r.reads !== null && r.reads !== undefined) { e.reads += r.reads; e.readsKnown = true; }
       // One person can have several monthly logs, so this accumulates rather
       // than assigning — otherwise August would quietly replace July.
+      // `by` stays a Map of person → OPENS, unchanged since v0.33.0, because
+      // the total it has to add up to is still opens. Reads ride alongside in
+      // their own map for the same reason the log has two columns.
       e.by.set(who, (e.by.get(who) || 0) + r.opens);
+      if (r.reads !== null && r.reads !== undefined) e.byReads.set(who, (e.byReads.get(who) || 0) + r.reads);
       byPath.set(r.path, e);
+
+      pr.opens += r.opens;
+      if (r.reads !== null && r.reads !== undefined) { pr.reads += r.reads; pr.readsKnown = true; }
+      pr.pages.add(r.path);
+      if (r.day > pr.last) pr.last = r.day;
     });
   }
-  const data = { rows: [...byPath.values()], logCount: logs.length, peopleCount: people.size };
+  const data = { rows: [...byPath.values()], logCount: logs.length, peopleCount: people.size,
+                 people: [...byPerson.values()] };
   usageAggCache = { at: Date.now(), data };
+  return data;
+}
+
+// ── The search log, read side (S100) ─────────────────────────────
+//
+// Capture shipped at v0.65.0 and nothing has ever read it back. Five outcomes
+// go in and four questions come out:
+//
+//   found nothing   NO RESULTS + ABANDONED — the page nobody has written yet
+//   wrong page      WRONG PAGE — a title that reads like the wrong answer
+//   reworded        REFINED — their word, then yours; an Obsidian alias fixes it
+//   top searches    everything summed, with the average position clicked
+//
+// ANONYMOUS, and that is a property of THIS FUNCTION, not of the view: no name
+// is carried out of here at all, so no render downstream is in a position to
+// show one. That is the opposite arrangement to usageAggregate, deliberately,
+// and the difference is what the note there is about — reading is attributed
+// because the pane exists to ask who is reading, and a search is not.
+let zrAggCache = { at: 0, data: null };
+async function zrAggregate(force) {
+  if (!force && zrAggCache.data && (Date.now() - zrAggCache.at) < 60000) return zrAggCache.data;
+  const logs     = await usageListLogs(ZR_SUBDIR);
+  const byQuery  = new Map();  // query → { query, count, posSum, posCount }
+  const notFound = new Map();  // query + kind → { query, count, kind }
+  const wrong    = new Map();  // query + path → { query, path, count }
+  const refined  = new Map();  // from + to    → { from, to, count }
+  let total = 0;
+  const bump = (map, key, make, n) => {
+    if (!map.has(key)) map.set(key, make());
+    const e = map.get(key);
+    e.count += n;
+    return e;
+  };
+  for (const f of logs) {
+    const txt = await readVaultFileOrNull(f.url);
+    if (!txt) continue;
+    zrParseLog(txt).forEach(r => {
+      const q = String(r.query || '').trim();
+      const key = q.toLowerCase();
+      const n = r.count || 0;
+      if (!q || n <= 0) return;
+      total += n;
+      bump(byQuery, key, () => ({ query: q, count: 0, posSum: 0, posCount: 0 }), n);
+      if (r.outcome === 'NO RESULTS') {
+        bump(notFound, key + '|nil', () => ({ query: q, count: 0, kind: 'nothing matched' }), n);
+      } else if (r.outcome === 'ABANDONED') {
+        bump(notFound, key + '|gave', () => ({ query: q, count: 0, kind: 'gave up' }), n);
+      } else if (r.outcome === 'REFINED') {
+        const to = String(r.detail || '').trim();
+        if (to) bump(refined, key + '|' + to.toLowerCase(), () => ({ from: q, to, count: 0 }), n);
+      } else {
+        // WRONG PAGE and FOUND IT both write `path#position`. The position is
+        // worth having from BOTH: where people click when they were right and
+        // when they were wrong is the same question about the ranking.
+        const m = /^(.*)#(\d+)$/.exec(String(r.detail || ''));
+        const pth = m ? m[1] : String(r.detail || '');
+        const pos = m ? parseInt(m[2], 10) : 0;
+        if (pos > 0) { const e = byQuery.get(key); e.posSum += pos * n; e.posCount += n; }
+        if (r.outcome === 'WRONG PAGE' && pth) {
+          bump(wrong, key + '|' + pth.toLowerCase(), () => ({ query: q, path: pth, count: 0 }), n);
+        }
+      }
+    });
+  }
+  const desc = (a, b) => b.count - a.count || String(a.query || a.from).localeCompare(String(b.query || b.from));
+  const data = {
+    logCount: logs.length,
+    total,
+    notFound: [...notFound.values()].sort(desc),
+    wrong:    [...wrong.values()].sort(desc),
+    refined:  [...refined.values()].sort(desc),
+    top:      [...byQuery.values()].sort(desc),
+  };
+  zrAggCache = { at: Date.now(), data };
   return data;
 }
 
@@ -15904,7 +16400,7 @@ async function auditFlagActive() {
 // OneDrive is the only thing that knows WHO changed a file. The app knows
 // who approved. Both matter, and this is the link between them.
 function auditOpenHistory() {
-  alert('Version history lives in OneDrive.\n\nRight-click this file in the synced vault folder and choose "Version history" to see who changed it and to restore an earlier copy.\n\nFolio deliberately does not build its own — it would duplicate what OneDrive already gives you for free.');
+  alert('Version history lives in OneDrive.\n\nRight-click this file in the synced vault folder and choose "Version history" to see who changed it and to restore an earlier copy.\n\nFolio deliberately does not build its own. It would duplicate what OneDrive already gives you for free.');
 }
 
 // Session 42 — Review dashboard
@@ -16044,6 +16540,7 @@ async function renderAdminReviewTab() {
   rvDashPaint();
   await scanBadges();
   if (adminActiveTab === 'review') rvDashPaint();
+  refreshAdminDoorCounts(); // S104 -- the door count was going stale, see above
 }
 
 // One ending for every review action: say what happened, then, if a walk is
@@ -16088,14 +16585,16 @@ async function rvAfterAction(url, msg) {
 // the tallies: decide is a judgement call, ack is additive and only needs
 // somebody to have seen it, again is a page asking to be re-read.
 const RV_OWE = {
-  escalation:  { icon: '\u{1F6A8}', sev: 'decide', tone: 'red'    },
-  vaultchange: { icon: '✏️', sev: 'decide', tone: 'orange' },
-  question:    { icon: '❓', sev: 'decide', tone: 'purple' },
-  change:      { icon: '\u{1F4DD}', sev: 'decide', tone: 'blue'   },
-  newsection:  { icon: '\u{1F9E9}', sev: 'ack',    tone: 'yellow' },
-  flagged:     { icon: '\u{1F6A9}', sev: 'ack',    tone: 'teal'   },
-  newfile:     { icon: '\u{1F195}', sev: 'ack',    tone: 'green'  },
-  due:         { icon: '⏰', sev: 'again',  tone: 'gray'   },
+  // S104 -- item 12, Review's tags moved onto the one tag style (capitals in
+  // a capsule); the icon field is gone with the emoji it held.
+  escalation:  { sev: 'decide', tone: 'red'    },
+  vaultchange: { sev: 'decide', tone: 'orange' },
+  question:    { sev: 'decide', tone: 'purple' },
+  change:      { sev: 'decide', tone: 'blue'   },
+  newsection:  { sev: 'ack',    tone: 'yellow' },
+  flagged:     { sev: 'ack',    tone: 'teal'   },
+  newfile:     { sev: 'ack',    tone: 'green'  },
+  due:         { sev: 'again',  tone: 'gray'   },
 };
 const RV_SEV_BAND = { decide: 'hard', ack: 'warn', again: 'info' };
 
@@ -16216,19 +16715,16 @@ function buildReviewDashboardHTML() {
   const nAgain  = rows.filter(r => r.sev === 'again').length;
   const ackable = rows.filter(r => r.sev !== 'decide').length;
 
-  let html = `<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:12px">
-    <div>
-      <h1 class="md-h md-h1" style="margin-bottom:4px">Review dashboard</h1>
-      <p class="md-p" style="margin-top:2px">${rows.length} page${rows.length !== 1 ? 's' : ''} waiting on you, oldest first · ${total} item${total !== 1 ? 's' : ''} in all</p>
-    </div>
-    <div class="review-filter-bar">${chips}</div>
-  </div>`;
+  // S103 (items 1, 2) -- the second title went: Admin names the screen and
+  // the count block below says how many pages wait. The kind chips are
+  // categories, so they stay chips, on a row of their own.
+  let html = `<div class="review-filter-bar scr-chips">${chips}</div>`;
 
-  html += '<div class="vc-tallies" style="padding:0 0 4px">' +
-    `<div class="vc-tally hard"><b>${nDecide}</b> decide</div>` +
-    `<div class="vc-tally warn"><b>${nAck}</b> acknowledge</div>` +
-    `<div class="vc-tally info"><b>${nAgain}</b> read again</div>` +
-    '</div>';
+  html += countsHTML({ n: rows.length, noun: rows.length === 1 ? 'page waiting' : 'pages waiting',
+    sub: rows.length ? 'oldest first' : '', empty: 'nothing waiting on you',
+    parts: [['hard', nDecide, 'decide', 'nothing to decide'],
+            ['warn', nAck, 'acknowledge', 'nothing to acknowledge'],
+            ['info', nAgain, 'read again', 'nothing to read again']] }).replace('class="ct-lead"', 'class="ct-lead" style="padding:0 0 4px"');
 
   if (rows.length) {
     html += '<div class="vc-bar" style="margin:12px 0 0">' +
@@ -16247,7 +16743,7 @@ function buildReviewDashboardHTML() {
       type: pg.owes[0].type, url: pg.url, name: pg.name, opts: pg.owes[0].opts,
     }) - 1;
     const oweChips = pg.owes.map(o =>
-      `<span class="rv-owe rv-owe-${RV_OWE[o.type].tone}">${RV_OWE[o.type].icon} ${escHtml(o.label)}</span>`
+      `<span class="rv-owe rv-owe-${RV_OWE[o.type].tone}">${escHtml(o.label)}</span>`
     ).join('');
     // Every page carries Review page. A page owing exactly ONE thing that can
     // be closed without reading it also carries that thing's own button --
@@ -16300,7 +16796,7 @@ function buildReviewDashboardHTML() {
       html += '<div style="margin-top:4px">';
       prevAll.forEach(it => {
         html += `<div class="backlink-item" data-wb-open="${escHtml(it.url)}" data-wb-name="${escHtml(it.name)}">
-          <span style="flex:1">${it.icon} ${escHtml(it.name)} <span style="color:var(--text-muted)">— ${escHtml(it.label)}${it.ts ? ' · ' + escHtml(it.ts.replace('T', ' ').slice(0, 16)) : ''}</span></span>
+          <span style="flex:1">${it.icon} ${escHtml(it.name)} <span style="color:var(--text-muted)">, ${escHtml(it.label)}${it.ts ? ' · ' + escHtml(it.ts.replace('T', ' ').slice(0, 16)) : ''}</span></span>
         </div>`;
       });
       html += '</div>';
@@ -16753,7 +17249,7 @@ async function rejectChangeCore(fileUrl, changesUrl, idx) {
   const snap  = e.pre ? b64dec(e.pre) : null;
   if (snap === null) {
     // legacy entry logged before revert support — flag-only, content untouched
-    if (!confirm('This change was logged before revert support, so the file cannot be restored automatically.\nMark it rejected anyway? (Content stays — fix it by hand.)')) return false;
+    if (!confirm('This change was logged before revert support, so the file cannot be restored automatically.\nMark it rejected anyway? (Content stays, fix it by hand.)')) return false;
   } else {
     const msg = 'Reject this change? The file reverts to how it was before it' +
       (later ? `,\nand ${later} later pending change${later > 1 ? 's' : ''} on this file will be discarded too.` : '.');
@@ -17432,7 +17928,7 @@ function qbFieldsHTML(root) {
       '<input type="checkbox" id="qb-esc"' + (root.type === 'escalation' ? ' checked' : '') + '>' +
       '<span>Raise as an escalation</span></span></div>' +
     '<button data-qb="save">Save</button>' +
-    '<span class="rvb-qhint">Assigned to is typed, not picked — there is no roster in the app. ' +
+    '<span class="rvb-qhint">Assigned to is typed, not picked. There is no roster in the app. ' +
     'Clear the due date to remove it. Saving here writes the comment and nothing else.</span>' +
   '</div>';
 }
@@ -18536,6 +19032,18 @@ function resolvedMode() {
 
 // The one function that touches the DOM. Everything else just edits
 // state.themePrefs and calls this.
+// S102 -- the door style, Block unless the temporary Admin switch says
+// otherwise. Anything unrecognised (an old 'now' from the S101 preview)
+// falls back to Block.
+// 0.71.1 -- Block picked (Jayson, 21 Sep). With the switch hidden the style
+// is Block for everyone, whatever an earlier try-out left saved on this PC.
+const DOOR_SWITCH_ON = false;
+function doorStyle() {
+  if (!DOOR_SWITCH_ON) return 'block';
+  const d = state.themePrefs && state.themePrefs.doors;
+  return ['spine', 'corner', 'block', 'fold'].indexOf(d) === -1 ? 'block' : d;
+}
+
 function applyThemePrefs() {
   const p    = state.themePrefs;
   const mode = resolvedMode();
@@ -18543,6 +19051,7 @@ function applyThemePrefs() {
   const s    = document.body.style;
 
   document.body.setAttribute('data-theme', mode);
+  document.body.setAttribute('data-doors', doorStyle()); // S102
 
   const heads  = (p.headings && p.headings[mode]) || set.h;
   const accent = (p.accent && p.accent[mode]) || set.ac;
@@ -19079,6 +19588,8 @@ document.addEventListener('keydown', e => {
   // underneath it without the popup having been opened from them, which no
   // route does.
   if (e.key === 'Escape' && reportTargetUrl) closeReportModal();
+  // S104 -- item 8, Settings closes on Escape like every other anchored panel.
+  if (e.key === 'Escape' && state.settingsOpen) closeSettingsPanel();
 });
 
 // P8 — relocated from the Theme panel; same setThemePref() every other
@@ -19798,29 +20309,55 @@ function refreshRightPanel() {
   if (typeof betaSlideId !== 'undefined' && betaSlideId) { const fn = fns[betaSlideId]; if (fn) fn(); }
 }
 
-// ── Usage tab (S45) ──────────────────────────────────────────────
+// ── Usage tab (S45, rebuilt S100) ───────────────────
 //
-// Three lists, and the middle one is the point. Most read tells you what the
-// wiki is for; Never opened tells you what to delete or what nobody can find;
-// Gone quiet catches a page that used to earn its place and stopped, which is
-// almost always a page that went out of date.
+// Three views behind one sub navigation: Pages (which pages earn their place),
+// Searches (what people looked for), People (who is using it and who is not).
+// Before this it was eight bands on one scroll, which Jayson could not read.
 //
-// Top 5 shown, up to 25 behind "Show more" — Jayson's shape. The cap is real
-// and not a render trick: a list of 400 rows is not a report, it is the raw
-// data with extra steps.
+// TWO THINGS THIS REBUILD RESTS ON, both easy to undo by accident:
+//
+// 1. It borrows VAULT CHECK'S GRAMMAR wholesale — .vc-bar to explain itself,
+//    .vc-tally chips for the headline counts, .vc-band heads with a count,
+//    .vc-rows with a severity stripe. Not reuse for its own sake: a report row
+//    and a check row are both a FACT about a page, and a yellow stripe has to
+//    mean one thing on every screen or it means nothing. Writing bespoke rows
+//    here again is how the app stopped feeling like one app.
+// 2. The sub navigation is UNDERLINE tabs, not a second .seg2. Level one in
+//    this app is the enclosed segmented control; a second enclosed control
+//    stacked under it reads as the same level, which is what made the first
+//    sample feel wrong before anyone could say why.
+//
+// RANKING MOVED FROM OPENS TO READS. An open is counted the moment a page
+// renders, so a wrong click counted fully; a read is USAGE_READ_SECS of
+// engaged time. Both numbers are shown, because the GAP between them is itself
+// a finding: fourteen opens and six reads is a page people keep landing on and
+// leaving. A row written before v0.65.0 has no read count and shows a DASH,
+// never a nought — a nought would say nobody read the page when the truth is
+// that nobody was counting.
 //
 // v0.33.0 — Most read rows expand to a per-person breakdown. See the long note
 // on usageAggregate for why the no-names rule was reversed and what it turned
 // out to have been protecting (nothing: the logs were always named and always
-// readable by everyone). The other two lists stay unnamed, and not by
-// oversight — "never opened" has nobody to name, and putting names on "gone
-// quiet" would turn a prompt to check whether a page is out of date into a
-// list of who stopped reading it.
-const USAGE_TOP     = 25;
-const USAGE_PREVIEW = 5;
+// readable by everyone). Never opened has nobody to name, and naming Gone
+// quiet would turn "is this page out of date" into "who stopped reading it",
+// which is a different and worse question. People answers the naming question
+// head on instead, which is the question Jayson built the pane for.
+const USAGE_TOP        = 25;
+const USAGE_PREVIEW    = 5;
 const USAGE_QUIET_DAYS = 30;
-let usageExpanded = {};   // section id → showing all 25
+const USAGE_VIEWS = [
+  { id: 'pages',    label: 'Pages' },
+  { id: 'searches', label: 'Searches' },
+  { id: 'people',   label: 'People' },
+];
+let usageView     = 'pages';
+let usageExpanded = {};   // band id → showing all 25
 let usageOpenRows = {};   // path → showing that row's per-person breakdown
+// Every view reads files, so a second click while the first read is in flight
+// would paint the view you just left over the one you asked for. The sequence
+// is checked after every await, which is the same guard the scan cache needed.
+let usageRenderSeq = 0;
 
 function usageToggleRow(path) {
   usageOpenRows[path] = !usageOpenRows[path];
@@ -19832,56 +20369,309 @@ function usageToggleSection(id) {
   renderUsageTab();
 }
 
-function usageSection(id, title, rows, render, emptyMsg) {
-  const capped = rows.slice(0, USAGE_TOP);
-  const open   = !!usageExpanded[id];
-  const shown  = open ? capped : capped.slice(0, USAGE_PREVIEW);
-  if (!capped.length) {
-    return `<div class="usage-sect"><div class="usage-sect-head">${escHtml(title)}</div>` +
-           `<div class="rp-empty usage-none">${escHtml(emptyMsg)}</div></div>`;
-  }
-  const more = capped.length > USAGE_PREVIEW
-    ? `<button class="usage-more" data-wb-usage-more="${escHtml(id)}">` +
-      (open ? 'Show less' : `Show more (${capped.length - USAGE_PREVIEW})`) + '</button>'
-    : '';
-  return `<div class="usage-sect">` +
-         `<div class="usage-sect-head">${escHtml(title)}<span class="usage-count">${capped.length}${rows.length > USAGE_TOP ? '+' : ''}</span></div>` +
-         shown.map(render).join('') + more + '</div>';
+function usageSetView(v) {
+  if (!USAGE_VIEWS.some(x => x.id === v) || v === usageView) return;
+  usageView     = v;
+  usageExpanded = {};   // a Show more on Pages must not arrive open on Searches
+  usageOpenRows = {};
+  renderUsageTab();
 }
 
-// The row keeps its existing click-to-open behaviour; the reader count is a
-// separate control beside it, because opening the page and asking who read it
-// are two different intentions and one click cannot serve both.
-function usageRowBar(r, max) {
-  const pct   = max > 0 ? Math.max(3, Math.round((r.opens / max) * 100)) : 3;
-  const by    = r.by ? [...r.by.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])) : [];
-  const open  = !!usageOpenRows[r.path];
-  const who   = by.length
-    ? `<button class="usage-who" data-wb-usage-who="${escHtml(r.path)}" ` +
-      `title="${open ? 'Hide who read this' : 'Show who read this'}">` +
-      `${by.length} reader${by.length === 1 ? '' : 's'} ${open ? '▾' : '▸'}</button>`
-    : '';
-  const list = open && by.length
-    ? '<div class="usage-by">' + by.map(([name, n]) =>
-        `<div class="usage-by-row"><span class="usage-by-name">${escHtml(name)}</span>` +
-        `<span class="usage-by-val">${n}</span></div>`).join('') + '</div>'
-    : '';
-  // One data-wb-usage-open, on the row, exactly as before. The reader-count
-  // button sits inside it and is a nested target the delegated handler asks
-  // about first, which is the established pattern here and is why the row does
-  // not need to give up its own click to make room for it.
-  return `<div class="usage-row" data-wb-usage-open="${escHtml(r.path)}" title="${escHtml(r.path)}">` +
-         `<div class="usage-row-top"><span class="usage-name">${escHtml(usageLabel(r.path))}</span>` +
-         `${who}<span class="usage-val">${r.opens}</span></div>` +
-         `<div class="usage-track"><div class="usage-fill" style="width:${pct}%"></div></div>` +
-         list + '</div>';
+function usageRefresh() {
+  usageAggCache = { at: 0, data: null };
+  zrAggCache    = { at: 0, data: null };
+  renderUsageTab();
 }
-function usageRowPlain(r) {
-  return `<div class="usage-row" data-wb-usage-open="${escHtml(r.path)}" title="${escHtml(r.path)}">` +
-         `<div class="usage-row-top"><span class="usage-name">${escHtml(usageLabel(r.path))}</span>` +
-         `<span class="usage-meta">${escHtml(r.note || '')}</span></div></div>`;
+
+function usageSubNav() {
+  return '<div class="ug-sub">' + USAGE_VIEWS.map(v =>
+    '<button class="' + (usageView === v.id ? 'on' : '') + '" data-wb-usage-view="' + v.id + '">' +
+    escHtml(v.label) + '</button>').join('') + '</div>';
 }
+
+// The bar says what the view is FOR, which is where Vault check puts its own
+// explanation. There is deliberately no separate lead paragraph: one block of
+// text at the top per view, and the footer carries provenance only. Mixing the
+// two is what produced the footer claim v0.33.0 had to correct.
+function usageBar(purpose) {
+  return '<div class="vc-bar"><div class="vc-bar-meta">' + purpose + '</div>' +
+    '<button class="vc-btn" data-wb-usage-refresh="1">Refresh</button></div>';
+}
+
+// S102 -- Usage's counts use the shared block; the first entry is the headline
+// and the rest are the breakdown. Usage is a report, so it is always blue.
+function usageTallies(list, head) {
+  const on = list.filter(Boolean);
+  if (!on.length) return '';
+  const h = head || { n: on[0][1], noun: on[0][2] };
+  return countsHTML({ n: h.n, noun: h.noun, sub: h.sub, always: 'info', meterGone: h.meterGone,
+    parts: (head ? on : on.slice(1)).map(t => [t[0], t[1], t[2], t[3] || ('none ' + t[2])]) });
+}
+
+// `opts.note` is the band's one-line explanation; `opts.all` turns the cap off
+// for a band bounded by something other than the vault. The cap is real and not
+// a render trick -- a list of 400 rows is the raw data with extra steps -- but
+// a ROSTER is two to ten people, and on People the rows that matter most (the
+// ones reading nothing) sort last, so capping it hides the finding.
+function usageBand(id, title, rows, render, emptyMsg, opts) {
+  const o = opts || {};
+  const note = o.note ? '<div class="ug-note">' + escHtml(o.note) + '</div>' : '';
+  const capped = o.all ? rows.slice() : rows.slice(0, USAGE_TOP);
+  const open   = !!usageExpanded[id];
+  const shown  = (o.all || open) ? capped : capped.slice(0, USAGE_PREVIEW);
+  if (!capped.length) {
+    return '<div class="vc-band"><div class="vc-band-head">' + escHtml(title) + '</div>' + note +
+           '<div class="rp-empty usage-none">' + escHtml(emptyMsg) + '</div></div>';
+  }
+  const more = (!o.all && capped.length > USAGE_PREVIEW)
+    ? '<button class="usage-more" data-wb-usage-more="' + escHtml(id) + '">' +
+      (open ? 'Show less' : 'Show more (' + (capped.length - USAGE_PREVIEW) + ')') + '</button>'
+    : '';
+  return '<div class="vc-band">' +
+         '<div class="vc-band-head">' + escHtml(title) + ' &middot; ' +
+         capped.length + ((!o.all && rows.length > USAGE_TOP) ? '+' : '') + '</div>' + note +
+         '<div class="vc-rows">' + shown.map(render).join('') + '</div>' + more + '</div>';
+}
+
+// One row shape for every band in every view: Vault check's stripe, a main
+// column, and a right-aligned number column.
+function usageRow(band, main, act, openPath) {
+  return '<div class="vc-row ' + band + '"' +
+    (openPath ? ' data-wb-usage-open="' + escHtml(openPath) + '" title="' + escHtml(openPath) + '"' : '') +
+    '><div class="vc-stripe"></div><div class="vc-main">' + main + '</div>' +
+    '<div class="vc-act">' + act + '</div></div>';
+}
+
 function usageLabel(p) { return displayFileName(String(p).split('/').pop() || p); }
+
+// null is UNKNOWN and prints a dash. Nought prints as nought, because a page
+// opened and never read for fifteen seconds is a real and different fact.
+function usageNum(n, dim) {
+  const head = (n === null || n === undefined) ? '<span class="dim">–</span>' : escHtml(String(n));
+  return '<span class="ug-num">' + head +
+    (dim ? ' <span class="dim">· ' + escHtml(dim) + '</span>' : '') + '</span>';
+}
+
+// Unknown sorts below every known count, including a known nought.
+function usageReadKey(r) { return r.readsKnown ? r.reads : -1; }
+
+function usageDayAge(day) {
+  const t = Date.parse(String(day || '') + 'T00:00:00Z');
+  if (isNaN(t)) return null;
+  return Math.floor((Date.parse(usageDay() + 'T00:00:00Z') - t) / 86400000);
+}
+function usageWhen(day) {
+  const age = usageDayAge(day);
+  if (age === null) return 'no reading yet';
+  if (age <= 0) return 'today';
+  if (age === 1) return 'yesterday';
+  if (age < USAGE_QUIET_DAYS) return age + ' days ago';
+  return day;
+}
+
+function usageMostRow(r, maxReads, maxOpens) {
+  const known = r.readsKnown;
+  const pct   = known
+    ? (maxReads > 0 ? Math.max(3, Math.round((r.reads / maxReads) * 100)) : 3)
+    : (maxOpens > 0 ? Math.max(3, Math.round((r.opens / maxOpens) * 100)) : 3);
+  const by = r.by ? [...r.by.entries()].map(([name, opens]) => ({
+    name, opens,
+    reads: (r.byReads && r.byReads.has(name)) ? r.byReads.get(name) : null,
+  })).sort((a, b) =>
+    ((b.reads === null ? -1 : b.reads) - (a.reads === null ? -1 : a.reads)) ||
+    (b.opens - a.opens) || a.name.localeCompare(b.name)) : [];
+  const open = !!usageOpenRows[r.path];
+  const who  = by.length
+    ? '<button class="usage-who" data-wb-usage-who="' + escHtml(r.path) + '" ' +
+      'title="' + (open ? 'Hide who read this' : 'Show who read this') + '">' +
+      by.length + ' reader' + (by.length === 1 ? '' : 's') + ' ' + (open ? '▾' : '▸') + '</button>'
+    : '';
+  // The breakdown counts READS, the same definition the band is ranked by. Two
+  // numbers both called reading on one screen is how a second definition gets
+  // in, which is the rule S96 wrote for the search side.
+  const list = open && by.length
+    ? '<div class="usage-by">' + by.map(b =>
+        '<div class="usage-by-row"><span class="usage-by-name">' + escHtml(b.name) + '</span>' +
+        '<span class="usage-by-val">' + (b.reads === null ? '–' : b.reads) + '</span></div>').join('') +
+      '</div>'
+    : '';
+  const why = !known
+    ? '<div class="vc-why">Read count never taken</div>'
+    : (r.opens >= r.reads * 2 && r.opens - r.reads >= 3
+        ? '<div class="vc-why">Opened often, read rarely</div>' : '');
+  const main = '<span class="vc-name">' + escHtml(usageLabel(r.path)) + '</span>' + why +
+    '<div class="usage-track"><div class="usage-fill' + (known ? '' : ' unk') +
+    '" style="width:' + pct + '%"></div></div>' + list;
+  return usageRow(known ? 'vc-info' : 'vc-gone', main,
+    who + usageNum(known ? r.reads : null, r.opens + ' opens'), r.path);
+}
+
+function usagePlainRow(band, r) {
+  return usageRow(band, '<span class="vc-name">' + escHtml(usageLabel(r.path)) + '</span>',
+    '<span class="ug-num"><span class="dim">' + escHtml(r.note || '') + '</span></span>', r.path);
+}
+
+// ── view: Pages ──
+async function usagePagesHTML() {
+  const agg  = await usageAggregate();
+  const read = new Map(agg.rows.map(r => [r.path, r]));
+  const all  = allMdFiles().map(f => auditPathKey(f.url));
+
+  const most = agg.rows.slice().sort((a, b) =>
+    usageReadKey(b) - usageReadKey(a) || b.opens - a.opens || a.path.localeCompare(b.path));
+  const never = all.filter(p => !read.has(p)).sort().map(p => ({ path: p, note: 'never opened' }));
+
+  // "Gone quiet" is deliberately not "low count". A page with two opens that
+  // both happened last week is fine; a page with sixty opens and none this
+  // month is the one worth looking at.
+  const cutoff = usageDay(new Date(Date.now() - USAGE_QUIET_DAYS * 86400000));
+  const quiet  = agg.rows.filter(r => r.last < cutoff && r.opens >= 3)
+                         .sort((a, b) => b.opens - a.opens)
+                         .map(r => ({ path: r.path, note: 'last read ' + r.last }));
+
+  const maxReads = most.reduce((m, r) => (r.readsKnown && r.reads > m ? r.reads : m), 0);
+  const maxOpens = most.reduce((m, r) => (r.opens > m ? r.opens : m), 0);
+  const readPages = most.filter(r => r.readsKnown && r.reads > 0).length;
+
+  const people = agg.peopleCount || 0;
+  const foot = agg.logCount
+    ? '<div class="usage-foot">Totals across ' + agg.logCount + ' monthly log' +
+      (agg.logCount === 1 ? '' : 's') + ' from ' + people + ' ' + (people === 1 ? 'person' : 'people') + '. ' +
+      (people === 1 ? 'Only your own reading has reached the vault so far. ' : '') +
+      'Reads counted since 0.65.0, a dash means nobody was counting yet. ' +
+      'Near live: your own reading appears at once, everyone else\'s when they next leave the tab. ' +
+      'Reading is logged for everyone and stored per person in zSystem/Analytics. This pane is Administrator only.</div>'
+    : '<div class="usage-foot">Nothing recorded yet. Reading is written to the vault when you leave the tab.</div>';
+
+  return usageBar('Which pages earn their place. A read is ' + USAGE_READ_SECS +
+      ' seconds of real attention, so a wrong click does not count.') +
+    usageTallies([
+      ['warn', never.length, 'never opened', 'every page opened'],
+      ['gone', quiet.length, 'gone quiet', 'nothing gone quiet'],
+    ], { n: readPages, noun: readPages === 1 ? 'page read' : 'pages read', sub: 'of ' + all.length + ' in the vault' }) +
+    usageBand('most', 'Most read', most, r => usageMostRow(r, maxReads, maxOpens), 'Nothing recorded yet.') +
+    usageBand('never', 'Never opened', never, r => usagePlainRow('vc-warn', r), 'Every page has been opened at least once.') +
+    usageBand('quiet', 'Gone quiet (' + USAGE_QUIET_DAYS + '+ days)', quiet, r => usagePlainRow('vc-gone', r), 'Nothing has gone quiet.') +
+    foot;
+}
+
+// ── view: Searches ──
+async function usageSearchesHTML() {
+  const s = await zrAggregate();
+  const bar = usageBar('What people looked for, counted without names. ' +
+    'The pages worth writing next are at the top of this list.');
+  if (!s.total) {
+    return bar + '<div class="rp-empty">Nothing searched yet. Searches have been counted since 0.65.0, ' +
+      'and reach the vault when someone leaves the tab.</div>';
+  }
+  const sum = list => list.reduce((n, r) => n + r.count, 0);
+  const qRow = (band, left, right, openPath) =>
+    usageRow(band, left, '<span class="ug-num">' + right + '</span>', openPath);
+
+  return bar +
+    usageTallies([
+      ['hard', sum(s.notFound), 'found nothing', 'nothing came up empty'],
+      ['warn', sum(s.wrong), 'wrong page', 'no wrong pages'],
+      ['gone', sum(s.refined), 'reworded', 'nothing reworded'],
+    ], { n: s.total, noun: s.total === 1 ? 'search' : 'searches' }) +
+    usageBand('nil', 'Found nothing', s.notFound, r =>
+      qRow(r.kind === 'gave up' ? 'vc-warn' : 'vc-hard',
+        '<span class="ug-q">' + escHtml(r.query) + '</span>',
+        r.count + ' <span class="dim">· ' + escHtml(r.kind) + '</span>'),
+      'Every search has found something.',
+      { note: 'The page they expected. "Gave up" means results came back and nobody opened one.' }) +
+    usageBand('wrong', 'Clicked the wrong page', s.wrong, r =>
+      qRow('vc-warn',
+        '<div class="ug-pair"><span class="ug-q">' + escHtml(r.query) + '</span>' +
+        '<span class="ug-arrow">→</span>' +
+        '<span class="vc-name">' + escHtml(usageLabel(r.path)) + '</span></div>',
+        String(r.count), r.path),
+      'Nobody has clicked a result and bounced off it.',
+      { note: 'Opened, then left before reading. The title may read like the wrong answer.' }) +
+    usageBand('refined', 'Reworded the search', s.refined, r =>
+      qRow('vc-info',
+        '<div class="ug-pair"><span class="ug-q">' + escHtml(r.from) + '</span>' +
+        '<span class="ug-arrow">→</span>' +
+        '<span class="ug-q">' + escHtml(r.to) + '</span></div>',
+        String(r.count)),
+      'Nobody has had to reword a search.',
+      { note: 'Their word, then yours. An alias in Obsidian makes the first search work.' }) +
+    usageBand('top', 'Top searches', s.top, r =>
+      qRow('vc-info', '<span class="ug-q">' + escHtml(r.query) + '</span>',
+        r.count + (r.posCount
+          ? ' <span class="dim">· clicked #' + (r.posSum / r.posCount).toFixed(1) + '</span>'
+          : ' <span class="dim">· no clicks</span>')),
+      'Nothing searched yet.',
+      { note: 'If people keep picking the third result, the ranking is wrong.' }) +
+    '<div class="usage-foot">Totals only, no names: this view is built without them rather than ' +
+    'hiding them. The log itself stays per person in zSystem/SearchLog, readable by anyone with the vault. ' +
+    'Counting started at 0.65.0, so this fills up slowly. This pane is Administrator only.</div>';
+}
+
+// ── view: People ──
+//
+// The question Jayson built this pane for, asked directly: who is using Folio
+// and who is not. It joins the roster in zSystem/Users to the reading logs on
+// the email SLUG (see usageLogSlug), which is what lets it show somebody who
+// has a profile and has never read a thing — the row that matters most and the
+// one a page-shaped report can never contain.
+async function usagePeopleHTML() {
+  const agg = await usageAggregate();
+  let roster = [];
+  try { roster = await usersListProfiles(); } catch (_) { roster = []; }
+
+  const bySlug = new Map((agg.people || []).map(p => [p.slug, p]));
+  const rows = [];
+  roster.forEach(u => {
+    const slug = auditSlug(u.email);
+    const p = bySlug.get(slug) || null;
+    bySlug.delete(slug);
+    rows.push({ name: u.name, sub: TIER_NAME[u.access] || 'User', log: p });
+  });
+  // A log with no profile is a real state: someone read something before the
+  // roster existed, or their profile has been removed from the vault.
+  [...bySlug.values()].forEach(p => rows.push({ name: p.name, sub: 'No profile in the vault', log: p }));
+
+  const age = r => (r.log ? usageDayAge(r.log.last) : null);
+  const active = rows.filter(r => age(r) !== null && age(r) < USAGE_QUIET_DAYS).length;
+  const stale  = rows.filter(r => age(r) !== null && age(r) >= USAGE_QUIET_DAYS).length;
+  const none   = rows.filter(r => !r.log).length;
+
+  // Three tiers of sort key, not two, and never a mix of reads with opens: a
+  // person whose reads were never counted must not outrank one who has nine of
+  // them just because their opens are higher. Known reads first, then unknown,
+  // then nobody with a log at all.
+  const rank = r => (!r.log ? -2 : (r.log.readsKnown ? r.log.reads : -1));
+  rows.sort((a, b) => rank(b) - rank(a) || a.name.localeCompare(b.name));
+
+  const row = r => {
+    const band = !r.log ? 'vc-hard' : (age(r) >= USAGE_QUIET_DAYS ? 'vc-warn' : 'vc-info');
+    const num = !r.log
+      ? '<span class="ug-num"><span class="dim">no reading</span></span>'
+      : usageNum(r.log.readsKnown ? r.log.reads : null,
+          r.log.pages.size + ' page' + (r.log.pages.size === 1 ? '' : 's') + ' · ' + usageWhen(r.log.last));
+    return usageRow(band,
+      '<span class="vc-name" style="color:var(--text-primary);cursor:default">' + escHtml(r.name) + '</span>' +
+      '<div class="vc-why">' + escHtml(r.sub) + (r.log ? '' : '. Nothing recorded, they may not have installed it.') + '</div>',
+      num);
+  };
+
+  const bar = usageBar('Who is using Folio and who is not. Reading only. ' +
+    'The names are already in the vault; this view does not add any.');
+  if (!rows.length) {
+    return bar + '<div class="rp-empty">Nobody has signed in and nothing has been read yet.</div>';
+  }
+  return bar +
+    usageTallies([
+      ['info', active, 'reading', 'nobody reading'],
+      ['warn', stale, 'quiet ' + USAGE_QUIET_DAYS + '+ days', 'nobody quiet'],
+      ['hard', none, 'nothing recorded', 'everyone has a record'],
+    ], { n: rows.length, noun: rows.length === 1 ? 'person' : 'people' }) +
+    usageBand('people', 'People', rows, row, 'Nobody to list.', { all: true }) +
+    '<div class="usage-foot">One row per profile in zSystem/Users, plus anyone with a log and no profile. ' +
+    'Reading comes from each person\'s own monthly log, so a new PC shows nothing until they next read something. ' +
+    'Near live, the same as Pages. This pane is Administrator only.</div>';
+}
 
 // The log stores vault-relative paths, not mode urls — that is what lets a log
 // written in local mode still resolve if the vault ever moves to SharePoint.
@@ -19900,45 +20690,24 @@ async function renderUsageTab() {
   if (!atLeast('admin')) { pane.innerHTML = ''; return; } // absent, not disabled
   if (!vaultReady) { pane.innerHTML = paneHead('usage') + '<div class="rp-empty">Open a vault to see usage.</div>'; return; }
 
-  pane.innerHTML = paneHead('usage') + '<div class="rp-empty">Reading the logs…</div>';
-  let agg;
-  try { agg = await usageAggregate(); } catch (_) { agg = { rows: [], logCount: 0 }; }
-
-  const read = new Map(agg.rows.map(r => [r.path, r]));
-  const all  = allMdFiles().map(f => auditPathKey(f.url));
-
-  const mostRead = agg.rows.slice().sort((a, b) => b.opens - a.opens || a.path.localeCompare(b.path));
-  const never    = all.filter(p => !read.has(p)).sort().map(p => ({ path: p, note: 'never opened' }));
-
-  // "Gone quiet" is deliberately not "low count". A page with two opens that
-  // both happened last week is fine; a page with sixty opens and none this
-  // month is the one worth looking at.
-  const cutoff = usageDay(new Date(Date.now() - USAGE_QUIET_DAYS * 86400000));
-  const quiet  = agg.rows.filter(r => r.last < cutoff && r.opens >= 3)
-                         .sort((a, b) => b.opens - a.opens)
-                         .map(r => ({ path: r.path, note: `last read ${r.last}` }));
-
-  const max = mostRead.length ? mostRead[0].opens : 0;
-  // v0.33.0 — the old line here read "No names are shown or stored in this
-  // view", which stopped being true the moment a row could be expanded, and
-  // was only ever half true anyway: the logs have always been stored under
-  // their owner's name in the vault. It now says where the data comes from and
-  // who can see this pane, which is what someone reading a report about their
-  // colleagues should be told.
-  const people = agg.peopleCount || 0;
-  const foot = agg.logCount
-    ? `<div class="usage-foot">Totals across ${agg.logCount} monthly log${agg.logCount === 1 ? '' : 's'} from ` +
-      `${people} ${people === 1 ? 'person' : 'people'}. ` +
-      (people === 1 ? 'Only your own reading has reached the vault so far. ' : '') +
-      `Reading is logged for everyone and stored per person in zSystem/Analytics. This pane is Administrator only.</div>`
-    : `<div class="usage-foot">Nothing recorded yet. Reading is written to the vault when you leave the tab.</div>`;
-
-  pane.innerHTML = paneHead('usage', { count: mostRead.length || '' }) +
-    '<div class="usage-body">' +
-    usageSection('most',  'Most read',   mostRead, r => usageRowBar(r, max), 'Nothing recorded yet.') +
-    usageSection('never', 'Never opened', never,   usageRowPlain, 'Every page has been opened at least once.') +
-    usageSection('quiet', `Gone quiet (${USAGE_QUIET_DAYS}+ days)`, quiet, usageRowPlain, 'Nothing has gone quiet.') +
-    foot + '</div>';
+  // No count on the head. ADMIN_TABS already declares that Usage carries none
+  // because a badge means a QUEUE and this is a report; the pane head was
+  // quietly disagreeing with its own tab.
+  const shell = body => {
+    pane.innerHTML = paneHead('usage') + '<div class="usage-body">' + usageSubNav() + body + '</div>';
+  };
+  const seq = ++usageRenderSeq;
+  shell('<div class="rp-empty">Reading the logs…</div>');
+  let body;
+  try {
+    if (usageView === 'searches')    body = await usageSearchesHTML();
+    else if (usageView === 'people') body = await usagePeopleHTML();
+    else                             body = await usagePagesHTML();
+  } catch (_) {
+    body = '<div class="rp-empty">The logs could not be read.</div>';
+  }
+  if (seq !== usageRenderSeq) return;   // a newer view is already on screen
+  shell(body);
 }
 
 // ── Outline tab ──────────────────────────────────────────────────
@@ -20368,7 +21137,7 @@ function updateBetaSaveButton() {
   if (!btn) return;
   const on = isPageSaved(state.activeUrl);
   btn.classList.toggle('on', on);
-  const label = on ? 'Saved — click to remove' : 'Save this page';
+  const label = on ? 'Saved, click to remove' : 'Save this page';
   btn.title = label;
   btn.setAttribute('aria-label', label);
   btn.innerHTML = on
@@ -20835,7 +21604,7 @@ function renderLinkGroup(label, items, kind) {
       // javascript: link is neutralised in the body but still clickable
       // here, which would defeat the fix entirely.
       const clean = safeUrl(item.href);
-      if (!clean) return `<div class="backlink-item" style="cursor:default;color:var(--text-muted)" title="Link removed — unsupported or unsafe URL scheme">↗ ${escHtml(item.name)}</div>`;
+      if (!clean) return `<div class="backlink-item" style="cursor:default;color:var(--text-muted)" title="Link removed, unsupported or unsafe URL scheme">↗ ${escHtml(item.name)}</div>`;
       return `<div class="backlink-item" data-wb-external="${escHtml(clean)}">↗ ${escHtml(item.name)}</div>`;
     }
     if (kind === 'folder') return `<div class="backlink-item" style="cursor:default">${ICON.folder} ${escHtml(item.name)}</div>`;
@@ -20887,7 +21656,7 @@ function renderBacklinksTab() {
   } else {
     html += '<div class="rp-empty" style="padding:4px 12px 12px;text-align:left">No backlinks found this session.</div>';
   }
-  html += `<div class="backlink-note">Backlinks only include files opened this session — Folio has no way to scan the whole vault for links without opening each file.</div>`;
+  html += `<div class="backlink-note">Backlinks only include files opened this session. Folio has no way to scan the whole vault for links without opening each file.</div>`;
 
   pane.innerHTML = RP_HEADER_LINKS() + html;
 }
@@ -21090,7 +21859,8 @@ async function runSearch() {
   const lc = q.toLowerCase();
   searchHits = [];
 
-  const snippet = line => {
+  const snippet = raw => {
+    const line = searchPlainLine(raw, lc);
     const i   = line.toLowerCase().indexOf(lc);
     const s   = Math.max(0, i - 30);
     return (s ? '…' : '') + escHtml(line.slice(s, i)) +
@@ -21820,21 +22590,18 @@ function buildReviewHTML(data, filter) {
   const label = filter === 'all' ? 'comment' : `${filter} comment`;
   const countText = `${total} ${label}${total !== 1 ? 's' : ''} across ${filtered.length} file${filtered.length !== 1 ? 's' : ''}`;
 
-  const chips = ['open', 'closed', 'all'].map(s =>
-    `<button class="review-chip${filter === s ? ' active' : ''}" onclick="setReviewFilter('${s}')">${s.charAt(0).toUpperCase() + s.slice(1)}</button>`
+  // S103 (items 1, 2) -- no second title: Admin already says where you are.
+  // Open / Closed / All are three views of one list, so they are underline
+  // tabs, the Usage pattern, not chips parked on the title row.
+  const tabs = ['open', 'closed', 'all'].map(s =>
+    `<button class="${filter === s ? 'on' : ''}" onclick="setReviewFilter('${s}')">${s.charAt(0).toUpperCase() + s.slice(1)}</button>`
   ).join('');
 
-  let html = `
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:0.25rem">
-      <div>
-        <h1 class="md-h md-h1" style="margin-bottom:4px">All comments</h1>
-        <p class="md-p" style="margin-top:2px">${escHtml(countText)}</p>
-      </div>
-      <div class="review-filter-bar">${chips}</div>
-    </div>`;
+  let html = `<div class="ug-sub scr-views">${tabs}</div>
+    <p class="scr-sub">${escHtml(countText)}</p>`;
 
   if (!filtered.length) {
-    html += `<div style="padding:40px 0;text-align:center;color:var(--text-muted);font-size:13px">No ${filter === 'all' ? '' : filter + ' '}comments found in vault.</div>`;
+    html += `<div style="padding:40px 0;text-align:center;color:var(--text-muted);font-size:13.5px">No ${filter === 'all' ? '' : filter + ' '}comments found in vault.</div>`;
   } else {
     filtered.forEach(file => {
       html += `<div class="review-file-block">
@@ -22097,11 +22864,18 @@ function frRunScreens() {
   return out;
 }
 
+const FR_MARK = { intro: 'blue', connect: 'blue', identity: 'rose', install: 'green', tour: 'purple', done: 'green' };
+
 function frStep(id) {
   const list = firstRunCtx.screens || frRunScreens();
   const i = list.indexOf(id);
   if (i < 0) return '';
-  return '<p class="fr-step">' + (i + 1) + ' of ' + list.length +
+  // S103 (item 16) -- a colour mark per step, in the colours the Home doors
+  // use for the same meanings: blue to read, rose for who you are, green for
+  // the app on this PC and for done, purple for learning your way round.
+  const marks = '<div class="fr-marks" aria-hidden="true">' + list.map((s, k) =>
+    '<span class="fr-mark fr-m-' + (FR_MARK[s] || 'blue') + (k <= i ? ' on' : '') + '"></span>').join('') + '</div>';
+  return marks + '<p class="fr-step">' + (i + 1) + ' of ' + list.length +
          ' &middot; ' + FR_LABELS[id] + '</p>';
 }
 
@@ -22220,7 +22994,7 @@ function vaultLoadFailed(e) {
   LOCAL.on = false;
   const tree = $('sb-tree');
   if (tree) tree.innerHTML = '<div class="sb-msg">Could not load vault.<br>' +
-    '<span style="font-size:11px">' + escHtml(why) + '</span></div>';
+    '<span style="font-size:11.5px">' + escHtml(why) + '</span></div>';
   renderAppBanner(); // the connect banner is true again
   frConnectStatus({ error: why });
 }
@@ -22253,7 +23027,7 @@ function showFirstRunStep(step, ctx) {
       '<h1>Welcome back</h1>' +
       '<p>Your browser drops folder permission when Folio is closed, so it ' +
       'needs one click to open the vault again. Installing Folio is what ' +
-      'stops it asking — you can do that from the account menu.</p>' +
+      'stops it asking, you can do that from the account menu.</p>' +
       frConnectMsg(ctx) +
       (ctx.busy ? frConnectBusyHTML() :
       '<div class="fr-actions">' +
@@ -22505,7 +23279,7 @@ const FR_TOUR = [
       { sel: '#reader-content .md-h-acts button:nth-of-type(2)', name: 'Save this section',
         desc: 'Keeps just this heading in your saved list, rather than the whole page. The second of the three places you can save from.' },
       { sel: '#reader-content .md-h-acts button:nth-of-type(3)', name: 'Comment on this section',
-        desc: 'Starts a comment anchored to this heading, right in the Comments panel — no separate step to pick the section.' },
+        desc: 'Starts a comment anchored to this heading, right in the Comments panel. No separate step to pick the section.' },
       { sel: '#reader-content .md-h-acts button:nth-of-type(4)', name: 'Highlight', soon: true,
         desc: 'Will mark a passage for yourself, private to you and visible to nobody else.' }
     ] },

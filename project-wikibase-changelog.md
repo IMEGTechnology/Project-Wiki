@@ -8,6 +8,118 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.71.2 — 2026-09-21
+
+**Changed:** `index.html`; `docs/COMMISSIONING.md` (S102-S104 items added, S66-S101 gap logged); `help.md` (Esc row); `supporting/tests/p9-admin.test.js` (new section, 6 checks); `Claude outputs/` (stale S102 sample moved to `_delete-me`).
+
+*S104, the sweep that closes out the S101 audit: Settings closes on Escape, on-screen em dashes are gone, Review's tags dropped their emoji and joined the one tag style, and the Review door's count no longer goes stale the first time Admin opens.*
+
+### Fixed
+
+- **The Review door's count on Admin's first open in a session.** It was computed once, before the door's own vault-wide scan finished, and nothing told it to update after, so it read blank until Admin was closed and reopened. `refreshAdminDoorCounts()` patches it in place once the scan resolves.
+- **A leftover 18px arrow** on the Admin door chevron, off the S102 text scale. Now 16px.
+
+### Changed
+
+- **Settings closes on `Esc`**, like the Theme panel.
+- **No on-screen wording uses an em dash any more.** Commas or periods, interface chrome only. Vault content and the changelog are untouched.
+- **Review's per-page chips dropped their emoji** and joined the shared pill style (item 12): capitals in a capsule, colour still carries what each one means.
+- **`docs/COMMISSIONING.md`** gained a group for the S102-S104 pass, and a note marking the S66-S101 gap for S107 to close.
+
+## 0.71.1 — 2026-09-21
+
+**Changed:** `index.html`; `supporting/tests/s102-foundations.test.js` (the switch checks replaced by Block-picked checks, 34).
+
+*Block is the door style. The temporary switch is hidden.*
+
+### Changed
+
+- **Block is the door style for everyone** (Jayson's pick). A style tried earlier on a PC no longer applies.
+- **The door-style switch under the Admin doors is hidden.** It is only switched off, so it can come back if needed; S104 decides whether to delete it along with the three styles that were not picked.
+- **The open Admin door keeps its name in the normal text colour.** Only its sub-line takes the door's colour.
+
+## 0.71.0 — 2026-09-21
+
+**Changed:** `index.html`; `supporting/tests/s103-screens.test.js` (new, 34 checks); `p9-admin`, `review-actions`, `review-bugfix-0321`, `s92-review`, `whats-new` suites (the Review marker moved off the removed heading; What's New filters are tabs and chips).
+
+*The screens pass of the S101 audit: every screen you visit gets one title, one way to filter, one panel shape, and the comments column stops falling off the window.*
+
+### Changed
+
+- **One title per screen.** Review and All comments lose the large blue second title under Admin's. What's New drops its page-sized heading for the small screen title with a Close, like Saved, Search and Admin. Search loses the second "Search" label under its title.
+- **One way to filter.** Switching between views of one list is underline tabs: All comments (Open, Closed, All) and What's New (Unseen, New, Updated, All). Picking categories stays chips: Review's kinds and What's New's time range. No chips on a title row any more.
+- **Admin draws one line, not two,** around the door row.
+- **One frame for the three header panels.** Account, Settings and Theme are one width, each with a title and a Close on top, and Settings' section labels are sentence case like Theme's. The page menu under the three dots has icons, like the account menu.
+- **Search results read as words.** Heading marks, list and task markers, link brackets, emphasis and code ticks come off the snippets, in the full Search screen and the quick search bar. Searching for the markup itself still shows it.
+- **The walkthrough looks like Folio.** Home's measure, a colour mark per step in the Home door colours, and the main button and its link on one line.
+- **What's New rows take Home's list style:** a hairline between rows, the name turns blue on hover.
+
+### Fixed
+
+- **The comments column ran off the right edge.** The right column is sized once, when it first appears, against whatever else is open then. Sized on Home with no tree, then joined by the tree, it kept its width and pushed the comment box, the note picker and "Post to General" off screen. It now gives way when the window is tight.
+
+### Notes
+
+- **Browse and the right column:** checked on 0.70.0 by opening a page from Browse through the tree and through a default page. Outline shows both ways, and Comments appears when it is asked for, same as every other route. Nothing to change.
+- Every one of the seven fixes was reverted in turn against the new suite and each went red.
+
+## 0.70.0 — 2026-09-21
+
+**Changed:** `index.html`; `supporting/tests/s102-foundations.test.js` (new, 36 checks); `supporting/tests/p9-admin.test.js`, `round2-destinations.test.js`, `s100-usage-views.test.js` (checks updated for doors and the new count block).
+
+*The foundations of the S101 theme audit: one text scale, doors everywhere you navigate, one set of buttons, and counts that stop looking like buttons.*
+
+### Added
+
+- **Admin's tabs are doors**, the same object as Home's, drawn compact and coloured by what they open: orange for work waiting (Review, All comments, Vault check), rose for access (Users), blue for reading (Usage), green for telling people (Staff update). Hovering one widens it and says what it does.
+- **Block is the door style**, Home and Admin both. **A temporary switch under the Admin doors** tries Spine, Corner, Block and Fold on the real app. It remembers the pick on this PC. It goes in S104 once a style is chosen.
+- **One count block** on Vault check, Review and Usage: a headline number with a breakdown beside it. Zeros collapse into one quiet sentence, a meter only appears when two or more parts split the headline, and the headline takes the colour of the most serious thing present, green at zero. Usage is a report, so its headline is always blue.
+
+### Changed
+
+- **Six text sizes for the whole interface**: 10.5, 11.5, 12.5, 13.5, 16 and 26. 162 declarations moved to the nearest step, ties rounding up. Page content keeps its own sizes, checked element by element on a rendered page before and after.
+- **Small buttons are one quiet box** (Jayson's pick, option A): one outlined box, 26 pixels tall, on every row and panel. Vault check, Review, Staff update, comments, the review banner, What's New's mark-seen link and the account menu's Fix were four different sizes and weights. Dialog and card buttons are one 30 pixel size.
+- **One main-button style**, the blue tint. The install banner's filled button and the comment Post button now match everything else; Home stays the only filled control.
+- **Tags are one pill size, counts one badge style, filter chips one size.**
+- **Fields are lighter**, like the comment box: the reader background with a firmer edge, instead of the darker sunken look.
+
+### Notes
+
+- **No staff update line.** Everything here is visual, and the Staff update tab already says so when it matters.
+- Door styles use no `color-mix()`, the standing rule since 0.14.4; the preview copy used it three times and the theme suite caught all three.
+- The whole run was rendered in real Chromium on the test vault, both themes, at two widths. A narrow window was squeezing Admin labels under the icon block; the doors now wrap to a second row instead, and the sub-line shows on hover only so six doors fit a report-width column.
+
+## 0.69.0 — 2026-09-20
+
+**Changed:** `index.html`; `supporting/tests/s100-usage-views.test.js` (new, 67 checks); `supporting/tests/usage-analytics.test.js` (four checks updated for the new markup and the reads breakdown, 88); `supporting/tests/render-usage.js` (new, a real-browser render harness for this pane).
+
+*The Usage page now ranks by reading rather than by opening, reads the search log back for the first time, and answers who is using Folio and who is not.*
+
+### Added
+
+- **Three views behind one sub navigation: Pages, Searches, People.** It was eight bands on one scroll. The sub navigation is underline tabs rather than a second segmented control, because level one in this app is the enclosed control and a second enclosed control stacked under it reads as the same level.
+- **Searches.** Four bands over the outcome log that has been collected since 0.65.0 and never read back: what found nothing, what was clicked and bounced off, what people reworded, and the top searches with the average position clicked. Counted without names, and built that way rather than hiding them at the view.
+- **People.** One row per profile in `zSystem/Users` joined to that person's own reading log on the email slug, plus anyone with a log and no profile. Reads, distinct pages and when they were last here. The roster is never capped: the rows that matter most, the people reading nothing, sort last.
+
+### Changed
+
+- **Most read ranks by reads, not by opens.** An open is counted the moment a page renders, so a wrong click counted as fully as an hour of study. Both numbers are shown, because the gap between them is itself a finding: fourteen opens against six reads is a page people keep landing on and leaving, and it now says so.
+- **A read count from before 0.65.0 shows a dash, never a nought.** Nought would claim nobody read the page when the truth is that nobody was counting, and it would drag the page to the bottom of a list it may belong at the top of.
+- **The per-person breakdown counts reads**, the same definition the band above it is ranked by.
+- **The pane uses Vault check's grammar**: its status bar, tally chips, band heads, rows and severity stripes. A report row and a check row are both a fact about a page, and a yellow stripe now means one thing on both screens.
+- **Each view explains itself in its bar and the footer carries provenance only.** One block of text doing both jobs is what produced the footer claim 0.33.0 had to correct.
+- **The pane head no longer carries a count.** `ADMIN_TABS` already declares that Usage has none because a badge means a queue and this is a report; the pane head was disagreeing with its own tab.
+
+### Fixed
+
+- **The double-click column fit named a row class this release retires.** A selector that matches nothing is silent, which is how the Outline sat in that list for months fitting to air. It now names the row class the pane actually renders.
+
+### Notes
+
+- **No staff update line.** Nothing in this release is visible below Administrator.
+- **One bug only a real render could find.** `.vc-main` is a column flex container, so every child starts a new line, and `query → page` stacked three deep until the pair became one flex item. Three thousand green checks had nothing to say about it.
+- **Fifteen reverts, driven through the real call sites, every one red.** One came back green first time and was worth more than the other fourteen: People's sort key could mix reads with opens undetected, because the fixture's uncounted reader happened to have the same number of opens as the top reader had reads. The fixture now makes the uncounted page the busiest in the vault.
+
 ## 0.68.0 — 2026-09-19
 
 **Changed:** `index.html`; `supporting/tests/s99-home-trade.test.js` (new, 45 checks); `supporting/tests/b2-home.test.js` (meter and Saved sections rewritten for the new model, 90 checks).

@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.68.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.71.2**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -563,7 +563,7 @@ Comments are written to a sidecar `.comments.md` file that OneDrive carries to t
 | `Esc` in search | Clear the field; again to close the tab |
 | `↑` `↓` in search | Move through results |
 | `Enter` in search | Open the highlighted result |
-| `Esc` | Close the Theme panel |
+| `Esc` | Close the Theme panel or Settings |
 
 ### Where every control lives
 
