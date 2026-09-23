@@ -4401,7 +4401,7 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.72.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.73.0</button>
       </div>
 
       <div class="ud-actions">
@@ -5370,7 +5370,37 @@ function displayFolderName(raw) {
 // The DISPLAY name — the tree, the reader title, search results, bookmarks,
 // What's New, the review queue. Never used to find a file.
 function displayFileName(raw) {
-  return state.stripPfx ? stripNumPrefix(fileStem(raw)) : fileStem(raw);
+  return state.stripPfx ? stripPageNumber(fileStem(raw)) : fileStem(raw);
+}
+
+// S108 -- the trim trusts a page's own `number:` property when it has one,
+// so a four-digit page (1000-Handbook) trims correctly while a title that
+// merely starts with a year (2024-Q1 Review) is left alone: it has no
+// property saying 2024 is its number. A page without the property falls
+// back to the digit pattern above. The property values ride in the What's
+// New index (field n), which every scan already keeps, so this costs no read.
+function pdNumPropsFrom(idx) {
+  const m = new Map();
+  Object.entries(idx || {}).forEach(([u, r]) => {
+    if (r && r.n) m.set(fileStem(String(u).split('/').pop()).toLowerCase(), String(r.n));
+  });
+  return m;
+}
+function pdNumPropMap() {
+  if (!state.pdNumProp) {
+    try { state.pdNumProp = pdNumPropsFrom(wnRead(WN_INDEX_KEY, null)); } catch (_) { state.pdNumProp = new Map(); }
+  }
+  return state.pdNumProp;
+}
+function stripPageNumber(stem) {
+  stem = String(stem);
+  let n = null;
+  try { n = pdNumPropMap().get(stem.toLowerCase()); } catch (_) { n = null; }
+  if (n) {
+    const m = stem.match(/^(\d{1,5})[-_ .]/);
+    if (m && Number(m[1]) === Number(n)) return stem.slice(m[0].length).replace(/^\s+/, '') || stem;
+  }
+  return stripNumPrefix(stem);
 }
 
 // The trim happens EXACTLY ONCE, at the boundary where a path or a raw
@@ -5480,6 +5510,15 @@ function pageNumberOf(url) {
   return m ? m[1] : null;
 }
 
+// S108 -- a page's `number:` property as written, quotes dropped, or null.
+// Obsidian may show 014 as 14; every comparison is numeric for that reason.
+function fmNumberOf(fm) {
+  const v = fm && fm.number;
+  if (v == null) return null;
+  const s = String(v).trim().replace(/^["']|["']$/g, '').trim();
+  return s || null;
+}
+
 // { rel, vault, top, number, draft, root }. With vaults.json on, the first
 // segment of a path that names a vault folder is the vault, and the top
 // folder is the one inside it: Jayson's minimum is Vault > Folder > Page.
@@ -5564,10 +5603,13 @@ function pdVirtual(url) {
 // callers serialize and re-parse their own formats and must get back exactly
 // what they wrote.
 function pdParse(text) {
-  const out = { page: '', comments: null, changes: null };
+  const out = { page: '', was: [], comments: null, changes: null };
   if (!text) return out;
   const pm = String(text).match(/^page:[ \t]*"?(.*?)"?[ \t]*$/m);
   if (pm) out.page = pm[1];
+  // S108 -- names the page used to have, newest last, as a YAML flow list.
+  const wm = String(text).match(/^was:[ \t]*(\[.*\])[ \t]*$/m);
+  if (wm) { try { const a = JSON.parse(wm[1]); if (Array.isArray(a)) out.was = a.map(String); } catch (_) {} }
   Object.keys(PD_PARTS).forEach(k => {
     const open = '<!-- folio:' + k + ' -->\n', close = '\n<!-- /folio:' + k + ' -->';
     const a = text.indexOf(open);
@@ -5580,7 +5622,8 @@ function pdParse(text) {
 }
 
 function pdSerialize(d) {
-  let s = '---\nfolio: page data\npage: "' + String(d.page || '').replace(/"/g, '') + '"\n---\n';
+  let s = '---\nfolio: page data\npage: "' + String(d.page || '').replace(/"/g, '') + '"\n' +
+    (d.was && d.was.length ? 'was: ' + JSON.stringify(d.was.map(x => String(x).replace(/"/g, ''))) + '\n' : '') + '---\n';
   Object.keys(PD_PARTS).forEach(k => {
     if (d[k] == null) return;
     s += '\n## ' + PD_PARTS[k] + '\n<!-- folio:' + k + ' -->\n' + d[k] + '\n<!-- /folio:' + k + ' -->\n';
@@ -5639,6 +5682,52 @@ async function pdMoveDataFile(a, b, toPageUrl) {
   if (LOCAL.on) await localDeleteFile(a);
   if (state.pdFiles) { state.pdFiles.delete(a); state.pdFiles.add(b); }
   return true;
+}
+
+// ── S108 · A renamed page remembers its old names ───────────────────────
+// Usage and search logs are written by each person's own device, one line
+// per page per day, under the name the page had that day. They are never
+// rewritten (two devices writing one file is how OneDrive makes conflict
+// copies). Instead the page's own data file lists the names it used to
+// have, and the reports read old lines under the current name. Jayson,
+// 23 Sep: keep the vault clean, never split a page's history.
+function pdRecordWas(renames) {
+  if (!LOCAL.on || !atLeast('contributor')) return Promise.resolve(0);
+  const pairs = Object.entries(renames || {});
+  return Promise.all(pairs.map(([to, from]) => {
+    const file = pageDataUrl(to);
+    const prev = pdLocks.get(file) || Promise.resolve();
+    const next = prev.catch(() => {}).then(async () => {
+      const txt = await readVaultFileOrNull(file);
+      const cur = pdParse(txt);
+      const oldRel = pdRel(from), newRel = pdRel(to);
+      if (oldRel === newRel || cur.was.includes(oldRel)) return 0;
+      cur.was = cur.was.filter(x => x !== newRel).concat(oldRel);
+      cur.page = newRel;
+      if (!LOCAL.on) await pdEnsureSpDirs(file);
+      await spWriteFile(file, pdSerialize(cur));
+      if (state.pdFiles) state.pdFiles.add(file);
+      return 1;
+    });
+    pdLocks.set(file, next);
+    return next.catch(() => 0);
+  })).then(r => r.reduce((a, b) => a + b, 0));
+}
+
+// Old name -> current name, from every page data file. Read by the Usage
+// and search reports only (Administrator), so the cost lands where the
+// report is opened, never on a scan.
+async function pdAliasMap() {
+  const map = new Map();
+  if (!LOCAL.on) return map;
+  await scanSidecarStats();
+  for (const f of (state.pdFiles ? [...state.pdFiles] : [])) {
+    let d;
+    try { d = pdParse(await readVaultFileOrNull(f)); } catch (_) { continue; }
+    if (!d.page || !d.was.length) continue;
+    d.was.forEach(w => { if (w && w !== d.page) map.set(w, d.page); });
+  }
+  return map;
 }
 
 // ── S107 · Park old files ───────────────────────────────────────────────
@@ -5845,6 +5934,27 @@ async function pdStructureFindings(pageTexts) {
   }
 
   const drafts = pdDraftsFolder();
+
+  // S108 -- the next free number per top folder, for the No number row.
+  // Highest number in use plus one, never a gap: a number that was used and
+  // freed stays retired (DECISIONS, 22 Sep). Width follows the widest number
+  // already in the folder, three digits at least.
+  const topMax = new Map(), topWidth = new Map();
+  pages.forEach(u => {
+    const id = pageIdentity(u);
+    if (!id.number) return;
+    const k = (id.vault ? id.vault + '/' : '') + id.top;
+    topMax.set(k, Math.max(topMax.get(k) || 0, Number(id.number)));
+    topWidth.set(k, Math.max(topWidth.get(k) || 3, id.number.length));
+  });
+  const nextFree = id => {
+    const k = (id.vault ? id.vault + '/' : '') + id.top;
+    const n = (topMax.get(k) || 0) + 1;
+    topMax.set(k, n);
+    return String(n).padStart(topWidth.get(k) || 3, '0');
+  };
+  const missingNum = [];
+
   pages.forEach(u => {
     const id = pageIdentity(u);
     const page = { name: nameOf(u), url: u };
@@ -5856,19 +5966,44 @@ async function pdStructureFindings(pageTexts) {
     }
     if (id.draft) return;
     if (!id.number) {
+      // S108 -- report only. Folio does not rename pages (Jayson, 23 Sep):
+      // a rename in Obsidian rewrites every link to the page, a rename here
+      // would not.
+      const next = nextFree(id);
       out.push(vcFinding('info', 'No number', 'pdnonum:' + id.rel,
         'Pages outside the drafts folder carry a number unique to ' + escHtml(id.top) +
-        '. The vault sweep (S108) assigns one.', page));
+        '. The next free one there is <b>' + next + '</b>. Rename it in Obsidian to <b>' +
+        escHtml(next + '-' + fileStem(u.split('/').pop())) + '</b> so its links follow.', page));
       return;
     }
-    const fmNum = (() => { try { return parseFm(texts.get(u) || '').number; } catch (_) { return undefined; } })();
-    if (fmNum != null && String(fmNum).trim() !== '' && Number(String(fmNum).trim()) !== Number(id.number)) {
+    const fmNum = (() => { try { return fmNumberOf(parseFm(texts.get(u) || '')); } catch (_) { return null; } })();
+    // Only a page whose text this run actually read can be called missing.
+    if (fmNum == null && texts.has(u)) missingNum.push(u);
+    if (fmNum != null && Number(fmNum) !== Number(id.number)) {
       out.push(vcFinding('warn', 'Number does not match name', 'pdnum:' + id.rel,
         'The name says ' + id.number + ' and the number property says ' + escHtml(String(fmNum)) +
         '. The name decides; this writes ' + id.number + ' into the property.', page, null,
         vcFix('numprop', u, 'Match the name')));
     }
   });
+
+  // S108 -- the sweep. One row for every page whose name carries a number
+  // and whose properties do not, because a row per page would bury the
+  // report on its first run. The row IS the preview: it names the pages,
+  // and nothing is written until Write numbers is pressed.
+  state.vcNumMissing = missingNum.slice();
+  if (missingNum.length) {
+    const names = missingNum.map(u => fileStem(u.split('/').pop()));
+    const shown = names.slice(0, 12).map(escHtml).join(', ');
+    const more  = names.length > 12 ? ', and ' + (names.length - 12) + ' more' : '';
+    out.push(vcFinding('warn', 'Number property missing', 'pd-numprop-missing',
+      missingNum.length + ' page' + (missingNum.length === 1 ? ' has' : 's have') +
+      ' a number in the name but not in the properties: ' + shown + more + '. ' +
+      'Write numbers adds one line, <code>number:</code>, copied from each name. Nothing else ' +
+      'in the page changes, and What\u2019s New does not list the pages as updated.',
+      { name: missingNum.length + ' page' + (missingNum.length === 1 ? '' : 's'), url: '' }, null,
+      vcFix('numall', '', 'Write numbers (' + missingNum.length + ')')));
+  }
 
   (state.pdOwners || new Map()).forEach((urls, k) => {
     if (urls.length < 2) return;
@@ -11377,6 +11512,7 @@ function vcRepair(op, url) {
   if (op === 'park')     return vcParkOldFiles();
   if (op === 'moveroot') return vcMoveRootPage(url);
   if (op === 'numprop')  return vcMatchNumber(url);
+  if (op === 'numall')   return vcWriteAllNumbers();
   vcMsg = 'That repair is not one this version knows how to run.';
   renderVaultCheckTab();
 }
@@ -11502,6 +11638,48 @@ async function vcMatchNumber(url) {
     vcMsg = 'Could not update that page: ' + e.message;
     renderVaultCheckTab();
   }
+}
+
+// S108 -- Write numbers. Each page is read fresh (the run may be old), the
+// one key is written, and the page is read back: a page that does not come
+// back carrying its number is reported, not assumed. The body is untouched
+// by setFmKeys, and What's New hashes pages without their properties, so
+// nobody sees the whole vault as Updated the day it runs.
+async function vcWriteAllNumbers() {
+  if (!atLeast('admin')) return;
+  const list = (state.vcNumMissing || []).slice();
+  if (!list.length) return;
+  if (!confirm('Write the page number into ' + list.length + ' page' + (list.length === 1 ? '' : 's') +
+               '?\n\nEach page gets one property line, number:, copied from its name. ' +
+               'Nothing else in the page changes.')) return;
+  let done = 0, skipped = 0;
+  const failed = [];
+  for (let i = 0; i < list.length; i++) {
+    const url = list[i];
+    const num = pageNumberOf(url);
+    if (!num) { skipped++; continue; }
+    if (i % 10 === 0) { vcMsg = 'Writing numbers\u2026 ' + i + ' of ' + list.length; renderVaultCheckTab(); }
+    try {
+      const txt = await readVaultFile(url);
+      if (fmNumberOf(parseFm(txt)) != null) { skipped++; continue; }   // somebody got there first
+      const outTxt = setFmKeys(txt, [['number', num]]);
+      await spWriteFile(url, outTxt);
+      const back = await readVaultFileOrNull(url);
+      if (back !== outTxt || Number(fmNumberOf(parseFm(back))) !== Number(num)) throw new Error('did not read back');
+      done++;
+    } catch (e) {
+      failed.push(fileStem(url.split('/').pop()));
+    }
+  }
+  const failMsg = failed.length
+    ? 'Could not write ' + failed.length + ': ' + failed.slice(0, 5).join(', ') + (failed.length > 5 ? '\u2026' : '') + '. Run the check again to retry.'
+    : '';
+  vcMsg = '';
+  try { await scanBadges(); } catch (_) {}
+  if (state.activeUrl && list.includes(state.activeUrl)) openFile(state.activeUrl, state.activeName);
+  await vcRun();                     // the row is gone now, and the run is what proves it
+  if (failMsg) { vcMsg = failMsg; renderVaultCheckTab(); }
+  if (done) rvNotify('Number written into ' + done + ' page' + (done === 1 ? '' : 's') + '.', true);
 }
 
 function vcWhen(ms) {
@@ -15092,6 +15270,11 @@ const WN_SECT_KEY  = 'wb_wn_sections';
 // and cannot lose a section you still owe a read either.
 const WN_SECT_KEEP = 12;
 const WN_MUSTREAD_DAYS = 30;          // per person, from first surfacing — not from file mtime
+// S108 -- version of the whole-page hash. 2 = properties stripped before
+// hashing, like the section hashes always were, so a property write (the
+// number sweep, Fill properties, a status change) is not an edit to read.
+// A record without it is re-read once and, if you had seen it, stays seen.
+const WN_HASH_V = 2;
 const WN_BULK_THRESHOLD = 25;         // above this many updates in one scan, collapse
 
 // Section 13 — the change signature.
@@ -15441,8 +15624,8 @@ async function wnBuildIndex(files, oldIdx) {
 
     // Cheap path: both stage-1 fields match a record that already carries a
     // hash. Nothing is read, and the section map rides along untouched.
-    if (prev && typeof prev === 'object' && prev.h && prev.m === m && prev.s === s) {
-      curIdx[f.url] = { m: prev.m, s: prev.s, h: prev.h, sec: prev.sec || {} };
+    if (prev && typeof prev === 'object' && prev.h && prev.hv === WN_HASH_V && prev.m === m && prev.s === s) {
+      curIdx[f.url] = { m: prev.m, s: prev.s, h: prev.h, hv: prev.hv, sec: prev.sec || {}, n: prev.n || null };
       continue;
     }
 
@@ -15452,8 +15635,11 @@ async function wnBuildIndex(files, oldIdx) {
     const isText = (typeof text === 'string');
     curIdx[f.url] = {
       m, s,
-      h:   isText ? await wnHash(text) : null,
+      h:   isText ? await wnHash(auditStripFm(text)) : null,
+      hv:  isText ? WN_HASH_V : undefined,
       sec: isText ? await wnSectionMap(text) : (prev && prev.sec) || {},
+      // S108 -- the page's number property, for the display trim.
+      n:   isText ? (() => { try { return fmNumberOf(parseFm(text)); } catch (_) { return null; } })() : (prev && prev.n) || null,
     };
   }
   return curIdx;
@@ -15486,6 +15672,7 @@ async function wnScan() {
       wnWrite(WN_SEEN_KEY, seen);
       wnWrite(WN_SECT_KEY, {});
       wnWrite(WN_INDEX_KEY, curIdx);
+      state.pdNumProp = pdNumPropsFrom(curIdx);   // S108
       wnWrite(WN_META_KEY, { ...meta, seeded: true });
       state.wnBulk = null;
       wnBuildEntries();
@@ -15517,7 +15704,9 @@ async function wnScan() {
     // comments and saved sections. Both fire and forget: a scan must never
     // wait on, or fail because of, a write into the vault.
     try { pdRecordHeadingRenames(wnDetectHeadingRenames(oldIdx, curIdx, renames)); } catch (_) {}
-    pdReconcile(renames).catch(() => {});
+    // S108 -- then the page's data file notes its old name, AFTER reconcile,
+    // because reconcile never moves data onto a file that already exists.
+    pdReconcile(renames).catch(() => {}).then(() => pdRecordWas(renames)).catch(() => {});
 
     // Deletions drop out of every store. A path that comes back later is
     // genuinely new again, which is the honest answer.
@@ -15534,8 +15723,19 @@ async function wnScan() {
     // Note the guard now counts HASH-confirmed changes, so a sync sweep that
     // only rewrites modified times no longer reaches it at all. What is left
     // for it to absorb is a genuine bulk edit or a vault reorganisation.
+    // S108 -- the one-off hash upgrade is not an edit. A page you had seen
+    // under the old hash stays seen under the new one; one you had not stays
+    // unread; either way it is kept out of the count, so the upgrade scan
+    // never trips the bulk guard or lists the whole vault.
+    const rehashed = new Set();
+    Object.keys(curIdx).forEach(u => {
+      const o = oldIdx[u], c = curIdx[u];
+      if (!o || typeof o !== 'object' || o.hv === WN_HASH_V || !c || c.hv !== WN_HASH_V) return;
+      rehashed.add(u);
+      if (seen[u] === wnSig(o)) seen[u] = wnSig(c);
+    });
     const updated = Object.keys(curIdx)
-      .filter(u => (u in oldIdx) && wnSig(oldIdx[u]) !== wnSig(curIdx[u]));
+      .filter(u => (u in oldIdx) && !rehashed.has(u) && wnSig(oldIdx[u]) !== wnSig(curIdx[u]));
     if (updated.length > WN_BULK_THRESHOLD) {
       updated.forEach(u => { seen[u] = wnSig(curIdx[u]); delete sect[u]; });
       state.wnBulk = { count: updated.length, at: new Date().toISOString() };
@@ -15567,6 +15767,7 @@ async function wnScan() {
     wnWrite(WN_SEEN_KEY, seen);
     wnWrite(WN_SECT_KEY, sect);
     wnWrite(WN_INDEX_KEY, curIdx);
+    state.pdNumProp = pdNumPropsFrom(curIdx);   // S108
     wnWrite(WN_META_KEY, meta);
     wnBuildEntries();
     savedPostScan(curIdx); // 0.52.0 — fingerprints forward, unambiguous moves repaired
@@ -16843,6 +17044,9 @@ async function usageAggregate(force) {
   const byPath = new Map(); // path → { opens, reads, readsKnown, secs, days:Set, last, by:Map, byReads:Map }
   const byPerson = new Map(); // email slug → one row for the People view
   const people = new Set();
+  // S108 -- a renamed page's old lines count under its current name.
+  let alias = new Map();
+  try { alias = await pdAliasMap(); } catch (_) { alias = new Map(); }
   for (const f of logs) {
     const txt = await readVaultFileOrNull(f.url);
     if (!txt) continue;
@@ -16854,8 +17058,9 @@ async function usageAggregate(force) {
     pr.name = who;   // a newer log carries the better name
     byPerson.set(slug, pr);
     usageParseLog(txt).forEach(r => {
-      const e = byPath.get(r.path) ||
-        { path: r.path, opens: 0, reads: 0, readsKnown: false, secs: 0, days: new Set(), last: '', by: new Map(), byReads: new Map() };
+      const pth = alias.get(r.path) || r.path;
+      const e = byPath.get(pth) ||
+        { path: pth, opens: 0, reads: 0, readsKnown: false, secs: 0, days: new Set(), last: '', by: new Map(), byReads: new Map() };
       e.opens += r.opens;
       e.secs  += r.secs;
       e.days.add(r.day);
@@ -16872,11 +17077,11 @@ async function usageAggregate(force) {
       // their own map for the same reason the log has two columns.
       e.by.set(who, (e.by.get(who) || 0) + r.opens);
       if (r.reads !== null && r.reads !== undefined) e.byReads.set(who, (e.byReads.get(who) || 0) + r.reads);
-      byPath.set(r.path, e);
+      byPath.set(pth, e);
 
       pr.opens += r.opens;
       if (r.reads !== null && r.reads !== undefined) { pr.reads += r.reads; pr.readsKnown = true; }
-      pr.pages.add(r.path);
+      pr.pages.add(pth);
       if (r.day > pr.last) pr.last = r.day;
     });
   }
@@ -16905,6 +17110,8 @@ let zrAggCache = { at: 0, data: null };
 async function zrAggregate(force) {
   if (!force && zrAggCache.data && (Date.now() - zrAggCache.at) < 60000) return zrAggCache.data;
   const logs     = await usageListLogs(ZR_SUBDIR);
+  let alias = new Map();   // S108 -- wrong-page rows follow a renamed page
+  try { alias = await pdAliasMap(); } catch (_) { alias = new Map(); }
   const byQuery  = new Map();  // query → { query, count, posSum, posCount }
   const notFound = new Map();  // query + kind → { query, count, kind }
   const wrong    = new Map();  // query + path → { query, path, count }
@@ -16938,7 +17145,8 @@ async function zrAggregate(force) {
         // worth having from BOTH: where people click when they were right and
         // when they were wrong is the same question about the ranking.
         const m = /^(.*)#(\d+)$/.exec(String(r.detail || ''));
-        const pth = m ? m[1] : String(r.detail || '');
+        const pth0 = m ? m[1] : String(r.detail || '');
+        const pth = alias.get(pth0) || pth0;
         const pos = m ? parseInt(m[2], 10) : 0;
         if (pos > 0) { const e = byQuery.get(key); e.posSum += pos * n; e.posCount += n; }
         if (r.outcome === 'WRONG PAGE' && pth) {

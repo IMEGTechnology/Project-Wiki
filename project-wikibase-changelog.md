@@ -8,6 +8,32 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.73.0 — 2026-09-23
+
+**Changed:** `index.html`; added `supporting/tests/s108-number-sweep.test.js` (48 checks, eight reverts each turn it red); updated `supporting/tests/change-detection.test.js` (one check reversed on purpose, see below).
+
+*S108, the number sweep, cut to size at kickoff. Jayson's Vault check on the real vault showed no unnumbered pages, no duplicate numbers, no missing properties and no old-number links, so renumbering and link rewriting were dropped. What is left: write `number:` into every page, trust it on screen, and keep a renamed page's reading history together.*
+
+### The sweep
+
+- **Vault check > Number property missing.** One row for every page whose name carries a number and whose properties do not, naming the pages (the row is the preview). **Write numbers (N)** asks first, adds one line, `number:`, copied from each name, reads each page back, and skips any page that gained the property since the check ran. Admin only. New pages started in Obsidian land in the same row until New page exists.
+- **No number is report only.** It names the next free number in that top folder (highest plus one, never a reused gap) and the name to rename to in Obsidian. Folio does not rename pages (Jayson, 23 Sep): Obsidian rewrites every link on a rename, Folio would not.
+- **Number does not match name** reads a quoted `"014"` and Obsidian's `14` as the same number as `014`.
+
+### Properties are not edits
+
+- **What's New now hashes a page without its properties,** as it always did for sections. A property write (the sweep, Fill properties, a status change) no longer lists a page as Updated for everyone. A body edit still does. `change-detection.test.js` asserted the old rule and now asserts the new one.
+- **The upgrade is silent.** Each page is re-read once under the new hash; a page you had seen stays seen, one you had not stays unread, and the upgrade scan never trips the 25-page bulk note.
+
+### On screen
+
+- **The name trim trusts `number:`.** A page with the property has exactly that number trimmed, so `1000-Handbook` shows as Handbook while a title that starts with a year, with no property saying so, keeps its year. Pages without the property trim as before.
+
+### Renamed pages keep their history
+
+- **A page's data file remembers its old names** (`was:` in `zSystem/pages/...folio.md`), written by a Contributor or Admin scan after the data has followed the page.
+- **Usage and the search report count old lines under the current name,** so a rename no longer splits a page into a gone row and a new row starting from zero. The logs themselves are never rewritten.
+
 ## 0.72.0 — 2026-09-23
 
 **Changed:** `index.html`; added `supporting/tests/s107-identity.test.js` (95 checks); updated `supporting/tests/comment-anchor.test.js`, `comment-threads.test.js`, `j2-review-b.test.js`, `j2b-banner.test.js`, `review-dashboard.test.js`, `s92-review.test.js`, `scan-cache.test.js`, `vault-audit.test.js` (the page-data address in their fixtures), `session-a-shell.test.js` (the Back condition), `reconnect-vault.test.js` (seven menu items); `docs/DECISIONS.md`, `docs/STATUS.md`.
