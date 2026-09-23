@@ -8,6 +8,35 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.72.0 — 2026-09-23
+
+**Changed:** `index.html`; added `supporting/tests/s107-identity.test.js` (95 checks); updated `supporting/tests/comment-anchor.test.js`, `comment-threads.test.js`, `j2-review-b.test.js`, `j2b-banner.test.js`, `review-dashboard.test.js`, `s92-review.test.js`, `scan-cache.test.js`, `vault-audit.test.js` (the page-data address in their fixtures), `session-a-shell.test.js` (the Back condition), `reconnect-vault.test.js` (seven menu items); `docs/DECISIONS.md`, `docs/STATUS.md`.
+
+*S107, vault storage and page identity. A page's comments and change log now live in one file keyed by the page's number, so renaming a page stops orphaning them. Plus three fixes from Jayson's list: Back skipping Home, no Remove in Saved, and Saved Repair offering nothing for a renumbered page. New capability, so MINOR.*
+
+### One data file per page
+
+- **Comments and change log are two sections of one file,** `zSystem/pages/<top folder>/<number>.folio.md`, instead of two sidecars in a hidden zSystem folder beside every page. Obsidian shows one zSystem at the vault root instead of one in every folder.
+- **Keyed by the page's identity, not its name.** Numbers repeat per top-level folder (Jayson's call this session): 10_Processes/042 and 20_Guides/042 are different pages, and subfolders share their top folder's range. Renaming a page inside its top folder keeps its number, so its data does not move at all.
+- **Drafts carry no number.** Pages in `00_Home/Working Drafts/` (Admin can change it: account menu > Drafts folder) and anything not yet numbered are kept by path under `zSystem/pages/_unnumbered/`. When a draft is filed with a number, the next scan carries its comments, history and saved items to it.
+- **Nothing is deleted.** Vault check has a one-off **Park old files** that moves every old `.comments.md` / `.changes.md` to `zSystem/_old/` at its original path. You remove the emptied zSystem folders yourself. Until parked, Folio no longer reads the old files, which is the fresh start planned for Friday.
+
+### Renames and moves keep everything
+
+- **Rename pairing gained two passes:** same number in the same top folder (a page renamed and edited together now pairs), and same title with the number trimmed (a draft filed with a new number and an edit pairs). Each pairs only when the match is unique on both sides.
+- **A renamed heading keeps its comments and its saved sections,** when the text under it is unchanged. Renaming and rewriting in one go stays unmatched.
+- **Move (Admin) carries the page's data** when the move changes its identity.
+
+### Vault check
+
+New rows: **Old page files** (with Park old files), **Page outside a folder** (with Move to drafts), **Number used twice** (hard), **Number does not match name** (with Match the name), **No number** (info, outside drafts; the S108 sweep assigns them), **Comments with no page** (info). Repair buttons now say what they do.
+
+### Fixed
+
+- **Back from a page opened from Home skipped Home.** Continue and Browse open a page while nothing else is open, and the old rule only added a history step when leaving another page, so the page overwrote Home's step. Leaving Home or the help page now adds one.
+- **Saved had no Remove.** Every row has one now, on hover (always shown on touch screens).
+- **Saved Repair offered nothing for a renumbered page.** It matched only the exact filename or unchanged content, and the renumbering to three digits changed every filename (12-Keys to 012-Keys). It now also matches by number and by title, preselects the best match, lists every page as a fallback, and defaults to Leave broken when nothing matches instead of an arbitrary page. A unique same-number match repairs itself.
+
 ## 0.71.4 — 2026-09-23
 
 **Changed:** `index.html`; `supporting/tests/j1-everyday.test.js` (shared-modal-chrome check widened for the new popup), `supporting/tests/p10-vault-check.test.js` (the reader's-notice section now sets a tier, plus a new check that User does not see it).

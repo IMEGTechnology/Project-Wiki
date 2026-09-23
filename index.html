@@ -1610,12 +1610,12 @@
     .folder-row:hover .fr-add { display: block; }
     .fr-add:hover { color: var(--text-primary); }
     /* create + move + default-page modals */
-    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay, #rpt-overlay, #su-outlook-overlay {
+    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay, #rpt-overlay, #su-outlook-overlay, #df-overlay {
       position: fixed; inset: 0; z-index: 60;
       background: rgba(0,0,0,0.35);
       display: flex; align-items: center; justify-content: center;
     }
-    #create-modal, #move-modal, #dp-modal, #sr-modal, #rpt-modal, #su-outlook-modal {
+    #create-modal, #move-modal, #dp-modal, #sr-modal, #rpt-modal, #su-outlook-modal, #df-modal {
       width: 380px; padding: 16px; border-radius: 10px;
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
@@ -1670,7 +1670,7 @@
     }
     #cm-name:focus { border-color: var(--accent); }
     .cm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
-    #move-modal .s-select, #dp-modal .s-select { width: 100%; }
+    #move-modal .s-select, #dp-modal .s-select, #df-modal .s-select { width: 100%; }
 
     /* ── S14 access tiers (0.27.0) ────────────────────────────────
        The unlock prompt reuses the create-modal shell so there is one
@@ -3733,6 +3733,15 @@
       padding: 6px 10px; border-radius: var(--radius); cursor: pointer;
     }
     .saved-row:hover { background: var(--hover); }
+    /* S107 -- Remove. Quiet until the row is hovered or focused, then plain. */
+    .saved-remove {
+      margin-left: auto; flex-shrink: 0; border: 0; background: none; cursor: pointer;
+      color: var(--text-muted); font-size: 16px; line-height: 1; padding: 0 4px;
+      border-radius: 4px; opacity: 0;
+    }
+    .saved-row:hover .saved-remove, .saved-remove:focus-visible { opacity: 1; }
+    .saved-remove:hover { color: var(--text-primary); background: var(--hover); }
+    @media (hover: none) { .saved-remove { opacity: 1; } }
     .saved-dot {
       width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
     }
@@ -4392,7 +4401,7 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.71.4</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.72.0</button>
       </div>
 
       <div class="ud-actions">
@@ -4429,6 +4438,11 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
         <button class="ud-item" id="ud-defaultpage" onclick="openDefaultPageModal()">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg>
           Default page
+        </button>
+        <!-- S107 -- Drafts folder (Admin only), same gating as Default page. -->
+        <button class="ud-item" id="ud-draftsfolder" onclick="openDraftsFolderModal()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5"/><path d="M9.5 13.5h5"/></svg>
+          Drafts folder
         </button>
         <button class="ud-item" onclick="switchUser()">
           <svg class="icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
@@ -4886,6 +4900,21 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
       <p class="id-sub">Paste the copied email into the body now (Ctrl+V), then send.</p>
       <div class="cm-actions">
         <button class="ed-btn ed-save" onclick="closeOutlookReminderModal()">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- S107 -- Drafts folder (Admin only). Where pages without a number live
+       until they are filed, and where a page found at the vault root is
+       moved. Relative to the vault, so with several vaults each has its own. -->
+  <div id="df-overlay" style="display:none" onclick="closeDraftsFolderModal()">
+    <div id="df-modal" role="dialog" aria-label="Drafts folder" onclick="event.stopPropagation()">
+      <div class="cm-title">Drafts folder</div>
+      <p class="id-sub">Pages here carry no number until they are filed into a folder. A page found outside every folder is moved here.</p>
+      <select class="s-select" id="df-folder" aria-label="Drafts folder"></select>
+      <div class="cm-actions">
+        <button class="ed-btn" onclick="closeDraftsFolderModal()">Cancel</button>
+        <button class="ed-btn ed-save" onclick="submitDraftsFolder()">Save</button>
       </div>
     </div>
   </div>
@@ -5399,24 +5428,481 @@ function resolveNoteUrl(lcKey) {
   return state.fileIndex[lcKey] || state.fileAlias[lcKey];
 }
 
-// Change-log sidecars live in a hidden "zSystem" subfolder next to
-// whatever folder holds the note itself (root-level notes get a
-// root-level zSystem). Keeps them out of the visible tree without
-// scattering them into one global folder that loses the file's context.
-function changesUrlFor(fileUrl) {
+// ── S107 · Page data: one file per page, keyed by page identity ───────────
+//
+// Until 0.72.0 every page had two sidecars, <name>.comments.md and
+// <name>.changes.md, in a hidden zSystem folder beside the page. That put a
+// zSystem folder in every folder Obsidian shows, and it keyed a page's
+// history to its FILENAME, so a rename in Obsidian orphaned it.
+//
+// Now a page's comments and change log are two sections of ONE file:
+//
+//   zSystem/pages/<vault>/<top folder>/<number>.folio.md
+//
+// keyed by the page's IDENTITY rather than its name. Jayson's rule (S107):
+// a page's number is unique inside its top-level folder, not across the
+// vault, so 10_Processes/042 and 20_Guides/042 are different pages. A rename
+// inside the top folder keeps the number, so the key does not move and
+// nothing has to follow. Pages with no number yet (drafts, and anything the
+// S108 sweep has not reached) are keyed by path under _unnumbered/, and the
+// scan's reconcile pass carries their data across when they gain a number.
+//
+// Every existing caller still asks commentsUrlFor()/changesUrlFor() and reads
+// and writes through readVaultFileOrNull()/spWriteFile(). Those two URLs now
+// name a SECTION of the page file (".../042.folio.md#comments"), and the I/O
+// layer resolves the section. That is why twenty-odd call sites needed no
+// change: the address changed, the conversation did not.
+const PD_DIR            = 'zSystem/pages';
+const PD_OLD_DIR        = 'zSystem/_old';
+const PD_DRAFTS_DEFAULT = '00_Home/Working Drafts';
+const PD_PARTS          = { comments: 'Comments', changes: 'Change log' };
+
+function pdRootPrefix() { return LOCAL.on ? 'local:/' : (CONFIG.vaultRelPath ? CONFIG.vaultRelPath + '/' : ''); }
+
+// A page url as a path from the vault root, whichever backend made it.
+function pdRel(url) {
+  const s = String(url || '');
+  if (s.startsWith('local:/')) return s.slice(7);
+  const vp = CONFIG.vaultRelPath ? CONFIG.vaultRelPath + '/' : '';
+  if (vp && s.startsWith(vp)) return s.slice(vp.length);
+  return s.replace(/^\/+/, '');
+}
+
+// The Admin setting (zSystem/settings.json), relative to a vault.
+function pdDraftsFolder() {
+  return String(state.draftsFolder || PD_DRAFTS_DEFAULT).trim().replace(/^\/+|\/+$/g, '');
+}
+
+// Three or four digits then a separator. The name decides the number
+// (DECISIONS, 22 Sep); the `number:` property is checked against it.
+function pageNumberOf(url) {
+  const m = String(url || '').split('/').pop().match(/^(\d{3,4})(?=[-_ .])/);
+  return m ? m[1] : null;
+}
+
+// { rel, vault, top, number, draft, root }. With vaults.json on, the first
+// segment of a path that names a vault folder is the vault, and the top
+// folder is the one inside it: Jayson's minimum is Vault > Folder > Page.
+function pageIdentity(url) {
+  const rel   = pdRel(url);
+  const parts = rel.split('/');
+  let vault   = '';
+  try { if (parts.length > 1 && vaultFolderIds().includes(parts[0])) vault = parts.shift(); } catch (_) {}
+  const inVault = parts.join('/');
+  const top     = parts.length > 1 ? parts[0] : null;
+  const d       = pdDraftsFolder().toLowerCase();
+  const draft   = !!d && inVault.toLowerCase().startsWith(d + '/');
+  const number  = (top && !draft) ? pageNumberOf(url) : null;
+  return { rel, vault, top, number, draft, root: !top };
+}
+
+// Number owners per vault/top folder, rebuilt from the full file list on
+// every scan. Two pages claiming one number would otherwise share a file.
+function pdNumberKey(id) { return (id.vault ? id.vault + '/' : '') + id.top + '/' + id.number; }
+function pdIndexNumbers(urls) {
+  const owners = new Map();
+  (urls || []).forEach(u => {
+    const id = pageIdentity(u);
+    if (!id.number) return;
+    const k = pdNumberKey(id);
+    owners.set(k, (owners.get(k) || []).concat(u));
+  });
+  state.pdOwners = owners;
+  return owners;
+}
+function pdIsDuplicate(url, id) {
+  const o = state.pdOwners && state.pdOwners.get(pdNumberKey(id || pageIdentity(url)));
+  return !!(o && o.length > 1);
+}
+
+function pageDataKey(url) {
+  const id = pageIdentity(url);
+  if (id.number && !pdIsDuplicate(url, id)) return pdNumberKey(id);
+  return '_unnumbered/' + id.rel.replace(/\.md$/i, '');
+}
+
+// The prefix comes from the page's own url, the way the old sidecar path
+// did, so a page address and its data address always share a backend.
+function pdPrefixOf(url) {
+  const s = String(url || '');
+  if (s.startsWith('local:/')) return 'local:/';
+  if (CONFIG.vaultRelPath && s.startsWith(CONFIG.vaultRelPath + '/')) return CONFIG.vaultRelPath + '/';
+  return '';
+}
+
+function pageDataUrl(url) {
+  const f = pdPrefixOf(url) + PD_DIR + '/' + pageDataKey(url) + '.folio.md';
+  (state.pdPageFor = state.pdPageFor || {})[f] = url;   // who the file belongs to, for its page: line
+  return f;
+}
+
+function changesUrlFor(fileUrl)  { return pageDataUrl(fileUrl) + '#changes'; }
+function commentsUrlFor(fileUrl) { return pageDataUrl(fileUrl) + '#comments'; }
+
+// The layout before 0.72.0. Read by Park old files and nothing else.
+function legacyChangesUrlFor(fileUrl) {
   const slash = fileUrl.lastIndexOf('/');
   const dir   = slash === -1 ? '' : fileUrl.slice(0, slash);
   const name  = (slash === -1 ? fileUrl : fileUrl.slice(slash + 1)).replace(/\.md$/i, '.changes.md');
   return dir ? `${dir}/zSystem/${name}` : `zSystem/${name}`;
 }
-
-// Comments sidecars live in the same hidden zSystem subfolder as the
-// change log — one system folder per note's folder, not two.
-function commentsUrlFor(fileUrl) {
+function legacyCommentsUrlFor(fileUrl) {
   const slash = fileUrl.lastIndexOf('/');
   const dir   = slash === -1 ? '' : fileUrl.slice(0, slash);
   const name  = (slash === -1 ? fileUrl : fileUrl.slice(slash + 1)).replace(/\.md$/i, '.comments.md');
   return dir ? `${dir}/zSystem/${name}` : `zSystem/${name}`;
+}
+
+// ".../042.folio.md#comments" -> { file, part }, anything else -> null.
+function pdVirtual(url) {
+  const m = /^(.*\.folio\.md)#(comments|changes)$/.exec(String(url || ''));
+  return m ? { file: m[1], part: m[2] } : null;
+}
+
+// The file is plain Markdown so it reads sensibly in Obsidian. Each section's
+// body sits between two markers and is returned byte-for-byte as written:
+// callers serialize and re-parse their own formats and must get back exactly
+// what they wrote.
+function pdParse(text) {
+  const out = { page: '', comments: null, changes: null };
+  if (!text) return out;
+  const pm = String(text).match(/^page:[ \t]*"?(.*?)"?[ \t]*$/m);
+  if (pm) out.page = pm[1];
+  Object.keys(PD_PARTS).forEach(k => {
+    const open = '<!-- folio:' + k + ' -->\n', close = '\n<!-- /folio:' + k + ' -->';
+    const a = text.indexOf(open);
+    if (a === -1) return;
+    const b = text.indexOf(close, a + open.length - 1);
+    if (b === -1) return;
+    out[k] = b < a + open.length ? '' : text.slice(a + open.length, b);
+  });
+  return out;
+}
+
+function pdSerialize(d) {
+  let s = '---\nfolio: page data\npage: "' + String(d.page || '').replace(/"/g, '') + '"\n---\n';
+  Object.keys(PD_PARTS).forEach(k => {
+    if (d[k] == null) return;
+    s += '\n## ' + PD_PARTS[k] + '\n<!-- folio:' + k + ' -->\n' + d[k] + '\n<!-- /folio:' + k + ' -->\n';
+  });
+  return s;
+}
+
+// Writes to one page file are chained, so a comment and a change-log entry
+// landing together cannot each read the old file and overwrite the other.
+const pdLocks = new Map();
+function pdWritePart(v, content) {
+  const prev = pdLocks.get(v.file) || Promise.resolve();
+  const next = prev.catch(() => {}).then(async () => {
+    const cur = pdParse(await readVaultFileOrNull(v.file));
+    cur[v.part] = String(content);
+    const pg = state.pdPageFor && state.pdPageFor[v.file];
+    if (pg) cur.page = pdRel(pg);
+    if (!LOCAL.on) await pdEnsureSpDirs(v.file);
+    await spWriteFile(v.file, pdSerialize(cur));
+    if (state.pdFiles) state.pdFiles.add(v.file);
+  });
+  pdLocks.set(v.file, next);
+  return next;
+}
+
+// SharePoint needs each folder to exist before a file lands in it. Dormant
+// path; kept correct rather than fast.
+async function pdEnsureSpDirs(fileUrl) {
+  const rel = pdRel(fileUrl).split('/'); rel.pop();
+  let parent = CONFIG.vaultRelPath;
+  for (const seg of rel) {
+    try { await spCreateFolder(parent, seg); } catch (_) { /* exists */ }
+    parent += '/' + seg;
+  }
+}
+
+// Moves one page's data file to where another page url keys it. Never
+// overwrites: if the destination already holds data, nothing moves and the
+// caller reports it. The source is removed only after the copy reads back
+// identical, so a failed write can never lose the only copy.
+async function pdMoveData(fromPageUrl, toPageUrl) {
+  const a = pageDataUrl(fromPageUrl), b = pageDataUrl(toPageUrl);
+  return pdMoveDataFile(a, b, toPageUrl);
+}
+async function pdMoveDataFile(a, b, toPageUrl) {
+  if (a === b) return false;
+  const txt = await readVaultFileOrNull(a);
+  if (txt == null) return false;
+  if (await readVaultFileOrNull(b) != null) return false;
+  const d = pdParse(txt);
+  if (toPageUrl) d.page = pdRel(toPageUrl);
+  const out = pdSerialize(d);
+  if (!LOCAL.on) await pdEnsureSpDirs(b);
+  await spWriteFile(b, out);
+  if (await readVaultFileOrNull(b) !== out) throw new Error('page data did not read back');
+  if (LOCAL.on) await localDeleteFile(a);
+  if (state.pdFiles) { state.pdFiles.delete(a); state.pdFiles.add(b); }
+  return true;
+}
+
+// ── S107 · Park old files ───────────────────────────────────────────────
+// A one-off, run from Vault check. Finds every .comments.md / .changes.md in
+// the old per-folder zSystem layout and MOVES it to zSystem/_old/ at its
+// original path. Nothing is deleted: a file is removed from its old place
+// only after its copy under _old reads back identical. The emptied zSystem
+// folders are left for Jayson to check and remove himself (his call, S107).
+// Local mode only; the SharePoint path is dormant.
+async function pdFindLegacy() {
+  if (!LOCAL.on || !LOCAL.root) return [];
+  const out = [];
+  async function walk(dir, rel, depth) {
+    if (depth > 12) return;
+    for await (const [name, h] of dir.entries()) {
+      if (h.kind !== 'directory') continue;
+      if (name.startsWith('.')) continue;
+      const here = rel ? rel + '/' + name : name;
+      if (name.toLowerCase() === 'zsystem') {
+        // Only the sidecars directly inside. The root zSystem also holds
+        // Users, Analytics, pages and _old, none of which is walked.
+        for await (const [fn, fh] of h.entries()) {
+          if (fh.kind === 'file' && (fn.endsWith('.comments.md') || fn.endsWith('.changes.md'))) {
+            out.push({ url: 'local:/' + here + '/' + fn, rel: here + '/' + fn });
+          }
+        }
+        continue;
+      }
+      await walk(h, here, depth + 1);
+    }
+  }
+  try { await walk(LOCAL.root, '', 0); } catch (_) { /* a folder that vanished mid-walk is not an error */ }
+  return out.sort((x, y) => x.rel.localeCompare(y.rel));
+}
+
+async function pdParkLegacy(list) {
+  let moved = 0, failed = 0;
+  for (const it of list) {
+    try {
+      const txt = await readVaultFileOrNull(it.url);
+      if (txt == null) continue;
+      let dest = 'local:/' + PD_OLD_DIR + '/' + it.rel;
+      if (await readVaultFileOrNull(dest) != null) {
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        dest = dest.replace(/(\.(comments|changes)\.md)$/, '.' + stamp + '$1');
+      }
+      await localWriteFile(dest, txt);
+      if (await readVaultFileOrNull(dest) !== txt) { failed++; continue; }
+      await localDeleteFile(it.url);
+      moved++;
+    } catch (_) { failed++; }
+  }
+  return { moved, failed };
+}
+
+// ── S107 · Reconcile ────────────────────────────────────────────────────
+// A page file whose key no page produces any more is an orphan: its page was
+// renamed to a new number, moved to another top folder, filed out of the
+// drafts folder, or deleted. Every file records the page it belongs to
+// (page:), so the scan can usually say where it went:
+//
+//   1. the rename pairing this scan found names the new path;
+//   2. the recorded path still exists (its key changed, e.g. a duplicate
+//      number was resolved);
+//   3. for a page that had no number (a draft), exactly one page now carries
+//      the same title and has no data of its own.
+//
+// Anything else stays put and is listed in Vault check. Writes, so
+// Contributor and above only; everyone else just reads what is there.
+async function pdReconcile(renames) {
+  state.pdPendingRenames = Object.assign(state.pdPendingRenames || {}, renames || {});
+  if (!LOCAL.on || !atLeast('contributor')) return 0;
+  await scanSidecarStats();                 // refreshes state.pdFiles
+  const files = state.pdFiles ? [...state.pdFiles] : [];
+  const pages = allMdFiles().map(f => f.url);
+  pdIndexNumbers(pages);
+  const expected = new Set(pages.map(u => pageDataUrl(u)));
+  const orphans  = files.filter(f => !expected.has(f));
+  const inv = {};
+  Object.entries(state.pdPendingRenames).forEach(([to, from]) => { inv[pdRel(from)] = to; });
+  state.pdPendingRenames = {};
+  if (!orphans.length) { state.pdOrphans = []; return 0; }
+
+  const byRel   = new Map(pages.map(u => [pdRel(u), u]));
+  const titleOf = rel => stripNumPrefix(fileStem(String(rel).split('/').pop())).toLowerCase().trim();
+  const byTitle = new Map();
+  pages.forEach(u => { const t = titleOf(pdRel(u)); byTitle.set(t, (byTitle.get(t) || []).concat(u)); });
+
+  let moved = 0;
+  const left = [];
+  for (const f of orphans.slice(0, 50)) {
+    let d;
+    try { d = pdParse(await readVaultFileOrNull(f)); } catch (_) { continue; }
+    let target = null;
+    if (d.page && inv[d.page]) target = inv[d.page];
+    else if (d.page && byRel.has(d.page)) target = byRel.get(d.page);
+    else if (d.page && f.includes('/' + PD_DIR + '/_unnumbered/')) {
+      const hits = (byTitle.get(titleOf(d.page)) || []).filter(u => !state.pdFiles.has(pageDataUrl(u)));
+      if (hits.length === 1) target = hits[0];
+    }
+    let ok = false;
+    if (target) { try { ok = await pdMoveDataFile(f, pageDataUrl(target), target); } catch (_) { ok = false; } }
+    if (ok) moved++; else left.push({ file: f, page: d.page || '' });
+  }
+  state.pdOrphans = left;
+  if (moved) { try { scanBadges(); } catch (_) {} }
+  return moved;
+}
+
+// ── S107 · Renamed headings keep their comments and saved sections ──────
+// A section's hash is taken over its BODY only (wnSectionMap), so renaming a
+// heading leaves the hash alone. A heading id that vanished and a new one
+// carrying the same hash, each unique on its side, is one heading renamed.
+// Rename-and-rewrite in one go stays unmatched, which is the honest limit.
+function wnDetectHeadingRenames(oldIdx, curIdx, renames) {
+  const out = {};
+  const back = renames || {};
+  Object.keys(curIdx || {}).forEach(url => {
+    const o = oldIdx && oldIdx[back[url] || url] && oldIdx[back[url] || url].sec;
+    const n = curIdx[url] && curIdx[url].sec;
+    if (!o || !n) return;
+    const gone    = Object.keys(o).filter(k => !(k in n));
+    const arrived = Object.keys(n).filter(k => !(k in o));
+    if (!gone.length || !arrived.length) return;
+    const map = {};
+    gone.forEach(g => {
+      const h = o[g] && o[g][1];
+      if (!h) return;
+      if (gone.filter(x => o[x] && o[x][1] === h).length !== 1) return;
+      const hit = arrived.filter(a => n[a] && n[a][1] === h);
+      if (hit.length === 1) map[g] = hit[0];
+    });
+    if (Object.keys(map).length) out[url] = map;
+  });
+  return out;
+}
+
+const WB_HEAD_Q_KEY = 'wb_heading_rename_queue';
+function pdRecordHeadingRenames(map) {
+  if (!map || !Object.keys(map).length) return;
+  try { wnWrite(WB_HEAD_Q_KEY, wnRead(WB_HEAD_Q_KEY, []).concat([map])); } catch (_) {}
+  pdDrainHeadingRenames();
+}
+
+// Saved sections are the reader's own record, so they are fixed on every
+// device. Comment anchors live in the vault, so only a device that may write
+// rewrites them; the others read the fixed file on their next scan.
+async function pdDrainHeadingRenames() {
+  if (!state.user) return;
+  let q = [];
+  try { q = wnRead(WB_HEAD_Q_KEY, []) || []; } catch (_) { q = []; }
+  if (!q.length) return;
+  wnWrite(WB_HEAD_Q_KEY, []);
+  let savedTouched = 0;
+  for (const map of q) {
+    for (const url of Object.keys(map)) {
+      const ren = map[url];
+      const p = state.user.saved && state.user.saved.pages && state.user.saved.pages[url];
+      if (p && p.sections) {
+        Object.keys(ren).forEach(oldId => {
+          if (!(oldId in p.sections)) return;
+          if (!(ren[oldId] in p.sections)) p.sections[ren[oldId]] = p.sections[oldId];
+          delete p.sections[oldId];
+          savedTouched++;
+        });
+      }
+      if (atLeast('contributor')) {
+        try {
+          const cUrl = commentsUrlFor(url);
+          const txt  = await readVaultFileOrNull(cUrl);
+          if (txt) {
+            const list = parseComments(txt);
+            let n = 0;
+            list.forEach(c => { if (c.hid && ren[c.hid]) { c.hid = ren[c.hid]; n++; } });
+            if (n) await spWriteFile(cUrl, serializeComments(list));
+          }
+        } catch (_) { /* the next scan tries again only if the heading moves again */ }
+      }
+    }
+  }
+  if (savedTouched) {
+    try { saveUserRecord(); updateSavedTabBadge(); renderOutlineTab(); if (isSavedPaneOpen()) renderSavedTab(); } catch (_) {}
+  }
+}
+
+// ── S107 · Vault check: structure findings ───────────────────────────────
+// Everything here is about WHERE pages and their data live, not what the
+// pages say, so it runs off the file list rather than page text.
+async function pdStructureFindings(pageTexts) {
+  const out = [];
+  const pages = allMdFiles().map(f => f.url);
+  pdIndexNumbers(pages);
+  const nameOf = u => displayNameOf(u);
+  const texts = new Map((pageTexts || []).map(p => [p.url, p.text]));
+
+  const legacy = await pdFindLegacy();
+  if (legacy.length) {
+    out.push(vcFinding('warn', 'Old page files', 'pd-legacy',
+      legacy.length + ' comment and change-log file' + (legacy.length === 1 ? ' is' : 's are') +
+      ' still in the old per-folder zSystem layout, which Folio no longer reads. Park moves ' +
+      (legacy.length === 1 ? 'it' : 'them') + ' to zSystem/_old/ at the same path. Nothing is deleted; ' +
+      'you remove the emptied zSystem folders yourself.',
+      { name: 'zSystem', url: '' }, null, vcFix('park', '', 'Park old files')));
+  }
+
+  const drafts = pdDraftsFolder();
+  pages.forEach(u => {
+    const id = pageIdentity(u);
+    const page = { name: nameOf(u), url: u };
+    if (id.root) {
+      out.push(vcFinding('warn', 'Page outside a folder', 'pdroot:' + id.rel,
+        'Every page lives in a folder inside the vault. Move puts this one in ' + escHtml(drafts) +
+        ', with its comments and history, to be filed from there.', page, null, vcFix('moveroot', u, 'Move to drafts')));
+      return;
+    }
+    if (id.draft) return;
+    if (!id.number) {
+      out.push(vcFinding('info', 'No number', 'pdnonum:' + id.rel,
+        'Pages outside the drafts folder carry a number unique to ' + escHtml(id.top) +
+        '. The vault sweep (S108) assigns one.', page));
+      return;
+    }
+    const fmNum = (() => { try { return parseFm(texts.get(u) || '').number; } catch (_) { return undefined; } })();
+    if (fmNum != null && String(fmNum).trim() !== '' && Number(String(fmNum).trim()) !== Number(id.number)) {
+      out.push(vcFinding('warn', 'Number does not match name', 'pdnum:' + id.rel,
+        'The name says ' + id.number + ' and the number property says ' + escHtml(String(fmNum)) +
+        '. The name decides; this writes ' + id.number + ' into the property.', page, null,
+        vcFix('numprop', u, 'Match the name')));
+    }
+  });
+
+  (state.pdOwners || new Map()).forEach((urls, k) => {
+    if (urls.length < 2) return;
+    const id = pageIdentity(urls[0]);
+    out.push(vcFinding('hard', 'Number used twice', 'pddup:' + k,
+      urls.length + ' pages carry ' + id.number + ' in ' + escHtml(id.top) +
+      '. Until one is renumbered, each keeps its comments and history by path instead of by number.',
+      { name: nameOf(urls[0]), url: urls[0] }, { name: nameOf(urls[1]), url: urls[1] }));
+  });
+
+  (state.pdOrphans || []).forEach(o => {
+    out.push(vcFinding('info', 'Comments with no page', 'pdorph:' + o.file,
+      'Comments and history recorded for <b>' + escHtml(o.page || 'an unknown page') +
+      '</b>, which is not in the vault any more and could not be matched to a renamed page. ' +
+      'The file stays in zSystem/pages until you decide.', { name: displayNameOf(o.page || o.file), url: '' }));
+  });
+  return out;
+}
+
+// Moves a page that sits at the vault root into the drafts folder of its
+// vault, with its data. The drafts folder is created if it is not there.
+async function pdMoveRootPage(url) {
+  if (!atLeast('admin') || !LOCAL.on) return false;
+  const id   = pageIdentity(url);
+  const name = url.split('/').pop();
+  const dest = 'local:/' + (id.vault ? id.vault + '/' : '') + pdDraftsFolder() + '/' + name;
+  if (await readVaultFileOrNull(dest) != null) throw new Error('A page with that name is already in ' + pdDraftsFolder() + '.');
+  const txt = await readVaultFile(url);
+  await localWriteFile(dest, txt);
+  if (await readVaultFileOrNull(dest) !== txt) throw new Error('the copy did not read back');
+  try { await pdMoveData(url, dest); } catch (_) { /* reconcile finds it by path next scan */ }
+  await localDeleteFile(url);
+  wbRecordRenames({ [dest]: url });
+  return dest;
 }
 
 // SharePoint's Files/Add endpoint needs the target folder to already
@@ -5426,6 +5912,7 @@ function commentsUrlFor(fileUrl) {
 const zSystemEnsured = new Set();
 async function ensureZSystemDir(changesUrl) {
   if (LOCAL.on) return; // localWriteFile creates intermediate dirs itself
+  if (pdVirtual(changesUrl)) return; // S107 -- pdWritePart makes the page-data folders itself
   const dir = changesUrl.slice(0, changesUrl.lastIndexOf('/')); // "<parent>/zSystem"
   if (zSystemEnsured.has(dir)) return;
   const parent = dir.slice(0, dir.lastIndexOf('/'));
@@ -5794,6 +6281,13 @@ async function localWriteFile(url, content) {
 
 // Unified reads — every raw-content caller goes through these, live or local.
 async function readVaultFile(url) { // throws if unavailable
+  // S107 -- a page-data section reads through the OrNull path, which knows
+  // how to find a section inside its file.
+  if (pdVirtual(url)) {
+    const t = await readVaultFileOrNull(url);
+    if (t === null) throw new Error('File not found');
+    return t;
+  }
   if (LOCAL.on) {
     const text = await localReadText(url);
     if (text === null) throw new Error('File not found');
@@ -5805,6 +6299,14 @@ async function readVaultFile(url) { // throws if unavailable
 }
 
 async function readVaultFileOrNull(url) { // missing → null, never throws
+  // S107 -- "<page file>#comments" and "#changes" are sections of one file.
+  // A missing file and a missing section both read as null, exactly as a
+  // missing sidecar always did.
+  const pv = pdVirtual(url);
+  if (pv) {
+    const whole = await readVaultFileOrNull(pv.file);
+    return whole === null ? null : pdParse(whole)[pv.part];
+  }
   if (LOCAL.on) return localReadText(url);
   try {
     const res = await fetch(url, { credentials: 'same-origin' });
@@ -7210,6 +7712,13 @@ function wbDelegatedClick(e) {
   if (hCmt) {
     e.preventDefault();
     commentOnHeading(hCmt.dataset.wbHcmt);
+    return;
+  }
+  const savedRm = e.target.closest('[data-wb-savedremove]');
+  if (savedRm) {
+    e.preventDefault();
+    e.stopPropagation();
+    removeSavedItem(savedRm.dataset.wbSavedremove, savedRm.dataset.wbSavedremoveid || '');
     return;
   }
   const savedJump = e.target.closest('[data-wb-savedjump]');
@@ -10675,7 +11184,7 @@ function vcTitleClose(a, b) {
 function vcFinding(band, kind, key, why, page, page2, fix) {
   return { band, kind, key, why, page, page2: page2 || null, fix: fix || null };
 }
-function vcFix(op, url) { return { op, url }; }
+function vcFix(op, url, label) { return { op, url, label: label || '' }; }
 
 function vcWordCount(text) {
   return (String(text || '').trim().match(/\S+/g) || []).length;
@@ -10833,6 +11342,13 @@ async function vcRun() {
     await buildSearchIndex();          // the run IS the read: every page, once
     await loadVaultCheckDismissals();  // somebody else may have dismissed since boot
     vcResults = vcAnalyze(searchIndex || []);
+    // S107 -- where pages and their data live, added to the same run so the
+    // counts and bands cover them. A failure here costs these rows only.
+    try {
+      const extra = (await pdStructureFindings(searchIndex || [])).filter(f => !vcIsDismissed(f.key));
+      vcResults.findings = vcResults.findings.concat(extra);
+      ['hard', 'warn', 'info'].forEach(b => { vcResults.counts[b] += extra.filter(f => f.band === b).length; });
+    } catch (e) { console.error('Folio: structure check failed', e); }
   } catch (e) {
     console.error('Folio: vault check failed', e);
     vcResults = null;
@@ -10858,6 +11374,9 @@ async function vcRun() {
 function vcRepair(op, url) {
   if (op === 'props') return vcRepairProps(url);
   if (op === 'dupfm') return vcRepairDoubleFm(url);
+  if (op === 'park')     return vcParkOldFiles();
+  if (op === 'moveroot') return vcMoveRootPage(url);
+  if (op === 'numprop')  return vcMatchNumber(url);
   vcMsg = 'That repair is not one this version knows how to run.';
   renderVaultCheckTab();
 }
@@ -10928,6 +11447,63 @@ async function vcRepairDoubleFm(url) {
   }
 }
 
+// S107 -- the three structure repairs. Each confirms, names what it touches,
+// works from the disk as it is now, and re-runs the check as its proof.
+async function vcParkOldFiles() {
+  if (!atLeast('admin')) return;
+  const list = await pdFindLegacy();
+  if (!list.length) { vcMsg = 'There are no old page files left to park.'; renderVaultCheckTab(); return; }
+  if (!confirm('Park ' + list.length + ' old comment and change-log file' + (list.length === 1 ? '' : 's') + '?\n\n' +
+               'Each one moves to zSystem/_old/ at the same path it has now. Nothing is deleted. ' +
+               'Folio stops showing the comments and history in them, which is the fresh start you asked for.')) return;
+  try {
+    const r = await pdParkLegacy(list);
+    await scanBadges();
+    await vcRun();
+    rvNotify('Parked ' + r.moved + ' file' + (r.moved === 1 ? '' : 's') + ' in zSystem/_old/' +
+             (r.failed ? '. ' + r.failed + ' could not be moved and are still where they were.' : '.'), !r.failed);
+  } catch (e) {
+    vcMsg = 'Could not park the old files: ' + e.message;
+    renderVaultCheckTab();
+  }
+}
+
+async function vcMoveRootPage(url) {
+  if (!atLeast('admin')) return;
+  const name = displayFileName((url || '').split('/').pop());
+  if (!confirm('Move "' + name + '" into ' + pdDraftsFolder() + '?\n\nIts comments and history move with it.')) return;
+  try {
+    const dest = await pdMoveRootPage(url);
+    state.folderLoaded = {}; state.folderFiles = {}; state.folderKids = {};
+    await refreshVaultRoot();
+    await loadAllFolders();
+    renderSidebar();
+    await scanBadges();
+    if (state.activeUrl === url && dest) openFile(dest, displayNameOf(dest));
+    await vcRun();
+    rvNotify(name + ' moved to ' + pdDraftsFolder() + '.', true);
+  } catch (e) {
+    vcMsg = 'Could not move that page: ' + e.message;
+    renderVaultCheckTab();
+  }
+}
+
+async function vcMatchNumber(url) {
+  if (!atLeast('admin')) return;
+  const num = pageNumberOf(url);
+  if (!num) return;
+  try {
+    const txt = await readVaultFile(url);
+    await spWriteFile(url, setFmKeys(txt, [['number', num]]));
+    await scanBadges();
+    if (state.activeUrl === url) openFile(url, state.activeName);
+    await vcRun();
+  } catch (e) {
+    vcMsg = 'Could not update that page: ' + e.message;
+    renderVaultCheckTab();
+  }
+}
+
 function vcWhen(ms) {
   const mins = Math.floor((Date.now() - ms) / 60000);
   if (mins < 1)  return 'just now';
@@ -10938,6 +11514,9 @@ function vcWhen(ms) {
 }
 
 function vcPageHTML(p) {
+  // S107 -- a structure finding can name something that is not a page you
+  // can open (the old zSystem layout, data whose page is gone): plain text.
+  if (!p.url) return '<span class="vc-name vc-name-plain">' + escHtml(p.name) + '</span>';
   return '<span class="vc-name" data-wb-vcopen="' + escHtml(p.url) + '" data-wb-vcname="' +
     escHtml(p.name) + '">' + escHtml(p.name) + '</span>';
 }
@@ -10961,7 +11540,7 @@ function vcRowHTML(f) {
     '<div class="vc-act">' +
       '<span class="vc-kind ' + kind + '">' + escHtml(f.kind) + '</span>' +
       (f.fix ? '<button class="vc-btn primary" data-wb-vcfixop="' + escHtml(f.fix.op) +
-               '" data-wb-vcfix="' + escHtml(f.fix.url) + '">Repair</button>' : '') +
+               '" data-wb-vcfix="' + escHtml(f.fix.url) + '">' + escHtml(f.fix.label || 'Repair') + '</button>' : '') +
       '<button class="vc-btn" data-wb-vcdismiss="' + escHtml(f.key) + '">Dismiss</button>' +
     '</div>' +
   '</div>';
@@ -12159,7 +12738,13 @@ async function openFile(url, name) {
   const restoreScrollTop = state.navRestoreScroll || 0;
   state.navFromHistory   = false;
   state.navRestoreScroll = 0;
-  if (!isNavRestore && state.activeUrl && state.activeUrl !== url) wbHistoryPush(url, '');
+  // S107 -- leaving Home (or the help page) is a navigation too. Home clears
+  // activeUrl, so the old test read "nothing open" and skipped the push; the
+  // replace further down then overwrote the #home entry with the page, and
+  // Back from a page opened by Continue or Browse jumped past Home to
+  // whatever came before it.
+  const leavingPlace = !state.activeUrl && (location.hash === HOME_HASH || location.hash === HELP_HASH);
+  if (!isNavRestore && ((state.activeUrl && state.activeUrl !== url) || leavingPlace)) wbHistoryPush(url, '');
   updateBackButtons();
 
   // S35 — What's New commits "seen" on LEAVING a page, not on opening it.
@@ -12925,6 +13510,8 @@ function refreshAccountMenu() {
   // P9 -- Usage moved inside the Admin screen; Home's Admin door reaches it.
   const defaultPageItem = $('ud-defaultpage');
   if (defaultPageItem) defaultPageItem.style.display = atLeast('admin') ? 'flex' : 'none';
+  const draftsItem = $('ud-draftsfolder');
+  if (draftsItem) draftsItem.style.display = atLeast('admin') ? 'flex' : 'none';
 
   // P6 — install state just moved, and the banner is the loud half of it.
   renderAppBanner();
@@ -14092,26 +14679,31 @@ async function runPooled(items, limit, worker) {
 // fast on a guess is how a dormant path acquires a bug nobody can reproduce.
 async function scanSidecarStats() {
   if (!LOCAL.on) return null;
-  const out    = new Map();
-  const dirIds = new Set(['']);
-  Object.keys(state.folderFiles).forEach(id => {
-    if ((state.folderFiles[id] || []).length) dirIds.add(id);
-  });
-  await Promise.all([...dirIds].map(async id => {
-    const dirId = id ? `${id}/zSystem` : 'zSystem';
-    let dir;
-    try { dir = await localGetDir(dirId); }
-    catch (_) { return; } // no zSystem here — every sidecar in this folder is absent
-    const base = `local:/${dirId}`;
-    try {
-      for await (const [name, h] of dir.entries()) {
-        if (h.kind !== 'file') continue;
-        if (!name.endsWith('.comments.md') && !name.endsWith('.changes.md')) continue;
-        const st = await localStat(h);
-        out.set(`${base}/${name}`, `${st.modified || ''}:${st.size == null ? '' : st.size}`);
-      }
-    } catch (_) { /* listing failed — treated as "no sidecars here" */ }
-  }));
+  // S107 -- one walk of zSystem/pages replaces a listing of every folder's
+  // zSystem. Both section addresses of a page file share its stamp, so a
+  // comment added on another machine still invalidates exactly that page.
+  const out   = new Map();
+  const files = new Set();
+  async function walk(dir, base, depth) {
+    if (depth > 12) return;
+    for await (const [name, h] of dir.entries()) {
+      if (h.kind === 'directory') { await walk(h, base + '/' + name, depth + 1); continue; }
+      if (h.kind !== 'file' || !name.endsWith('.folio.md')) continue;
+      const st  = await localStat(h);
+      const u   = base + '/' + name;
+      const stamp = `${st.modified || ''}:${st.size == null ? '' : st.size}`;
+      out.set(u + '#comments', stamp);
+      out.set(u + '#changes',  stamp);
+      files.add(u);
+    }
+  }
+  let dir = null;
+  try {
+    dir = LOCAL.root;
+    for (const seg of PD_DIR.split('/')) dir = await dir.getDirectoryHandle(seg);
+  } catch (_) { dir = null; } // no page data yet -- every page reads as having none
+  if (dir) { try { await walk(dir, 'local:/' + PD_DIR, 0); } catch (_) { /* listing failed: treated as none */ } }
+  state.pdFiles = files;
   return out;
 }
 
@@ -14697,6 +15289,34 @@ function wnDetectRenames(oldIdx, curIdx) {
       if (hit.length === 1) map[u] = hit[0];
     });
   }
+
+  // S107 -- two more passes for what the first two cannot see, each unique on
+  // BOTH sides or it pairs nothing.
+  //
+  // Number: same vault, same top folder, same number. A page renamed AND
+  // edited keeps its number, and the number is its identity (Jayson, S107).
+  //
+  // Title: the name with its number trimmed. A draft filed out of the drafts
+  // folder gains a number and usually an edit on the way, so neither the
+  // content nor the filename matches, but its title does. Same vault only.
+  const pass = (keyOf) => {
+    const g = gone.filter(u => !Object.values(map).includes(u));
+    const a = arrived.filter(u => !(u in map));
+    if (!g.length || !a.length) return;
+    const gk = new Map(), ak = new Map();
+    g.forEach(u => { const k = keyOf(u); if (k) gk.set(k, (gk.get(k) || []).concat(u)); });
+    a.forEach(u => { const k = keyOf(u); if (k) ak.set(k, (ak.get(k) || []).concat(u)); });
+    ak.forEach((us, k) => {
+      const hit = gk.get(k);
+      if (us.length === 1 && hit && hit.length === 1) map[us[0]] = hit[0];
+    });
+  };
+  pass(u => { const id = pageIdentity(u); return id.number ? pdNumberKey(id) : null; });
+  pass(u => {
+    const id = pageIdentity(u);
+    const t  = stripNumPrefix(fileStem(u.split('/').pop())).toLowerCase().trim();
+    return t ? (id.vault || '') + '|' + t : null;
+  });
   return map;
 }
 
@@ -14734,6 +15354,7 @@ function wbRecordRenames(renames) {
 // places identity can arrive without either needing to know about the other.
 function wbDrainRenameQueue() {
   if (!state.user) return;
+  pdDrainHeadingRenames().catch(() => {}); // S107 -- renamed headings wait for identity the same way
   let q = [];
   try { q = wnRead(WB_RENAME_Q_KEY, []) || []; } catch (_) { q = []; }
   if (!q.length) return;
@@ -14845,6 +15466,7 @@ async function wnScan() {
   try {
     await loadAllFolders();
     const files  = allMdFiles();
+    pdIndexNumbers(files.map(f => f.url)); // S107 -- duplicate numbers known before any key is taken
 
     const meta   = wnMeta();
     const oldIdx = wnRead(WN_INDEX_KEY, null);
@@ -14889,6 +15511,13 @@ async function wnScan() {
     // the whole change: the pairing above was already correct and already ran
     // on every scan, it was just never handed to anyone but What's New.
     wbRecordRenames(renames);
+
+    // S107 -- page data follows a page whose identity moved (a new number, a
+    // new top folder, filed out of drafts), and a renamed heading keeps its
+    // comments and saved sections. Both fire and forget: a scan must never
+    // wait on, or fail because of, a write into the vault.
+    try { pdRecordHeadingRenames(wnDetectHeadingRenames(oldIdx, curIdx, renames)); } catch (_) {}
+    pdReconcile(renames).catch(() => {});
 
     // Deletions drop out of every store. A path that comes back later is
     // genuinely new again, which is the honest answer.
@@ -18639,23 +19268,17 @@ async function submitMove() {
     if (await readVaultFileOrNull(destUrl) !== null) {
       throw new Error('A file with that name already exists in the destination.');
     }
-    // Move the file and its sidecars (.comments.md and .changes.md, both
-    // of which live in a zSystem subfolder of the file's own folder)
-    // together.
-    const pairs = [
-      [srcUrl, destUrl],
-      [commentsUrlFor(srcUrl), commentsUrlFor(destUrl)],
-      [changesUrlFor(srcUrl), changesUrlFor(destUrl)],
-    ];
-    for (const [s, d] of pairs) {
-      const txt = await readVaultFileOrNull(s);
-      if (txt === null) continue;
-      if (LOCAL.on) { await localWriteFile(d, txt); await localDeleteFile(s); }
-      else {
-        if (d.includes('/zSystem/')) await ensureZSystemDir(d); // dest zSystem may not exist yet
-        await spMoveFile(s, d);
-      }
+    // S107 -- the page moves, and its one data file follows only if the move
+    // changed the page's identity (a new top folder, or out of drafts).
+    // Inside its top folder a numbered page keeps its key, so there is
+    // nothing to carry.
+    const txt = await readVaultFileOrNull(srcUrl);
+    if (txt !== null) {
+      if (LOCAL.on) { await localWriteFile(destUrl, txt); await localDeleteFile(srcUrl); }
+      else await spMoveFile(srcUrl, destUrl);
     }
+    try { await pdMoveData(srcUrl, destUrl); } catch (_) { /* the scan's reconcile finds it by path */ }
+    wbRecordRenames({ [destUrl]: srcUrl });
     closeMoveModal();
     // Refresh every loaded folder + root (source and destination both covered).
     state.folderLoaded = {};
@@ -21345,9 +21968,22 @@ function savedRepairMatches(url, idx, brokenSet) {
     seen.add(u); out.push({ url: u, how });
   };
   if (p && p.fp) Object.keys(idx).forEach(u => { if (idx[u] && idx[u].h === p.fp) add(u, 'content'); });
+  // S107 -- same number in the same top folder: the page's identity.
+  const wantId = pageIdentity(url);
+  if (wantId.number) Object.keys(idx).forEach(u => {
+    const id = pageIdentity(u);
+    if (id.number && pdNumberKey(id) === pdNumberKey(wantId)) add(u, 'number');
+  });
   const stem = x => x.slice(x.lastIndexOf('/') + 1).toLowerCase();
   const want = stem(url);
   Object.keys(idx).forEach(u => { if (stem(u) === want) add(u, 'name'); });
+  // S107 -- the title, number trimmed. This is the match 0.52.0 lacked: the
+  // renumbering to three digits changed every filename (12-X to 012-X), so
+  // neither the exact name nor, after any edit, the content could find it,
+  // and the Repair screen offered nothing but Leave broken.
+  const title = x => stripNumPrefix(fileStem(x.slice(x.lastIndexOf('/') + 1))).toLowerCase().trim();
+  const wantT = title(url);
+  if (wantT) Object.keys(idx).forEach(u => { if (title(u) === wantT) add(u, 'title'); });
   return out;
 }
 
@@ -21365,11 +22001,16 @@ function repairSavedAuto(idx) {
   let fixed = 0;
   broken.forEach(u => {
     const p = state.user.saved.pages[u];
-    if (!p || !p.fp) return;
-    const hits = savedRepairMatches(u, idx, broken).filter(h => h.how === 'content');
+    if (!p) return;
+    // S107 -- a unique number match in the same top folder is as safe as a
+    // unique content match: the number is the page's identity. Title and
+    // plain name stay manual.
+    const all  = savedRepairMatches(u, idx, broken);
+    let hits = all.filter(h => h.how === 'content');
+    if (!hits.length) hits = all.filter(h => h.how === 'number');
     if (hits.length !== 1) return;
     if (wbRemapUserRecord(u, hits[0].url)) {
-      state.user.saved.pages[hits[0].url].fp = p.fp;
+      if (p.fp) state.user.saved.pages[hits[0].url].fp = p.fp;
       fixed++;
     }
   });
@@ -21440,16 +22081,22 @@ function openSavedRepair() {
       const matches = savedRepairMatches(u, idx, brokenSet);
       const best = matches[0];
       const opts = matches.map((mm, i) =>
-        `<option value="${escHtml(mm.url)}"${i === 0 ? ' selected' : ''}>${escHtml(pathOf(mm.url))}</option>`).join('');
+        `<option value="${escHtml(mm.url)}"${i === 0 ? ' selected' : ''}>${escHtml(pathOf(mm.url))}</option>`).join('') +
+        // S107 -- every page, so a saved item whose page was renamed beyond
+        // recognition can still be pointed somewhere by hand.
+        `<optgroup label="Every page">` +
+        Object.keys(idx).filter(x => !brokenSet.has(x)).sort((a, b) => pathOf(a).localeCompare(pathOf(b)))
+          .map(x => `<option value="${escHtml(x)}">${escHtml(pathOf(x))}</option>`).join('') +
+        `</optgroup>`;
       return `<div class="sr-row">` +
         `<div class="sr-what">` +
           `<div class="sr-name">${escHtml(p.name || u)}</div>` +
           `<div class="sr-from" title="${escHtml(pathOf(u))}">was ${escHtml(pathOf(u))}</div>` +
         `</div>` +
-        (best ? `<span class="sr-how${best.how === 'content' ? ' exact' : ''}">${best.how === 'content' ? 'same file' : 'same name'}</span>` : '') +
+        (best ? `<span class="sr-how${best.how === 'content' || best.how === 'number' ? ' exact' : ''}">${({ content: 'same file', number: 'same number', title: 'same title', name: 'same name' })[best.how] || 'match'}</span>` : '') +
         `<select class="s-select sr-pick" data-sr-from="${escHtml(u)}" aria-label="Where ${escHtml(p.name || u)} should point">` +
           opts +
-          `<option value="">Leave broken</option>` +
+          `<option value=""${best ? '' : ' selected'}>Leave broken</option>` +
           `<option value="\u0000remove">Remove this saved item</option>` +
         `</select>` +
       `</div>`;
@@ -21514,7 +22161,32 @@ function savedItemRowHTML(url, name, sectionId, sectionTitle, broken) {
     `<span class="saved-name">${escHtml(name || url)}</span>` +
     (sectionId ? `<span class="saved-sec">\u00b7 ${escHtml(sectionTitle)}</span>` : '') +
     (broken ? `<span class="bm-sub">file not found</span>` : '') +
+    // S107 -- Remove, on every row. Unsaving used to be possible only from the
+    // page itself (P7), which left a saved item whose page you did not want
+    // to open, or could not, with no way out but Repair.
+    `<button class="saved-remove" data-wb-savedremove="${escHtml(url)}"` +
+      (sectionId ? ` data-wb-savedremoveid="${escHtml(sectionId)}"` : '') +
+      ` title="Remove from Saved" aria-label="Remove from Saved">\u00d7</button>` +
   `</div>`;
+}
+
+// S107 -- one saved row removed, whole page or one section. The entry goes
+// when nothing is left in it, same rule toggleSavePage() uses.
+function removeSavedItem(url, sectionId) {
+  if (!state.user || !state.user.saved || !url) return false;
+  const pages = state.user.saved.pages;
+  const p = pages[url];
+  if (!p) return false;
+  if (sectionId) delete p.sections[sectionId];
+  else p.page = false;
+  if (!p.page && !Object.keys(p.sections || {}).length) delete pages[url];
+  saveUserRecord();
+  updateSavedTabBadge();
+  try { updateBetaSaveButton(); } catch (_) {}
+  try { if (url === state.activeUrl) renderOutlineTab(); } catch (_) {}
+  try { if (isSavedPaneOpen()) renderSavedTab(); } catch (_) {}
+  try { if (state.consoleHome) renderConsoleHome(false); } catch (_) {}
+  return true;
 }
 
 function renderSavedGroup(url, p, known) {
@@ -21859,10 +22531,12 @@ function appSettingsFileUrl() {
 
 async function loadAppSettings() {
   state.defaultPage = null;
+  state.draftsFolder = null;   // S107 -- null means PD_DRAFTS_DEFAULT
   try {
     const txt = await readVaultFileOrNull(appSettingsFileUrl());
     if (!txt) return;
     const obj = JSON.parse(txt);
+    if (obj && typeof obj.draftsFolder === 'string' && obj.draftsFolder.trim()) state.draftsFolder = obj.draftsFolder.trim();
     if (obj && obj.defaultPage && obj.defaultPage.url) {
       state.defaultPage = { url: String(obj.defaultPage.url), name: String(obj.defaultPage.name || obj.defaultPage.url) };
     }
@@ -21878,7 +22552,46 @@ async function saveDefaultPage(url, name) {
   try {
     if (!LOCAL.on) { try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* exists */ } }
     state.defaultPage = url ? { url, name: name || url } : null;
-    await spWriteFile(appSettingsFileUrl(), JSON.stringify({ defaultPage: state.defaultPage }, null, 2));
+    await spWriteFile(appSettingsFileUrl(), appSettingsJson());
+  } catch (e) {
+    console.error('Folio: failed to write app settings', e);
+    alert('Could not write to the vault. Check your permissions.');
+  }
+}
+
+// S107 -- one writer for settings.json, so saving either setting keeps the other.
+function appSettingsJson() {
+  const o = { defaultPage: state.defaultPage };
+  if (state.draftsFolder) o.draftsFolder = state.draftsFolder;
+  return JSON.stringify(o, null, 2);
+}
+
+function openDraftsFolderModal() {
+  if (!atLeast('admin')) return;
+  closeUserDropdown();
+  const cur = pdDraftsFolder().toLowerCase();
+  const vaults = vaultFolderIds();
+  const inVault = id => { const p = id.split('/'); return (p.length > 1 && vaults.includes(p[0])) ? p.slice(1).join('/') : id; };
+  const seen = new Set();
+  const opts = collectFolders().map(x => inVault(x.folder.id))
+    .filter(r => r && !vaults.includes(r) && !seen.has(r.toLowerCase()) && seen.add(r.toLowerCase()))
+    .sort((a, b) => a.localeCompare(b));
+  if (!seen.has(cur)) opts.unshift(pdDraftsFolder());
+  $('df-folder').innerHTML = opts.map(r =>
+    `<option value="${escHtml(r)}"${r.toLowerCase() === cur ? ' selected' : ''}>${escHtml(r)}</option>`).join('');
+  $('df-overlay').style.display = 'flex';
+}
+function closeDraftsFolderModal() { $('df-overlay').style.display = 'none'; }
+async function submitDraftsFolder() {
+  if (!atLeast('admin')) return;
+  const v = ($('df-folder').value || '').trim();
+  closeDraftsFolderModal();
+  if (!v) return;
+  try {
+    if (!LOCAL.on) { try { await spCreateFolder(CONFIG.vaultRelPath, 'zSystem'); } catch (e) { /* exists */ } }
+    state.draftsFolder = v;
+    await spWriteFile(appSettingsFileUrl(), appSettingsJson());
+    rvNotify('Drafts folder set to ' + v + '.', true);
   } catch (e) {
     console.error('Folio: failed to write app settings', e);
     alert('Could not write to the vault. Check your permissions.');
@@ -22555,6 +23268,8 @@ async function getDigest() {
 }
 
 async function spWriteFile(serverRelUrl, content) {
+  // S107 -- a page-data section is merged into its file, never written raw.
+  if (pdVirtual(serverRelUrl)) return pdWritePart(pdVirtual(serverRelUrl), content);
   searchIndex = null; // any write invalidates the search index
   if (LOCAL.on) return localWriteFile(serverRelUrl, content);
   const parts     = serverRelUrl.split('/');
