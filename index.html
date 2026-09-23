@@ -86,6 +86,15 @@
       --text-muted:    #6b6966;
       --border:        rgba(255,255,255,0.07);
       --border-strong: rgba(255,255,255,0.13);
+      /* S106, item 5 -- code blocks were using --bg-sidebar/--text-secondary,
+         which barely separate from the page in dark mode (no colour was
+         doing any work). Own variables so the boost is scoped to code and
+         never ripples into the sidebar or any other secondary text. Light
+         mode keeps the old values unchanged -- Jayson's complaint was dark
+         mode only. */
+      --code-bg:       #17171a;
+      --code-text:     #e8e6e1;
+      --code-border:   rgba(255,255,255,0.1);
       /* Solid (non-translucent) handle tones — see .resize-handle comment
          below for why these exist instead of reusing --border-strong.
          Real values come from the active preset (S32) and are written
@@ -135,6 +144,10 @@
       --text-muted:    #999893;
       --border:        rgba(0,0,0,0.08);
       --border-strong: rgba(0,0,0,0.14);
+      /* S106, item 5 -- unchanged in light mode, see the dark block. */
+      --code-bg:       #f0efec;
+      --code-text:     #5a5955;
+      --code-border:   rgba(0,0,0,0.08);
       --handle-active: #d3d3d1;
       --handle-hover:  #e1e1e0;
       --handle-rest:   #e1e1e0;
@@ -1597,12 +1610,12 @@
     .folder-row:hover .fr-add { display: block; }
     .fr-add:hover { color: var(--text-primary); }
     /* create + move + default-page modals */
-    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay, #rpt-overlay {
+    #create-overlay, #move-overlay, #dp-overlay, #sr-overlay, #rpt-overlay, #su-outlook-overlay {
       position: fixed; inset: 0; z-index: 60;
       background: rgba(0,0,0,0.35);
       display: flex; align-items: center; justify-content: center;
     }
-    #create-modal, #move-modal, #dp-modal, #sr-modal, #rpt-modal {
+    #create-modal, #move-modal, #dp-modal, #sr-modal, #rpt-modal, #su-outlook-modal {
       width: 380px; padding: 16px; border-radius: 10px;
       background: var(--bg-reader); border: 1px solid var(--border-strong);
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
@@ -2078,6 +2091,23 @@
       scroll-margin-top: 60px;
     }
 
+    /* S106, item 3 -- a search landing, not a "this changed" marker: the
+       same tint the search results list already uses for a matched term
+       (--accent-mark), no left-edge bar, no box-shadow banner chrome. See
+       markSearchHit/clearSearchHit and revealSearchLine. !important on the
+       background: a search hit can land on a callout, which sets its own
+       background later in this sheet at equal specificity and would
+       otherwise silently win -- found by rendering it, not by reasoning
+       about the cascade (same lesson as everywhere else in this file).
+       The temporary state has to beat the content's own colour or a
+       callout is the one place search would go quiet. */
+    .wb-search-hit {
+      background: var(--accent-mark) !important; border-radius: 3px;
+      padding: 0 2px; margin: 0 -2px;
+      scroll-margin-top: 60px;
+      transition: background 0.6s ease-out;
+    }
+
     /* S15 — vault audit marking. Three kinds, three colours, and the
        gutter glyph repeats the colour so this still reads on a screen
        where the tint is washed out. Added and modified sit on real
@@ -2469,12 +2499,12 @@
        .md-task-item's existing flex/gap rules above still apply as-is. */
 
     /* Code block */
-    .md-codeblock { background: var(--bg-sidebar); border: 1px solid var(--border); border-radius: var(--radius); margin: 1rem 0; overflow: hidden; }
-    .md-codeblock-header { font-size: 11px; color: var(--text-muted); padding: 5px 12px; border-bottom: 1px solid var(--border); background: var(--bg-app); font-family: 'SFMono-Regular', Consolas, monospace; }
+    .md-codeblock { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: var(--radius); margin: 1rem 0; overflow: hidden; }
+    .md-codeblock-header { font-size: 11px; color: var(--text-muted); padding: 5px 12px; border-bottom: 1px solid var(--code-border); background: var(--bg-app); font-family: 'SFMono-Regular', Consolas, monospace; }
     pre.md-codeblock-body {
       font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
       font-size: 13px;
-      color: var(--text-secondary);
+      color: var(--code-text);
       padding: 12px 14px;
       overflow-x: auto;
       white-space: pre;
@@ -4362,7 +4392,7 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.71.2</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.71.4</button>
       </div>
 
       <div class="ud-actions">
@@ -4846,6 +4876,20 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
     </div>
   </div>
 
+  <!-- S106b -- Open in Outlook's paste reminder. mailto cannot carry a
+       formatted body (see suMailtoHref()), so the workflow is Copy, Open in
+       Outlook, paste. Easy to forget the last step; this says so right as
+       Outlook opens instead of only in the small line under the buttons. -->
+  <div id="su-outlook-overlay" style="display:none" onclick="closeOutlookReminderModal()">
+    <div id="su-outlook-modal" role="dialog" aria-label="Paste into Outlook" onclick="event.stopPropagation()">
+      <div class="cm-title">Outlook is opening</div>
+      <p class="id-sub">Paste the copied email into the body now (Ctrl+V), then send.</p>
+      <div class="cm-actions">
+        <button class="ed-btn ed-save" onclick="closeOutlookReminderModal()">Got it</button>
+      </div>
+    </div>
+  </div>
+
   <div id="dp-overlay" style="display:none" onclick="closeDefaultPageModal()">
     <div id="dp-modal" role="dialog" aria-label="Default page" onclick="event.stopPropagation()">
       <div class="cm-title">Default page</div>
@@ -5257,17 +5301,25 @@ const $ = id => document.getElementById(id);
 // file level. Those numbers do their whole job before Folio renders
 // anything, so they are trimmed on screen and nowhere else.
 //
-// EXACTLY two digits, then one underscore or hyphen, then the rest. Two and
-// not "one or more" because a wider rule quietly eats real titles — "2024-Q1
-// Review" is a filename someone will write, and `^\d+[_-]` turns it into "Q1
-// Review" with no way to tell it was wrong. Three characters is also the
-// promise made to the person turning this on, so the promise is what is coded.
+// EXACTLY two OR three digits, then one underscore or hyphen, then the
+// rest. Not "one or more" because a wider rule quietly eats real titles —
+// "2024-Q1 Review" is a filename someone will write, and a four-digit rule
+// turns it into "Q1 Review" with no way to tell it was wrong.
+//
+// S106: widened from two-only to two-or-three once Jayson's vault moved to
+// three-digit page serials (001-File Name.md), so those stop showing their
+// number in the tree and reader. Still deliberately short of four — that's
+// exactly where it would start colliding with a four-digit year. S107/S108
+// give every numbered page its own `number:` property, checked against the
+// file name; once that exists, this should stop guessing from digit count
+// and trust that property when it's present, falling back to this pattern
+// only for a page that doesn't have one yet. See DECISIONS.md.
 //
 // The setting itself is older than this: it shipped for FOLDERS only, matching
 // `^\d+_`, and defaulted off. Files are what people actually read, so this
 // extends it to files, tightens the pattern to accept `-` as well as `_`, and
 // switches the default on.
-const NUM_PREFIX = /^\d\d[_-]/;
+const NUM_PREFIX = /^\d{2,3}[_-]/;
 
 function stripNumPrefix(s) {
   return String(s).replace(NUM_PREFIX, '');
@@ -8666,18 +8718,18 @@ function clearJumpHighlight() {
   state.jumpPinnedId = null;
 }
 
-// Click a heading's own text (not its fold chevron) to select it — mirrors
-// the same heading as the Outline's active item and highlights the row,
-// reusing the exact pin used for an Outline-click jump (pinJumpHighlight/
-// clearJumpHighlight, held until a real scroll happens — no scroll fires
-// here since we're already at this heading, so it holds until the user
-// scrolls away). Gives Collapse Unused a reliable "current heading" from an
-// explicit click instead of only whatever the scroll-spy last landed on.
-// stopPropagation so this doesn't also bubble into the row's own fold
-// click — chevron folds, text selects, same split the Outline already uses
-// between its fold-chevron and jump buttons.
+// Click anywhere on a heading row -- chevron or text -- to fold or unfold
+// it (S106, Jayson: match Notion's whole-header click). This used to be
+// split, chevron folds / text only selects, so a "collapse unused
+// sections" tool could ask "what's the current heading" from an explicit
+// click. That tool was cut later (see wikibase-fold-model) and nothing
+// else reads this split, so there is no longer a reason to keep text and
+// chevron doing different things. No longer stops propagation: the row's
+// own fold handler (headingFoldClick) now also fires on a text click. The
+// pin below still runs first regardless, mirroring the same heading as
+// the Outline's active item and highlighting the row
+// (pinJumpHighlight/clearJumpHighlight).
 function selectReaderHeading(e, hEl) {
-  e.stopPropagation();
   if (!hEl || !hEl.id) return;
   pinJumpHighlight(hEl.id);
 }
@@ -11680,14 +11732,45 @@ function suMailtoHref() {
     '?subject=' + encodeURIComponent(SU_SUBJECT);
 }
 
-function suOpenOutlook() {
+// S106b -- Jayson reversed the 18 Sep call: Send to now fills itself from
+// the vault roster (zSystem/Users, name + email) instead of staying empty
+// until typed by hand. Only steps in when the field is empty, so a hand
+// edit made for one particular send (dropping a name, adding a guest)
+// is not wiped out the next time this button is pressed.
+async function suRecipientsFromRoster() {
+  try {
+    const profiles = await usersListProfiles();
+    return profiles.map(p => p.email).filter(Boolean).join('; ');
+  } catch (_) { return ''; }
+}
+
+function openOutlookReminderModal() {
+  const ov = $('su-outlook-overlay');
+  if (ov) ov.style.display = 'flex';
+}
+function closeOutlookReminderModal() {
+  const ov = $('su-outlook-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
+async function suOpenOutlook() {
+  if (!(suData.recipients || '').trim()) {
+    const filled = await suRecipientsFromRoster();
+    if (filled) {
+      suData.recipients = filled;
+      await saveStaffUpdate();
+      const box = $('su-to');
+      if (box) box.value = filled;
+    }
+  }
   const to = (suData.recipients || '').trim();
   try { location.href = suMailtoHref(); } catch (_) {}
   suMsg = to
     ? 'Outlook should be opening, addressed and titled. Paste the copy into it.'
-    : 'No addresses saved yet, so the message opens empty. Fill in Send to above.';
+    : 'No one is in the vault roster yet, so the message opens empty. Fill in Send to above.';
   const m = document.querySelector('.su-msg');
   if (m) m.textContent = suMsg; else renderStaffUpdateTab();
+  openOutlookReminderModal();
 }
 
 // ── The reader's half ────────────────────────────────────────────
@@ -11700,6 +11783,9 @@ function suOpenOutlook() {
 // everywhere, or the dismissal is only half a decision.
 function readerNoticeHTML(text, url) {
   if (!text || !url) return '';
+  // S106b -- Jayson: this notice should not tell a plain reader the vault
+  // has a problem, only someone who can act on it.
+  if (!reviewAllowed()) return '';
   let broken;
   try { broken = vcBrokenLinks(text); } catch (_) { return ''; }
   const key = auditPathKey(url);
@@ -15027,6 +15113,9 @@ document.addEventListener('visibilitychange', () => {
   usagePause();
   usageFoldPending(false);
   usageFlush();
+  zrFlush(); // S106b -- search log was only flushed on full close; switching
+             // tabs (e.g. straight to Usage) left a just-run search stuck
+             // in memory, unwritten, which is why Usage looked empty.
 });
 window.addEventListener('blur',  () => usagePause());
 window.addEventListener('focus', () => usageResume());
@@ -16559,6 +16648,11 @@ async function rvAfterAction(url, msg) {
   const at = state.rvQueuePos;
   if (!q[at] || q[at].url !== url) { rvShowQueueBar(); rvDashPaint(); return; }
   q.splice(at, 1);                     // position now holds what used to be next
+  // S106b -- the dashboard behind a running walk was never told to repaint
+  // here, so a page you had just resolved kept showing in the list until you
+  // left Admin and came back (or reloaded). scanBadges() already refreshed
+  // the underlying data before this runs; this just catches the screen up.
+  rvDashPaint();
   if (at > q.length - 1) { rvQueueExit(); return; }   // that was the last one
   const item = q[at];
   await rvOpenItem(item.type, item.url, item.name, item.opts);
@@ -17203,10 +17297,19 @@ function selectChangeCard(i) {
   if (hit) scrollToBlock(hit);
 }
 
-function scrollToBlock(el) {
+// center: true lands the block near the middle of the visible reading
+// area instead of just under the top clearance. S106 -- a heading jump
+// (Outline, anchor link) still lands at the top on purpose, that is
+// "go to the start of this section"; a search hit is a sentence buried
+// inside a section, and landing it dead center is what makes it obviously
+// the thing you asked for rather than something sitting near the top edge.
+function scrollToBlock(el, center) {
   const reader = $('reader');
   if (!reader) return;
-  const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - 60;
+  const readerRect = reader.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  const offset = center ? Math.max(24, (reader.clientHeight / 2) - (elRect.height / 2)) : 60;
+  const top = elRect.top - readerRect.top + reader.scrollTop - offset;
   try { reader.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); } catch (_) {}
 }
 
@@ -19684,7 +19787,13 @@ function loadPersistedState() {
         const d = JSON.parse(savedDocks);
         DOCK_SIDES.forEach(side => {
           if (Array.isArray(d[side])) {
-            state.docks[side] = d[side].filter(t => RP_TABS.includes(t));
+            // S106 -- Search and Saved became full-screen destinations and
+            // have not been dockable since (see DESTINATIONS / betaOpenTool);
+            // a layout saved before that change can still name them here,
+            // and nothing before now cleared it back out. Anyone whose
+            // left dock still has one of these pinned from that old layout
+            // was permanently stuck seeing it -- this is that cleanup.
+            state.docks[side] = d[side].filter(t => RP_TABS.includes(t) && !DESTINATIONS.includes(t));
           }
         });
       } catch (e) {}
@@ -21945,17 +22054,27 @@ async function gotoSearchHit(idx) {
   revealSearchLine(h.line);
 }
 
+// S106, Jayson's item 3. Search used to borrow the Review/Comments "jump
+// to this block" marker (.wb-changed / clearChangeHighlights) -- right for
+// a diff ("this content changed"), wrong for a search result, and it read
+// as a banner rather than a highlight. It also never cleared on scroll,
+// only on the next search/open. markSearchHit gives search its own visual
+// (the same tint the results list already uses for a matched term) and
+// its own clear: the IntersectionObserver in markSearchHit drops it once
+// the block has scrolled fully out of the reading area, not on the first
+// pixel of scroll, so a small nudge of the wheel doesn't kill it.
+//
 // S95 — lifted out of gotoSearchHit() unchanged so the palette can reveal a
 // line too. It was already the only copy; it was just locked inside the
 // pane's own click handler.
 function revealSearchLine(line) {
-  clearChangeHighlights();
+  clearSearchHit();
   const text = normalizeMdLine(line);
   if (text.length < 2) return;
   for (const el of document.querySelectorAll(READER_BLOCKS)) {
     const t = el.textContent.replace(/\s+/g, ' ').trim();
     if (t && (t === text || t.includes(text))) {
-      el.classList.add('wb-changed');
+      markSearchHit(el);
       // J1 -- Jayson's item 3. Arriving here tinted the matching LINE and left
       // the section header untouched, so nothing told the eye which section it
       // had landed in. A saved item has pinned its heading since the Outline
@@ -21971,10 +22090,35 @@ function revealSearchLine(line) {
         pinJumpHighlight(owner);
         readerJumpSuppressUntil = performance.now() + 700;
       }
-      scrollToBlock(el);
+      scrollToBlock(el, true);
       break;
     }
   }
+}
+
+// Search's own highlight and its own clear rule (S106) -- see the comment
+// on revealSearchLine for why this isn't .wb-changed. Cleared by scrolling
+// the block out of the reading area (IntersectionObserver against #reader
+// as root), or by the next call to markSearchHit / clearSearchHit, e.g. a
+// new search or opening a different page.
+let searchHitEl = null;
+let searchHitObserver = null;
+
+function markSearchHit(el) {
+  clearSearchHit();
+  el.classList.add('wb-search-hit');
+  searchHitEl = el;
+  const reader = $('reader');
+  if (!reader || typeof IntersectionObserver !== 'function') return;
+  searchHitObserver = new IntersectionObserver(entries => {
+    if (entries[0] && !entries[0].isIntersecting) clearSearchHit();
+  }, { root: reader, threshold: 0 });
+  searchHitObserver.observe(el);
+}
+
+function clearSearchHit() {
+  if (searchHitObserver) { searchHitObserver.disconnect(); searchHitObserver = null; }
+  if (searchHitEl) { searchHitEl.classList.remove('wb-search-hit'); searchHitEl = null; }
 }
 
 $('search-input').addEventListener('input', runSearch);

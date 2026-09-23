@@ -8,6 +8,39 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.71.4 — 2026-09-23
+
+**Changed:** `index.html`; `supporting/tests/j1-everyday.test.js` (shared-modal-chrome check widened for the new popup), `supporting/tests/p10-vault-check.test.js` (the reader's-notice section now sets a tier, plus a new check that User does not see it).
+
+*S106, continued same day: four more from Jayson's list. The review list now keeps up with itself mid-walk, the vault-check notice is Contributor+ only, search logging picks up the flush trigger reading time already had, and Open in Outlook fills the address line and reminds you to paste.*
+
+### Fixed
+
+- **The Review list didn't drop an item you had just approved or rejected.** Stepping through the queue updated the record correctly, but the list behind it only redrew when you left Admin and came back, or reloaded — so mid-walk it kept showing pages already dealt with. It now redraws after every step.
+- **A search you just ran wouldn't show up in Usage.** Every search is held in memory first and only written to the vault at certain moments; reading time gets written both when the app closes AND when you switch away from it, but search only had the first trigger. Switching straight from Search to Usage, without closing the app in between, meant that search genuinely hadn't been saved yet. Search now gets the same "switching away" trigger reading time already had.
+
+### Changed
+
+- **The vault-check banner at the top of a page is Contributor and Administrator only now.** It used to show to every reader; Jayson's call this session is that a plain reader shouldn't be told the vault has a problem.
+- **Open in Outlook now fills Send to from the vault's roster** (the name-and-email list already kept at Admin → Users) when the field is empty, instead of staying blank until typed by hand — reversing an 18 Sep call. A hand edit made for one particular send is not overwritten the next time the button is pressed. A popup now also appears the moment Outlook opens, reminding you to paste the copied email into the body before sending.
+
+## 0.71.3 — 2026-09-23
+
+**Changed:** `index.html`; `supporting/tests/rename-and-trim.test.js`, `supporting/tests/j1-everyday.test.js` (assertions updated for the widened prefix rule and the search highlight's own class); `docs/DECISIONS.md` (number-trim follow-up noted for S107/S108).
+
+*S106, the bug-fix session: a left-nav leftover from before Search and Saved became destinations, headings that fold from anywhere on the row, a search landing that reads as a highlight instead of a banner, three-digit file numbers hidden in the tree, and code blocks with real contrast in dark mode.*
+
+### Fixed
+
+- **A stale left-dock leftover.** Search and Saved stopped being dockable tools a while back (both moved to full-screen destinations), but a device whose layout was saved before that change could still show one pinned in the left bar forever, with no way in today's app to have put it there and no way to remove it. Cleared on load now.
+- **Search's landing highlight looked like a "content changed" banner** (it was literally borrowing the Review/Vault-check marker) and never cleared on scroll, only on the next search or page. Now its own visual — the same tint the results list already uses for a matched term — clears once the block scrolls fully out of the reading area, and lands centered in the reading column instead of flush under the header.
+- **Three-digit file numbers (`001-`) were showing in the tree and reader.** The display-trim rule only matched exactly two digits; widened to two-or-three. Left at three on purpose — four is exactly where it would start eating a real title like "2024-Q1 Review". Noted in DECISIONS.md for S107/S108 to replace this guess with the `number:` property once every page carries one.
+
+### Changed
+
+- **Clicking anywhere on a heading, not just its arrow, folds or unfolds it** (matches Notion). The old split fed a "collapse unused sections" tool that was cut a while back; nothing reads that split any more.
+- **Code blocks get their own colors in dark mode**, separate from the sidebar/secondary-text colors they were borrowing, so there is real contrast against the page. Light mode is unchanged.
+
 ## 0.71.2 — 2026-09-21
 
 **Changed:** `index.html`; `docs/COMMISSIONING.md` (S102-S104 items added, S66-S101 gap logged); `help.md` (Esc row); `supporting/tests/p9-admin.test.js` (new section, 6 checks); `Claude outputs/` (stale S102 sample moved to `_delete-me`).
