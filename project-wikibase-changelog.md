@@ -8,6 +8,36 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.76.0 — 2026-09-24
+
+**Changed:** `index.html`, `help.md`, `help-edit.md`; added `supporting/tests/s109b-reading.test.js` (52 checks, six reverts red); updated `theme.test.js` and `p8-first-run.test.js` (the old presets and widths reversed on purpose). Added `rollout/Folio-obsidian-theme-v0.76.0.zip`.
+
+*S109b, the reading look, researched and sampled with Jayson 24 Sep (`Claude outputs/s109b-reading-page.html`) and built the same day for Friday's staff launch.*
+
+### Two themes
+- **Default** (one accent: a short mark under the page title, and links; levels by size, weight and space; a thin rule above each main section) and **Guided** (the same, plus a coloured marker beside H2 to H4). Things, Minimal and the six presets nobody could pick are deleted.
+- Page text is a touch brighter than the interface grey, in the page only.
+- **Everyone starts on the new defaults** on their next open (only dark/light carries over): Default, Readable, Medium, Relaxed, heading size Medium, section trail on.
+
+### Reading settings
+- **Width: Readable / Standard / Wide / Full.** Readable (about 70 characters a line) is the smallest and the default; Standard is about Claude's own reading width. Old values map across (Narrow to Readable, Normal to Standard).
+- **Line spacing now sets the gaps too:** space between paragraphs, and more space above a heading than below it. **Heading size** is back in the panel (asked for at S106).
+
+### Section trail
+- A thin tinted row under the reader bar naming the section and subsection you are in, with ↑ Top. Only on long pages (over 2.5 screens, two or more main sections), only once you are inside a main section, drawn over the page so nothing moves. Theme panel: Section trail On / Off.
+
+### Tables
+- **A header that reads as a header:** solid accent tint, 2px accent rule, bold; row bands; light column lines.
+- **Wider than the text, a table grows into the margins,** centred, up to the reading area's width. The header stays pinned to the end of the table, under the section trail when it shows, and is solid so no row shows through it.
+- **Wider than the reading area:** one line per row and sideways scroll, with a pinned copy of the header that follows the sideways scroll, plus **Open full table** (header and first column pinned, Esc closes).
+
+### Pictures (Obsidian's own syntax)
+- `![[p.png|inlR|240]]` / `inlL` float the picture with text wrapping beside it (the width now survives other words after the name); pictures on one line sit side by side; an italic line straight under a picture is its caption; the next heading always starts below a wrapped picture.
+- **Folio theme for Obsidian** (`rollout/Folio-obsidian-theme-v0.76.0.zip`) makes Obsidian look the same while you write: both themes (Guided via the Style Settings plugin), colours, headings, tables and picture placement.
+
+### Checked
+- Full suite green bar the release check before packaging. Real renders in Chromium, both themes, dark and light: headings, trail, floated and side-by-side pictures, the wide and ultra-wide schedules pinned mid-scroll and scrolled sideways, Open full table.
+
 ## 0.75.0 — 2026-09-23
 
 **Changed:** `index.html`; added `supporting/tests/s109-review.test.js` (31 checks, seven reverts red); updated `change-detection`, `j2-review-b`, `p10-vault-check`, `review-actions`, `review-bugfix-0321`, `review-dashboard`, `scan-cache`, `vault-audit` (old review rules reversed on purpose, each marked S109).

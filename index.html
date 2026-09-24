@@ -4251,6 +4251,159 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
   background: var(--bg-reader); border: 1px solid var(--border-strong); color: var(--text-primary);
 }
 </style>
+<style id="reading">
+/* ===================================================================
+   S109b / 0.76.0 -- the reading look. Written LAST on purpose so it is the
+   one place the page type lives: two themes (body[data-preset]), headings by
+   size and weight, section rule, section trail, tables, images. Researched
+   and sampled with Jayson 24 Sep (Claude outputs/s109b-reading-page.html).
+   =================================================================== */
+
+/* Page text: a little brighter than the interface's secondary grey, scoped
+   to the page so no panel or button changes colour. */
+body[data-theme="dark"]  #reader-content { --text-secondary: #cfcfcf; --text-primary: #ececec; }
+body[data-theme="light"] #reader-content { --text-secondary: #383b40; --text-primary: #1d1f22; }
+
+/* Headings: size ramp in em of the body size, so Text size moves them too;
+   Heading size (--head-scale) multiplies all six. */
+#reader-content h1.md-h { font-size: calc(2em    * var(--head-scale)); font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
+#reader-content h2.md-h { font-size: calc(1.5em  * var(--head-scale)); font-weight: 600; line-height: 1.3; }
+#reader-content h3.md-h { font-size: calc(1.25em * var(--head-scale)); font-weight: 600; line-height: 1.3; }
+#reader-content h4.md-h { font-size: calc(1.1em  * var(--head-scale)); font-weight: 600; line-height: 1.35; }
+#reader-content h5.md-h { font-size: calc(1em    * var(--head-scale)); font-weight: 600; line-height: 1.4; }
+#reader-content h6.md-h { font-size: calc(0.92em * var(--head-scale)); font-weight: 600; line-height: 1.4; }
+#reader-content .md-fold-icon { margin-top: 0.35em; }
+
+/* Spacing: more above a heading than below it, so a heading belongs to the
+   text it introduces. Paragraph gap follows Line spacing. */
+#reader-content .md-h-block { margin-top: var(--head-gap-top); scroll-margin-top: calc(var(--stick, 0px) + 12px); }
+#reader-content .md-h-block:first-child { margin-top: 0; }
+#reader-content .md-h-row { margin-bottom: var(--head-gap-bot); }
+#reader-content .md-p { margin: var(--para-gap) 0; }
+#reader-content .md-p:first-child { margin-top: 0; }
+/* A section contains its own floated pictures, so the next heading always
+   starts below them. */
+#reader-content .md-section { display: flow-root; }
+
+/* A rule above each main section, both themes. */
+#reader-content .md-h-block-h2 { border-top: 1px solid var(--section-rule); padding-top: 0.7em; }
+#reader-content .md-h-block-h2:first-child { border-top: 0; padding-top: 0; }
+
+/* Default: a short accent mark under the page's H1. */
+body[data-preset="default"] #reader-content h1.md-h { position: relative; }
+body[data-preset="default"] #reader-content .md-h-row-h1 { margin-bottom: calc(var(--head-gap-bot) + 0.6em); }
+body[data-preset="default"] #reader-content h1.md-h::after {
+  content: ''; position: absolute; left: 0; bottom: -0.3em; width: 48px; height: 3px; border-radius: 2px; background: var(--accent);
+}
+
+/* Guided: a coloured marker beside H2 to H4, so the level shows at a glance.
+   Drawn as a background, the same way the Obsidian theme draws it. */
+body[data-preset="guided"] #reader-content h2.md-h,
+body[data-preset="guided"] #reader-content h3.md-h,
+body[data-preset="guided"] #reader-content h4.md-h {
+  padding-left: 14px; background-repeat: no-repeat; background-origin: content-box; background-position: -14px 50%;
+}
+body[data-preset="guided"] #reader-content h2.md-h { background-image: linear-gradient(var(--hmark-2), var(--hmark-2)); background-size: 5px 0.9em; }
+body[data-preset="guided"] #reader-content h3.md-h { background-image: linear-gradient(var(--hmark-3), var(--hmark-3)); background-size: 4px 0.9em; }
+body[data-preset="guided"] #reader-content h4.md-h { background-image: linear-gradient(var(--hmark-4), var(--hmark-4)); background-size: 3px 0.9em; }
+
+#reader-content .md-callout-body { font-size: 0.94em; line-height: 1.65; }
+
+/* ---------- Section trail ----------
+   Its own row under the reader bar. Height 0 in the page so nothing moves
+   when it appears; the row itself is drawn over the top of the page. Shows
+   only on long pages and only once you are inside a main section
+   (updateSectionTrail). */
+#section-trail { display: none; position: sticky; top: 0; height: 0; z-index: 6; }
+body.beta-shell #section-trail { display: block; }
+body.beta-shell.console-home #section-trail, body.trail-off #section-trail { display: none; }
+#st-row {
+  position: absolute; left: 0; right: 0; top: 0; height: 32px;
+  display: flex; align-items: center; gap: 6px; padding: 0 22px 0 19px;
+  font-size: 12.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden;
+  background: linear-gradient(var(--accent-bg), var(--accent-bg)), var(--bg-reader);
+  border-left: 3px solid var(--accent); border-bottom: 1px solid var(--border);
+  opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .15s, transform .15s;
+}
+#section-trail.show #st-row { opacity: 1; transform: none; pointer-events: auto; }
+#st-row .icon { width: 13px; height: 13px; flex: 0 0 auto; }
+#st-row .st-seg { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; padding: 2px 4px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#st-row .st-seg:hover { background: var(--hover); color: var(--text-primary); }
+#st-row .st-seg.last { color: var(--text-primary); font-weight: 600; }
+#st-row .st-seg i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: 0 0 auto; }
+body[data-preset="guided"] #st-row .st-seg[data-lv="2"] i { background: var(--hmark-2); }
+body[data-preset="guided"] #st-row .st-seg[data-lv="3"] i { background: var(--hmark-3); }
+body[data-preset="guided"] #st-row .st-seg[data-lv="4"] i { background: var(--hmark-4); }
+#st-row .st-sep { color: var(--text-muted); }
+#st-row .st-top { margin-left: auto; cursor: pointer; padding: 2px 6px; border-radius: 4px; color: var(--text-muted); }
+#st-row .st-top:hover { color: var(--accent); }
+
+/* ---------- Tables ----------
+   A header that reads as a header (solid accent tint, 2px accent rule), row
+   bands, light column lines. The header is SOLID and pins exactly at the
+   bottom of whatever sits above it (--stick: 0, or the trail's height), so a
+   row can never show through it or slip into a gap above it. */
+#reader-content .md-table-wrap { padding: 0; margin: 1.2em 0; position: relative; }
+#reader-content .md-table { width: auto; max-width: 100%; font-size: 0.92em; border: 1px solid var(--border-strong); border-radius: 6px; border-collapse: separate; border-spacing: 0; }
+#reader-content .md-table th {
+  background: var(--th-head); color: var(--text-primary); font-size: 1em; font-weight: 650;
+  border-bottom: 2px solid var(--th-line); padding: 7px 12px;
+}
+#reader-content .md-table td { padding: 6px 12px; border-bottom: 1px solid var(--border); }
+#reader-content .md-table th + th, #reader-content .md-table td + td { border-left: 1px solid var(--border); }
+#reader-content .md-table tbody tr:nth-child(even) td { background: var(--row-band); }
+#reader-content .md-table tr:last-child td { border-bottom: 0; }
+#reader-content .md-table thead th:first-child { border-top-left-radius: 5px; }
+#reader-content .md-table thead th:last-child  { border-top-right-radius: 5px; }
+body.beta-shell #reader-content .md-table thead th { position: sticky; top: var(--stick, 0px); z-index: 3; }
+/* Widened past the text column (layoutReaderTables sets width and offset).
+   Wider than the whole reading area: one line per row, sideways scroll in
+   .md-tscroll, and a copy of the header that stays pinned and follows the
+   sideways scroll, so the header holds to the end of every table. */
+#reader-content .md-table-wrap.widened .md-table { width: 100%; max-width: none; }
+#reader-content .md-table-wrap.overflow .md-tscroll { overflow-x: auto; }
+#reader-content .md-table-wrap.overflow .md-table { width: max-content; min-width: 100%; }
+#reader-content .md-table-wrap.overflow th, #reader-content .md-table-wrap.overflow td { white-space: nowrap; }
+body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { position: static; }
+#reader-content .md-table-wrap.overflow .md-tscroll thead { visibility: hidden; }
+#reader-content .md-thead-pin { position: sticky; top: var(--stick, 0px); z-index: 4; overflow: hidden; background: var(--bg-reader); }
+#reader-content .md-thead-pin .md-table { width: max-content; border-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+#reader-content .md-thead-pin th { white-space: nowrap; }
+#reader-content .md-tbar { display: flex; justify-content: flex-end; margin: 0 0 4px; }
+.md-tbtn { font-size: 12px; color: var(--text-secondary); background: transparent; border: 1px solid var(--border-strong); border-radius: 6px; height: 24px; padding: 0 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+.md-tbtn:hover { color: var(--accent); border-color: var(--accent); }
+/* Open full table: the table on its own, header and first column pinned,
+   both scrollbars on screen. Esc or Close. */
+#table-view { display: none; position: fixed; inset: 20px; z-index: 900; background: var(--bg-reader); border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.45); flex-direction: column; }
+#table-view.open { display: flex; }
+#table-view .tv-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12.5px; color: var(--text-muted); }
+#table-view .tv-head b { color: var(--text-primary); }
+#table-view .tv-body { flex: 1; overflow: auto; padding: 0 14px 14px; font-size: var(--body-size); line-height: 1.5; }
+#table-view .md-table { width: max-content; font-size: 0.92em; border: 1px solid var(--border-strong); border-collapse: separate; border-spacing: 0; }
+#table-view th { position: sticky; top: 0; z-index: 3; white-space: nowrap; background: var(--th-head); color: var(--text-primary); border-bottom: 2px solid var(--th-line); padding: 7px 12px; text-align: left; }
+#table-view td { white-space: nowrap; padding: 6px 12px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+#table-view th + th, #table-view td + td { border-left: 1px solid var(--border); }
+#table-view tbody tr:nth-child(even) td { background: linear-gradient(var(--row-band), var(--row-band)), var(--bg-reader); }
+#table-view tbody tr:nth-child(odd) td { background: var(--bg-reader); }
+#table-view th:first-child, #table-view td:first-child { position: sticky; left: 0; z-index: 2; box-shadow: 1px 0 0 var(--border-strong); }
+#table-view th:first-child { z-index: 4; }
+
+/* ---------- Images ----------
+   Obsidian's own syntax; Folio reads the same words the Folio Obsidian theme
+   does: a width number, inlR / inlL to wrap text, several on one line for a
+   row, an italic line straight under for a caption. */
+#reader-content .md-img-wrap { margin: 1.2em 0; text-align: center; }
+#reader-content .md-img-wrap img.md-img { margin: 0 auto; height: auto; border-radius: 6px; }
+#reader-content .md-img-wrap.md-img-inlR { float: right; margin: 0.3em 0 0.8em 1.4em; max-width: 45%; }
+#reader-content .md-img-wrap.md-img-inlL { float: left;  margin: 0.3em 1.4em 0.8em 0; max-width: 45%; }
+#reader-content .md-img-wrap.md-img-inlR img.md-img, #reader-content .md-img-wrap.md-img-inlL img.md-img { width: 100%; }
+/* One line, always: pictures written on one line shrink together to fit
+   rather than dropping under each other. */
+#reader-content .md-img-row { display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; }
+#reader-content .md-img-row img.md-img { margin: 0; min-width: 0; flex: 0 1 auto; max-width: 100%; }
+#reader-content .md-img-cap { font-size: 0.85em; color: var(--text-muted); font-style: italic; margin-top: 0.45em; line-height: 1.45; }
+</style>
+
 
 </head>
 <!-- data-headers/data-bg are gone (S32): one preset now drives headings,
@@ -4405,7 +4558,7 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.75.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.76.0</button>
       </div>
 
       <div class="ud-actions">
@@ -4675,6 +4828,9 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
              #reader on purpose: position:sticky pins to the scrollport this
              element actually sits in, and #reader is that scrollport. -->
         <div id="beta-top-fade" aria-hidden="true"></div>
+        <!-- S109b -- the section trail. Sticky and 0 tall; its row is drawn
+             over the top of the page. See updateSectionTrail(). -->
+        <div id="section-trail"><div id="st-row"></div></div>
         <div class="reader-empty" id="reader-empty">Select a file to read</div>
         <!-- Console landing (Section 18, session 1). A node of its own
              rather than something rendered into #reader-content, so the
@@ -7178,7 +7334,9 @@ function renderInline(text) {
     const [namePart, sizePart] = raw.split('|');
     const name = namePart.trim();        // escaped — safe for markup
     const rawName = unescHtml(name);     // decoded — safe for URL building
-    const size = (sizePart || '').trim();
+    // S109b -- the width can come after other words (inlR|240), so take it
+    // from the parsed options, not just the second part.
+    const size = parseImageEmbed(raw).width || (sizePart || '').trim();
     if (isImageExt(name)) {
       // attachmentSrcFor() runs encodeURIComponent internally, so it must
       // be given the DECODED name — feeding it "Q1 &amp; Q2.png" would
@@ -8344,6 +8502,29 @@ function parseMarkdown(md) {
 // Block-level parser — used for the top-level document and recursively for
 // callout/blockquote bodies. Each ">" strips down one level per recursion,
 // so ">>" / ">>>" nest automatically instead of needing special-case depth logic.
+// S109b -- the words after an image name, Obsidian style: a number (or
+// 300x200) is the width, inlR / inlL float it with text wrapping beside it
+// (the Blue Topaz theme's words, which the Folio Obsidian theme reads too).
+// Anything else is the image's description and is ignored here.
+function parseImageEmbed(raw) {
+  const parts = String(raw).split('|').map(x => x.trim());
+  const out = { name: parts[0], width: '', float: '' };
+  parts.slice(1).forEach(x => {
+    const m = x.match(/^(\d+)(x\d+)?$/);
+    if (m) out.width = m[1];
+    else if (/(^|\s)inlR(\s|$)/.test(x)) out.float = 'inlR';
+    else if (/(^|\s)inlL(\s|$)/.test(x)) out.float = 'inlL';
+  });
+  return out;
+}
+// A caption is a line that is only italic text: *like this* or _like this_.
+function imageCaptionLine(line) {
+  if (line === undefined || line === null) return null;
+  const t = String(line).trim();
+  const m = t.match(/^\*([^*].*?)\*$/) || t.match(/^_([^_].*?)_$/);
+  return m ? m[1] : null;
+}
+
 function parseBlocks(lines) {
   const blocks = [];
   let i = 0;
@@ -8445,16 +8626,30 @@ function parseBlocks(lines) {
     // "png|691" and misses every sized embed.
     const standaloneEmbed = trimmed.match(/^!\[\[([^\]]+)\]\]$/);
     if (standaloneEmbed) {
-      const [namePart, sizePart] = standaloneEmbed[1].split('|');
-      const name = namePart.trim();
-      const size = (sizePart || '').trim();
-      if (isImageExt(name)) {
-        blocks.push({ type: 'image', name, size });
+      const opts = parseImageEmbed(standaloneEmbed[1]);
+      if (isImageExt(opts.name)) {
+        i++;
+        // S109b -- an italic-only line straight under a picture is its caption.
+        const cap = imageCaptionLine(lines[i]);
+        if (cap !== null) i++;
+        blocks.push({ type: 'image', name: opts.name, size: opts.width, float: opts.float, caption: cap });
       } else {
-        blocks.push({ type: 'embed', name });
+        blocks.push({ type: 'embed', name: opts.name });
+        i++;
       }
-      i++;
       continue;
+    }
+
+    // S109b -- two or more pictures on one line are a row, side by side.
+    if (/^(!\[\[[^\]]+\]\]\s*){2,}$/.test(trimmed)) {
+      const items = [...trimmed.matchAll(/!\[\[([^\]]+)\]\]/g)].map(m => parseImageEmbed(m[1]));
+      if (items.every(it => isImageExt(it.name))) {
+        i++;
+        const cap = imageCaptionLine(lines[i]);
+        if (cap !== null) i++;
+        blocks.push({ type: 'imgrow', items, caption: cap });
+        continue;
+      }
     }
 
     // List (ul, ol, task). Continuation check recognizes 1+ tabs, or
@@ -8494,6 +8689,7 @@ function parseBlocks(lines) {
       if (t.includes('|') && i + 1 < lines.length && lines[i+1].match(/^\|?[\s\-:|]+\|/)) break;
       if (t.match(/^[-*+] /) || t.match(/^\d+\. /)) break;
       if (t.match(/^!\[\[[^\]]+\]\]$/)) break;
+      if (/^(!\[\[[^\]]+\]\]\s*){2,}$/.test(t.trim())) break;
       paraLines.push(lines[i]);
       i++;
     }
@@ -8530,7 +8726,7 @@ function renderBlockTree(blocks, seenIds) {
       }
       const sectionHtml = j > i + 1 ? renderBlockTree(blocks.slice(i + 1, j), seenIds) : '';
       const hid = uniqueHeadingId(block.content, seenIds);
-      html += `<div class="md-h-block">
+      html += `<div class="md-h-block md-h-block-h${level}">
 <div class="md-h-row md-h-row-h${level}" onclick="headingFoldClick(event, this)">${ICON.foldChevron}<h${level} class="md-h md-h${level}" id="${hid}" onclick="selectReaderHeading(event, this)">${renderInline(block.content)}</h${level}>${headingActionsHTML(hid, block.content)}</div>
 <div class="md-section">${sectionHtml}</div>
 </div>`;
@@ -9027,10 +9223,29 @@ function renderSingleBlock(block, seenIds) {
       // block.name arrives RAW from parseBlocks (unlike the inline image
       // path, where renderInline has already escaped it), so this branch
       // does its own escaping and scheme check.
-      const src = safeUrl(attachmentSrcFor(block.name), { image: true });
-      const srcAttr = src ? ` src="${escHtml(src)}"` : '';
-      const widthAttr = /^\d+$/.test(block.size || '') ? ` width="${block.size}"` : '';
-      return `<div class="md-img-wrap"><img class="md-img" data-wb-asset="${escHtml(block.name)}"${srcAttr} alt="${escHtml(block.name)}"${widthAttr} onerror="wbImgError(this)"></div>`;
+      const imgTag = (name, size) => {
+        const src = safeUrl(attachmentSrcFor(name), { image: true });
+        const srcAttr = src ? ` src="${escHtml(src)}"` : '';
+        const widthAttr = /^\d+$/.test(size || '') ? ` width="${size}"` : '';
+        return `<img class="md-img" data-wb-asset="${escHtml(name)}"${srcAttr} alt="${escHtml(name)}"${widthAttr} onerror="wbImgError(this)">`;
+      };
+      // S109b -- a floated picture's box takes its width, so the text wraps
+      // beside the picture rather than beside an empty full-width box.
+      const fl = block.float === 'inlR' || block.float === 'inlL' ? ' md-img-' + block.float : '';
+      const boxW = fl && /^\d+$/.test(block.size || '') ? ` style="width:${block.size}px"` : '';
+      const cap = block.caption ? `<div class="md-img-cap">${renderInline(block.caption)}</div>` : '';
+      return `<div class="md-img-wrap${fl}"${boxW}>${imgTag(block.name, block.size)}${cap}</div>`;
+    }
+
+    case 'imgrow': {
+      const cells = block.items.map(it => {
+        const src = safeUrl(attachmentSrcFor(it.name), { image: true });
+        const srcAttr = src ? ` src="${escHtml(src)}"` : '';
+        const widthAttr = /^\d+$/.test(it.width || '') ? ` width="${it.width}"` : '';
+        return `<img class="md-img" data-wb-asset="${escHtml(it.name)}"${srcAttr} alt="${escHtml(it.name)}"${widthAttr} onerror="wbImgError(this)">`;
+      }).join('');
+      const cap = block.caption ? `<div class="md-img-cap">${renderInline(block.caption)}</div>` : '';
+      return `<div class="md-img-wrap"><div class="md-img-row">${cells}</div>${cap}</div>`;
     }
 
     case 'embed':
@@ -9081,6 +9296,8 @@ function headingFoldClick(e, row) {
   // depth. One guard that a test can turn red beats two where one is inert.
   if (e && e.target && e.target.closest && e.target.closest('[data-wb-hacts]')) return;
   toggleFold(row, { deep: e && e.altKey });
+  // S109b -- folding changes the page length the trail measures.
+  updateSectionTrail();
 }
 
 // Count of heading rows + list items hidden underneath a folded heading.
@@ -9290,8 +9507,11 @@ let readerJumpSuppressUntil = 0; // performance.now() cutoff — scroll events b
 function initReaderScrollHandling() {
   const reader = $('reader');
   if (!reader) return;
+  let trailFrame = 0;
   reader.addEventListener('scroll', () => {
     if (state.jumpPinnedId && performance.now() >= readerJumpSuppressUntil) clearJumpHighlight();
+    // S109b -- the section trail follows the scroll, once per frame.
+    if (!trailFrame) trailFrame = requestAnimationFrame(() => { trailFrame = 0; updateSectionTrail(); });
   });
 }
 
@@ -9309,7 +9529,9 @@ function revealHeading(id) {
     node = section.parentElement;
   }
 
-  const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - READER_TOP_CLEARANCE;
+  // S109b -- clear the section trail too, when it is showing.
+  const trailH = parseInt(reader.style.getPropertyValue('--stick'), 10) || 0;
+  const top = el.getBoundingClientRect().top - reader.getBoundingClientRect().top + reader.scrollTop - READER_TOP_CLEARANCE - trailH;
 
   // Pin the outline + reader highlight to this heading *before* the observer
   // gets a chance to recompute — otherwise, if another heading sits close
@@ -19987,47 +20209,35 @@ document.addEventListener('click', e => {
 // back to --text-secondary in 7 of the 8, which was invisible until the
 // panel let you actually see all six levels at once.
 const PRESETS = {
+  // S109b / 0.76.0 -- two themes, chosen with Jayson 24 Sep after the reading
+  // research: Default (one accent, levels by size and weight) and Guided (the
+  // same page plus a coloured marker beside H2 to H4). The eight earlier
+  // presets (Things, Minimal and six never offered) are deleted, not hidden.
+  //   m: Guided's level markers for H2, H3, H4 (Default draws none)
   default: { label: 'Default',
-    dark:  { bg: ['#1c1c1a','#212120','#252523','#212120'], hd: ['#2c2c2a','#3a3a38'], ac: '#5b9cf6', h: ['#64B5F6','#e8e5df','#d8d5cf','#c8c5bf','#a8a5a0','#8f8c88'] },
-    light: { bg: ['#f5f5f3','#f0efec','#ffffff','#f0efec'], hd: ['#e1e1e0','#d3d3d1'], ac: '#1a6ef5', h: ['#2563EB','#1f2328','#3a4046','#565d64','#6e757c','#868d94'] } },
-  // Renamed from "light" — the old name collided with the Dark/Light
-  // mode names and read as "the light theme", which it never was. It's
-  // the warm-graphite / cool-neutral blue-ramp identity.
-  ocean: { label: 'Ocean',
-    dark:  { bg: ['#201f1c','#262521','#2b2a26','#262521'], hd: ['#302f2c','#3d3c3a'], ac: '#6fa8f2', h: ['#8ec5ff','#6fa8f2','#5b93d9','#4a7cb8','#7f9bbd','#9aa8b5'] },
-    light: { bg: ['#e8e8e8','#dedede','#f5f5f5','#dedede'], hd: ['#d5d5d5','#c8c8c8'], ac: '#14559c', h: ['#0b3d66','#14559c','#1a6ef5','#5b93d9','#6f8fb0','#8496a8'] } },
-  frost: { label: 'Frost',
-    dark:  { bg: ['#0d1117','#131a24','#171f2b','#131a24'], hd: ['#1e2227','#2c3035'], ac: '#0A84FF', h: ['#5AC8FA','#0A84FF','#64D2FF','#98A2B3','#66D4CF','#A0AEC0'] },
-    light: { bg: ['#eef4fb','#e4edf8','#ffffff','#e4edf8'], hd: ['#dbe0e7','#cdd2d8'], ac: '#007AFF', h: ['#0A5DC2','#007AFF','#34AADC','#6E7F96','#00A396','#8A94A6'] } },
-  clay: { label: 'Clay',
-    dark:  { bg: ['#1c1b1f','#211f26','#26232b','#211f26'], hd: ['#2c2b2f','#39393c'], ac: '#D0BCFF', h: ['#D0BCFF','#EFB8C8','#A6D388','#CCC2DC','#F2B8B5','#9A93A8'] },
-    light: { bg: ['#f7f2fa','#efe6f3','#fffbfe','#efe6f3'], hd: ['#e3dfe6','#d4d0d7'], ac: '#6750A4', h: ['#6750A4','#7D5260','#386A20','#625B71','#B3261E','#79747E'] } },
-  mica: { label: 'Mica',
-    dark:  { bg: ['#202020','#2c2c2c','#323232','#2c2c2c'], hd: ['#303030','#3d3d3d'], ac: '#60CDFF', h: ['#60CDFF','#3AA0F3','#6CCB5F','#C5C5C5','#FFB900','#9E9E9E'] },
-    light: { bg: ['#f3f3f3','#e9e9e9','#ffffff','#e9e9e9'], hd: ['#e0e0e0','#d1d1d1'], ac: '#0078D4', h: ['#005A9E','#0078D4','#107C10','#5B5B5B','#8A6A00','#767676'] } },
-  marble: { label: 'Marble',
-    dark:  { bg: ['#1e1e1e','#262626','#2c2c2c','#262626'], hd: ['#2e2e2e','#3b3b3b'], ac: '#409CFF', h: ['#409CFF','#7D7AFF','#6AC4DC','#98989D','#FF9F0A','#86868B'] },
-    light: { bg: ['#ececec','#e4e4e4','#ffffff','#e4e4e4'], hd: ['#d9d9d9','#cbcbcb'], ac: '#1E6FD9', h: ['#1E6FD9','#5E5CE6','#30B0C7','#8E8E93','#C76E00','#6E6E73'] } },
-  things: { label: 'Things',
-    dark:  { bg: ['#17181c','#1e1f24','#24252b','#1e1f24'], hd: ['#27282c','#35363a'], ac: '#5B9CF6', h: ['#5B9CF6','#FF8080','#5FD98A','#A0A0A5','#F5C26B','#8A8A8F'] },
-    light: { bg: ['#fbfbfa','#f4f3f1','#ffffff','#f4f3f1'], hd: ['#e7e7e6','#d8d8d7'], ac: '#2D6CDF', h: ['#2D6CDF','#F2555A','#34A853','#8E8E93','#C98A20','#77777C'] } },
-  // Obsidian Minimal's own built-in accent palette (--color-red/orange/
-  // yellow/green/blue/purple from the real theme.css) — the same six hex
-  // values in both modes, unlike the other seven identities. This is the
-  // one preset that always had all six levels.
-  minimal: { label: 'Minimal',
-    dark:  { bg: ['#1e1e1e','#212121','#242424','#212121'], hd: ['#2e2e2e','#3b3b3b'], ac: '#6c99bb', h: ['#d04255','#d5763f','#e5b567','#a8c373','#6c99bb','#9e86c8'] },
-    light: { bg: ['#fafafa','#f6f6f6','#ffffff','#f6f6f6'], hd: ['#e6e6e6','#d7d7d7'], ac: '#4a7c9b', h: ['#d04255','#d5763f','#e5b567','#a8c373','#6c99bb','#9e86c8'] } },
+    dark:  { bg: ['#161616','#232323','#1e1e1e','#232323'], hd: ['#2e2e2e','#3b3b3b'], ac: '#7cb0ff', h: ['#ffffff','#ececec','#ececec','#dcdcdc','#c4c4c4','#9e9e9e'], m: null },
+    light: { bg: ['#f3f4f6','#f3f4f6','#ffffff','#f3f4f6'], hd: ['#e3e5e8','#d3d6da'], ac: '#1d5fb8', h: ['#111316','#1d1f22','#1d1f22','#2f3237','#4a4f56','#6b7078'], m: null } },
+  guided:  { label: 'Guided',
+    dark:  { bg: ['#161616','#232323','#1e1e1e','#232323'], hd: ['#2e2e2e','#3b3b3b'], ac: '#6fa8ff', h: ['#6fa8ff','#ececec','#ececec','#d6d6d6','#bdbdbd','#9a9a9a'], m: ['#ff9b60','#43cfa0','#8e8e8e'] },
+    light: { bg: ['#f3f4f6','#f3f4f6','#ffffff','#f3f4f6'], hd: ['#e3e5e8','#d3d6da'], ac: '#1d5fb8', h: ['#1d5fb8','#1d1f22','#1d1f22','#2f3237','#4a4f56','#6b7078'], m: ['#d4600f','#0f9468','#b5b9bf'] } },
 };
 
 // Accent alternates offered next to the preset's own accent (which is
 // always the first chip). Tuned per mode — a light-mode accent needs
 // more depth to stay legible on a near-white surface.
 
-const READ_WIDTHS = { narrow: '820px', normal: '1290px', wide: '1600px' };
-const BODY_SIZES  = { s: '14px', m: '15px', l: '17px' };
-const BODY_LEADS  = { tight: '1.5', normal: '1.75', relaxed: '2' };
-const HEAD_SCALES = { compact: '0.85', normal: '1', large: '1.15' };
+// S109b -- the width is the text column plus the reader's 48px side padding, so
+// Readable is a ~640px text column (about 70 characters at 16px), the smallest
+// option by Jayson's call; Standard is about Claude's own reading width.
+const READ_WIDTHS = { readable: '736px', standard: '876px', wide: '1116px', full: '100%' };
+const BODY_SIZES  = { s: '15px', m: '16px', l: '17.5px' };
+// Line height, paragraph gap, space above a heading, space below it. A longer
+// line needs more space between lines, which is why Relaxed is the default.
+const BODY_LEADS  = { tight: '1.5', normal: '1.6', relaxed: '1.75' };
+const BODY_GAPS   = { tight: ['0.45em', '1.1em', '0.2em'], normal: ['0.8em', '1.7em', '0.4em'], relaxed: ['1em', '2.2em', '0.5em'] };
+const HEAD_SCALES = { compact: '0.9', normal: '1', large: '1.1' };
+// Older saved values (and shared theme strings) map onto the new scale.
+const OLD_WIDTHS  = { narrow: 'readable', normal: 'standard' };
 const BODY_FONTS  = {
   sans:  "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   serif: "Georgia, 'Iowan Old Style', 'Times New Roman', serif",
@@ -20038,14 +20248,15 @@ const BODY_FONTS  = {
 // existed: Things headings, H2 underlined, everything else untouched.
 function defaultThemePrefs() {
   return {
-    mode: 'dark', preset: 'things',
+    mode: 'dark', preset: 'default', rev: 3,
     accent:   { dark: null, light: null },  // null = use the preset's own
     headings: { dark: null, light: null },  // null = use the preset's own
-    underlines: [false, true, false, false, false, false],
+    underlines: [false, false, false, false, false, false],
     // H5 shipped as forced uppercase, so it starts on and every other
     // level starts off — an untouched install looks unchanged.
-    caps: [false, false, false, false, true, false],
-    width: 'normal', size: 'm', lead: 'normal', font: 'sans', scale: 'normal',
+    caps: [false, false, false, false, false, true],
+    width: 'readable', size: 'm', lead: 'relaxed', font: 'sans', scale: 'normal',
+    trail: 'on',          // S109b -- the section trail under the reader bar
     inlineTitle: false,
     // Pass 2 — every default reproduces the look that shipped before
     // these controls existed.
@@ -20089,6 +20300,16 @@ function hexToRgba(hex, alpha) {
   return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
 }
 
+// Solid mix of two hex colours, t = share of b. Plain hex out, for the same
+// old-WebView reason hexToRgba() exists.
+function mixHex(a, b, t) {
+  const n = h => { const x = String(h).replace('#', ''); return parseInt(x.length === 3 ? x.split('').map(c => c + c).join('') : x, 16); };
+  const A = n(a), B = n(b);
+  if (!isFinite(A) || !isFinite(B)) return a;
+  const ch = sh => Math.round(((A >> sh) & 255) * (1 - t) + ((B >> sh) & 255) * t);
+  return '#' + [16, 8, 0].map(sh => ch(sh).toString(16).padStart(2, '0')).join('');
+}
+
 // 'system' resolves against the OS setting; everything downstream only
 // ever sees 'dark' or 'light'.
 function resolvedMode() {
@@ -20113,7 +20334,7 @@ function doorStyle() {
 function applyThemePrefs() {
   const p    = state.themePrefs;
   const mode = resolvedMode();
-  const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+  const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.default[mode];
   const s    = document.body.style;
 
   document.body.setAttribute('data-theme', mode);
@@ -20157,9 +20378,28 @@ function applyThemePrefs() {
 
   for (let i = 0; i < 6; i++) s.setProperty('--heading-' + (i + 1), heads[i]);
 
-  s.setProperty('--read-width', READ_WIDTHS[p.width] || READ_WIDTHS.normal);
+  s.setProperty('--read-width', READ_WIDTHS[OLD_WIDTHS[p.width] || p.width] || READ_WIDTHS.readable);
   s.setProperty('--body-size',  BODY_SIZES[p.size]   || BODY_SIZES.m);
-  s.setProperty('--body-lead',  BODY_LEADS[p.lead]   || BODY_LEADS.normal);
+  s.setProperty('--body-lead',  BODY_LEADS[p.lead]   || BODY_LEADS.relaxed);
+  const gaps = BODY_GAPS[p.lead] || BODY_GAPS.relaxed;
+  s.setProperty('--para-gap', gaps[0]);
+  s.setProperty('--head-gap-top', gaps[1]);
+  s.setProperty('--head-gap-bot', gaps[2]);
+
+  // S109b -- the preset name drives the heading treatment in CSS (Default's
+  // accent mark under H1, Guided's level markers), and the table header takes
+  // a solid accent tint mixed into the reader colour: solid, never rgba, so a
+  // row scrolling under a pinned header can never show through it.
+  document.body.setAttribute('data-preset', PRESETS[p.preset] ? p.preset : 'default');
+  const marks = set.m || [accent, accent, accent];
+  for (let i = 0; i < 3; i++) s.setProperty('--hmark-' + (i + 2), marks[i]);
+  s.setProperty('--th-head', mixHex(reader, accent, mode === 'dark' ? 0.16 : 0.10));
+  s.setProperty('--th-line', hexToRgba(accent, mode === 'dark' ? 0.55 : 0.45));
+  s.setProperty('--row-band', mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.028)');
+  s.setProperty('--section-rule', mode === 'dark' ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.14)');
+  document.body.classList.toggle('trail-off', p.trail === 'off');
+  if (typeof updateSectionTrail === 'function') updateSectionTrail();
+  if (typeof layoutReaderTables === 'function') requestAnimationFrame(layoutReaderTables);
   s.setProperty('--head-scale', HEAD_SCALES[p.scale] || HEAD_SCALES.normal);
   s.setProperty('--body-font',  BODY_FONTS[p.font]   || BODY_FONTS.sans);
 
@@ -20241,6 +20481,16 @@ function loadThemePrefs() {
     // Fill any key added after this record was written, so an older
     // stored object never leaves a control undefined.
     state.themePrefs = Object.assign(defaultThemePrefs(), p);
+    // S109b / 0.76.0 -- the new reading look starts everyone on its defaults
+    // (Jayson, 24 Sep, the day before staff get Folio). Only dark vs light is
+    // carried over; the old presets and widths no longer exist.
+    if (p.rev !== 3) {
+      const keepMode = p.mode;
+      state.themePrefs = defaultThemePrefs();
+      if (keepMode === 'dark' || keepMode === 'light' || keepMode === 'system') state.themePrefs.mode = keepMode;
+      persist('wb_theme_v2', state.themePrefs);
+      p = state.themePrefs;
+    }
     const q = state.themePrefs;
     if (!Array.isArray(q.underlines) || q.underlines.length !== 6) q.underlines = defaultThemePrefs().underlines;
     // caps[] replaced the single h5caps boolean — carry an older record's
@@ -20352,7 +20602,7 @@ function resetThemeSection(name) {
   const d = defaultThemePrefs();
   const p = state.themePrefs;
   if (name === 'appearance') { p.preset = d.preset; p.accent = { dark: null, light: null }; }
-  if (name === 'reading')    { p.width = d.width; p.size = d.size; p.lead = d.lead; p.font = d.font; }
+  if (name === 'reading')    { p.width = d.width; p.size = d.size; p.lead = d.lead; p.font = d.font; p.scale = d.scale; p.trail = d.trail; }
   if (name === 'headings')   { p.headings = { dark: null, light: null }; p.underlines = d.underlines.slice(); p.caps = d.caps.slice(); p.scale = d.scale; p.inlineTitle = d.inlineTitle; }
   if (name === 'navigation') { p.navIcons = d.navIcons; p.navColor = d.navColor; p.navSingle = d.navSingle; p.navFileColor = d.navFileColor; }
   if (name === 'interface')  { p.chrome = d.chrome; p.borders = d.borders; p.activeRow = d.activeRow; p.density = d.density; }
@@ -20364,7 +20614,7 @@ function resetThemeSection(name) {
 // (and can be 'system'), while the preset, colours, reading settings
 // and chrome are the team's look. Sharing mode would mean one person's
 // export forces everyone else's screen to their preference.
-const SHAREABLE = ['preset','accent','headings','underlines','caps','width','size','lead','font','scale',
+const SHAREABLE = ['preset','accent','headings','underlines','caps','width','size','lead','font','scale','trail',
                    'inlineTitle','navIcons','navColor','navSingle','navFileColor','chrome','borders','activeRow','density'];
 const THEME_STR_PREFIX = 'WBTHEME1:';
 
@@ -20400,6 +20650,13 @@ function applySharedTheme(obj) {
   if (!Array.isArray(state.themePrefs.underlines) || state.themePrefs.underlines.length !== 6) state.themePrefs.underlines = d.underlines;
   if (!Array.isArray(state.themePrefs.caps)       || state.themePrefs.caps.length !== 6)       state.themePrefs.caps       = d.caps;
   if (!PRESETS[state.themePrefs.preset]) state.themePrefs.preset = d.preset;
+  const tp = state.themePrefs;
+  if (OLD_WIDTHS[tp.width]) tp.width = OLD_WIDTHS[tp.width];
+  if (!READ_WIDTHS[tp.width]) tp.width = d.width;
+  if (!BODY_LEADS[tp.lead])   tp.lead  = d.lead;
+  if (!HEAD_SCALES[tp.scale]) tp.scale = d.scale;
+  if (tp.trail !== 'on' && tp.trail !== 'off') tp.trail = d.trail;
+  tp.rev = 3;
   saveThemePrefs();
   return true;
 }
@@ -20488,7 +20745,7 @@ function setHeadingColor(idx, hex) {
   const p    = state.themePrefs;
   const mode = resolvedMode();
   if (!p.headings[mode]) {
-    const src = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+    const src = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.default[mode];
     p.headings[mode] = src.h.slice();
   }
   p.headings[mode][idx] = hex;
@@ -20512,7 +20769,7 @@ function copyHeadingsToOtherMode() {
   const p    = state.themePrefs;
   const from = resolvedMode();
   const to   = from === 'dark' ? 'light' : 'dark';
-  const src  = p.headings[from] || (PRESETS[p.preset] || PRESETS.things)[from].h;
+  const src  = p.headings[from] || (PRESETS[p.preset] || PRESETS.default)[from].h;
   p.headings[to] = src.slice();
   saveThemePrefs();
 }
@@ -20541,7 +20798,7 @@ function renderThemePanel() {
   const mode = resolvedMode();
   // P8 — the panel is cut to five fields: Mode, Preset, Width, Text size,
   // Line spacing. The rest went with the old interface at P11.
-  const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+  const set  = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.default[mode];
   const heads  = (p.headings && p.headings[mode]) || set.h;
   const accent = (p.accent && p.accent[mode]) || set.ac;
   let html = '';
@@ -20560,11 +20817,12 @@ function renderThemePanel() {
     // P8 — cut to the two presets the locked project spec ever named.
     // The other six were exploration that never made it into that spec.
     // P11 -- two presets, which is what this panel has actually offered since P8.
-    const presetKeys = ['things', 'minimal'];
+    // S109b -- Default and Guided, the only two themes.
+    const presetKeys = ['default', 'guided'];
     presetKeys.forEach(key => {
       const sw = PRESETS[key][mode];
       html += `<button type="button" class="tp-preset${key === p.preset ? ' on' : ''}" data-wb-tpreset="${key}" title="${escHtml(PRESETS[key].label)}">
-        <span class="tp-preset-sw" style="background:${sw.bg[2]};border-color:${sw.hd[1]}"><span style="background:${sw.h[0]}"></span></span>
+        <span class="tp-preset-sw" style="background:${sw.bg[2]};border-color:${sw.hd[1]}"><span style="background:${sw.m ? sw.m[0] : sw.ac}"></span></span>
         <span class="tp-preset-name">${escHtml(PRESETS[key].label)}</span></button>`;
     });
     html += '</div>';
@@ -20576,9 +20834,13 @@ function renderThemePanel() {
   html += themeSectionHeadHTML('reading', 'Reading');
   if (state.themeSection === 'reading') {
     html += '<div class="tp-sec-body">';
-    html += '<div class="tp-lb">Width</div>'   + themeSegHTML('width', [['narrow','Narrow'],['normal','Normal'],['wide','Wide']]);
+    html += '<div class="tp-lb">Width</div>'   + themeSegHTML('width', [['readable','Readable'],['standard','Standard'],['wide','Wide'],['full','Full']]);
     html += '<div class="tp-lb">Text size</div>' + themeSegHTML('size',  [['s','Small'],['m','Medium'],['l','Large']]);
     html += '<div class="tp-lb">Line spacing</div>' + themeSegHTML('lead', [['tight','Tight'],['normal','Normal'],['relaxed','Relaxed']]);
+    // S109b -- heading scale is back (asked for at S106), and the section trail.
+    html += '<div class="tp-lb">Heading size</div>' + themeSegHTML('scale', [['compact','Small'],['normal','Medium'],['large','Large']]);
+    html += '<div class="tp-lb">Section trail</div>' + themeSegHTML('trail', [['on','On'],['off','Off']]);
+    html += '<div class="tp-note">The section trail shows where you are on long pages, under the reader bar.</div>';
     html += '</div>';
   }
 
@@ -20638,7 +20900,7 @@ function setHeadingColorLive(idx, hex) {
   const p    = state.themePrefs;
   const mode = resolvedMode();
   if (!p.headings[mode]) {
-    const src = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.things[mode];
+    const src = PRESETS[p.preset] ? PRESETS[p.preset][mode] : PRESETS.default[mode];
     p.headings[mode] = src.h.slice();
   }
   p.headings[mode][idx] = hex;
@@ -21983,10 +22245,8 @@ function finishReaderRender() {
   const reader = $('reader');
   if (!rc || !reader) return;
 
-  rc.querySelectorAll('.md-table-wrap').forEach(wrap => {
-    const table = wrap.querySelector('table');
-    if (table && table.scrollWidth > wrap.clientWidth + 1) wrap.classList.add('wide');
-  });
+  // S109b -- tables are laid out by layoutReaderTables() (widen, centre, pin).
+  layoutReaderTables();
 
   // P11 -- the you-are-here bar above the reader belonged to the old interface
   // and is gone; the reader head names the page and its folder path instead.
@@ -21994,7 +22254,158 @@ function finishReaderRender() {
   // section you are in, which the comment form needs.
   const headings = [...rc.querySelectorAll('h1, h2, h3, h4, h5, h6')];
   setupSectionBarObserver(headings);
+  // S109b -- a fresh page starts at the top, where the trail is hidden.
+  updateSectionTrail();
 }
+
+// ── S109b / 0.76.0: section trail ────────────────────────────────
+// The H2 > H3 > H4 you are reading, in a row under the reader bar. It shows
+// only on a long page (over 2.5 screens and at least two main sections) and
+// only once you are inside a main section, so a short page never gets one.
+// The row is drawn over the page (#section-trail is 0 tall), so the page
+// never moves when it appears. --stick tells pinned table headers how far
+// down to sit, so they pin under the row rather than behind it.
+const TRAIL_H = 32;
+function updateSectionTrail() {
+  const reader = $('reader'), rc = $('reader-content'), box = $('section-trail'), row = $('st-row');
+  if (!reader || !rc || !box || !row) return;
+  const p = state.themePrefs || {};
+  const visible = document.body.classList.contains('beta-shell') && p.trail !== 'off' &&
+                  rc.style.display !== 'none' && !document.body.classList.contains('console-home');
+  const mains = visible ? rc.querySelectorAll('.md-h-block-h2') : [];
+  const long = mains.length >= 2 && reader.scrollHeight > reader.clientHeight * 2.5;
+  let path = [];
+  if (long) {
+    const line = reader.getBoundingClientRect().top + TRAIL_H + 12;
+    const walk = (scope, level) => {
+      if (level > 4) return;
+      const blocks = scope.querySelectorAll(':scope > .md-h-block-h' + level + ', :scope > .md-section > .md-h-block-h' + level);
+      for (const b of blocks) {
+        const r = b.getBoundingClientRect();
+        if (r.top <= line && r.bottom > line) {
+          const h = b.querySelector(':scope > .md-h-row .md-h');
+          path.push({ level, id: h ? h.id : '', text: h ? h.textContent.trim() : '' });
+          const sec = b.querySelector(':scope > .md-section');
+          if (sec) walk(sec, level + 1);
+          return;
+        }
+      }
+      // A level can be skipped (H2 straight to H4); look one deeper.
+      if (level < 4) walk(scope, level + 1);
+    };
+    // Main sections sit either at the top of the page or inside the page's H1.
+    const h1 = rc.querySelector('.md-h-block-h1 > .md-section');
+    walk(h1 && !rc.querySelector(':scope > .md-h-block-h2') ? h1 : rc, 2);
+    if (!path.length && h1) walk(rc, 2);
+  }
+  const show = path.length > 0;
+  if (show) {
+    row.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>' +
+      path.map((s, i) => (i ? '<span class="st-sep">›</span>' : '') +
+        `<span class="st-seg${i === path.length - 1 ? ' last' : ''}" data-lv="${s.level}" data-wb-trail="${escHtml(s.id)}" title="${escHtml(s.text)}"><i></i>${escHtml(s.text)}</span>`).join('') +
+      '<span class="st-top" data-wb-trail="__top" title="Back to the top">↑ Top</span>';
+  }
+  box.classList.toggle('show', show);
+  reader.style.setProperty('--stick', (show ? TRAIL_H : 0) + 'px');
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-wb-trail]');
+  if (!t) return;
+  const reader = $('reader');
+  if (t.dataset.wbTrail === '__top') { reader.scrollTo({ top: 0 }); return; }
+  const h = document.getElementById(t.dataset.wbTrail);
+  const block = h && h.closest('.md-h-block');
+  if (block) block.scrollIntoView({ block: 'start' });
+});
+
+// ── S109b / 0.76.0: tables ───────────────────────────────────────
+// A table that fits the text column stays in line with the text. Wider than
+// that, it grows into the margins, centred, up to the reading area's width,
+// and its header stays pinned as it always has. Wider than the whole reading
+// area (rare): it takes the full reading width, keeps one line per row and
+// scrolls sideways; a copy of its header sits pinned above it and follows
+// the sideways scroll, so the header still holds to the end of the table,
+// and "Open full table" shows it on its own. Re-run on every render, resize
+// and reading-setting change.
+function layoutReaderTables() {
+  const rc = $('reader-content'), reader = $('reader');
+  if (!rc || !reader || rc.style.display === 'none') return;
+  const cs = getComputedStyle(rc);
+  const textW = rc.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const readerW = reader.clientWidth - 48;
+  // Not laid out yet (hidden, or a test DOM): leave every table as rendered.
+  if (textW <= 0 || readerW <= 0) return;
+  rc.querySelectorAll('.md-table-wrap').forEach(wrap => {
+    // Back to the plain shape first, so this is safe to run any number of times.
+    const oldScroll = wrap.querySelector(':scope > .md-tscroll');
+    const table = wrap.querySelector('.md-tscroll > table, :scope > table');
+    if (!table) return;
+    if (oldScroll) { wrap.appendChild(table); oldScroll.remove(); }
+    wrap.querySelectorAll(':scope > .md-thead-pin, :scope > .md-tbar').forEach(n => n.remove());
+    wrap.classList.remove('widened', 'overflow', 'wide');
+    wrap.style.width = ''; wrap.style.marginLeft = '';
+    // Inside a callout, list or other box the table stays where it is.
+    if (wrap.parentElement && wrap.parentElement.closest('.md-callout, li, blockquote')) return;
+    // Measured free of the column: the stylesheet caps a table at 100% of
+    // its box, which would make every table look as if it already fits.
+    table.style.width = 'max-content'; table.style.maxWidth = 'none';
+    const natural = Math.ceil(table.getBoundingClientRect().width) + 2;
+    table.style.width = ''; table.style.maxWidth = '';
+    if (natural <= textW + 1) return;
+    const W = Math.min(natural, readerW);
+    wrap.classList.add('widened');
+    wrap.style.width = W + 'px';
+    wrap.style.marginLeft = Math.round((textW - W) / 2) + 'px';
+    if (natural <= readerW) return;
+    wrap.classList.add('overflow');
+    const bar = document.createElement('div');
+    bar.className = 'md-tbar';
+    bar.innerHTML = '<button type="button" class="md-tbtn" data-wb-tableview="1">⤢ Open full table</button>';
+    const scroll = document.createElement('div');
+    scroll.className = 'md-tscroll';
+    wrap.appendChild(bar);
+    wrap.appendChild(scroll);
+    scroll.appendChild(table);
+    // The pinned header copy: same column widths, moved sideways with the scroll.
+    const pin = document.createElement('div');
+    pin.className = 'md-thead-pin';
+    const head = document.createElement('table');
+    head.className = 'md-table';
+    head.appendChild(table.tHead.cloneNode(true));
+    pin.appendChild(head);
+    wrap.insertBefore(pin, scroll);
+    const src = table.tHead.rows[0].cells, dst = head.tHead.rows[0].cells;
+    for (let i = 0; i < src.length && i < dst.length; i++) {
+      const w = src[i].getBoundingClientRect().width + 'px';
+      dst[i].style.width = w; dst[i].style.minWidth = w; dst[i].style.maxWidth = w;
+    }
+    head.style.width = table.getBoundingClientRect().width + 'px';
+    pin.style.marginBottom = -table.tHead.getBoundingClientRect().height + 'px';
+    scroll.addEventListener('scroll', () => { head.style.transform = 'translateX(' + (-scroll.scrollLeft) + 'px)'; });
+  });
+}
+function openTableView(wrap) {
+  const table = wrap && wrap.querySelector('.md-tscroll > table, :scope > table');
+  if (!table) return;
+  let tv = $('table-view');
+  if (!tv) { tv = document.createElement('div'); tv.id = 'table-view'; tv.setAttribute('role', 'dialog'); document.body.appendChild(tv); }
+  const block = wrap.closest('.md-h-block');
+  const h = block && block.querySelector(':scope > .md-h-row .md-h');
+  tv.innerHTML = '<div class="tv-head">Table in <b>' + escHtml(h ? h.textContent.trim() : 'this page') + '</b><span class="bt-grow"></span>' +
+    'Scroll both ways. The header and first column stay put.<button type="button" class="md-tbtn" data-wb-tableclose="1">Close</button></div><div class="tv-body"></div>';
+  const copy = table.cloneNode(true);
+  copy.style.width = '';
+  tv.querySelector('.tv-body').appendChild(copy);
+  tv.classList.add('open');
+}
+function closeTableView() { const tv = $('table-view'); if (tv) tv.classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-wb-tableclose]')) { closeTableView(); return; }
+  const b = e.target.closest('[data-wb-tableview]');
+  if (b) openTableView(b.closest('.md-table-wrap'));
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTableView(); });
+window.addEventListener('resize', () => { layoutReaderTables(); updateSectionTrail(); });
 
 // ── Saved (P7) ───────────────────────────────────────────────────
 // Replaces S30's separate Bookmarks + Favorites with one list. A page can

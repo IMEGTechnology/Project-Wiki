@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.75.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.76.0**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -357,70 +357,36 @@ Two separate places. **Theme** is how Folio looks; **Settings** is how it behave
 
 Open with **initials badge → Theme**. It is a popup, not a modal, so the note stays visible behind it and every change lands live as you make it. There is no Save button — everything writes the moment you change it. Each section has its own **Reset**, and there is a **Reset all** in the footer. One section opens at a time.
 
-**This panel is shorter on purpose.** It offers five controls: Mode, Preset (Things or Minimal), Reading width, Text size, and Line spacing, described under Appearance and Reading below. Accent, body font, and the whole of Headings, Navigation icons, Interface and Share aren't shown here; your existing choices in those aren't changed, there's just no way to change them further from this panel. Switch to the old layout (**Settings → New look**, off) to reach the full panel described below. **Show page title**, previously part of Headings, lives at **Settings → New look** instead.
+Two themes and six reading controls, set once and kept on this computer.
 
 #### Appearance
 
 | Control | Options | Default |
 |---|---|---|
 | Mode | Dark / Light / System | Dark |
-| Preset | Default, Ocean, Frost, Clay, Mica, Marble, Things, Minimal | Things |
-| Accent | The preset's own accent plus six alternates, tuned per mode | The preset's own |
+| Theme | Default / Guided | Default |
 
-A preset sets backgrounds, all six heading colours and the accent together, with separate dark and light definitions. **System** follows your computer's own dark/light setting. The accent drives buttons, links, the active row and tag chips.
+**Default** uses one accent colour: a short mark under the page title, and links. Heading levels are told apart by size, weight and space, with a thin rule above each main section. **Guided** is the same page plus a coloured marker beside each H2, H3 and H4, so you can see the level at a glance. **System** follows your computer's own dark/light setting.
 
 #### Reading
 
 | Control | Options | Default |
 |---|---|---|
-| Width | Narrow / Normal / Wide | Normal |
+| Width | Readable / Standard / Wide / Full | Readable |
 | Text size | Small / Medium / Large | Medium |
-| Line spacing | Tight / Normal / Relaxed | Normal |
-| Body font | System sans / Serif / Monospace | System sans |
+| Line spacing | Tight / Normal / Relaxed | Relaxed |
+| Heading size | Small / Medium / Large | Medium |
+| Section trail | On / Off | On |
 
-#### Headings
+**Readable** keeps lines to about 70 characters, the length most people read fastest at. Wider tables still grow past it (see Tables below). The longer the line, the more space between lines helps, which is why Relaxed is the default.
 
-- A **colour** for each level H1 through H6, plus an **underline** and a **capitals** toggle per level. Underline ships on for H2 only, capitals on for H5 only, which is how it looked before these controls existed.
-- **Heading scale** — Compact / Normal / Large. One control instead of six size fields.
-- **Inline title** — off by default. Turns on a large heading of the note's own name at the top of the document, Obsidian-style. The reader header shows the filename either way.
+**Section trail** is the thin tinted row under the reader bar on long pages: it names the section and subsection you are in, and appears once you scroll into the first main section. Click a part of it to jump there, or **↑ Top** to go back to the top. Short pages never show it.
 
-Changing any heading colour flips the badge to **Custom** and seeds all six from your current preset. Custom colours are held separately for dark and light, since a colour that reads on near-black often fails on white; there is a one-click **Copy these to the other mode** for when you want them to match. Picking a named preset again clears the override.
+#### Tables
 
-#### Navigation icons
+A table that fits the text stays in line with it. A wider one grows into the margins, centred, up to the width of the reading area, and its header row stays pinned at the top while you scroll to its last row. A table wider than the whole reading area keeps one line per row and scrolls sideways; its header still stays pinned, and **Open full table** above it shows the table on its own with the header and first column pinned (Esc closes it).
 
-| Control | Options | Default |
-|---|---|---|
-| Icon style | Folder and file / Chevron / Dot / None | Folder and file |
-| Folder colour | Rainbow by position / Accent / Single colour / Muted | Rainbow by position |
-| Colour file icons too | On / Off | Off |
-
-Rainbow by position means folders cycle through a colour set based on where they sit in the tree. Choosing **Single colour** reveals a six-swatch picker holding the same hues the rainbow cycles through. File icons stay quiet next to coloured folders unless you turn the third control on.
-
-#### Interface
-
-| Control | What it does |
-|---|---|
-| Chrome tone | **Contrast** gives the panels, header and reader their own shades. **Match reader** flattens the panels and header into the reader surface. **Flat** puts everything on one surface. Default Contrast. |
-| Borders | None, **Hairline** (default) or Strong. |
-| Active row | How the open file is marked: a **Bar** on the edge, a **Tint** behind the row, or **Both** (default). |
-| Density | **Compact**, Normal (default) or Roomy row spacing in Vault Files and Outline. |
-
-> [!NOTE] Borders → None
-> This clears the decorative dividing lines only. Toggle tracks, resize handles and input outlines keep their outline on purpose — without it they vanish rather than look minimal.
-
-#### Share
-
-Set your look up once and pass it to the rest of the team.
-
-**Copy** puts your theme into the box as a `WBTHEME1:` string. Send it to someone; they paste it into the same box and click **Apply pasted**.
-
-**Set as vault default** saves it to the vault itself, at `zSystem/theme.json`. Anyone opening Folio for the first time starts with that look instead of the plain default. It never overwrites a theme someone has already chosen — if you have used Folio before, your own settings stay exactly as they are.
-
-Dark vs light is **not** included in a shared theme. That stays personal, and it can be set to System, so sharing a look never forces anyone else's screen to your preference.
-
-#### Elsewhere
-
-**Callouts** — all 13 Obsidian callout types render in theme-matched colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. These follow the mode rather than the preset. There's also a 14th type Folio adds itself, `[!copy]`, which carries a **Copy** button that puts its contents on your clipboard with the formatting intact and no Markdown markers — see [Editing and Markdown](help-edit.md) for how to write one.
+**Callouts** render in the standard Obsidian colours, grouped the way Obsidian groups them: note, info and todo share blue; failure, danger and bug share red, and so on. There's also a 14th type Folio adds itself, `[!copy]`, which carries a **Copy** button that puts its contents on your clipboard with the formatting intact and no Markdown markers. See [Editing and Markdown](help-edit.md) for how to write one.
 
 ### Settings
 

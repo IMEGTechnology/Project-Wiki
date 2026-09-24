@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.75.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.76.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -278,6 +278,19 @@ Typing `[[` in the editor offers completion for all of the wikilink forms, so yo
 Put the image in the **attachments subfolder beside the note**, not in one shared folder for the whole vault. Folio follows Obsidian's **"in subfolder under current folder"** setting, so `![[image.png]]` looks in that subfolder of the current note's own folder. Obsidian creates it for you when you paste an image into a note.
 
 The filename must match exactly, including case.
+
+**Placing a picture.** Everything is written the normal Obsidian way, and the Folio theme for Obsidian shows it the same way while you write.
+
+| You write | You get |
+|---|---|
+| `![[photo.png]]` | Full width, centred |
+| `![[photo.png\|400]]` | 400 pixels wide |
+| `![[photo.png\|inlR\|240]]`, then the paragraph on the very next line | Picture on the right, text wraps on the left |
+| `![[photo.png\|inlL\|240]]` | Picture on the left, text wraps on the right |
+| `![[a.png\|320]] ![[b.png\|320]]` on one line | Side by side |
+| `*Caption text*` on the line straight under a picture | A caption under it |
+
+The next heading always starts below a wrapped picture. Leave wrapped pictures without a caption and say what the photo shows in the text beside it.
 
 ### Lists
 
