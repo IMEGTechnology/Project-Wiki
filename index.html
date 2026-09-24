@@ -1609,6 +1609,10 @@
     }
     .folder-row:hover .fr-add { display: block; }
     .fr-add:hover { color: var(--text-primary); }
+    /* S108 (Jayson, 23 Sep): New file, New folder and Move a file are hidden
+       for every tier. Pages are started and moved in Obsidian until New page
+       lands (S110), which brings New back. Nothing is deleted. */
+    #btn-new, #btn-move, #dock-actions-left, .fr-add, .folder-row:hover .fr-add { display: none !important; }
     /* create + move + default-page modals */
     #create-overlay, #move-overlay, #dp-overlay, #sr-overlay, #rpt-overlay, #su-outlook-overlay, #df-overlay {
       position: fixed; inset: 0; z-index: 60;
@@ -4401,7 +4405,7 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.73.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.75.0</button>
       </div>
 
       <div class="ud-actions">
@@ -5274,7 +5278,8 @@ const state = {
   reviewData:      null,// cached inbox data (array of {name, url, commentsUrl, comments})
   reviewFilter:    'open', // 'open' | 'closed' | 'all'
   openLastNote:    true,  // Settings "Open last note" — default on
-  unauditedFiles:  [],    // files with no Folio "status" frontmatter key (S12 file audit)
+  unauditedFiles:  [],    // S109 -- pages Folio has never signed off (no baseline), whatever their properties
+  reportItems:     [],    // S109 -- open Flag / Report comments, listed in Review
 
   // ── Review dashboard (S42) ───────────────────────────────────────
   // The other four item types (missingProps, flaggedFiles, dueItems,
@@ -9665,7 +9670,10 @@ function openConsoleHome() {
 
   // Fire and forget, the same shape boot uses. A failed scan leaves the
   // column saying so and never blocks the page.
-  wnScan().then(() => { if (consoleHomeOn()) renderConsoleHome(); })
+  // S108 -- Home is the full refresh (Jayson, 23 Sep): the tree is re-listed
+  // first, then the scan re-lists every folder it marked stale.
+  folioRelistTree().catch(() => {}).then(() => { renderSidebar(); return wnScan(); })
+          .then(() => { if (consoleHomeOn()) renderConsoleHome(); })
           .catch(() => { if (consoleHomeOn()) renderConsoleHome(true); });
 
   // B3 -- last, after the guards above have all had their chance to return.
@@ -11357,7 +11365,7 @@ function vcAnalyze(pages) {
     if (propRepairNeeded(fm)) {
       const g = propGaps(fm);
       findings.push(vcFinding(g.required.length ? 'hard' : 'warn', 'Missing properties', 'props:' + key,
-        'This page was approved at some point and its properties are incomplete. ' +
+        'Some of this page\u2019s properties are missing. ' +
         escHtml(rvGapNote({ required: g.required, optional: g.optional })) +
         '. Repair writes only the keys that are absent and touches nothing that already has a value.',
         page, null, vcFix('props', p.url)));
@@ -13038,9 +13046,35 @@ async function openFile(url, name) {
         if (target) scrollToAnchor(null, target);
       }, 80);
     }
+    // S108 -- the light refresh on opening a page: its own folder is
+    // re-listed after the page is on screen, so it never delays the page.
+    folioRefreshFolderOf(url);
   } catch (e) {
+    // S108 -- renamed or moved since the link was made: follow it once.
+    if (!openFile._following) {
+      openFile._following = true;
+      let nu = null;
+      try { nu = await folioFindMoved(url); } catch (_) { nu = null; }
+      openFile._following = false;
+      if (nu && nu !== url) return openFile(nu, displayNameOf(nu));
+    }
     rc.innerHTML = `<p class="md-p" style="color:var(--text-muted);padding-top:32px">Could not load file: ${escHtml(e.message)}</p>`;
   }
+}
+
+async function folioRefreshFolderOf(url) {
+  try {
+    const id = state.fileFolder[url];
+    const folder = id ? findFolder(id) : null;
+    if (!folder) return;
+    const before = (state.folderFiles[folder.id] || []).map(f => f.url).join('|') + '#' +
+                   (state.folderKids[folder.id] || []).map(k => k.id).join('|');
+    state.folderLoaded[folder.id] = false;
+    await loadFolderFiles(folder);
+    const after = (state.folderFiles[folder.id] || []).map(f => f.url).join('|') + '#' +
+                  (state.folderKids[folder.id] || []).map(k => k.id).join('|');
+    if (before !== after) renderSidebar();
+  } catch (_) { /* the tree stays as it was */ }
 }
 
 // Intercept data-anchor from [[Note#Heading]] clicks
@@ -14621,8 +14655,7 @@ function fmMergeDoubleBlock(text) {
 // Review flags applied on every editor save.
 function applyReviewFlags(text) {
   return setFmKeys(text, [
-    ['status',    'Needs Review'],
-    ['reviewed',  'false'],
+    ['status',    'To Be Reviewed'],   // S109 -- the one review flag
     ['edited-by', wbAuthor()],
     ['edited-at', new Date().toISOString().slice(0, 16)],
   ]);
@@ -14956,6 +14989,9 @@ async function scanBadges() {
     const due              = [];
     const questions        = [];
     const escalations      = [];
+    const reports          = []; // S109 -- open Flag / Report comments
+    const flipTo           = []; // S109 -- pages whose status must say To Be Reviewed
+    const carry            = []; // S109 -- a renamed page keeps its sign-off
     const resolvedChanges  = []; // content-change entries with reviewed !== 'no'
     const resolvedComments = []; // closed comments, any type
     const reviewedFiles    = []; // status: Reviewed — covers the new-file/missing-props/flagged/due resolution path
@@ -14968,6 +15004,7 @@ async function scanBadges() {
     // at that tier, so there is no reason to read the logs either.
     const auditOn   = reviewAllowed();
     const auditBase = auditOn ? await auditLoadBaseline() : {};
+    const wasSeeded = state.auditSeeded;   // S109 -- the seed run writes nothing into pages
     const auditNow  = {}; // path → { hash, sections }, this scan's truth
 
     // S45 — the sweep now runs over cached per-file records, eight lanes at a
@@ -14976,6 +15013,16 @@ async function scanBadges() {
     // is the same derivation it always was; only where the inputs come from
     // changed.
     const sideStats = await scanSidecarStats();
+
+    // S109 -- a page renamed or moved without an edit keeps its sign-off:
+    // a baseline whose page is gone, carrying exactly this content, is this
+    // page's baseline under its old name. Unique matches only.
+    const livePaths = new Set(files.map(f => auditPathKey(f.url)));
+    const orphanByHash = new Map();
+    if (auditOn) Object.entries(auditBase).forEach(([pth, b]) => {
+      if (livePaths.has(pth) || !b || !b.hash || b.hash === 'nohash') return;
+      orphanByHash.set(b.hash, (orphanByHash.get(b.hash) || []).concat(pth));
+    });
 
     await runPooled(files, SCAN_POOL, async f => {
       let hasUnreviewedChange = false;
@@ -14988,6 +15035,9 @@ async function scanBadges() {
           openCmts++;
           if (c.type === 'question')   questions.push({ name: displayFileName(f.name), url: f.url, commentsUrl, idx: ci, comment: c });
           if (c.type === 'escalation') escalations.push({ name: displayFileName(f.name), url: f.url, commentsUrl, idx: ci, comment: c });
+          // S109 -- a Flag or Report is a page problem somebody raised. Until
+          // now it reached only All comments; Review lists it with its note.
+          if (c.type === 'flag' && !c.replyTo) reports.push({ name: displayFileName(f.name), url: f.url, commentsUrl, idx: ci, comment: c });
         } else if (c.status === 'closed') {
           resolvedComments.push({ name: displayFileName(f.name), url: f.url, ts: c.closedTs || c.ts, comment: c });
         }
@@ -15050,83 +15100,63 @@ async function scanBadges() {
           const g = propGaps(fm);
           missingProps.push({ name: displayFileName(f.name), url: f.url, required: g.required, optional: g.optional });
         }
-        if (!fm.status) {
-          // v0.32.1 — a New file row used to be a bare name. It stays one row
-          // and one cause, but it now says WHICH properties are absent, so the
-          // row answers "what is wrong with this file" without opening it.
-          audit.push({
-            name: displayFileName(f.name), url: f.url,
-            required: propGaps(fm).required,
-            optional: propGaps(fm).optional,
-          });
-        } else if (reviewAllowed()) {
-          // Session 42 fields are Contributor+ data, same gate as content
-          // changes above — not rendered below Contributor, so no reason to
-          // compute them below Contributor either.
-          //
-          // A file the app has already touched (has a status key). Required
-          // keys missing → Missing properties, and it never also becomes a
-          // New file or a Flagged item — one row per file per cause.
-          const reqMissing = REQUIRED_PROPS.filter(k => !(k in fm));
-          // v0.32.1 — an incomplete property block is now reported whether the
-          // absent key is required or optional, and it is checked INDEPENDENTLY
-          // of the cause chain below, the same exception Due already gets.
-          //
-          // Both halves of that matter. optMissing was computed, attached to
-          // the row, and only ever seen on a file that was already failing on a
-          // required key, so a file carrying all four required keys and none of
-          // the optional ones was reported nowhere — and since must-read and
-          // onboarding arrived with What's New, that is every file predating
-          // it, which is exactly the population this check exists to find.
-          //
-          // Independent, because the obvious fix — widening the `if` below to
-          // include optMissing — silently costs far more than it looks. That
-          // branch is also where the vault audit takes its delta and where
-          // Flagged is decided. On a vault that has never been swept EVERY file
-          // has an optional gap, so widening the branch would have taken the
-          // whole vault out of the audit on the one run where the audit matters
-          // most. Incompleteness is a fact about a file, not a decision about
-          // it, so it does not compete for the file's one cause.
-          // v0.33.0 — the push that used to live here moved above the cause
-          // chain so it could cover unstamped files too. reqMissing is still
-          // computed here because the audit delta below turns on it.
-          if (reqMissing.length) {
-            /* structurally incomplete for the app — no audit delta to take */
+        // S109 -- Review is about CONTENT only (Jayson, 23 Sep): properties
+        // are Vault check's, and nothing here depends on them. A page is
+        // signed off when Folio holds a baseline for it (the audit log) and
+        // its text still matches. Otherwise it is To Be Reviewed:
+        //   no baseline         a new page, whatever its properties say
+        //   text differs        edited since the last sign-off
+        //   status by hand      someone set it back to be reviewed
+        //   due date passed     time to read it again
+        // Before S109 a page only counted as new when it had no `status`, and
+        // only pages with a baseline were watched, so a page created with a
+        // status already in it (typed, copied) was never reviewed at all.
+        if (reviewAllowed() && auditOn) {
+          const st   = String(fm.status || '').toLowerCase().trim();
+          const key  = auditPathKey(f.url);
+          let base   = auditBase[key];
+          if (!base && auditNow[key] && orphanByHash.has(auditNow[key].hash) && orphanByHash.get(auditNow[key].hash).length === 1) {
+            const from = orphanByHash.get(auditNow[key].hash)[0];
+            base = auditBase[from];
+            carry.push({ path: key, base });
+          }
+          let owes = hasUnreviewedChange;
+          if (!base) {
+            audit.push({
+              name: displayFileName(f.name), url: f.url,
+              required: propGaps(fm).required,
+              optional: propGaps(fm).optional,
+            });
+            owes = true;
           } else {
-            const st  = (fm.status   || '').toLowerCase();
-            const rev = (fm.reviewed || '').toLowerCase();
-            // S15 — vault audit. Only files the app has already stamped are
-            // audited: an unstamped file is already in the queue as a New
-            // file, and listing it twice would break one-file-one-cause.
-            // The file hash is computed from text scanBadges already has in
-            // hand, so this costs a hash, not a read.
-            const key = auditPathKey(f.url);
-            const delta = auditDelta(auditNow[key], auditBase[key]);
+            const delta = auditDelta(auditNow[key], base);
             if (delta) {
               const row = {
                 name: displayFileName(f.name), url: f.url, delta,
-                base: auditBase[key],
+                base,
                 counts: { added: delta.added.length, modified: delta.modified.length, removed: delta.removed.length },
               };
-              // Additive-only goes to band 2. Anything that changed or lost
-              // text goes to band 1, including a preamble edit that names no
-              // section at all — "changed but nothing named" is still changed.
+              // Additive-only reads as "Section added", anything that changed
+              // or lost text as "Edited in Obsidian".
               if (auditIsAdditive(delta)) { newSections.push(row); hasVaultChange = true; }
               else                        { vaultChanges.push(row); hasVaultChange = true; }
-            }
-            // Flagged only if it isn't already a content-change row — the
-            // same in-app save sets both status:"Needs Review" and the
-            // .changes.md entry, and Accept/Reject is the sharper action.
-            // Same exclusion now applies to a vault change, for the same reason.
-            if (!hasUnreviewedChange && !hasVaultChange && (st === 'needs review' || rev === 'false')) {
-              flagged.push({ name: displayFileName(f.name), url: f.url, status: fm.status || '', reviewed: fm.reviewed || '' });
-            }
-            if (st === 'reviewed') {
-              reviewedFiles.push({ name: displayFileName(f.name), url: f.url, ts: f.modified || '' });
+              owes = true;
             }
           }
-          // Due is independent of the chain above — a reviewed policy page
-          // can still be due again, and should still surface.
+          if (!owes && fm.status && st !== 'reviewed') {
+            flagged.push({ name: displayFileName(f.name), url: f.url, status: fm.status || '', reviewed: fm.reviewed || '' });
+          }
+          if (st === 'reviewed') {
+            reviewedFiles.push({ name: displayFileName(f.name), url: f.url, ts: f.modified || '' });
+          }
+          // The page's own flag follows (Jayson: the property flips). Only
+          // once the page has sat for two minutes, so Folio never writes
+          // into a page somebody is typing in.
+          if (owes && st !== 'to be reviewed') {
+            const m = Date.parse(f.modified || '') || Number(f.modified) || 0;
+            if (!m || Date.now() - m > RV_FLIP_SETTLE_MS) flipTo.push(f.url);
+          }
+          // Due is independent: a signed-off page can still be due again.
           if (fm.due && fm.due < today) {
             due.push({ name: displayFileName(f.name), url: f.url, due: fm.due });
           }
@@ -15173,9 +15203,26 @@ async function scanBadges() {
       auditSeedInFlight = false;
       vaultChanges.length = 0;   // a seed run has, by definition, nothing to review
       newSections.length  = 0;
+      audit.length        = 0;   // S109 -- nor any new page: the seed IS the sign-off
+      flipTo.length       = 0;
+    }
+
+    // S109 -- the two writes Review owes the vault, Contributor and above,
+    // never on the seed run, never waited on by the scan.
+    if (auditOn && wasSeeded && state.auditSeeded && atLeast('contributor')) {
+      if (carry.length) {
+        const ts = new Date().toISOString().slice(0, 23);
+        auditAppend(carry.map(c => ({ ts, path: c.path, hash: c.base.hash,
+          sections: auditSectionsField(c.base.sections || []) }))).then(() => {
+          carry.forEach(c => { state.auditBaseline[c.path] = Object.assign({}, c.base, { ts }); });
+        }).catch(() => {});
+      }
+      // Awaited, so the flips never overlap the next scan's reads.
+      if (flipTo.length && LOCAL.on) { try { if (await rvFlipStatus(flipTo)) scanAgain = true; } catch (_) {} }
     }
 
     state.cmtOpenCount   = openCmts;
+    state.reportItems    = reports;
     state.vaultChanges   = vaultChanges;
     state.newSections    = newSections;
     state.reviewChanges  = review;
@@ -15686,6 +15733,10 @@ async function wnScan() {
     // Renames carry their seen state across, so a file someone renamed in
     // Obsidian doesn't resurface as new for the whole team.
     const renames = wnDetectRenames(oldIdx, curIdx);
+    // S108 -- kept for the session (old -> new) so a page that cannot be
+    // found at its old address can be followed to its new one.
+    state.lastRenames = state.lastRenames || {};
+    Object.entries(renames).forEach(([to, from]) => { state.lastRenames[from] = to; });
     Object.entries(renames).forEach(([newUrl, oldUrl]) => {
       if (oldUrl in seen) seen[newUrl] = seen[oldUrl];
       if (sect[oldUrl]) sect[newUrl] = sect[oldUrl];
@@ -17285,7 +17336,7 @@ async function auditApproveActive() {
   const url = auditWalk.url;
   if (!url) return;
   try {
-    await auditRecord(url);                 // appends to the log; the note is untouched
+    await rvSignOff(url, { skipScan: true });   // S109 -- the one sign-off
     auditCloseBar();
     await scanBadges();
     await rvAfterAction(url, 'Approved. This page is recorded as reviewed.');
@@ -17351,17 +17402,22 @@ const WB_COMMENT_ICONS = { note: '📝', question: '❓', action: '✅', flag: '
 // S15 renamed 'change' to "App edit" and added 'vaultchange'/'newsection'.
 // The two edit types read very differently and the old bare label "Content
 // change" gave no clue which one you were looking at.
+// S109 -- three kinds, not eight (Jayson, 23 Sep). Everything about a page's
+// content is To be reviewed and the row says why; a Flag or Report somebody
+// raised is Flagged, with their note; a comment asking something is a
+// Question (escalated ones stay red). RV_GROUP says which kind each owed
+// thing belongs to.
 const RV_FILTERS = [
-  ['all',         'All',                 ''],
-  ['escalation',  'Escalated',           'red'],
-  ['vaultchange', 'Vault change',        'orange'],
-  ['change',      'App edit',            'blue'],
-  ['question',    'Question',            'purple'],
-  ['newsection',  'New section',         'yellow'],
-  ['flagged',     'Flagged',             'teal'],
-  ['due',         'Due',                 'gray'],
-  ['newfile',     'New file',            'green'],
+  ['all',      'All',            ''],
+  ['review',   'To be reviewed', 'orange'],
+  ['report',   'Flagged',        'red'],
+  ['question', 'Questions',      'purple'],
 ];
+const RV_GROUP = {
+  vaultchange: 'review', newsection: 'review', change: 'review',
+  flagged: 'review', newfile: 'review', due: 'review',
+  report: 'report', question: 'question', escalation: 'question',
+};
 
 function renderDiffBody(body) {
   return body.split('\n').map(l => {
@@ -17405,12 +17461,75 @@ function rvGapNote(it) {
 // band 2, where the item is additive — band 1 has no bulk and no
 // approve-without-reading, because the whole value of the audit is that
 // somebody looked.
-async function rvApproveAudit(url) {
+async function rvApproveAudit(url) { return rvApprovePage(url); }
+
+// ── S109 · One sign-off ─────────────────────────────────────────────
+// Approve means "I have read this content" and nothing else (Jayson, 23 Sep).
+// It records the page's text as the new baseline, sets status: Reviewed and
+// reviewed: <today> (reviewed is the date of the last sign-off now, not
+// true/false), clears a due date that has passed, and settles any edit made
+// inside Folio. It never fills a missing property; that is Vault check's.
+const RV_FLIP_SETTLE_MS = 2 * 60 * 1000;
+function rvToday() { return new Date().toISOString().slice(0, 10); }
+async function rvSignOff(url, opts) {
+  if (!reviewAllowed()) return;
+  const txt = await readVaultFile(url);
+  const fm  = parseFm(txt);
+  const keys = [['status', 'Reviewed'], ['reviewed', rvToday()]];
+  if (fm.due && fm.due < rvToday()) keys.push(['due', '']);
+  const out = setFmKeys(txt, keys);
+  if (out !== txt) await spWriteFile(url, out);
+  await auditRecord(url, out);
   try {
-    await auditRecord(url);
-    await scanBadges();
-    rvDashPaint();
-  } catch (e) { alert('Could not approve: ' + e.message); }
+    const ch = changesUrlFor(url);
+    const chTxt = await readVaultFileOrNull(ch);
+    if (chTxt && /reviewed="no"/.test(chTxt)) {
+      await spWriteFile(ch, chTxt.replace(/<!-- WBCH ([^>]*?)reviewed="no"([^>]*?)-->/g,
+        (m, pre, post) => `<!-- WBCH ${stampResolved(pre + 'reviewed="yes"' + post)}-->`));
+    }
+  } catch (_) { /* the page is signed off either way */ }
+  if (!(opts && opts.skipScan)) await scanBadges();
+}
+async function rvApprovePage(url) {
+  try {
+    await rvSignOff(url);
+    if (state.activeUrl === url) await openFile(url, state.activeName);
+    await rvAfterAction(url, 'Approved. The page is marked Reviewed.');
+  } catch (e) { rvNotify('Could not approve: ' + e.message, false); }
+}
+// Every page waiting on a content review, signed off as it stands. Meant for
+// the first run on a vault Review never watched properly (Jayson: fix it
+// while the vault is small), and for nothing routine.
+async function rvApproveAll() {
+  if (!atLeast('admin')) return;
+  const urls = rvPageRollup().filter(r => r.owes.some(o => RV_GROUP[o.type] === 'review')).map(r => r.url);
+  if (!urls.length) return;
+  if (!confirm('Approve ' + urls.length + ' page' + (urls.length === 1 ? '' : 's') + ' as they are now?\n\n' +
+               'Each is marked Reviewed without being opened. Use this once, to accept the vault as it stands; ' +
+               'after that every new page and every change comes back here.')) return;
+  let n = 0;
+  for (const u of urls) { try { await rvSignOff(u, { skipScan: true }); n++; } catch (_) {} }
+  await scanBadges();
+  rvDashPaint();
+  rvNotify(n + ' page' + (n === 1 ? '' : 's') + ' approved.', true);
+}
+
+// The page's own flag, flipped to To Be Reviewed by a Contributor or Admin
+// scan when its text is new or changed. One property line; What's New does
+// not count it as an edit (S108), and the next scan sees it already set.
+async function rvFlipStatus(urls) {
+  let n = 0;
+  for (const u of urls) {
+    try {
+      const txt = await readVaultFileOrNull(u);
+      if (txt == null) continue;
+      try { scanCache.delete(u); } catch (_) {}   // the next scan reads what is really there
+      if (String(parseFm(txt).status || '').toLowerCase().trim() === 'to be reviewed') continue;
+      const out = setFmKeys(txt, [['status', 'To Be Reviewed']]);
+      if (out !== txt) { await spWriteFile(u, out); n++; }
+    } catch (_) { /* tried again on the next scan */ }
+  }
+  return n;   // only a real write asks for another scan, so this can never loop
 }
 
 // ── Saying so, and moving on (0.56.0) ─────────────────────────────
@@ -17518,14 +17637,18 @@ async function rvAfterAction(url, msg) {
 const RV_OWE = {
   // S104 -- item 12, Review's tags moved onto the one tag style (capitals in
   // a capsule); the icon field is gone with the emoji it held.
+  // S109 -- sev is now the KIND's weight, so the stripe says which kind a
+  // row is: red for a problem somebody raised, orange for content to be
+  // reviewed, blue for a question.
   escalation:  { sev: 'decide', tone: 'red'    },
-  vaultchange: { sev: 'decide', tone: 'orange' },
-  question:    { sev: 'decide', tone: 'purple' },
-  change:      { sev: 'decide', tone: 'blue'   },
+  report:      { sev: 'decide', tone: 'red'    },
+  vaultchange: { sev: 'ack',    tone: 'orange' },
+  change:      { sev: 'ack',    tone: 'blue'   },
   newsection:  { sev: 'ack',    tone: 'yellow' },
   flagged:     { sev: 'ack',    tone: 'teal'   },
   newfile:     { sev: 'ack',    tone: 'green'  },
-  due:         { sev: 'again',  tone: 'gray'   },
+  due:         { sev: 'ack',    tone: 'gray'   },
+  question:    { sev: 'again',  tone: 'purple' },
 };
 const RV_SEV_BAND = { decide: 'hard', ack: 'warn', again: 'info' };
 
@@ -17533,7 +17656,7 @@ function reviewDashboardTotal() {
   return state.reviewChanges.reduce((s, r) => s + r.unreviewed, 0)
     + state.questionItems.length + state.escalatedItems.length
     + state.flaggedFiles.length + state.dueItems.length
-    + state.unauditedFiles.length
+    + state.unauditedFiles.length + (state.reportItems || []).length
     + state.vaultChanges.length + state.newSections.length;
 }
 
@@ -17558,13 +17681,16 @@ function rvPageModified(url) {
 // the ONE derivation: the rows, the tallies, the walk queue and the bar count
 // all read it, so they cannot disagree about what is waiting.
 function rvPageRollup() {
-  const show  = t => state.rvFilter === 'all' || state.rvFilter === t;
+  const show  = t => state.rvFilter === 'all' || state.rvFilter === (RV_GROUP[t] || t);
   const pages = new Map();
   const add = (type, url, name, label, ts, opts, act) => {
     if (!pages.has(url)) pages.set(url, { url, name, owes: [] });
     pages.get(url).owes.push({ type, label, ts: rvStamp(ts), opts: opts || {}, act: act || null });
   };
 
+  (state.reportItems || []).forEach(it => { if (show('report'))
+    add('report', it.url, it.name, 'Flagged', it.comment && it.comment.ts,
+        { idx: it.idx, note: String((it.comment && it.comment.body) || '').trim().slice(0, 140) }); });
   state.escalatedItems.forEach(it => { if (show('escalation'))
     add('escalation', it.url, it.name, 'Escalated', it.comment && it.comment.ts, { idx: it.idx }); });
   state.vaultChanges.forEach(it => { if (show('vaultchange'))
@@ -17579,21 +17705,21 @@ function rvPageRollup() {
       const t = rvStamp(e.ts);
       return (t && (m === null || t < m)) ? t : m;
     }, null);
-    add('change', r.url, r.name, r.unreviewed + ' pending edit' + (r.unreviewed === 1 ? '' : 's'),
-        oldest, { headIdx: headOpenIdx(r.entries) }, { fn: 'markReviewed(' + ri + ')', label: 'Accept all' });
+    add('change', r.url, r.name, 'Edited in Folio',
+        oldest, { headIdx: headOpenIdx(r.entries) }, { fn: 'markReviewed(' + ri + ')', label: 'Approve' });
   } });
   state.newSections.forEach(it => { if (show('newsection'))
-    add('newsection', it.url, it.name, 'New section', null, { delta: it.delta },
+    add('newsection', it.url, it.name, 'Section added', null, { delta: it.delta },
         { fn: "rvApproveAudit('" + escHtml(it.url) + "')", label: 'Approve' }); });
   state.flaggedFiles.forEach(it => { if (show('flagged'))
-    add('flagged', it.url, it.name, it.status || 'Flagged', null, {},
+    add('flagged', it.url, it.name, 'Set to be reviewed', null, {},
         { fn: "rvApproveFlagged('" + escHtml(it.url) + "')", label: 'Approve' }); });
   state.dueItems.forEach(it => { if (show('due'))
-    add('due', it.url, it.name, 'Due ' + it.due, it.due, {},
-        { fn: "rvClearDue('" + escHtml(it.url) + "')", label: 'Clear due date' }); });
+    add('due', it.url, it.name, 'Due again ' + it.due, it.due, {},
+        { fn: "rvApprovePage('" + escHtml(it.url) + "')", label: 'Approve' }); });
   state.unauditedFiles.forEach(it => { if (show('newfile'))
     add('newfile', it.url, it.name, 'New page', null, {},
-        { fn: "rvUpdateFile('" + escHtml(it.url) + "')", label: 'Approve' }); });
+        { fn: "rvApprovePage('" + escHtml(it.url) + "')", label: 'Approve' }); });
 
   const rows = [...pages.values()].map(pg => {
     // Most serious first inside the row, so the chip you read first is the
@@ -17645,6 +17771,7 @@ function buildReviewDashboardHTML() {
   const nAck    = rows.filter(r => r.sev === 'ack').length;
   const nAgain  = rows.filter(r => r.sev === 'again').length;
   const ackable = rows.filter(r => r.sev !== 'decide').length;
+  const nContent = rows.filter(r => r.owes.some(o => RV_GROUP[o.type] === 'review')).length;   // S109
 
   // S103 (items 1, 2) -- the second title went: Admin names the screen and
   // the count block below says how many pages wait. The kind chips are
@@ -17653,16 +17780,17 @@ function buildReviewDashboardHTML() {
 
   html += countsHTML({ n: rows.length, noun: rows.length === 1 ? 'page waiting' : 'pages waiting',
     sub: rows.length ? 'oldest first' : '', empty: 'nothing waiting on you',
-    parts: [['hard', nDecide, 'decide', 'nothing to decide'],
-            ['warn', nAck, 'acknowledge', 'nothing to acknowledge'],
-            ['info', nAgain, 'read again', 'nothing to read again']] }).replace('class="ct-lead"', 'class="ct-lead" style="padding:0 0 4px"');
+    // S109 -- counted by kind, the three kinds of the filter row.
+    parts: [['hard', nDecide, 'flagged', 'nothing flagged'],
+            ['warn', nAck, 'to be reviewed', 'nothing to review'],
+            ['info', nAgain, 'questions', 'no questions']] }).replace('class="ct-lead"', 'class="ct-lead" style="padding:0 0 4px"');
 
   if (rows.length) {
     html += '<div class="vc-bar" style="margin:12px 0 0">' +
-      '<div class="vc-bar-meta">Counted by the most serious thing each page owes. ' +
+      '<div class="vc-bar-meta">One row per page, counted by the most pressing thing it owes. ' +
       'Start at the top and the list empties from the oldest end.</div>' +
-      (ackable
-        ? `<button class="vc-btn" onclick="rvAcknowledgeAllAdditive()">Acknowledge all (${ackable})</button>` : '') +
+      (nContent && atLeast('admin')
+        ? `<button class="vc-btn" onclick="rvApproveAll()">Approve all as they are (${nContent})</button>` : '') +
       '<button class="vc-btn primary" onclick="rvQueueStart(state.rvFlatQueue,0)">Start review &rarr;</button>' +
       '</div>';
   }
@@ -17682,12 +17810,18 @@ function buildReviewDashboardHTML() {
     // page open. A page owing several does not: the buttons would be acting
     // on one of the things in a row that lists three, which is the ambiguity
     // the old bands had.
-    const solo = pg.owes.length === 1 ? pg.owes[0].act : null;
+    // S109 -- every content reason on a page closes with the same Approve,
+    // so a page owing only content carries it however many reasons it has.
+    const allContent = pg.owes.every(o => RV_GROUP[o.type] === 'review');
+    const solo = allContent
+      ? { fn: "rvApprovePage('" + escHtml(pg.url) + "')", label: 'Approve' }
+      : (pg.owes.length === 1 ? pg.owes[0].act : null);
     body += `<div class="vc-row vc-${RV_SEV_BAND[pg.sev]}">
       <div class="vc-stripe"></div>
       <div class="vc-main">
         <div><span class="vc-name" onclick="rvQueueStart(state.rvFlatQueue,${qi})">${escHtml(pg.name)}</span></div>
         <div class="rv-owe-row">${oweChips}</div>
+        ${pg.owes.filter(o => o.opts && o.opts.note).map(o => `<div class="vc-why" style="color:var(--text-secondary)">&ldquo;${escHtml(o.opts.note)}&rdquo;</div>`).join('')}
         <div class="vc-why">${escHtml(rvSinceText(pg))}${pg.owes.length > 1 ? ' · ' + pg.owes.length + ' things owed, one visit' : ''}</div>
       </div>
       <div class="vc-act">
@@ -17757,7 +17891,7 @@ async function rvOpenItem(type, url, name, opts) {
     const entries = await rvLoadChanges(url);
     const idx = opts.headIdx !== undefined ? opts.headIdx : headOpenIdx(entries);
     if (idx >= 0) selectChangeCard(idx);
-  } else if (type === 'question' || type === 'escalation') {
+  } else if (type === 'question' || type === 'escalation' || type === 'report') {
     closeDiffStrip();
     ensureToolOpen('comments');
     await renderCommentsTab();
@@ -17845,15 +17979,7 @@ function rvQueueExit() {
 function rvShowQueueBar() { rvBannerRender(); }
 
 // ── Band 2 row + bulk actions ──────────────────────────────────────
-async function rvApproveFlagged(url) {
-  try {
-    const txt = await readVaultFile(url);
-    await spWriteFile(url, setFmKeys(txt, [['status', 'Reviewed'], ['reviewed', 'true']]));
-    await scanBadges();
-    if (state.activeUrl === url) await openFile(url, state.activeName);
-    await rvAfterAction(url, 'Approved. The page is marked Reviewed.');
-  } catch (e) { rvNotify('Could not approve: ' + e.message, false); }
-}
+async function rvApproveFlagged(url) { return rvApprovePage(url); }
 
 async function rvClearDue(url) {
   try {
@@ -17886,7 +18012,7 @@ async function rvAcknowledgeAllAdditive() {
     }
     for (const it of flaggedItems) {
       const txt = await readVaultFile(it.url);
-      await spWriteFile(it.url, setFmKeys(txt, [['status', 'Reviewed'], ['reviewed', 'true']]));
+      await spWriteFile(it.url, setFmKeys(txt, [['status', 'Reviewed'], ['reviewed', rvToday()]]));
     }
     for (const it of dueList) {
       const txt = await readVaultFile(it.url);
@@ -18042,7 +18168,11 @@ function propGaps(fm) {
 // manufacture review work, so the band-hop that has existed since v0.29.0
 // closes by construction rather than by a rule anyone has to remember.
 function propRepairNeeded(fm) {
-  if (!fm || !fm.status) return false;      // an approval, not a repair
+  // S109 -- properties are Vault check's alone (Jayson, 23 Sep: properties
+  // and reviewed are never combined). A page with no status used to be left
+  // to Review as a New file; Review is about content now, so every page's
+  // gaps are reported here.
+  if (!fm) return false;
   const g = propGaps(fm);
   return !!(g.required.length || g.gated.length);
 }
@@ -18065,7 +18195,9 @@ async function approveNewFileCore(f, opts) {
   const text = await readVaultFile(f.url);
   const fm = parseFm(text);
   const defaults = {
-    status: 'Needs Review', reviewed: 'false',
+    // S109 -- a property fill never approves: status says To Be Reviewed and
+    // reviewed (the sign-off date) starts empty.
+    status: 'To Be Reviewed', reviewed: '',
     created: new Date().toISOString().slice(0, 10),
     author: wbAuthor(),
     tags: '[]', aliases: '[]', due: '',
@@ -18096,9 +18228,10 @@ async function approveNewFileCore(f, opts) {
   // looked at it. "Fill all" did that to every file in the band at once.
   // A baseline records that somebody approved this content. A property fill
   // is not somebody approving the content, so it must not write one.
-  try {
-    if (!state.auditBaseline[auditPathKey(f.url)]) await auditRecord(f.url, text);
-  } catch (_) {}
+  // S109 -- and it no longer records a baseline either. That line made a
+  // property fill sign the page's content off, which is exactly the
+  // combining Jayson ruled out: a page never signed off stays a New page
+  // in Review until somebody approves it, filled or not.
   if (!(opts && opts.skipScan)) await scanBadges();
 }
 
@@ -18119,12 +18252,8 @@ async function markReviewedCore(fileUrl, changesUrl) {
 async function markReviewed(idx) {
   const r = state.reviewChanges[idx];
   if (!r) return;
-  try {
-    await markReviewedCore(r.url, r.changesUrl);
-    rvDashPaint();
-  } catch (e) {
-    alert('Could not mark reviewed: ' + e.message);
-  }
+  // S109 -- an edit made in Folio is approved like any other content.
+  return rvApprovePage(r.url);
 }
 
 // Show one change's diff in the bottom banner and scroll the reader to the first highlighted changed block.
@@ -18215,7 +18344,7 @@ async function maybeFlipFileReviewed(fileUrl, changesUrl) {
   const entries = txt ? parseChanges(txt) : [];
   if (entries.length && !entries.some(e => e.reviewed === 'no') && entries.some(e => e.reviewed === 'yes')) {
     const fTxt = await readVaultFileOrNull(fileUrl);
-    if (fTxt !== null) await spWriteFile(fileUrl, setFmKeys(fTxt, [['status', 'Reviewed'], ['reviewed', 'true']]));
+    if (fTxt !== null) await spWriteFile(fileUrl, setFmKeys(fTxt, [['status', 'Reviewed'], ['reviewed', rvToday()]]));
     return true;
   }
   return false;
@@ -18663,15 +18792,15 @@ let rvdItem = null; // { type, url, name, fm } — what the strip is currently s
 
 const RVD_ACTION = {
   flagged: { label: 'Approve',         fn: it => rvApproveFlagged(it.url) },
-  due:     { label: 'Clear due date',  fn: it => rvClearDue(it.url) },
-  newfile: { label: 'Fill properties', fn: it => rvUpdateFile(it.url) },
+  due:     { label: 'Approve',         fn: it => rvApprovePage(it.url) },   // S109 -- read again, then sign off
+  newfile: { label: 'Approve',         fn: it => rvApprovePage(it.url) },   // S109 -- content, never properties
   missing: { label: 'Fill properties', fn: it => rvUpdateFile(it.url) },
 };
 
 const RVD_TITLE = {
-  flagged: 'Flagged for review',
-  due:     'Due for re-review',
-  newfile: 'New file',
+  flagged: 'Set to be reviewed',
+  due:     'Due to be read again',
+  newfile: 'New page',
   missing: 'Missing properties',
 };
 
@@ -19341,8 +19470,8 @@ async function submitCreate() {
         '---',
         'tags: []',
         'aliases: []',
-        'status: Needs Review',
-        'reviewed: false',
+        'status: To Be Reviewed',
+        'reviewed: ',
         `created: ${new Date().toISOString().slice(0, 10)}`,
         'due: ',
         `author: ${wbAuthor()}`,
@@ -19515,7 +19644,10 @@ async function submitMove() {
 // never applied to. Under tiers it is Contributor, like every other write.
 // ================================================================
 
-const WB_STATUS_VALUES = ['In Progress', 'Draft', 'Needs Review', 'In Review', 'Reviewed', 'Master', 'Archived'];
+// S109 -- two values (Jayson, 23 Sep). The other five did nothing anywhere;
+// a page still carrying one shows it as an extra option and reads as
+// To Be Reviewed until it is approved.
+const WB_STATUS_VALUES = ['To Be Reviewed', 'Reviewed'];
 
 // ── Frontmatter (0.53.0 rewrite) ─────────────────────────────────
 // This used to test  lines[0] !== '---'  against a raw split on '\n' and
@@ -22216,6 +22348,11 @@ function repairSavedAuto(idx) {
     const all  = savedRepairMatches(u, idx, broken);
     let hits = all.filter(h => h.how === 'content');
     if (!hits.length) hits = all.filter(h => h.how === 'number');
+    // S108 -- the only page left in the same vault with the same title
+    // (number trimmed). Two pages with one title stay for a person to pick.
+    const sameVault = h => pageIdentity(h.url).vault === pageIdentity(u).vault;
+    if (!hits.length) hits = all.filter(h => h.how === 'name' && sameVault(h));   // moved, same file name
+    if (!hits.length) hits = all.filter(h => h.how === 'title' && sameVault(h));
     if (hits.length !== 1) return;
     if (wbRemapUserRecord(u, hits[0].url)) {
       if (p.fp) state.user.saved.pages[hits[0].url].fp = p.fp;
@@ -22232,12 +22369,31 @@ function repairSavedAuto(idx) {
 // either of them needing to know about the other.
 function savedPostScan(idx) {
   if (!state.user || !idx) return 0;
-  const n = repairSavedAuto(idx) + refreshSavedFingerprints(idx);
+  const n = repairSavedAuto(idx) + refreshSavedFingerprints(idx) + refreshSavedSectionNames(idx);
   if (n) {
     saveUserRecord();
     updateSavedTabBadge();
     try { if (isSavedPaneOpen()) renderSavedTab(); } catch (_) { /* pane may not be mounted */ }
   }
+  return n;
+}
+
+// S108 -- a saved section shows the heading's CURRENT name. A renamed
+// heading already kept its saved section (S107), but the label was copied
+// across with it, so Saved went on saying "Alpha" after Alpha became
+// "Alpha Two". The scan's index knows every heading's title, so after each
+// scan any label that no longer matches is brought up to date.
+function refreshSavedSectionNames(idx) {
+  if (!state.user || !state.user.saved || !state.user.saved.pages || !idx) return 0;
+  let n = 0;
+  Object.entries(state.user.saved.pages).forEach(([u, p]) => {
+    const sec = idx[u] && idx[u].sec;
+    if (!p || !p.sections || !sec) return;
+    Object.keys(p.sections).forEach(id => {
+      const t = sec[id] && sec[id][0];
+      if (t && p.sections[id] !== t) { p.sections[id] = t; n++; }
+    });
+  });
   return n;
 }
 
@@ -22443,6 +22599,17 @@ function renderSavedTab() {
   let html = paneHead('bookmarks', { count: total || '' });
 
   const nBroken = savedBrokenFiles().length;
+  // S108 -- look again before calling anything broken. A page renamed or
+  // moved in Obsidian can be missing for a moment mid-sync, or Folio may not
+  // have re-listed since. The fresh listing and scan repair what they can
+  // (savedPostScan), then this redraws. At most once every few seconds.
+  if (nBroken && !state.savedLooking && (!state.savedLookedAt || Date.now() - state.savedLookedAt > FOLIO_REFRESH_COOLDOWN)) {
+    state.savedLooking = true; state.savedLookedAt = Date.now();
+    folioRelistAll().then(() => wnScan()).catch(() => {}).then(() => {
+      state.savedLooking = false;
+      try { if (isSavedPaneOpen()) renderSavedTab(); updateSavedTabBadge(); } catch (_) {}
+    });
+  }
   if (nBroken) {
     // 0.52.0 — Repair, not Remove all. Remove all moved inside the repair
     // screen: it is still there, but it is no longer the only thing offered
@@ -24694,7 +24861,10 @@ async function boot() {
 // Obsidian) appear without a full app restart. Folders that are loaded
 // but currently collapsed are just marked stale — they re-fetch next
 // time they're expanded, rather than paying for a fetch no one will see.
-async function refreshVaultTree() {
+// S108 -- the listing half of the refresh, on its own so the light
+// refresh (clicking back into Folio) can run it without the settings reads
+// and the What's New scan. Directory listings only, no file is read.
+async function folioRelistTree() {
   const openIds = Object.keys(state.openFolders)
     .filter(id => state.openFolders[id])
     .sort((a, b) => a.split('/').length - b.split('/').length); // parents before children
@@ -24703,16 +24873,6 @@ async function refreshVaultTree() {
   vaultFolders   = folders;
   vaultRootFiles = files;
   files.forEach(indexFile);
-
-  // P6 — re-read on focus regain, which is what makes the admin workflow work
-  // without anyone reloading: the manifest is edited in Obsidian, OneDrive
-  // syncs it, and the vault appears the next time the app is looked at.
-  await loadVaultList();
-  // Same focus-regain timing for the default page, so an admin's change
-  // reaches everyone else's next glance at the app without a reload.
-  await loadAppSettings();
-  await loadVaultCheckDismissals(); // P10 -- see the note at the other call site
-  await loadStaffUpdate();          // S94 -- see the note at the other call site
 
   // Mark every loaded folder stale so it re-fetches next time it's opened —
   // but leave its cached files/kids/badge count in place until then. Wiping
@@ -24740,6 +24900,28 @@ async function refreshVaultTree() {
       try { await loadFolderFiles(f); } catch (_) { /* one bad vault must not stop the refresh */ }
     }
   }
+  state.lastRefreshAt = Date.now();
+}
+
+// S108 -- the whole vault's listing, fresh. Used when something could not be
+// found (a moved page, a broken saved item), never on an ordinary click.
+async function folioRelistAll() {
+  await folioRelistTree();
+  await loadAllFolders();          // every stale folder re-listed
+}
+
+async function refreshVaultTree() {
+  await folioRelistTree();
+
+  // P6 — re-read on focus regain, which is what makes the admin workflow work
+  // without anyone reloading: the manifest is edited in Obsidian, OneDrive
+  // syncs it, and the vault appears the next time the app is looked at.
+  await loadVaultList();
+  // Same focus-regain timing for the default page, so an admin's change
+  // reaches everyone else's next glance at the app without a reload.
+  await loadAppSettings();
+  await loadVaultCheckDismissals(); // P10 -- see the note at the other call site
+  await loadStaffUpdate();          // S94 -- see the note at the other call site
 
   renderSidebar();
   // S35 — a focus-regain refresh is exactly when someone else's edits land,
@@ -24762,12 +24944,26 @@ async function refreshVaultTree() {
 
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState !== 'visible' || !vaultReady) return;
+  state.lastRefreshAt = Date.now();   // S108 -- the focus handler need not repeat this
   if (state.editing) return; // never yank content out from under an open edit
   try {
     await refreshVaultTree(); // catches new/removed/rogue files from outside the app
+    await rereadActivePage();
+    refreshRightPanel(); // re-reads comments/outline/backlinks/review live
+    scanBadges();        // vault-wide comment + review counts
+  } catch (e) { /* silent — the file's own error state will show on next explicit open */ }
+});
 
+// S108 -- the page on screen, re-rendered only if its text changed. A page
+// renamed or moved while you were away is followed to its new name.
+async function rereadActivePage() {
     if (state.activeUrl) {
-      const text = await readVaultFile(state.activeUrl);
+      let text = await readVaultFileOrNull(state.activeUrl);
+      if (text == null) {
+        const nu = await folioFindMoved(state.activeUrl);
+        if (nu) { await openFile(nu, displayNameOf(nu)); return; }
+        return;
+      }
       const rc = $('reader-content');
       if (rc && rc.dataset.wbText !== text) {
         const fm = parseFm(text); // Session 2 -- byline stays in sync on a live re-render too
@@ -24782,10 +24978,50 @@ document.addEventListener('visibilitychange', async () => {
         extractAndRegisterLinks(text, state.activeUrl);
       }
     }
-    refreshRightPanel(); // re-reads comments/outline/backlinks/review live
-    scanBadges();        // vault-wide comment + review counts
-  } catch (e) { /* silent — the file's own error state will show on next explicit open */ }
-});
+}
+
+// S108 -- the light refresh (Jayson, 23 Sep: seamless, no button, Home may
+// take longer than moving around the vault). Clicking back into Folio from
+// Obsidian re-lists the folders open in the tree and re-reads the page on
+// screen: directory listings plus one file, tens of milliseconds on a local
+// vault. visibilitychange only fires when the window was HIDDEN, so side by
+// side with Obsidian nothing refreshed until Folio was closed and reopened.
+// A short cooldown keeps quick clicking from repeating the work.
+const FOLIO_REFRESH_COOLDOWN = 4000;
+async function folioLightRefresh() {
+  if (!vaultReady || state.editing || state.lightRefreshing) return;
+  if (state.lastRefreshAt && Date.now() - state.lastRefreshAt < FOLIO_REFRESH_COOLDOWN) return;
+  state.lightRefreshing = true;
+  try {
+    await folioRelistTree();
+    renderSidebar();
+    await rereadActivePage();
+    if (isSavedPaneOpen && isSavedPaneOpen()) renderSavedTab();
+  } catch (_) { /* a failed glance is retried on the next one */ }
+  finally { state.lightRefreshing = false; }
+}
+window.addEventListener('focus', () => { folioLightRefresh(); });
+
+// S108 -- where did this page go? Called only when a page cannot be read:
+// the whole listing is taken fresh, the scan runs (which pairs renames and
+// moves), and the page's new address is returned, or null. Falls back to the
+// only page left in the same vault with the same title, number trimmed.
+async function folioFindMoved(url) {
+  try {
+    await folioRelistAll();
+    await wnScan();
+  } catch (_) { return null; }
+  const files = allMdFiles().map(f => f.url);
+  if (files.includes(url)) return url;
+  let cur = url, hops = 0;
+  const ren = state.lastRenames || {};
+  while (ren[cur] && hops++ < 10) cur = ren[cur];
+  if (cur !== url && files.includes(cur)) return cur;
+  const title = x => stripNumPrefix(fileStem(String(x).split('/').pop())).toLowerCase().trim();
+  const vault = x => pageIdentity(x).vault;
+  const hits = files.filter(u => title(u) === title(url) && vault(u) === vault(url));
+  return hits.length === 1 ? hits[0] : null;
+}
 
 // S45 — anything a hard browser close left behind is picked up here and goes
 // out with the next flush, rather than being lost or double-counted.

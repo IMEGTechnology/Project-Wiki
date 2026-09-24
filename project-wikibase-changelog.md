@@ -8,6 +8,42 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.75.0 — 2026-09-23
+
+**Changed:** `index.html`; added `supporting/tests/s109-review.test.js` (31 checks, seven reverts red); updated `change-detection`, `j2-review-b`, `p10-vault-check`, `review-actions`, `review-bugfix-0321`, `review-dashboard`, `scan-cache`, `vault-audit` (old review rules reversed on purpose, each marked S109).
+
+*S109, the Review rework, pulled forward from after Friday at Jayson's call. Admin-only surfaces; staff see no difference. Rule (Jayson, 23 Sep): properties and review are two questions and are never combined.*
+
+### What was wrong
+- **Review called a page new only when it had no `status`,** and watched edits only on pages Folio had signed off. A page created with a status already in it (typed, copied, from a template) was never reviewed, and neither was any later edit to it.
+- **Approve on a new page only filled properties** and set Needs Review, so the page stayed listed for a second approval. A property fill also silently signed the page's content off.
+
+### Review is content only
+- **To be reviewed = anything Folio has not signed off:** a new page (no sign-off, whatever its properties), an edit in Obsidian or in Folio since the last sign-off, a section added, a status set back by hand, or a due date passed. The row says which.
+- **Approve** records the text as signed off, sets `status: Reviewed` and `reviewed: <today>` (`reviewed` is the date of the last sign-off now, not true/false), clears a due date that has passed, and settles edits made in Folio. It never fills a property.
+- **The page's own flag flips.** A Contributor or Admin scan sets `status: To Be Reviewed` on a page whose text is new or changed, once it has sat two minutes (never while someone is typing), never on the first-run seed, one property line only, and What's New does not count it as an edit.
+- **A rename or move without an edit keeps its sign-off.**
+- **Approve all as they are (N)**, Administrator only, signs off every content row once. For accepting the vault as it stands; afterwards every new page and change comes back.
+
+### Three kinds, two values
+- **Review lists To be reviewed, Flagged and Questions.** Flags and Reports raised on a page (they reached only All comments before) are Flagged, with the person's note under the row. Questions keep escalated ones in red. Stripe and counts are by kind.
+- **Status has two values, To Be Reviewed and Reviewed.** The other five did nothing anywhere; a page still carrying one shows it and reads as To Be Reviewed until approved.
+
+### Properties are Vault check's
+- **Missing properties is reported for every page,** status or not. Fill properties writes `status: To Be Reviewed` and an empty `reviewed` when absent, and never records a sign-off.
+
+## 0.74.0 — 2026-09-23
+
+**Changed:** `index.html`; `supporting/tests/s108-number-sweep.test.js` (+11 checks); updated `moves-links-version.test.js`, `s107-identity.test.js`, `session2-reading.test.js` (rules reversed on purpose, below).
+
+*S108 continued: the user-facing fixes from Jayson's rename test, for Friday's go-live.*
+
+- **Folio refreshes itself, no button.** Clicking back into Folio re-lists the folders open in the tree and re-reads the page on screen (directory listings and one file, a few milliseconds, at most once every few seconds). Opening a page re-lists its folder after the page is on screen. **Home** is the full refresh: the whole tree, then the scan. Before this, Folio refreshed only when its window had been hidden, so side by side with Obsidian new, renamed and moved pages appeared only after closing and reopening.
+- **A page that cannot be found is followed.** Opening a link, a saved item or the page on screen after it was renamed or moved takes one fresh look and opens it at its new address.
+- **Saved repairs itself.** It looks again before calling anything broken (the step-5 move was Folio not having re-listed), and it now also follows a page by a unique file name (moved) or a unique title (renamed and edited) in the same vault. Two candidates still wait for Repair. `moves-links-version` and `s107-identity` asserted the old manual-only rule and now assert this one.
+- **Saved shows a renamed heading's current name.** The section followed the heading since 0.72.0 but kept its old label.
+- **New file, New folder and Move a file are hidden for every tier** until New page (S110). Pages are started and moved in Obsidian.
+
 ## 0.73.0 — 2026-09-23
 
 **Changed:** `index.html`; added `supporting/tests/s108-number-sweep.test.js` (48 checks, eight reverts each turn it red); updated `supporting/tests/change-detection.test.js` (one check reversed on purpose, see below).
