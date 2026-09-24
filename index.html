@@ -4556,7 +4556,7 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.76.1</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.76.2</button>
       </div>
 
       <div class="ud-actions">
@@ -7307,6 +7307,9 @@ function renderInline(text) {
     codeSlots.push(`<code class="md-code">${code}</code>`);
     return `\x00C${idx}\x00`;
   });
+  // 0.76.2 -- an Obsidian comment inside a line (%% like this %%) is hidden,
+  // as Obsidian hides it. Code spans are already protected above.
+  s = s.replace(/%%.*?%%/g, '');
 
   // 1b. Protect links and images the same way, and do it before any bold/
   // italic/strikethrough/highlight parsing runs. Those regexes used to run
@@ -8526,10 +8529,13 @@ function imageCaptionLine(line) {
 function parseBlocks(lines) {
   const blocks = [];
   let i = 0;
+  // 0.76.2 -- %%wide%% applies to the next table; anything else in between cancels it.
+  let pendingWide = false;
 
   while (i < lines.length) {
     const line = lines[i];
     const trimmed = line.trimStart();
+    if (trimmed && !trimmed.startsWith('%%') && !isTableRow(trimmed)) pendingWide = false;
 
     // Fenced code block (``` or ~~~)
     const fenceM = line.match(/^(`{3,}|~{3,})(.*)/);
@@ -8602,6 +8608,20 @@ function parseBlocks(lines) {
       continue;
     }
 
+    // 0.76.2 -- Obsidian comments (%% ... %%) are hidden, as Obsidian hides
+    // them. One keyword is read: %%wide%% on its own line above a table
+    // (blank lines between are fine) takes that table margin to margin.
+    if (trimmed.startsWith('%%')) {
+      const t = trimmed.trim();
+      if (t.length >= 4 && t.endsWith('%%')) {
+        if (/^%%\s*wide\s*%%$/i.test(t)) pendingWide = true;
+        i++; continue;
+      }
+      i++;
+      while (i < lines.length && !lines[i].includes('%%')) i++;
+      i++; continue;
+    }
+
     // Table (needs a real column pipe on this line and separator on next).
     // "Real" = isTableRow, which ignores pipes living inside a
     // [[File#Head|Alias]], an ![[img.png|400]], a `a|b` code span or an
@@ -8614,7 +8634,8 @@ function parseBlocks(lines) {
         tableLines.push(lines[i]);
         i++;
       }
-      blocks.push({ type: 'table', lines: tableLines });
+      blocks.push({ type: 'table', lines: tableLines, wide: pendingWide });
+      pendingWide = false;
       continue;
     }
 
@@ -9179,12 +9200,13 @@ function renderSingleBlock(block, seenIds) {
             return `<tr${attr}>${cells(r).map((c, i) => `<td${alignAttr(i)}>${renderInline(c)}</td>`).join('')}</tr>`;
           }).join('')}</tbody>`
         : '';
-      // 0.76.1 -- the author's drawn width: the longest separator or
-      // width-padding row, in characters. Only a row drawn wider than the
-      // page widens the table (layoutReaderTables); everything else wraps.
-      const drawn = block.lines.filter(l => l.trim() && (isSeparatorRow(l) || isSpacerRow(l)))
-        .reduce((a, l) => Math.max(a, l.trim().length), 0);
-      return `<div class="md-table-wrap"${drawn ? ` data-drawn="${drawn}"` : ''}><table class="md-table">${thead}${tbody}</table></div>`;
+      // 0.76.2 (Jayson, 24 Sep) -- the separator row is a ruler. A column
+      // of 3 dashes or less sizes to its content; more than 3 and its dash
+      // count is its share of the width (layoutReaderTables). %%wide%% above
+      // the table takes it margin to margin.
+      const dash = sepLine ? splitTableCells(sepLine).map(c => (c.match(/-/g) || []).length) : [];
+      const dashAttr = dash.some(d => d > 3) ? ` data-dash="${dash.join(',')}"` : '';
+      return `<div class="md-table-wrap"${dashAttr}${block.wide ? ' data-wide="1"' : ''}><table class="md-table">${thead}${tbody}</table></div>`;
     }
 
     case 'list': {
@@ -22330,22 +22352,46 @@ document.addEventListener('click', e => {
 // and "Open full table" shows it on its own. Re-run on every render, resize
 // and reading-setting change.
 //
-// 0.76.1 (Jayson, 24 Sep): "none of the tables wrap, they are way too wide
-// for no reason". 0.76.0 sized a table by its one-line width, so one
-// sentence in a cell made it "wide". Now text ALWAYS wraps and a table stays
-// in the text column. It widens only when the author drew it wider than the
-// page: the separator (---) or width-padding (....) row, in characters, is
-// longer than the column holds. Then it takes that drawn width, up to the
-// reading area. Sideways scroll only if it cannot fit even fully wrapped.
-function measureReaderTable(table, wrap) {
-  const em = parseFloat(getComputedStyle(table).fontSize) || 15;
-  const drawn = parseInt(wrap.getAttribute('data-drawn') || '0', 10);
+// 0.76.2 (Jayson, 24 Sep) -- how a table takes its width. Text always wraps.
+//   Plain --- everywhere   sized to its content, up to the text column.
+//   A column of 4+ dashes  the table fills the text column; plain columns
+//                          stay tight (capped ~22 characters), drawn columns
+//                          share the rest by their dash counts.
+//   %%wide%% above it      the same, but across the whole reading area.
+//   Cannot fit wrapped     widens into the margins; past the reading area
+//                          it scrolls sideways with Open full table.
+// 0.76.0 sized tables at one line per row; 0.76.1 widened on the drawn
+// length of the --- row. Both are gone: dash counts only ever set shares.
+function measureReaderTable(table) {
   table.style.maxWidth = 'none';
+  const colW = () => Array.from((table.rows[0] || {}).cells || []).map(c => c.getBoundingClientRect().width);
+  table.style.width = 'max-content';
+  const maxW = colW();
   table.style.width = 'min-content';
+  const minW = colW();
   const min = Math.ceil(table.getBoundingClientRect().width) + 2;
   table.style.width = ''; table.style.maxWidth = '';
-  // A monospace-ish character is about 0.55em: Obsidian's editor, where the row is drawn.
-  return { drawnW: Math.ceil(drawn * 0.55 * em), min };
+  const probe = document.createElement('span');
+  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap';
+  probe.textContent = '0'.repeat(50);
+  table.parentElement.appendChild(probe);
+  const ch = (probe.getBoundingClientRect().width / 50) * 0.92 || 7.4;
+  probe.remove();
+  return { maxW, minW, min, ch };
+}
+function readerTableWidths(dash, m, target) {
+  const PAD = 25; // cell padding and the column line
+  const n = Math.max(dash.length, m.minW.length);
+  const w = [], drawnIdx = [];
+  for (let i = 0; i < n; i++) {
+    if ((dash[i] || 0) > 3) { drawnIdx.push(i); w[i] = 0; }
+    else w[i] = Math.ceil(Math.max(m.minW[i] || 0, Math.min(m.maxW[i] || 0, 22 * m.ch + PAD)));
+  }
+  const fixed = w.reduce((a, x) => a + x, 0);
+  const dsum = drawnIdx.reduce((a, i) => a + dash[i], 0);
+  const rest = Math.max(0, target - 2 - fixed);
+  drawnIdx.forEach(i => { w[i] = Math.ceil(Math.max(m.minW[i] || 0, dsum ? rest * dash[i] / dsum : 0, 4 * m.ch + PAD)); });
+  return w;
 }
 function layoutReaderTables() {
   const rc = $('reader-content'), reader = $('reader');
@@ -22368,16 +22414,39 @@ function layoutReaderTables() {
     if (wrap.parentElement && wrap.parentElement.closest('.md-callout, li, blockquote')) return;
     // Measured free of the column: the stylesheet caps a table at 100% of
     // its box, which would make every table look as if it already fits.
-    const m = measureReaderTable(table, wrap);
-    const want = Math.max(m.drawnW, m.min);
-    if (want <= textW + 1) return;
-    const W = Math.min(want, readerW);
+    const oldCols = table.querySelector(':scope > colgroup');
+    if (oldCols) oldCols.remove();
+    table.style.tableLayout = ''; table.style.width = '';
+    const m = measureReaderTable(table);
+    const dash = (wrap.getAttribute('data-dash') || '').split(',').filter(Boolean).map(Number);
+    const wide = wrap.hasAttribute('data-wide');
+    const drawn = dash.some(d => d > 3);
+    let total;
+    if (!drawn && !wide) {
+      // Plain: the browser sizes it to its content, wrapping at the column.
+      if (m.min <= textW + 1) return;
+      total = m.min;
+    } else if (!drawn) {
+      // %%wide%% with plain columns: the whole reading area, browser shares.
+      total = Math.max(readerW, m.min);
+      table.style.width = total + 'px';
+    } else {
+      const widths = readerTableWidths(dash, m, wide ? readerW : textW);
+      total = widths.reduce((a, x) => a + x, 0) + 2;
+      const cg = document.createElement('colgroup');
+      widths.forEach(x => { const c = document.createElement('col'); c.style.width = x + 'px'; cg.appendChild(c); });
+      table.insertBefore(cg, table.firstChild);
+      table.style.tableLayout = 'fixed';
+      table.style.width = total + 'px';
+    }
+    if (total <= textW + 1) return;
+    const W = Math.min(total, readerW);
     wrap.classList.add('widened');
     wrap.style.width = W + 'px';
     wrap.style.marginLeft = Math.round((textW - W) / 2) + 'px';
-    if (m.min <= readerW) return;
+    if (total <= readerW + 1) return;
     wrap.classList.add('overflow');
-    table.style.width = m.min + 'px';
+    table.style.width = total + 'px';
     const bar = document.createElement('div');
     bar.className = 'md-tbar';
     bar.innerHTML = '<button type="button" class="md-tbtn" data-wb-tableview="1">⤢ Open full table</button>';
@@ -22414,7 +22483,7 @@ function openTableView(wrap) {
   tv.innerHTML = '<div class="tv-head">Table in <b>' + escHtml(h ? h.textContent.trim() : 'this page') + '</b><span class="bt-grow"></span>' +
     'Scroll both ways. The header and first column stay put.<button type="button" class="md-tbtn" data-wb-tableclose="1">Close</button></div><div class="tv-body"></div>';
   const copy = table.cloneNode(true);
-  copy.style.width = '';
+  if (copy.style.tableLayout !== 'fixed') copy.style.width = '';
   tv.querySelector('.tv-body').appendChild(copy);
   tv.classList.add('open');
 }

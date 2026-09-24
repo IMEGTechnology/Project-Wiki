@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.76.1**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.76.2**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -364,7 +364,23 @@ This is different from a Folio **comment**, which is a threaded note posted from
 | a | b | c |
 ```
 
-Tables are content-width, matching Obsidian, and only wrap when they would otherwise overflow the column. Column alignment follows the separator row exactly as shown above — `:--` left, `:--:` center, `--:` right, plain `--` left (the default) — the same syntax Obsidian itself reads, so nothing changes about how you write these.
+Column alignment follows the separator row: `:--` left, `:--:` center, `--:` right, plain `--` left (the default). Obsidian reads the same syntax. Text in a table always wraps.
+
+**Width is set by the separator row too.** Think of it as a ruler:
+
+- **3 dashes or less** (`---`, `:-:`): the column is as wide as its content. A table drawn this way is compact.
+- **4 dashes or more** (`:------`): the table fills the text column, and the drawn columns share the room by their dash count. Plain columns stay tight. Draw only the column that needs the room, usually Notes. Two drawn columns of 10 and 30 dashes split the room one quarter to three quarters.
+- **`%%wide%%`** on its own line above the table (a blank line between is fine) takes it margin to margin. Obsidian hides that line, so only Folio reads it.
+
+```md
+%%wide%%
+
+| Door | Height | Notes |
+|:--|:-:|:----------|
+| DH-101 | 1.0 m | Mantrap outer, interlocked with DH-102. |
+```
+
+A table with too many columns to fit, even wrapped, widens into the margins and then scrolls sideways, with **Open full table** above it. Obsidian ignores dash counts, so a drawn table looks different while you edit; Folio is where the widths show.
 
 ### Properties, frontmatter
 

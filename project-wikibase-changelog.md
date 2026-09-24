@@ -8,6 +8,22 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.76.2 — 2026-09-24
+
+**Changed:** `index.html`, `help-edit.md` (Tables rewritten, version line), `help.md` (version line only); updated `supporting/tests/s109b-reading.test.js` (63 checks; the new width checks fail on 0.76.1).
+
+*Jayson, same day: tables need column widths and alignment the author controls, the way Confluence and Notion allow, without counting dashes to get a full-width table. Sampled first (`Claude outputs/s110-table-widths-sample.html`).*
+
+### Table widths come from the separator row
+- **3 dashes or less** in a column (`---`, `:-:`): that column sizes to its content. A table drawn this way is compact.
+- **4 dashes or more:** the table fills the text column. Drawn columns share the room by their dash count; plain columns stay tight. Draw only the column that needs room, usually Notes.
+- **`%%wide%%`** on its own line above a table takes it margin to margin, on every Width setting. Obsidian hides the line.
+- Too many columns to fit even wrapped: widens into the margins, then scrolls sideways with Open full table. Text always wraps. Vertical alignment stays top.
+- Replaces 0.76.1's rule, where a long `---` row widened the table. Dash counts now only set shares.
+
+### Obsidian comments are hidden
+- `%% ... %%` no longer shows in Folio, on its own line, across several lines, or inside a sentence, matching Obsidian.
+
 ## 0.76.1 — 2026-09-24
 
 **Changed:** `index.html`, `help.md`, `help-edit.md` (version line only); updated `supporting/tests/s109b-reading.test.js` (56 checks; the new table checks fail on 0.76.0). Replaced `rollout/Folio-obsidian-theme-v0.76.0.zip` with `rollout/Folio-obsidian-theme-v0.76.1.zip`.
