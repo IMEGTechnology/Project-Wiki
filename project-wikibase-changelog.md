@@ -8,6 +8,18 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.76.1 — 2026-09-24
+
+**Changed:** `index.html`, `help.md`, `help-edit.md` (version line only); updated `supporting/tests/s109b-reading.test.js` (56 checks; the new table checks fail on 0.76.0). Replaced `rollout/Folio-obsidian-theme-v0.76.0.zip` with `rollout/Folio-obsidian-theme-v0.76.1.zip`.
+
+*Jayson, same day as 0.76.0: "none of the tables wrap, they are way too wide for no reason."*
+
+### Tables wrap again
+- **Text in a table always wraps, and a table stays in the text column.** 0.76.0 sized each table as if no cell ever wrapped, so one sentence in a cell pushed the whole table into the margins, and past a point into one-line rows with sideways scrolling.
+- **A table widens only when you drew it wider than the page:** its `---` row (or a `....` padding row) is longer than the column holds. It then takes that drawn width, centred, up to the reading area, and still wraps.
+- Sideways scroll, the pinned header copy and Open full table are now only for a table that cannot fit the reading area even fully wrapped.
+- **Obsidian theme 0.76.1:** tables wrap in the text column there too. Obsidian cannot see how wide the `---` row is drawn, so a very wide table scrolls sideways there instead of widening.
+
 ## 0.76.0 — 2026-09-24
 
 **Changed:** `index.html`, `help.md`, `help-edit.md`; added `supporting/tests/s109b-reading.test.js` (52 checks, six reverts red); updated `theme.test.js` and `p8-first-run.test.js` (the old presets and widths reversed on purpose). Added `rollout/Folio-obsidian-theme-v0.76.0.zip`.

@@ -4357,18 +4357,16 @@ body[data-preset="guided"] #st-row .st-seg[data-lv="4"] i { background: var(--hm
 #reader-content .md-table thead th:last-child  { border-top-right-radius: 5px; }
 body.beta-shell #reader-content .md-table thead th { position: sticky; top: var(--stick, 0px); z-index: 3; }
 /* Widened past the text column (layoutReaderTables sets width and offset).
-   Wider than the whole reading area: one line per row, sideways scroll in
+   Wider than the whole reading area, even wrapped: sideways scroll in
    .md-tscroll, and a copy of the header that stays pinned and follows the
    sideways scroll, so the header holds to the end of every table. */
 #reader-content .md-table-wrap.widened .md-table { width: 100%; max-width: none; }
 #reader-content .md-table-wrap.overflow .md-tscroll { overflow-x: auto; }
-#reader-content .md-table-wrap.overflow .md-table { width: max-content; min-width: 100%; }
-#reader-content .md-table-wrap.overflow th, #reader-content .md-table-wrap.overflow td { white-space: nowrap; }
+#reader-content .md-table-wrap.overflow .md-table { min-width: 100%; }
 body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { position: static; }
 #reader-content .md-table-wrap.overflow .md-tscroll thead { visibility: hidden; }
 #reader-content .md-thead-pin { position: sticky; top: var(--stick, 0px); z-index: 4; overflow: hidden; background: var(--bg-reader); }
 #reader-content .md-thead-pin .md-table { width: max-content; border-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-#reader-content .md-thead-pin th { white-space: nowrap; }
 #reader-content .md-tbar { display: flex; justify-content: flex-end; margin: 0 0 4px; }
 .md-tbtn { font-size: 12px; color: var(--text-secondary); background: transparent; border: 1px solid var(--border-strong); border-radius: 6px; height: 24px; padding: 0 9px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
 .md-tbtn:hover { color: var(--accent); border-color: var(--accent); }
@@ -4558,7 +4556,7 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.76.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.76.1</button>
       </div>
 
       <div class="ud-actions">
@@ -9181,7 +9179,12 @@ function renderSingleBlock(block, seenIds) {
             return `<tr${attr}>${cells(r).map((c, i) => `<td${alignAttr(i)}>${renderInline(c)}</td>`).join('')}</tr>`;
           }).join('')}</tbody>`
         : '';
-      return `<div class="md-table-wrap"><table class="md-table">${thead}${tbody}</table></div>`;
+      // 0.76.1 -- the author's drawn width: the longest separator or
+      // width-padding row, in characters. Only a row drawn wider than the
+      // page widens the table (layoutReaderTables); everything else wraps.
+      const drawn = block.lines.filter(l => l.trim() && (isSeparatorRow(l) || isSpacerRow(l)))
+        .reduce((a, l) => Math.max(a, l.trim().length), 0);
+      return `<div class="md-table-wrap"${drawn ? ` data-drawn="${drawn}"` : ''}><table class="md-table">${thead}${tbody}</table></div>`;
     }
 
     case 'list': {
@@ -22322,11 +22325,28 @@ document.addEventListener('click', e => {
 // A table that fits the text column stays in line with the text. Wider than
 // that, it grows into the margins, centred, up to the reading area's width,
 // and its header stays pinned as it always has. Wider than the whole reading
-// area (rare): it takes the full reading width, keeps one line per row and
-// scrolls sideways; a copy of its header sits pinned above it and follows
+// area (rare): it takes the full reading width and scrolls sideways; a copy of its header sits pinned above it and follows
 // the sideways scroll, so the header still holds to the end of the table,
 // and "Open full table" shows it on its own. Re-run on every render, resize
 // and reading-setting change.
+//
+// 0.76.1 (Jayson, 24 Sep): "none of the tables wrap, they are way too wide
+// for no reason". 0.76.0 sized a table by its one-line width, so one
+// sentence in a cell made it "wide". Now text ALWAYS wraps and a table stays
+// in the text column. It widens only when the author drew it wider than the
+// page: the separator (---) or width-padding (....) row, in characters, is
+// longer than the column holds. Then it takes that drawn width, up to the
+// reading area. Sideways scroll only if it cannot fit even fully wrapped.
+function measureReaderTable(table, wrap) {
+  const em = parseFloat(getComputedStyle(table).fontSize) || 15;
+  const drawn = parseInt(wrap.getAttribute('data-drawn') || '0', 10);
+  table.style.maxWidth = 'none';
+  table.style.width = 'min-content';
+  const min = Math.ceil(table.getBoundingClientRect().width) + 2;
+  table.style.width = ''; table.style.maxWidth = '';
+  // A monospace-ish character is about 0.55em: Obsidian's editor, where the row is drawn.
+  return { drawnW: Math.ceil(drawn * 0.55 * em), min };
+}
 function layoutReaderTables() {
   const rc = $('reader-content'), reader = $('reader');
   if (!rc || !reader || rc.style.display === 'none') return;
@@ -22348,16 +22368,16 @@ function layoutReaderTables() {
     if (wrap.parentElement && wrap.parentElement.closest('.md-callout, li, blockquote')) return;
     // Measured free of the column: the stylesheet caps a table at 100% of
     // its box, which would make every table look as if it already fits.
-    table.style.width = 'max-content'; table.style.maxWidth = 'none';
-    const natural = Math.ceil(table.getBoundingClientRect().width) + 2;
-    table.style.width = ''; table.style.maxWidth = '';
-    if (natural <= textW + 1) return;
-    const W = Math.min(natural, readerW);
+    const m = measureReaderTable(table, wrap);
+    const want = Math.max(m.drawnW, m.min);
+    if (want <= textW + 1) return;
+    const W = Math.min(want, readerW);
     wrap.classList.add('widened');
     wrap.style.width = W + 'px';
     wrap.style.marginLeft = Math.round((textW - W) / 2) + 'px';
-    if (natural <= readerW) return;
+    if (m.min <= readerW) return;
     wrap.classList.add('overflow');
+    table.style.width = m.min + 'px';
     const bar = document.createElement('div');
     bar.className = 'md-tbar';
     bar.innerHTML = '<button type="button" class="md-tbtn" data-wb-tableview="1">⤢ Open full table</button>';
