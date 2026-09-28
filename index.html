@@ -2389,6 +2389,182 @@
     .md-callout.failure .md-callout-label, .md-callout.danger .md-callout-label, .md-callout.bug .md-callout-label { color: var(--co-red-txt); }
     .md-callout.example         { background: var(--co-purple-bg); border-color: var(--co-purple-bd); }
     .md-callout.example .md-callout-label  { color: var(--co-purple-txt); }
+
+    /* ── S110 · Templates and New page ─────────────────────────────── */
+    body.beta-shell #bt-newpage {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 28px; padding: 0 11px; margin-left: 6px; flex-shrink: 0;
+      border: 1px solid var(--border-strong); border-radius: var(--radius);
+      background: transparent; color: var(--text-primary);
+      font-size: 12.5px; font-weight: 600; cursor: pointer;
+    }
+    body.beta-shell #bt-newpage:hover { border-color: var(--accent); color: var(--accent); }
+    body.beta-shell #bt-newpage .icon { width: 13px; height: 13px; }
+    #bt-newpage[hidden] { display: none !important; }
+
+    /* Guide boxes: never drawn unless an Administrator shows them. */
+    .md-callout.guide { background: var(--co-purple-bg); border-color: var(--co-purple-bd); border-style: dashed; }
+    .md-callout.guide .md-callout-label { color: var(--co-purple-txt); }
+    .md-tpnote {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11.5px; font-style: italic;
+      color: var(--text-muted); white-space: pre-wrap; margin: .2em 0 .9em; padding: 2px 8px;
+      border-left: 2px solid var(--co-purple-bd); background: var(--co-purple-bg); border-radius: 3px;
+    }
+
+    /* The status line on a draft or unreviewed page: full width, a mark
+       and a word, never colour alone. Contrast measured 27 Sep. */
+    .pg-status {
+      display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+      margin: 0 0 14px; padding: 7px 12px; border-radius: 6px; border-left: 3px solid;
+      font-size: 13.5px; line-height: 1.45;
+    }
+    .pg-status .pg-st-lab { font-weight: 650; white-space: nowrap; }
+    body[data-theme="dark"] .pg-status.st-draft   { background: rgba(168,162,158,.14); border-color: #a8a29e; }
+    body[data-theme="dark"] .pg-status.st-draft .pg-st-lab { color: #e7e5e4; }
+    body[data-theme="dark"] .pg-status.st-review  { background: rgba(250,204,21,.12); border-color: #facc15; }
+    body[data-theme="dark"] .pg-status.st-review .pg-st-lab { color: #fde68a; }
+    body[data-theme="dark"] .pg-status span:not(.pg-st-lab) { color: #d6d3d1; }
+    body[data-theme="light"] .pg-status.st-draft  { background: #f1f0ee; border-color: #78716c; }
+    body[data-theme="light"] .pg-status.st-draft .pg-st-lab { color: #44403c; }
+    body[data-theme="light"] .pg-status.st-review { background: #fdf6d8; border-color: #a16207; }
+    body[data-theme="light"] .pg-status.st-review .pg-st-lab { color: #854d0e; }
+    body[data-theme="light"] .pg-status span:not(.pg-st-lab) { color: #57534e; }
+
+    /* Seven Admin doors now: a little less air between and inside them, so
+       the row still fits one line at report width (it wraps, as designed in
+       S102, when a narrow window or many counts need it). */
+    html body #admin-tabs .ad-doors { gap: 4px; }
+    html body[data-doors="block"] #admin-tabs .ch-door { padding-right: 18px; }
+
+    /* Admin > Templates */
+    .tpl-screen { font-size: 13.5px; color: var(--text-primary); }
+    .tpl-trow { display: flex; align-items: center; gap: 2px; border-bottom: 1px solid var(--border-strong); margin: 4px 0 0; min-height: 40px; }
+    .tpl-tscroll { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; min-width: 0; flex: 0 1 auto; scroll-behavior: smooth; }
+    .tpl-tscroll::-webkit-scrollbar { display: none; }
+    .tpl-tt { border: 0; background: transparent; padding: 9px 12px; font-size: 13.5px; color: var(--text-secondary); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; flex: none; }
+    .tpl-tt:hover { color: var(--text-primary); }
+    .tpl-tt.on { color: var(--text-primary); border-bottom-color: var(--accent); font-weight: 600; }
+    .tpl-tt .c { font-size: 11.5px; color: var(--text-muted); margin-left: 6px; font-weight: 400; }
+    .tpl-tt.samp { font-style: italic; }
+    .tpl-tt.ret { text-decoration: line-through; color: var(--text-muted); }
+    .tpl-tt.tpl-newt { color: var(--accent); }
+    .tpl-sarr { border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; font-size: 16px; padding: 4px 6px; border-radius: 5px; flex: none; }
+    .tpl-sarr:hover { background: var(--hover); }
+    .tpl-sarr.dim { opacity: .25; cursor: default; }
+    .tpl-tdiv { width: 1px; height: 20px; background: var(--border-strong); margin: 0 8px; flex: none; }
+    .tpl-sp { flex: 1; }
+    .tpl-acts { display: flex; gap: 6px; flex: none; }
+    .tpl-subline { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin: 10px 0 8px; color: var(--text-secondary); }
+    .tpl-meta { color: var(--text-muted); font-size: 11.5px; }
+    .tpl-vrow { display: flex; align-items: center; gap: 6px; margin: 0 0 12px; min-height: 30px; }
+    .tpl-seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }
+    .tpl-seg button { border: 0; background: transparent; padding: 5px 12px; font-size: 12.5px; color: var(--text-secondary); cursor: pointer; }
+    .tpl-seg button + button { border-left: 1px solid var(--border-strong); }
+    .tpl-seg button.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    .tpl-seg.sm button { font-size: 11.5px; padding: 2px 8px; }
+    .tpl-flywrap { position: relative; }
+    .tpl-fly { position: absolute; right: 0; top: calc(100% + 6px); z-index: 25; background: var(--bg-sidebar); border: 1px solid var(--border-strong);
+      border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,.3); padding: 10px 12px; min-width: 260px; display: flex; flex-direction: column; gap: 2px; }
+    .tpl-fh { font-size: 11.5px; color: var(--text-muted); margin: 8px 0 4px; }
+    .tpl-fh:first-child { margin-top: 0; }
+    .tpl-fo { border: 0; background: transparent; text-align: left; padding: 5px 8px; border-radius: 5px; color: var(--text-primary); cursor: pointer; font-size: 12.5px; }
+    .tpl-fo:hover { background: var(--hover); }
+    .tpl-fo.on { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    .tpl-fchk { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--text-secondary); cursor: pointer; }
+    .tpl-prev { border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-app); padding: 20px 16px; }
+    #tpl-page { margin: 0 auto; background: var(--bg-reader); border-radius: 6px; padding: 24px 28px; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+    #tpl-page.tpl-obs { font-size: 13.5px; }
+    .tpl-newnote { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 10px; padding: 6px 10px; border-left: 3px solid var(--accent); background: var(--accent-bg); border-radius: 4px; }
+    .tpl-src { margin: 0; white-space: pre-wrap; word-break: break-word; font: 12.5px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-secondary); }
+    .tpl-src .tpl-s-note { color: var(--text-muted); font-style: italic; background: var(--co-purple-bg); border-radius: 3px; }
+    .tpl-src .tpl-s-guide { background: var(--co-purple-bg); color: var(--co-purple-txt); }
+    .tpl-src .tpl-s-h { color: var(--text-primary); font-weight: 700; }
+    .tpl-src .tpl-s-fm { color: var(--text-muted); }
+    .tpl-card { border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-reader); margin: 0 0 10px; }
+    .tpl-set { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; padding: 10px 14px; }
+    .tpl-set div { display: flex; flex-direction: column; font-size: 12.5px; }
+    .tpl-set span { color: var(--text-muted); font-size: 11.5px; }
+    .tpl-set b { font-weight: 500; color: var(--text-primary); }
+    .tpl-orow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 9px 14px; border-top: 1px solid var(--border); }
+    .tpl-orow:first-child { border-top: 0; }
+    .tpl-orow.lv3 { padding-left: 36px; } .tpl-orow.lv4 { padding-left: 58px; } .tpl-orow.lv5, .tpl-orow.lv6 { padding-left: 80px; }
+    .tpl-oname { font-weight: 600; font-size: 13.5px; }
+    .tpl-hl { display: inline-block; width: 30px; font: 10.5px ui-monospace, Menlo, monospace; color: var(--text-muted); font-weight: 400; }
+    .tpl-opills { text-align: right; }
+    .tpl-onote { grid-column: 1 / -1; font-size: 12.5px; color: var(--text-secondary); margin-left: 30px; }
+    .tpl-ox { display: inline-block; font-size: 11.5px; color: var(--text-muted); margin: 0 0 0 8px; font-style: italic; }
+    .tpl-bad { display: block; color: var(--co-red-txt); font-size: 11.5px; }
+    .tpl-pl { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border: 1px solid currentColor;
+      border-radius: 99px; padding: 0 7px; line-height: 17px; white-space: nowrap; margin-left: 6px; }
+    .tpl-pl.p-core { color: var(--co-blue-txt); background: var(--co-blue-bg); }
+    .tpl-pl.p-opt  { color: var(--co-gray-txt); background: var(--co-gray-bg); }
+    .tpl-pl.p-one  { color: var(--co-purple-txt); background: var(--co-purple-bg); }
+    .tpl-pl.p-rep  { color: var(--co-green-txt); background: var(--co-green-bg); }
+    .tpl-pl.p-co   { color: var(--co-orange-txt); background: var(--co-orange-bg); }
+    .tpl-key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 11.5px; color: var(--text-muted); margin: 4px 2px 0; }
+    .tpl-key .tpl-pl, .tpl-key .tpl-ox { margin: 0 4px 0 0; }
+    .tpl-prow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-top: 1px solid var(--border); }
+    .tpl-prow:first-child { border-top: 0; }
+    .tpl-prow > div { flex: 1; }
+    .tpl-prow b { display: block; font-size: 13.5px; }
+    .tpl-prow span { font-size: 12.5px; color: var(--text-secondary); }
+    .tpl-hint { font-size: 12.5px; color: var(--text-muted); margin: 6px 2px; }
+    .tpl-hint a { color: var(--accent); }
+    .tpl-how { border: 1px solid var(--border); border-radius: 8px; margin: 0 0 10px; background: var(--bg-reader); }
+    .tpl-how summary { cursor: pointer; font-size: 13.5px; padding: 8px 12px; font-weight: 600; }
+    .tpl-howb { padding: 0 12px 10px; font-size: 12.5px; color: var(--text-secondary); display: grid; gap: 6px; }
+    .tpl-howb b { color: var(--text-primary); }
+    .tpl-grp { border-top: 1px solid var(--border); }
+    .tpl-grp:first-child { border-top: 0; }
+    .tpl-gh { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: transparent; padding: 10px 14px; cursor: pointer; text-align: left; color: var(--text-primary); font-size: 13.5px; }
+    .tpl-gh:hover { background: var(--hover); }
+    .tpl-gh .tw { color: var(--text-muted); width: 12px; }
+    .tpl-gh .gc { font-size: 11.5px; color: var(--text-muted); }
+    .tpl-gh .gs { flex: 1; text-align: right; font-size: 11.5px; color: var(--text-muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .tpl-gb { padding: 2px 14px 10px 36px; }
+    .tpl-rr { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto minmax(0, .8fr); gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13.5px; }
+    .tpl-rr:first-child { border-top: 0; }
+    .tpl-rr .rx { font-size: 11.5px; color: var(--text-muted); }
+    .tpl-fx { font-size: 12.5px; color: var(--text-secondary); }
+    .tpl-inp { font: inherit; font-size: 13.5px; color: var(--text-primary); background: var(--bg-reader); border: 1px solid var(--border-strong);
+      border-radius: 6px; padding: 5px 8px; width: 100%; box-sizing: border-box; color-scheme: var(--input-scheme); }
+    .tpl-inp:focus { outline: none; border-color: var(--accent); }
+    .tpl-rr .tpl-inp { width: 100px; padding: 3px 8px; font-size: 12.5px; }
+    .tpl-rr .tpl-inp.rx { width: 100%; }
+    .tpl-inp.bad { border-color: var(--co-red-bd); }
+    .tpl-savebar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--accent); background: var(--accent-bg); border-radius: 8px; margin: 0 0 10px; }
+    .tpl-savebar span { flex: 1; color: var(--accent); font-weight: 600; }
+    .tpl-empty { border: 1px dashed var(--border-strong); border-radius: 8px; padding: 18px; margin-top: 14px; }
+    .tpl-empty p { color: var(--text-secondary); margin: 6px 0 12px; }
+
+    /* Dialogs */
+    #tpl-overlay { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; }
+    #tpl-modal { width: 440px; max-width: calc(100vw - 32px); max-height: calc(100vh - 40px); overflow: auto; padding: 16px; border-radius: 10px; box-sizing: border-box;
+      background: var(--bg-reader); border: 1px solid var(--border-strong); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+    #tpl-modal.wide { width: 780px; }
+    .tpl-fr { margin: 0 0 10px; }
+    .tpl-fl { display: block; font-size: 11.5px; color: var(--text-muted); margin: 0 0 4px; }
+    .tpl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tpl-chip { border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); border-radius: 99px; padding: 3px 12px; font-size: 12.5px; cursor: pointer; }
+    .tpl-chip.on { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+    .tpl-use { font-size: 12.5px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; margin: -2px 0 10px; display: grid; gap: 3px; }
+    .tpl-use:empty { display: none; }
+    .tpl-use b { color: var(--text-primary); margin-right: 4px; }
+    .tpl-np { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; }
+    @media (max-width: 700px) { .tpl-np { grid-template-columns: 1fr; } }
+    .tpl-fname { display: flex; align-items: center; gap: 4px; font-size: 13.5px; }
+    .tpl-fname .num { width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+    .tpl-fname .ft { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tpl-why { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; min-height: 1em; }
+    .tpl-why.bad { color: var(--co-red-txt); }
+    .tpl-npprev { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; align-self: start; max-height: 360px; overflow: auto; }
+    .tpl-inc { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 0; border-top: 1px solid var(--border); font-size: 12.5px; }
+    .tpl-inc:first-of-type { border-top: 0; }
+    .tpl-inc.sub { padding-left: 12px; color: var(--text-secondary); }
+    .tpl-mini { font-size: 11.5px; color: var(--text-secondary); margin: 0 0 10px; }
+    .tpl-keys { flex: 1; font-size: 11.5px; color: var(--text-muted); align-self: center; }
+    #tpl-modal textarea.tpl-inp { resize: vertical; }
     .md-callout.quote           { background: var(--co-gray-bg);   border-color: var(--co-gray-bd); }
     .md-callout.quote .md-callout-label    { color: var(--co-gray-txt); }
     /* [!copy] (v0.19.2) — deliberately shares the neutral gray family with
@@ -4450,6 +4626,13 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
       Home
     </button>
 
+    <!-- S110 -- New page. Contributor and up (refreshEditControls). Starts a
+         page from a template in the drafts folder and opens it in Obsidian. -->
+    <button id="bt-newpage" onclick="tpOpenNewPage()" title="New page from a template" aria-label="New page" hidden>
+      <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New page
+    </button>
+
     <!-- The one control in the middle. In this session it opens the search
          tool that already exists; Session B turns it into the control that
          also lists favourites and recent when it is empty. It is a real
@@ -4556,7 +4739,7 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.76.2</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.77.0</button>
       </div>
 
       <div class="ud-actions">
@@ -5267,6 +5450,1167 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
 
 </div><!-- /app -->
 
+<!-- S110 -- the starter templates, as written. Admin > Templates adds any
+     that are missing to zSystem/Templates; nothing else reads these. -->
+<script type="text/plain" id="tpl-seed-Guide">
+---
+type: guide
+summary:
+number:
+tags: [training]
+aliases: []
+status: To Be Reviewed
+reviewed:
+created: "{{date}}"
+due:
+author:
+edited-by:
+edited-at:
+must-read: false
+must-read-start:
+onboarding: false
+onboarding-due:
+---
+%%
+TEMPLATE
+name: Guide
+version: 1
+type: guide
+offer-in-new-page: yes
+usual-folder: 20_Guides
+starting-tags: training
+section-order: in order
+extra-sections: flagged
+deepest-heading: H3
+use-for: teaching one subject so a new person can work on site and a designer can go deeper.
+not-for: steps for one job (use Process) or facts people look up (use Reference).
+%%
+
+# {{title}}
+
+> [!abstract] Learning objectives
+> - [Explain …]
+> - [Identify …]
+> - [Check …]
+
+%% Callout · Core · Expects: callout (summary), bullet list. Three to five objectives, each starting with a verb: what the reader can do when finished. %%
+
+> [!guide]- Guide: Writing a Guide page
+> A Guide teaches **one subject**. Picture a new starter on their first site visit, and a designer who needs the detail. The page should work for both: the first sections for the new starter, the later ones for the designer.
+>
+> **How a Guide is laid out**
+>
+> | Section | Who it serves | Keep it to |
+> | :-- | :-- | :------- |
+> | Learning objectives | Everyone | Three to five lines |
+> | Start here | The new starter | What it is and why it matters |
+> | Going deeper | The designer | Standards, numbers, edge cases |
+> | Worked example or Field scenarios | Both | One real case, start to finish |
+> | What to check on a site walk | The person on site | Only things you can see or test |
+> | Check yourself | The learner | Three to six questions |
+> | References | Anyone going further | Pages first, then standards |
+>
+> **Writing the objectives**
+>
+> Start each with a verb a trainer could test: Explain, Identify, Check, Choose, Mount. Not "Understand" or "Know about".
+>
+> ```md
+> - Explain why readers mount on the latch side.
+> - Identify the right reader height for each door type.
+> - Check a reader installation against the door schedule.
+> ```
+>
+> > [!tip] One subject per page
+> > If the objectives cover two subjects, it is two Guides. Link them from each other's References.
+
+## Start here
+
+%% Core · Expects: text, picture. The core idea in plain words. A new reader can stop here and still be useful. One picture beside the text. %%
+
+![[diagram-name.png|inlR|240]]
+[Write the core idea in two or three short paragraphs. Say what it is, why it matters on site, and the one thing people get wrong.]
+
+> [!guide]- Guide: Start here
+> This is the most read section of the page. Many readers stop here, so it must stand on its own.
+>
+> **Good**
+>
+> A card reader is the device a person badges at to open a door. It sits on the **latch side**, where a hand naturally reaches, 1.0 m above the floor. The reader on the secure side sets the height for both sides.
+>
+> **Do**
+> - Use one picture beside the text: a photo of the thing, or a simple diagram.
+> - Keep it to what a new starter needs on day one.
+>
+> **Don't**
+> - Don't start with history or standards. Those belong in Going deeper.
+> - Don't use a term you have not explained.
+
+### Key idea
+
+%% Core · Repeat. One heading per key idea, two to four in total. Rename each heading to the idea itself. %%
+
+[Explain one key idea in a short paragraph. Rename this heading.]
+
+> [!guide]- Guide: Key ideas
+> Break the subject into two to four ideas a new starter must hold on to. Each gets its own sub-section, named for the idea: "Latch side", "Mounting height", "Secure side sets the rules".
+>
+> ```md
+> ### Latch side
+> ### Mounting height
+> ```
+>
+> Rename this heading, then copy it (heading, note and text) for each further idea.
+
+## Going deeper
+
+%% Core · Expects: text, callout (warning). Specifications, standards and numbers. Name each standard with its edition. %%
+
+[Write the detail a designer needs: specifications, standards, numbers and exceptions.]
+
+> [!warning] Common mistake
+> [What people get wrong, and how to avoid it.]
+
+> [!guide]- Guide: Going deeper
+> This is the designer's section. Numbers, standards, the reasons behind the rules, and the exceptions.
+>
+> - Name every standard with its edition: "NFPA 101, 2024 edition".
+> - Use a table when comparing options or door types.
+> - Keep one **warning** callout for the mistake people really make. Delete it if there is none.
+>
+> > [!tip] Link, don't repeat
+> > If another page already explains a detail, link to it instead of copying it. Copies go out of date.
+
+### Sub-topic
+
+%% Core · Repeat. One heading per sub-topic of the detail. Rename each heading. %%
+
+[Write one sub-topic. Rename this heading.]
+
+## Worked example
+
+%% One of: practice · Expects: table (Input, Value, Source). One real calculation or decision, start to finish. A page needs this, Field scenarios, or both. %%
+
+| Input | Value | Source |
+| :-- | :-- | :------- |
+| [Input] | [Value] | [Where it comes from] |
+
+**Answer:** [The result, and what it means.]
+
+> [!guide]- Guide: Worked example or Field scenarios
+> A Guide needs at least one of these two sections. Keep one, or both, and delete the other.
+>
+> - **Worked example** suits a calculation or a design choice: inputs, the working, the answer.
+> - **Field scenarios** suit site work: what you find, what it means, what you do.
+>
+> | Input | Value | Source |
+> | :-- | :-- | :------- |
+> | Door width | 915 mm | Door schedule, D-101 |
+> | Reader offset from frame | 150 mm | Standard detail SD-04 |
+>
+> **Answer:** The reader centre sits 150 mm from the latch-side frame, 1.0 m above the floor.
+
+## Field scenarios
+
+%% One of: practice · Expects: table (You find, It means, You do). Two to four site situations and what to do in each. %%
+
+| You find | It means | You do |
+| :-- | :-- | :------- |
+| [What you see on site] | [Why it matters] | [The action to take] |
+
+## What to check on a site walk
+
+%% Core · Expects: tick list. Only things you can see, touch or test, in the order you walk them. %%
+
+- [ ] [Something you can see or test]
+- [ ] [Something you can see or test]
+
+> [!guide]- Guide: Site walk
+> Write it for someone standing at the door with this page on a phone.
+>
+> - [ ] Reader is on the latch side.
+> - [ ] Reader is 1.0 m above the finished floor.
+> - [ ] Tamper screws are fitted.
+>
+> **Don't** list things nobody can check on a walk, such as "configured correctly".
+
+## Check yourself
+
+%% Core · Expects: numbered list, callout (question). Three to six questions. The answers go in the folded callout so readers try first. %%
+
+1. [A question]
+2. [A question]
+3. [A question]
+
+> [!question]- Answers
+> 1. [Answer]
+> 2. [Answer]
+> 3. [Answer]
+
+> [!guide]- Guide: Check yourself
+> Ask about the learning objectives, one question each. Keep the numbering of the answers the same as the questions.
+>
+> The minus sign in `> [!question]-` keeps the answers folded, so readers try before they look.
+
+## References
+
+%% Core · Expects: link · Was: Sources. Linked pages first, then standards with edition and year. %%
+
+- [[Page name]]
+- [Standard, edition and year]
+
+## Video
+
+%% Optional · Was: Videos. Only when a good video exists. Delete the heading if not. %%
+
+- [Video title](https://)
+</script>
+<script type="text/plain" id="tpl-seed-Process">
+---
+type: process
+summary:
+number:
+tags: []
+aliases: []
+status: To Be Reviewed
+reviewed:
+created: "{{date}}"
+due:
+author:
+edited-by:
+edited-at:
+must-read: false
+must-read-start:
+onboarding: false
+onboarding-due:
+---
+%%
+TEMPLATE
+name: Process
+version: 1
+type: process
+offer-in-new-page: yes
+usual-folder: 10_Processes
+starting-tags:
+section-order: in order
+extra-sections: flagged
+deepest-heading: H3
+use-for: how to do one job, step by step, the same way every time.
+not-for: teaching a subject (use Guide) or facts people look up (use Reference).
+%%
+
+# {{title}}
+
+> [!guide]- Guide: Writing a Process page
+> A Process is **one job**, done the same way by anyone. The summary property (shown under the title) says what the job achieves, so the page goes straight into what to do.
+>
+> **How a Process is laid out**
+>
+> | Section | Answers | Required |
+> | :-- | :-- | :-- |
+> | Before you start | What do I need first? | Yes |
+> | Roles | Who does which part? | Only if more than one person |
+> | Steps | What do I do, in order? | Yes |
+> | Check it worked | How do I know it is right? | Yes |
+> | Common mistakes | What goes wrong? | If there are any |
+> | Standard text | What do I send? | If the job involves an email or form |
+> | References | Where do I go next? | Yes |
+>
+> > [!tip] Test it on someone
+> > Before sending for review, hand the page to a colleague who has never done the job. Every question they ask is a missing step.
+
+## Before you start
+
+%% Core · Expects: tick list. What the reader needs first: access, tools, approvals, who to tell. %%
+
+- [ ] [Access, tool or approval needed]
+- [ ] [Who to tell before starting]
+
+> [!guide]- Guide: Before you start
+> Everything that would stop someone halfway through if they did not have it.
+>
+> - [ ] Site access request approved.
+> - [ ] Door schedule, latest revision.
+> - [ ] Owner IT told of the test window.
+
+## Roles
+
+%% Optional · Expects: table (Role, Does). Only when more than one person is involved. Delete the section if not. %%
+
+| Role | Does |
+| :-- | :------- |
+| [Role] | [What they do in this process] |
+
+## Steps
+
+%% Core · Expects: numbered list. One action per step, in order, each starting with a verb. %%
+
+1. [First action]
+2. [Second action]
+3. [Third action]
+
+> [!guide]- Guide: Steps
+> One action per step, starting with a verb. If a step needs "and then", it is two steps.
+>
+> 1. Confirm the backing is in place before drywall.
+> 2. Mount the reader on the latch side, 1.0 m above the floor.
+> 	1. Level it.
+> 	2. Fix it with tamper screws.
+> 3. Request the test from the security subcontractor.
+>
+> - Sub-steps indent with Tab. Two levels at most.
+> - A picture under a step is fine when it saves words. Add a caption line.
+>
+> **Don't** hide a warning inside a step. Put it in Common mistakes, or a warning callout straight after the step.
+
+## Check it worked
+
+%% Core · Expects: tick list. How the reader knows the job is done right. %%
+
+- [ ] [A result you can see or test]
+- [ ] [A result you can see or test]
+
+## Common mistakes
+
+%% Optional · Expects: callout (warning). One warning per mistake people really make. Delete the section if there are none. %%
+
+> [!warning] Common mistake
+> [What people get wrong, and how to avoid it.]
+
+## Standard text
+
+%% Optional · Expects: callout (copy). Words people paste elsewhere: an email, a form. Folio adds a Copy button. %%
+
+> [!copy] [Name of the text]
+> [The words to paste, with anything that changes in square brackets.]
+
+> [!guide]- Guide: Standard text
+> Use it when the job ends with sending something. Mark what changes in [brackets], so the reader knows what to replace.
+>
+> > [!copy] Test request
+> > Please test the readers on [panel] on [date]. Doors [list] are ready.
+
+## References
+
+%% Core · Expects: link · Was: Sources. Linked pages, then standards. %%
+
+- [[Page name]]
+- [Standard, edition and year]
+</script>
+<script type="text/plain" id="tpl-seed-Reference">
+---
+type: reference
+summary:
+number:
+tags: []
+aliases: []
+status: To Be Reviewed
+reviewed:
+created: "{{date}}"
+due:
+author:
+edited-by:
+edited-at:
+must-read: false
+must-read-start:
+onboarding: false
+onboarding-due:
+---
+%%
+TEMPLATE
+name: Reference
+version: 1
+type: reference
+offer-in-new-page: yes
+usual-folder: 30_Reference
+starting-tags:
+section-order: any order
+extra-sections: allowed
+deepest-heading: H4
+use-for: facts people look up: standards, schedules, specifications. Read in pieces, not start to finish.
+not-for: how to do a job (use Process) or teaching a subject (use Guide).
+%%
+
+# {{title}}
+
+> [!abstract] At a glance
+> - [The fact most people came for]
+> - [The second most needed fact]
+
+%% Callout · Core · Expects: callout (summary), bullet list. The two or three facts most people came for. %%
+
+> [!guide]- Guide: Writing a Reference page
+> People land on a Reference from search, find one fact, and leave. So the page is built for scanning: the answer first, then the full detail in tables.
+>
+> - **At a glance** holds the facts most people need, so they never have to scroll.
+> - **Details** holds the complete facts, grouped in sub-sections.
+> - Sections can be in any order, and you can add your own. Reference allows headings down to H4.
+>
+> > [!tip] Tables over paragraphs
+> > If you are writing "for single doors..., for double doors...", it is a table.
+
+## Details
+
+%% Core · Expects: table (Item, Value, Notes). The full facts. Tables where things compare, with room for notes. %%
+
+| Item | Value | Notes |
+| :-- | :-- | :------- |
+| [Item] | [Value] | [Anything a reader should know] |
+
+> [!guide]- Guide: Details
+> The dashes under the header set the widths: three keep a column narrow, four or more give it room. Give Notes the room.
+>
+> | Door type | Reader height | Notes |
+> | :-- | :-- | :------- |
+> | Single | 1.0 m | Standard |
+> | Cage door | 1.1 m | Mesh backing plate |
+>
+> For a full schedule wider than the page, put the word wide between double percent signs on the line above the table.
+
+### Topic
+
+%% Optional · Repeat · Expects: table. One heading per group of facts. Rename each heading. %%
+
+[Rename this heading and add the facts for this group.]
+
+#### Detail
+
+%% Optional · Repeat. Only when a topic splits further. Delete it if not. %%
+
+[A narrower group of facts.]
+
+## Figures
+
+%% Optional · Expects: picture. Drawings or photos, each with a caption line. %%
+
+![[drawing-name.png|320]] ![[photo-name.png|320]]
+*Figure 1. [What the pictures show.]*
+
+## Notes
+
+%% Optional · Expects: callout (note). Exceptions, local code, owner rules. %%
+
+> [!note]
+> [An exception or a local rule.]
+
+## References
+
+%% Core · Expects: link · Was: Sources. Source documents with edition and year. %%
+
+- [[Page name]]
+- [Standard, edition and year]
+</script>
+<script type="text/plain" id="tpl-seed-Sample">
+---
+type: sample
+summary: The guided template for building templates, and a guide to everything a Folio page can hold.
+number:
+tags: [template, guide]
+aliases: [Sample template, How to build a page]
+status: To Be Reviewed
+reviewed:
+created: "{{date}}"
+due:
+author:
+edited-by:
+edited-at:
+must-read: false
+must-read-start:
+onboarding: false
+onboarding-due:
+---
+%%
+TEMPLATE
+name: Sample
+version: 1
+type: sample
+offer-in-new-page: no
+usual-folder: none
+starting-tags: template, guide
+section-order: any order
+extra-sections: allowed
+deepest-heading: H4
+use-for: building a new template, and learning how to write a Folio page.
+not-for: real pages. Folio never offers the Sample in New page.
+
+The lines above are the template settings. Folio reads them, so keep each one
+as "name: value" on its own line. The section "How Folio reads a template"
+explains every one.
+
+WHAT THIS FILE IS
+Every other template is copied from this one. It shows everything a page can
+hold, the right way and the wrong way, with the reason for each rule.
+
+TWO KINDS OF HELP IN THIS FILE
+1. Grey notes like this one. Only editors see them, in Obsidian. Folio hides
+   them. The short note under each heading carries its badges and says what
+   goes there.
+2. Guide boxes. Purple, folded callouts titled "Guide: ...". Click one in
+   Obsidian to open it: examples, what to type, do and don't. Folio never
+   shows a guide box, in any file.
+
+WHAT HAPPENS TO EACH ONE
+- New template from the Sample: this header is reset for the new name, the
+  grey notes stay, every guide box is removed. Write new guide boxes for the
+  new type.
+- New template copied from another template: everything is copied as it is.
+- New page: this header is removed. Grey notes and guide boxes stay, so the
+  writer has help while drafting. Folio still hides both.
+- Approve in Review: offers to remove the grey notes and guide boxes from the
+  page (ticked by default). Vault check flags a reviewed page that still has any.
+
+HOW TO BUILD A TEMPLATE FROM THIS (Admin)
+1. In Folio: Admin > Templates > + New > Start from: The Sample.
+2. Folio makes the file and opens it in Obsidian, without the Sample's guide boxes.
+3. Fill in the template settings above.
+4. Delete the sections the new type does not need.
+5. Rename the sections that stay, and rewrite each grey note for the new type.
+6. Set the badges at the start of each grey note: Core, Optional, One of.
+7. Add a guide box under any section a new writer would need help with.
+8. Keep References as the last section. Save. Check it on the Outline tab.
+
+RULES FOR THE NOTES THEMSELVES
+- A note never contains two percent signs in a row. That would end the note early.
+- One note goes straight under each heading. It starts with its badges.
+%%
+
+# {{title}}
+
+> [!abstract] Summary
+> This page shows every part a Folio page can use: headings, text, links, lists, tables, pictures, callouts and more. Each part comes with an example, what to type, and a short do and don't list.
+
+%% Callout · Core · Expects: callout (summary). Most templates open with one callout straight under the title: objectives for a Guide, key facts for a Reference. Keep it and rename its title for the new type. %%
+
+## Start here
+
+%% Core. Template builders: delete this section. It only teaches. %%
+
+> [!guide]- Guide: Start here
+> Folio is where the team **reads**. Obsidian is where you **write**. Every page is a plain text file, so what you type in Obsidian is exactly what Folio shows.
+>
+> **Three things to know before you start**
+>
+> 1. **Replace everything in [square brackets].** Brackets mark starter text. The format check in Vault check lists any page that still has some.
+> 2. **Grey text and purple Guide boxes are for editors only.** Folio never shows them. Grey notes say what goes in a section; delete them once done. Guide boxes teach, like this one; leave them folded and they stay out of your way.
+> 3. **Keep the headings the template gives you.** You can add sub-sections. If you rename or remove a main section, the page no longer matches its template, and Vault check will point it out.
+>
+> > [!tip] Work side by side
+> > Keep Folio open on this page while you write in Obsidian. Folio shows the finished look. Obsidian shows what to type.
+>
+> **The five-minute version**
+>
+> - [ ] Start the page from **+ New page** in Folio, not from Obsidian.
+> - [ ] Fill in the **summary** property with one sentence.
+> - [ ] Write each section, replacing the [brackets].
+> - [ ] Add pictures with a caption line under each.
+> - [ ] Delete the grey notes when you are done.
+> - [ ] Folio shows the page as **In review** until an Admin approves it.
+
+## The parts of a page
+
+%% Optional. Template builders: delete this section. %%
+
+> [!guide]- Guide: The parts of a page
+> Every page has the same five parts, in this order.
+>
+> | Part | Where it is | What it holds | Who fills it |
+> | :-- | :-- | :-- | :------- |
+> | Properties | The very top, between two lines of three dashes | Facts about the page: type, number, status, dates | Mostly Folio. You fill summary and tags |
+> | Title | The one line starting with a single # | The page name. It matches the file name, without the number | Folio, from New page |
+> | Opening callout | Straight under the title | A summary, objectives or key facts | You |
+> | Sections | Headings starting with ## | The body of the page | You |
+> | References | The last section | Pages and standards the page relies on | You |
+
+## Properties
+
+%% Optional. Template builders: delete this section. The property block at the top of the file is set by Folio for every template. Do not add or remove properties. %%
+
+> [!guide]- Guide: Properties
+> Properties are the block at the very top of the file. Obsidian shows it as a small form. Folio fills most of them for you. **You only fill in summary and tags.**
+>
+> | Property | Who fills it | What it means | Example |
+> | :-- | :-- | :------- | :-- |
+> | type | Folio | Which template the page follows | guide |
+> | summary | **You** | One sentence, 160 characters or fewer. It shows under the title and in search | How card readers are mounted and tested at data hall doors. |
+> | number | Folio | The page's three-digit number in its top folder | 021 |
+> | tags | **You** | A few topic words, lower case, hyphens between words | access-control, readers |
+> | aliases | You, if needed | Other names people search for | ACR, card reader |
+> | status | Folio | To Be Reviewed, or Reviewed once an Admin approves | To Be Reviewed |
+> | reviewed | Folio | The date an Admin approved the page | 2026-09-27 |
+> | created | Folio | The date the page was made | 2026-09-27 |
+> | due | Admin | A date the page must be finished by, if any | 2026-10-15 |
+> | author | Folio | Who started the page | Jayson Stickrod |
+> | edited-by, edited-at | Folio | Who changed it last, and when | |
+> | must-read, must-read-start | Admin | Whether everyone must read it, and from when | false |
+> | onboarding, onboarding-due | Admin | Whether new staff must read it, and by when | false |
+>
+> > [!warning] Leave the property names alone
+> > Change what comes after the colon, never the word before it. A misspelled property name is a new, empty property, and Folio will not find the real one.
+>
+> **Do**
+> - Write the summary as a sentence a reader would want to see in search results.
+> - Use the same tags other pages use. Check an existing page first.
+>
+> **Don't**
+> - Don't type status or reviewed yourself. Review sets them.
+> - Don't paste a paragraph into summary.
+
+## File names and numbers
+
+%% Optional. Template builders: delete this section. %%
+
+> [!guide]- Guide: File names and numbers
+> Every file name is **a three-digit number, a hyphen, then the title**, for example `021-Intrusion Detection.md`.
+>
+> - The number is unique inside its **top folder**. So 20_Guides and 10_Processes can both have a 021.
+> - New page shows the next free number, and you can change it. A number that is already taken is flagged.
+> - A new page waits in **00_Home / Working Drafts** until it is approved, then it moves to its folder.
+> - Folio never renames a page. Rename it in Obsidian, so every link to it follows.
+>
+> **Don't**
+> - Don't use two digits (`21-`) or four (`0021-`).
+> - Don't use these characters in a title: `\ / : * ? " < > | # ^ [ ]`. They break file names or links.
+
+## Headings
+
+%% Core · Expects: heading levels. Every template needs at least two Core sections. Template builders: keep the rule text and delete the examples. %%
+
+> [!guide]- Guide: Headings
+> Headings split a page into parts a reader can jump to, from the outline on the right in Folio.
+>
+> **What you type**
+>
+> ```md
+> # The page title (only one, Folio writes it)
+> ## A section
+> ### A sub-section inside it
+> #### A deeper level (only if the template allows it)
+> ```
+>
+> - Use **## for sections** and **### for sub-sections**. Most pages need nothing deeper.
+> - #### is available only where Format rules or the template allow it. The house default stops at ###.
+> - Keep headings short, six words or fewer, in sentence case: "Mounting heights", not "Mounting Heights For All Doors".
+>
+> > [!tip] Rename carefully
+> > Links can point at a heading (see Links). If you rename a heading, links to it break. The template's grey note says what the heading used to be called (was), so Folio can still match older pages.
+>
+> **Do**
+> - One idea per section.
+> - Add sub-sections freely under a section marked Repeat.
+>
+> **Don't**
+>
+> ```md
+> ## 1. Scope            (no numbers: they break when sections move)
+> ## **Scope**           (no bold in headings)
+> ## Scope of Work.      (no full stop)
+> ##### Detail           (too deep: split the page instead)
+> ## See [[Card Readers]] (no links in headings)
+> ```
+
+### A sub-section
+
+%% Optional · Repeat. Repeat means writers can add as many headings at this level as they need, each with its own name. %%
+
+> [!guide]- Guide: Headings
+> This is a sub-section. It belongs to the section above it. In a template, a sub-section marked Repeat usually has a placeholder name like "Key idea", which the writer renames.
+
+#### A deeper level
+
+%% Optional. Only in templates whose deepest heading is H4 or more (set in Format rules). Delete it everywhere else. %%
+
+> [!guide]- Guide: Headings
+> Use a fourth level only when a sub-section really splits in two. If you reach for a fifth, the page is doing too much. Split it into two pages and link them.
+
+## Writing text
+
+%% Core. Every template has plain text somewhere. Template builders: delete the examples and keep one line of [starter text]. %%
+
+> [!guide]- Guide: Writing text
+> Write the way you would explain it to a new colleague on site: short paragraphs, plain words, one idea at a time.
+>
+> Card readers mount on the **latch side** of the door, 1.0 m above the finished floor. The reader on the secure side sets the height for both.
+>
+> **What you type**
+>
+> ```md
+> Card readers mount on the **latch side** of the door, 1.0 m above the finished floor.
+> ```
+>
+> - **Bold** one key term per paragraph at most, so it stands out.
+> - Spell out an acronym the first time: access control panel (ACP), then ACP.
+> - Keep paragraphs to about 120 words. Format rules flag longer ones.
+> - Put a blank line between paragraphs. Obsidian keeps the line breaks you type, and so does Folio.
+>
+> **Don't**
+>
+> ```md
+> ==highlighted text==      (no highlight: use a callout instead)
+> <u>underlined</u>         (no underline: it looks like a link)
+> ~~struck out~~            (no strikethrough: delete it, the change log keeps history)
+> *italic for emphasis*     (italics are only for picture captions)
+> ```
+
+## Links
+
+%% Optional · Expects: link. Template builders: keep this section only if the new type links to other pages outside References. %%
+
+> [!guide]- Guide: Links
+> Links join pages together. They are what turn separate pages into a wiki.
+>
+> Hardware sets are in [[Door Hardware Schedule]]. Mounting heights are in [[Card Readers#Mounting heights]]. The maker's guide is [on their site](https://example.com).
+>
+> **What you type**
+>
+> ```md
+> [[Door Hardware Schedule]]                     a page in the vault
+> [[Door Hardware Schedule|the hardware sets]]   the same page, with your own words
+> [[Card Readers#Mounting heights]]              a section of a page
+> [on their site](https://example.com)           a web page, with words
+> ```
+>
+> > [!tip] Type two square brackets
+> > In Obsidian, type `[[` and start the page name. It suggests pages as you type, and keeps links working when a page is renamed.
+>
+> **Do**
+> - Link the first time you mention another page, not every time.
+> - Use words that say where the link goes.
+>
+> **Don't**
+>
+> ```md
+> https://example.com/specs.pdf       (bare web address: give it words)
+> Click [[here|Card Readers]]         (click here: say what it is)
+> ```
+
+## Lists
+
+%% Optional · Expects: bullet list, numbered list, tick list. Template builders: keep the one list type the new section needs and delete the others. %%
+
+> [!guide]- Guide: Lists
+> There are three kinds of list. Pick by what the reader will do with it.
+>
+> **Bullets: when order does not matter**
+>
+> - Single doors
+> - Double doors
+> 	- Active leaf only
+> - Mantrap doors
+>
+> **Numbers: when order matters**
+>
+> 1. Confirm the backing is in place.
+> 2. Mount the reader.
+> 	1. Level it.
+> 	2. Fix it with tamper screws.
+> 3. Terminate and test.
+>
+> **Tick boxes: things to check**
+>
+> - [ ] Reader height is 1.0 m.
+> - [ ] Tamper switch works.
+>
+> **What you type**
+>
+> ```md
+> - A bullet
+> 	- A bullet under it (press Tab first)
+> 1. A step
+> 	1. A sub-step (press Tab first)
+> - [ ] Something to check
+> - [x] Something checked
+> ```
+>
+> **Do**
+> - Start each step with a verb: Mount, Check, Send.
+> - Keep to two levels. Tab indents a level, Shift and Tab goes back one.
+>
+> **Don't**
+> - Don't nest three levels deep. Split it into a new section instead.
+> - Don't use tick boxes for ordinary lists. They mean "check this".
+
+## Tables
+
+%% Optional · Expects: table. Template builders: keep a table only where pages compare things side by side. Set its columns and give the Notes column room. %%
+
+> [!guide]- Guide: Tables
+> Tables compare things side by side. The line of dashes under the header does more than it looks: it sets how wide each column is.
+>
+> **A table sized to its content** (three dashes per column)
+>
+> | Door type | Height | Side |
+> | :-- | :-- | :-- |
+> | Single | 1.0 m | Latch |
+> | Accessible | 0.9 m | Push button |
+>
+> **A table with room for notes** (four or more dashes give a column room)
+>
+> | Door type | Height | Notes |
+> | :-- | :-- | :------- |
+> | Single | 1.0 m | Standard mounting, no backing plate needed |
+> | Cage door | 1.1 m | Fix to a mesh backing plate so the reader cannot be pushed in |
+>
+> **What you type**
+>
+> ```md
+> | Door type | Height | Notes    |
+> | :--       | :--    | :------- |
+> | Single    | 1.0 m  | Standard |
+> ```
+>
+> - `:--` keeps text on the left. `--:` puts numbers on the right. `:-:` centres.
+> - Folio pins the header row as you scroll a long table.
+> - For a schedule that needs the whole page width, put the word wide between double percent signs on the line straight above the table. It then runs margin to margin.
+>
+> > [!tip] Let Obsidian draw it
+> > In Obsidian, right-click an empty line and pick Insert > Table. Tab moves to the next cell, and Enter adds a row. You never need to line the bars up yourself.
+>
+> **Do**
+> - Always have a header row.
+> - Put units in the header (Height, m) or next to every value, the same all the way down.
+>
+> **Don't**
+> - Don't go past six columns unless the table is marked wide.
+> - Don't put pictures, lists or line breaks inside a cell.
+> - Don't use a picture of a table. Type it, so search can find it.
+
+## Pictures
+
+%% Optional · Expects: picture. Template builders: keep one picture layout per section at most. Full width suits drawings, beside the text suits photos, side by side suits before and after. %%
+
+> [!guide]- Guide: Pictures
+> Drag a picture into Obsidian, or paste it. Obsidian saves the file in the vault's attachments folder and adds the line for you. Then add what you want after the file name.
+>
+> **Full width, with a caption** (drawings and plans)
+>
+> ![[sample-level1-plan.png]]
+> *Figure 1. Level 1 data halls, reader doors marked in red.*
+>
+> **Beside the text** (photos)
+>
+> ![[sample-reader-photo.png|inlR|240]]
+> The reader sits on the latch side of the door. The picture floats to the right and this paragraph wraps beside it, then carries on underneath once it runs past the bottom. Use inlL instead to put the picture on the left. Pick a width from three sizes: 180 small, 240 medium, 320 large.
+>
+> **Side by side** (before and after)
+>
+> ![[sample-before.png|320]] ![[sample-after.png|320]]
+> *Figure 2. The same cabinet before and after the cabling was dressed.*
+>
+> **What you type**
+>
+> ```md
+> ![[plan.png]]
+> *Figure 1. What the drawing shows.*
+>
+> ![[photo.png|inlR|240]]
+> Text that wraps beside it.
+>
+> ![[before.png|320]] ![[after.png|320]]
+> *Figure 2. Before and after.*
+> ```
+>
+> - The **caption** is an italic line straight under the picture, starting with Figure and a number.
+> - Name the file for what it shows: `reader-latch-side.png`, not `IMG_4471.png`.
+>
+> **Don't**
+> - Don't use a screenshot of text. Type the text.
+> - Don't leave a picture without a caption. Format rules flag it.
+> - Don't make a picture beside the text wider than 320. The text next to it gets too narrow to read.
+
+## Callouts
+
+%% Optional · Expects: callout. Template builders: keep only the callout kinds the new type uses, one meaning each. %%
+
+> [!guide]- Guide: Callouts
+> A callout is a coloured box that makes one thing stand out. There are seven kinds, and **each one means one thing**, so readers learn the colours once.
+>
+> | Kind | Type this | Use it for | Colour |
+> | :-- | :-- | :------- | :-- |
+> | Summary | `> [!abstract]` | Objectives, key facts, the short version | Teal |
+> | Note | `> [!note]` | Background or an exception | Blue |
+> | Tip | `> [!tip]` | A faster or better way | Teal |
+> | Warning | `> [!warning]` | A common mistake and how to avoid it | Orange |
+> | Danger | `> [!danger]` | A safety or security risk only | Red |
+> | Copy | `> [!copy]` | Text people paste elsewhere. Folio adds a Copy button | Grey |
+> | Question | `> [!question]-` | Answers, folded so readers try first | Orange |
+>
+> **How they look**
+>
+> > [!abstract] Key facts
+> > Readers mount at 1.0 m on the latch side.
+>
+> > [!note]
+> > Older buildings may use 1.1 m. Match the existing doors on the same floor.
+>
+> > [!tip] Faster testing
+> > Test all readers on one panel in a single visit.
+>
+> > [!warning] Common mistake
+> > Never test with the door wedged open. The door contact never changes state.
+>
+> > [!danger] Security risk
+> > Removing the tamper switch disables the alarm for the whole door.
+>
+> > [!copy] Standard reply
+> > Thanks for the drawings. We will review them and reply by [date].
+>
+> > [!question]- Answers
+> > 1. On the latch side.
+> > 2. 1.0 m above the finished floor.
+>
+> **What you type**
+>
+> ```md
+> > [!warning] Common mistake
+> > Never test with the door wedged open.
+>
+> > [!question]- Answers
+> > A minus sign after the kind starts it folded.
+> ```
+>
+> **Do**
+> - Give a callout a short title after the kind, or leave it blank to use the kind's name.
+> - One callout per point. Two warnings in a row is fine. Five means the section needs rewriting.
+>
+> **Don't**
+> - Don't use danger for things that are merely important.
+> - Don't put a callout inside another callout.
+> - Don't use kinds outside the seven, such as bug or example. They look different in Folio and Obsidian.
+
+## Copy text
+
+%% Optional · Expects: callout (copy). Keep it where pages hold emails, letters or form text that people paste somewhere else. %%
+
+> [!guide]- Guide: Copy text
+> When people need exact words to paste into an email or a form, put them in a Copy callout. Folio adds a Copy button, so nobody has to select text by hand.
+>
+> > [!copy] Request for access
+> > Please add [name] to the [site] access list for [dates]. Their badge number is [number].
+>
+> - Mark what changes in [square brackets], so the reader knows what to replace.
+
+## Code and exact settings
+
+%% Optional · Expects: code. Keep it only where pages give commands or settings that must be typed exactly. %%
+
+> [!guide]- Guide: Code and exact settings
+> Use a code block for anything that must be typed exactly: commands, settings, addresses. Folio shows it in a fixed-width font with a Copy button.
+>
+> ```powershell
+> Get-Service -Name "AccessControl*"
+> ```
+>
+> **What you type**
+>
+> ````md
+> ```powershell
+> Get-Service -Name "AccessControl*"
+> ```
+> ````
+>
+> - Name the language after the three backticks: powershell, bash, json, yaml, or text.
+> - The format check skips code blocks. That is why this page can show don'ts inside them.
+
+## Quotes from a standard
+
+%% Optional · Expects: quote. Keep it where pages quote codes or standards word for word. %%
+
+> [!guide]- Guide: Quotes from a standard
+> Quote a standard only when the exact wording matters, and say where it came from.
+>
+> > "Doors shall be arranged to be opened readily from the egress side whenever the building is occupied."
+> > NFPA 101, 7.2.1.5.1, 2024 edition
+>
+> **What you type**
+>
+> ```md
+> > "The exact words."
+> > Standard, clause, edition
+> ```
+>
+> - A quote is a greater-than sign with no kind in brackets. With a kind, it becomes a callout.
+
+## How Folio reads a template
+
+%% Optional. Template builders: delete this section from new templates. It is the reference for everything Folio relies on. %%
+
+> [!guide]- Guide: How Folio reads a template
+> A template is an ordinary Markdown file in `zSystem/Templates/`. Folio reads six things from it. If one of them is missing or misspelled, Folio falls back to the default shown here, and Vault check says so.
+>
+> **1. Template settings** (the header note at the very top)
+>
+> | Setting | What it controls | Values | Default |
+> | :-- | :------- | :-- | :-- |
+> | name | The name on the Templates tab and in New page | Any short name | The file name |
+> | version | Goes up by one each time the sections change. Vault check compares pages to the version they were made from | 1, 2, 3 | 1 |
+> | type | The value written to a new page's type property | Lower case, one word | name, lower case |
+> | offer-in-new-page | Whether writers can pick it in New page | yes, no | yes |
+> | usual-folder | The top folder New page suggests, and where the number comes from | A top folder, or none | none |
+> | starting-tags | Tags a new page starts with | Words separated by commas | none |
+> | section-order | Whether sections must stay in this order | in order, any order | in order |
+> | extra-sections | Whether a page may add sections the template does not have | flagged, allowed | flagged |
+> | deepest-heading | The deepest heading a page may use. Overrides Format rules for this type | H2 to H6 | Format rules |
+> | use-for | One sentence shown in New page | Text | none |
+> | not-for | One sentence shown in New page | Text | none |
+>
+> **2. Headings.** Every `##`, `###` and `####` is a section of the Outline, in order. Names must be unique in the file.
+>
+> **3. Badges.** The grey note straight under a heading starts with its badges, separated by a middle dot, ending with a full stop. See "Notes for editors" for the full list. Only the first sentence is read; the rest is guidance for the writer.
+>
+> ```md
+> %% Core · Repeat · Expects: numbered list · Was: Method. One action per step. %%
+> ```
+>
+> **4. Expects.** The shapes a section should hold. Folio checks the shape is there, never what it says.
+>
+> | Write | Means |
+> | :-- | :-- |
+> | text | At least one paragraph |
+> | bullet list, numbered list, tick list | That kind of list |
+> | table | Any table |
+> | table (Item, Value, Notes) | A table with these header names |
+> | picture | At least one picture, with a caption |
+> | callout | Any callout |
+> | callout (warning) | A callout of that kind |
+> | code, code (powershell) | A code block, of that language |
+> | quote | A quote |
+> | link | At least one link |
+>
+> List several with commas: `Expects: numbered list, callout (warning)`.
+>
+> **5. Stand-ins.** `{{title}}` and `{{date}}` are filled by New page. Anything in [square brackets] is starter text the writer must replace. Vault check finds it.
+>
+> **6. Special blocks.**
+>
+> | Block | Folio | New page | Approve |
+> | :-- | :-- | :-- | :-- |
+> | Header note (settings) | Read, never shown | Removed | |
+> | Grey note under a heading | Read for badges, never shown | Kept | Removed if ticked |
+> | Guide box (`> [!guide]-`) | Never shown | Kept | Removed if ticked |
+> | Word wide between double percent signs above a table | Table runs margin to margin | Kept | Kept |
+>
+> > [!warning] Check it on the Outline tab
+> > After saving a template in Obsidian, open it on Folio's Outline tab. If a badge is misspelled, the Outline shows it without a badge and Vault check lists the template.
+
+## Notes for editors
+
+%% Optional. Template builders: delete this section. It explains the grey notes you are reading. %%
+
+> [!guide]- Guide: Notes for editors
+> Grey notes are text between two pairs of percent signs. Obsidian shows them grey while you edit. Folio never shows them. They are for the people writing the page, not the people reading it.
+>
+> **What you type**
+>
+> ```md
+> %% Anything here is for editors only. %%
+> ```
+>
+> In a **template**, the note straight under each heading is special. It starts with its **badges**, then says what to write. Folio reads the badges to build the template's Outline, and the format check uses them.
+>
+> | Badge | Type this at the start of the note | Means |
+> | :-- | :-- | :------- |
+> | core | `Core` | Every page of this type has this section |
+> | optional | `Optional` | Leave it out if there is nothing for it |
+> | one of | `One of: practice` | A page needs at least one section from the named group |
+> | repeat | `Repeat` | Writers can add as many of these headings as they need |
+> | callout | `Callout` | The callout straight under the title |
+> | Expects | `Expects: table (Item, Value, Notes)` | The shape the section should hold |
+> | was | `Was: Sources` | The heading's old name, so older pages still match |
+>
+> Separate badges with a middle dot and spaces, then end with a full stop:
+>
+> ```md
+> %% Core · Repeat · Expects: numbered list. One action per step. %%
+> ```
+>
+> **Don't**
+> - Don't put two percent signs inside a note. It ends the note early, and the rest shows on the page.
+> - Don't leave notes on a finished page. Vault check lists reviewed pages that still have them.
+
+## Placeholders and starter text
+
+%% Optional. Template builders: delete this section. %%
+
+> [!guide]- Guide: Placeholders and starter text
+> Templates use two kinds of stand-in text.
+>
+> | Kind | Looks like | Who replaces it |
+> | :-- | :-- | :-- |
+> | Placeholder | `{{title}}`, `{{date}}` | Folio, when it creates the page |
+> | Starter text | `[Write the core idea here.]` | You, while writing |
+>
+> - Starter text always sits in square brackets, so it is easy to spot and the format check can find it.
+> - Write starter text as an instruction: "[List what to check on a site walk.]", not "[Text]".
+
+## Not used on Folio pages
+
+%% Optional. Template builders: delete this section. %%
+
+> [!guide]- Guide: Not used on Folio pages
+> Obsidian can do more than Folio shows well. These are left out on purpose.
+>
+> | Not used | Why | Use instead |
+> | :-- | :-- | :------- |
+> | Highlight, underline, strikethrough | Colour noise, and weak for colour-blind readers | A callout, or bold for one term |
+> | Footnotes | Readers jump away and lose their place | References at the end |
+> | Embedding a whole page | It copies content, so changes go stale | A link to the page |
+> | Tags typed in the text (#tag) | Tags live in properties | The tags property |
+> | Horizontal lines | Folio already separates sections | A new section |
+> | Diagrams written as code | They do not show the same in Folio | A picture of the diagram |
+> | Raw HTML | It shows differently, or not at all | Plain Markdown |
+> | Headings deeper than the template allows | Pages get hard to scan | Split the page |
+
+## Before you send for review
+
+%% Optional. Template builders: delete this section, or keep a shorter copy for the new type. %%
+
+> [!guide]- Guide: Before you send for review
+> Run through this list before you tell anyone the page is ready.
+>
+> - [ ] Summary filled in, one sentence.
+> - [ ] Every [square bracket] replaced.
+> - [ ] Every section of the template is there. Optional ones left out if they are empty.
+> - [ ] Every picture has a caption.
+> - [ ] Links work: click each one in Folio.
+> - [ ] Grey notes deleted.
+> - [ ] The **Check a page** AI prompt shows nothing left to fix.
+
+## Using AI
+
+%% Optional. Template builders: delete this section. %%
+
+> [!guide]- Guide: Using AI
+> Folio has four AI prompts under Admin > Templates > AI prompts. Each one copies with the template and the Format rules, so the AI follows the same rules as the format check.
+>
+> | Prompt | Use it when |
+> | :-- | :------- |
+> | Write a page | You have notes and want a first draft in the right layout, with properties filled in |
+> | Fix a page | An older page needs moving into its template's layout |
+> | Check a page | You want a list of what breaks the rules before you send a page for review |
+> | Update this template | An Admin wants a template changed without breaking its notes |
+>
+> > [!warning] You are still the author
+> > Check every fact the AI writes. It can sound sure and still be wrong. Folio never adds AI text to a page by itself.
+
+## References
+
+%% Core · Expects: link · Was: Sources. Every template ends with References. Keep it, and keep it last, unless a Video section follows. %%
+
+- [[Format rules]]
+- [[Help]]
+- [Obsidian help: basic formatting](https://help.obsidian.md/syntax)
+
+> [!guide]- Guide: References
+> List the pages first, then outside sources. Give standards their edition and year: "NFPA 101, 2024 edition", not just "NFPA 101".
+
+## Video
+
+%% Optional. Optional sections can follow References. Keep a Video section only when good videos usually exist for the type. %%
+
+- [Obsidian: creating links](https://help.obsidian.md/links)
+
+> [!guide]- Guide: Video
+> Link one good video at most. If there isn't one, delete the section rather than leaving it empty.
+</script>
 <script>
 // ================================================================
 // Folio — index.html
@@ -7268,6 +8612,9 @@ const CALLOUT_META = {
   EXAMPLE:   { icon: '☰',  cls: 'example',  label: 'Example'   },
   QUOTE:     { icon: '❝',  cls: 'quote',    label: 'Quote'     },
   CITE:      { icon: '❝',  cls: 'quote',    label: 'Cite'      },
+  // S110 -- [!guide] is writer help inside templates and drafts. Folio never
+  // draws one unless an Administrator shows them (tpGuideVisible()).
+  GUIDE:     { icon: '🧭', cls: 'guide',    label: 'Guide'     },
   // [!copy] (v0.19.2) — Folio's own type, not one of Obsidian's 13.
   // Obsidian doesn't know it and falls back to its default note styling
   // with "Copy" as the title, so a vault using it stays perfectly
@@ -8596,7 +9943,11 @@ function parseBlocks(lines) {
           bodyLines.push(lines[i].replace(QUOTE_MARKER, ''));
           i++;
         }
-        blocks.push({ type: 'callout', cType, customTitle, startFolded, body: parseBlocks(bodyLines) });
+        // S110 -- a guide box is writer help. Its lines are consumed and
+        // nothing is drawn, unless tpGuideVisible() says otherwise.
+        if (cType === 'GUIDE' && !tpGuideVisible()) continue;
+        blocks.push({ type: 'callout', cType, customTitle, body: parseBlocks(bodyLines),
+                      startFolded: startFolded && !(cType === 'GUIDE' && TP_RENDER.tplView) });
       } else {
         const quoteLines = [];
         while (i < lines.length && lines[i].startsWith('>')) {
@@ -8615,10 +9966,13 @@ function parseBlocks(lines) {
       const t = trimmed.trim();
       if (t.length >= 4 && t.endsWith('%%')) {
         if (/^%%\s*wide\s*%%$/i.test(t)) pendingWide = true;
+        else if (TP_RENDER.tplView) blocks.push({ type: 'tpnote', text: t.slice(2, -2).trim() }); // S110
         i++; continue;
       }
+      const noteFrom = i;
       i++;
       while (i < lines.length && !lines[i].includes('%%')) i++;
+      if (TP_RENDER.tplView) blocks.push({ type: 'tpnote', text: lines.slice(noteFrom, i + 1).join('\n').replace(/^\s*%%|%%\s*$/g, '').trim() });
       i++; continue;
     }
 
@@ -9008,6 +10362,10 @@ function toggleListAll(btn) {
 // ── Single block renderer ─────────────────────────────────────────
 function renderSingleBlock(block, seenIds) {
   switch (block.type) {
+
+    // S110 -- a grey note, drawn only by the Templates In Obsidian preview.
+    case 'tpnote':
+      return `<div class="md-tpnote">${escHtml(block.text)}</div>`;
 
     case 'hr':
       return '<hr class="md-hr">';
@@ -11076,6 +12434,10 @@ const ADMIN_TABS = [
   // No count: the badge means a queue (Review, comments, vault check), and
   // a roster is a fact, not a queue -- same reason Usage carries none.
   { id: 'users', label: 'Users', min: 'admin' },
+  // S110 -- Contributor, like Review: the people who write pages read the
+  // templates and copy the prompts. Writing to templates and Format rules
+  // is Administrator only, gated inside the tab. Staff update stays last.
+  { id: 'templates', label: 'Templates', min: 'contributor' },
   // P10 -- Administrator, like Usage and Users. The DOOR still opens at
   // Contributor (chDoorsHTML) for the same reason it always has; what gates
   // is the tab.
@@ -11111,7 +12473,7 @@ function openAdminScreen(tab) {
 }
 
 function adminTabRenderFns() {
-  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, users: renderUsersTab, vault: renderVaultCheckTab, staff: renderStaffUpdateTab };
+  return { review: renderAdminReviewTab, comments: renderAdminCommentsTab, usage: renderUsageTab, users: renderUsersTab, vault: renderVaultCheckTab, staff: renderStaffUpdateTab, templates: renderTemplatesTab };
 }
 
 // S104 -- the door row is built once, synchronously, when Admin opens --
@@ -11166,8 +12528,9 @@ function renderAdminTab(tab) {
     vault: ['act', 'Broken links and orphans', '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8.5 11l1.8 1.8 3.2-3.3"/>'],
     users: ['team', 'Who has access to what', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'],
     usage: ['ins', 'What gets read and missed', '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/>'],
-    staff: ['tell', 'Email the team what changed', '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'] };
-  const AD_ORDER = ['review', 'comments', 'vault', '|', 'users', '|', 'usage', '|', 'staff'];
+    staff: ['tell', 'Email the team what changed', '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'],
+    templates: ['help', 'Page layouts and format rules', '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>'] };
+  const AD_ORDER = ['review', 'comments', 'vault', '|', 'users', '|', 'usage', '|', 'templates', '|', 'staff'];
   tabsEl.innerHTML = '<div class="ad-doors">' + AD_ORDER.map(id => {
     if (id === '|') return '<span class="sp"></span>';
     const t = ADMIN_TABS.find(x => x.id === id); const v = AD_DOORS[id];
@@ -11216,6 +12579,1239 @@ function renderAdminTab(tab) {
   const fn = adminTabRenderFns()[tab];
   if (fn) fn();
 }
+
+// ══ S110 · Templates and New page ═══════════════════════════════════
+// Templates are Markdown files in zSystem/Templates. They are written and
+// edited in Obsidian; Folio only reads them (Jayson, 27 Sep: Folio stays a
+// reader). What Folio reads from a template file:
+//   the settings block    a %% block straight after the properties, first
+//                         line TEMPLATE, then one "name: value" per line
+//   the headings          H2 to H6, in the order they sit
+//   the badge note        the grey %% note straight under each heading; its
+//                         first sentence is its badges (Core, Optional, One
+//                         of: <group>, then · Repeat, · Expects:, · Was:)
+// Guide boxes ([!guide] callouts) are writer help. Folio never draws one in
+// any file, unless an Administrator turns "Show guide boxes" on for the
+// session. New page keeps them in the file (hidden here); New template from
+// the Sample removes them; Approve offers to remove them.
+
+const TP_DIR          = 'zSystem/Templates';
+const TP_RULES_FILE   = 'Format rules.md';
+const TP_PROMPTS_FILE = 'Prompts.md';
+const TP_STARTERS     = ['Guide', 'Process', 'Reference', 'Sample'];
+const TP_HDR_KEYS     = ['name', 'version', 'type', 'offer-in-new-page', 'usual-folder', 'starting-tags',
+                         'section-order', 'extra-sections', 'deepest-heading', 'use-for', 'not-for', 'retired'];
+const TP_WIDTHS       = { readable: 760, standard: 960, wide: 0 };
+const TP_BADGE_RE     = /^(Core|Optional|One of:\s*([^·]+?))(\s*·\s*Repeat)?(\s*·\s*Expects:\s*([^·]+?))?(\s*·\s*Was:\s*([^·]+?))?\s*$/;
+
+const tpl = {
+  list: [], loaded: false, busy: null,
+  rules: null, rulesSaved: '', rulesExists: false,
+  prompts: null, promptsExists: false,
+  nav: null, view: 'sample', width: 'readable', show: 'folio', fly: false,
+  open: {}, how: false, np: null, dlg: null,
+};
+
+// Read by parseBlocks. showGuide is the Administrator's switch (this session
+// only). tplView is on only while the Templates screen draws In Obsidian.
+const TP_RENDER = { showGuide: false, tplView: false };
+function tpGuideVisible() { return TP_RENDER.tplView || (TP_RENDER.showGuide && atLeast('admin')); }
+
+function tpUrl(file) { return pdRootPrefix() + TP_DIR + '/' + file; }
+function tpNl(s) { return String(s == null ? '' : s).replace(/\r\n/g, '\n'); }
+function tpToday() { return new Date().toISOString().slice(0, 10); }
+function tpSlug(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+
+// ── Reading a template file ─────────────────────────────────────────
+// A % inside fenced code (also fenced code inside a callout) is masked, so a
+// %% written as an example is never read as a grey note.
+function tpMask(md) {
+  let fence = null;
+  return tpNl(md).split('\n').map(l => {
+    const bare = l.replace(/^(>\s?)*/, '');
+    const f = /^(`{3,}|~{3,})/.exec(bare);
+    if (f) {
+      if (!fence) fence = f[1];
+      else if (bare.trim().startsWith(fence) && /^[`~]+$/.test(bare.trim())) fence = null;
+      return l.replace(/%/g, '\u0003');
+    }
+    return fence ? l.replace(/%/g, '\u0003') : l;
+  }).join('\n');
+}
+function tpUnmask(s) { return s.replace(/\u0003/g, '%'); }
+
+// Every guide box goes: its callout line and every > line under it, and the
+// blank line after it when there is one before it too.
+function tpStripGuides(md) {
+  const L = tpNl(md).split('\n'), out = [];
+  for (let i = 0; i < L.length; i++) {
+    if (/^>\s*\[!guide\]/i.test(L[i])) {
+      while (i + 1 < L.length && /^>/.test(L[i + 1])) i++;
+      if (i + 1 < L.length && !L[i + 1].trim() && (!out.length || !out[out.length - 1].trim())) i++;
+      continue;
+    }
+    out.push(L[i]);
+  }
+  return out.join('\n');
+}
+function tpCountGuides(md) { return (tpNl(md).match(/^>\s*\[!guide\]/gim) || []).length; }
+
+// Grey notes out, %%wide%% kept (it is a layout keyword, not a note).
+function tpNotesIn(md) {
+  return (tpMask(md).match(/%%[\s\S]*?%%/g) || []).filter(m => !/^%%\s*wide\s*%%$/i.test(m));
+}
+function tpStripNotes(md) {
+  let s = tpMask(md).replace(/%%([\s\S]*?)%%/g, (m, t) => /^\s*wide\s*$/i.test(t) ? m : '\u0004');
+  s = s.replace(/^[ \t]*\u0004[ \t]*\n/gm, '').replace(/\u0004/g, '');
+  return tpUnmask(s).replace(/\n{3,}/g, '\n\n');
+}
+
+const TP_HDR_RE = /^(---\n[\s\S]*?\n---\n)(%%[ \t]*\nTEMPLATE[ \t]*\n([\s\S]*?)\n%%[ \t]*\n)(\n?)/;
+function tpHeader(md) {
+  const m = TP_HDR_RE.exec(tpNl(md));
+  const hdr = {};
+  if (!m) return hdr;
+  for (const line of m[3].split('\n')) {
+    if (!line.trim()) break;
+    const k = /^([a-z-]+)\s*:\s*(.*)$/i.exec(line);
+    if (k && TP_HDR_KEYS.includes(k[1].toLowerCase())) hdr[k[1].toLowerCase()] = k[2].trim();
+  }
+  return hdr;
+}
+function tpRemoveHeader(md) { return tpNl(md).replace(TP_HDR_RE, (m, fm) => fm + '\n'); }
+function tpSetHeaderKeys(md, pairs) {
+  const s = tpNl(md), m = TP_HDR_RE.exec(s);
+  if (!m) return s;
+  const lines = m[3].split('\n');
+  let end = lines.findIndex(l => !l.trim());
+  if (end < 0) end = lines.length;
+  pairs.forEach(([k, v]) => {
+    const re = new RegExp('^' + k.replace(/[-]/g, '\\-') + '\\s*:', 'i');
+    const i = lines.slice(0, end).findIndex(l => re.test(l));
+    if (i >= 0) lines[i] = k + ': ' + v;
+    else { lines.splice(end, 0, k + ': ' + v); end++; }
+  });
+  const block = '%%\nTEMPLATE\n' + lines.join('\n') + '\n%%\n';
+  return s.replace(m[2], () => block);
+}
+function tpFillStandins(md, title) {
+  return tpNl(md).replace(/\{\{title\}\}/g, () => title).replace(/\{\{date\}\}/g, tpToday());
+}
+
+function tpBadge(n) {
+  const out = { rule: '', note: '', ok: false, kind: '', group: '', repeat: false, expects: '', was: '', callout: false };
+  if (!n) return out;
+  let t = n.trim().replace(/\s+/g, ' ');
+  let rule = t, note = '';
+  const d = t.indexOf('. ');
+  if (d >= 0) { rule = t.slice(0, d); note = t.slice(d + 2).trim(); }
+  else rule = t.replace(/\.$/, '');
+  if (/^Callout\s*·\s*/.test(rule)) { out.callout = true; rule = rule.replace(/^Callout\s*·\s*/, ''); }
+  const m = TP_BADGE_RE.exec(rule);
+  if (!m) { out.note = t; out.callout = false; return out; }
+  out.ok = true; out.rule = rule; out.note = note;
+  out.kind = m[1] === 'Core' ? 'core' : m[1] === 'Optional' ? 'opt' : 'one';
+  out.group = (m[2] || '').trim();
+  out.repeat = !!m[3];
+  out.expects = (m[5] || '').trim();
+  out.was = (m[7] || '').trim();
+  return out;
+}
+
+// Sections in file order. The callout straight under the title counts when
+// its note starts "Callout ·".
+function tpOutline(md) {
+  const L = tpStripGuides(tpMask(tpRemoveHeader(md))).replace(/^---\n[\s\S]*?\n---\n/, '').split('\n');
+  const secs = [];
+  let fence = null;
+  const noteAt = j => {
+    while (j < L.length && !L[j].trim()) j++;
+    const n = /^%%\s*(.*?)\s*%%\s*$/.exec(L[j] || '');
+    return n ? n[1] : null;
+  };
+  for (let i = 0; i < L.length; i++) {
+    const bare = L[i].replace(/^(>\s?)*/, '');
+    const f = /^(`{3,}|~{3,})/.exec(bare);
+    if (f) { if (!fence) fence = f[1]; else if (bare.trim().startsWith(fence)) fence = null; continue; }
+    if (fence) continue;
+    const h = /^(#{1,6})\s+(.*)$/.exec(L[i]);
+    if (h) {
+      if (h[1].length === 1) continue;
+      secs.push(Object.assign({ name: h[2].trim(), lv: h[1].length }, tpBadge(noteAt(i + 1))));
+      continue;
+    }
+    const c = /^>\s*\[!(\w+)\][-+]?\s*(.*)$/.exec(L[i]);
+    if (c && !secs.length) {
+      let j = i;
+      while (j + 1 < L.length && /^>/.test(L[j + 1])) j++;
+      const b = tpBadge(noteAt(j + 1));
+      if (b.callout) {
+        const meta = CALLOUT_META[c[1].toUpperCase()];
+        secs.push(Object.assign({ name: c[2] || (meta ? meta.label : c[1]), lv: 0 }, b));
+      }
+      i = j;
+    }
+  }
+  return secs;
+}
+
+function tpParse(file, md, url) {
+  const text = tpNl(md);
+  const hdr = tpHeader(text);
+  const name = hdr.name || String(file).replace(/\.md$/i, '');
+  const type = String(hdr.type || tpSlug(name)).toLowerCase().trim();
+  const sample = type === 'sample';
+  const retired = /^yes$/i.test(hdr.retired || '');
+  return {
+    file, url: url || tpUrl(file), md: text, hdr, name, type, sample, retired,
+    offer: !sample && !retired && !/^no$/i.test(hdr['offer-in-new-page'] || ''),
+    secs: tpOutline(text),
+  };
+}
+
+async function tpLoad(force) {
+  if (tpl.busy) return tpl.busy;
+  if (tpl.loaded && !force) return;
+  tpl.busy = (async () => {
+    const files = await usageListLogs(TP_DIR);
+    const list = [];
+    let rulesTxt = null, promptsTxt = null;
+    for (const f of files) {
+      const txt = await readVaultFileOrNull(f.url);
+      if (txt == null) continue;
+      if (f.name === TP_RULES_FILE) rulesTxt = txt;
+      else if (f.name === TP_PROMPTS_FILE) promptsTxt = txt;
+      else list.push(tpParse(f.name, txt, f.url));
+    }
+    // Templates by name, then the Sample (the one templates are built from),
+    // then anything retired.
+    const rank = t => t.retired ? 2 : t.sample ? 1 : 0;
+    list.sort((a, b) => rank(a) - rank(b) || a.name.localeCompare(b.name));
+    tpl.list = list;
+    tpl.rulesExists = rulesTxt != null;
+    tpl.rules = tpRulesParse(rulesTxt);
+    tpl.rulesSaved = JSON.stringify(tpl.rules);
+    tpl.promptsExists = promptsTxt != null;
+    tpl.prompts = tpPromptsParse(promptsTxt);
+    tpl.loaded = true;
+  })();
+  try { await tpl.busy; } finally { tpl.busy = null; }
+}
+
+// How many pages carry this type, off the scan cache the review sweep fills.
+function tpUsage(type) {
+  let n = 0;
+  try {
+    scanCache.forEach((rec, url) => {
+      if (rec && rec.fm && String(rec.fm.type || '').toLowerCase().trim() === type && !/^zSystem\//i.test(pdRel(url))) n++;
+    });
+  } catch (_) {}
+  return n;
+}
+
+// ── Format rules ────────────────────────────────────────────────────
+// One rule per row: [name, setting, control, level, exceptions]. The control
+// is Folio's (how the setting is edited); the setting, level and exceptions
+// come from zSystem/Templates/Format rules.md when it is there. The format
+// check itself (Vault check reading these) is S111.
+const TP_RULES_DEFAULT = [
+  ['Headings', [
+    ['Deepest heading', 'H3', 'sel:H2,H3,H4,H5,H6', 'Warn', 'Reference: H4'],
+    ['No skipped levels', 'On', 'onoff', 'Warn', ''],
+    ['No numbers, links or bold in headings', 'On', 'onoff', 'Warn', ''],
+    ['Words per heading', '6', 'num', 'Info', ''],
+    ['Same heading twice on a page', 'Not allowed', 'fixed', 'Warn', '']]],
+  ['Length', [
+    ['Words per page', '2500', 'num', 'Info', 'Reference: 5000'],
+    ['Words per section', '400', 'num', 'Info', ''],
+    ['Words per paragraph', '120', 'num', 'Info', ''],
+    ['Empty sections', 'Not allowed', 'fixed', 'Warn', '']]],
+  ['Page and properties', [
+    ['Summary filled, characters', '160', 'num', 'Warn', ''],
+    ['Title matches the file name', 'On', 'onoff', 'Warn', ''],
+    ['Title length, characters', '60', 'num', 'Info', ''],
+    ['Three-digit number in the file name', 'On', 'onoff', 'Warn', '']]],
+  ['Lists and tables', [
+    ['Levels of nesting in a list', '2', 'num', 'Warn', ''],
+    ['Table columns, unless marked wide', '6', 'num', 'Warn', ''],
+    ['Table header row', 'Required', 'fixed', 'Warn', '']]],
+  ['Pictures and callouts', [
+    ['Caption line under each picture', 'On', 'onoff', 'Info', ''],
+    ['Picture file exists', 'On', 'onoff', 'Warn', ''],
+    ['Callout kinds', 'Summary, Note, Tip, Warning, Danger, Copy, Question', 'fixed', 'Warn', ''],
+    ['Callout inside a callout', 'Not allowed', 'fixed', 'Warn', '']]],
+  ['Text and extras', [
+    ['Highlight, underline, strikethrough, emoji', 'Not allowed', 'fixed', 'Warn', ''],
+    ['Footnotes, embedded pages, inline tags, raw HTML', 'Not allowed', 'fixed', 'Warn', ''],
+    ['Code blocks name their language', 'On', 'onoff', 'Info', ''],
+    ['Bare web addresses', 'Not allowed', 'fixed', 'Info', '']]],
+  ['Finishing', [
+    ['Starter text in [square brackets] left in', 'On', 'onoff', 'Warn', ''],
+    ['Grey notes left on a reviewed page', 'On', 'onoff', 'Info', ''],
+    ['Guide boxes left in a page or template', 'On', 'onoff', 'Warn', 'Sample: allowed'],
+    ['Not reviewed in, months', '12', 'num', 'Info', '']]],
+];
+const TP_LEVELS = ['Warn', 'Info', 'Off'];
+
+function tpRulesDefault() {
+  return TP_RULES_DEFAULT.map(([g, items]) => ({ g, items: items.map(r => ({ name: r[0], value: r[1], ctl: r[2], level: r[3], exc: r[4] })) }));
+}
+function tpRulesParse(md) {
+  const R = tpRulesDefault();
+  if (!md) return R;
+  let g = null;
+  tpNl(md).split('\n').forEach(l => {
+    const h = /^##\s+(.*)$/.exec(l);
+    if (h) { g = h[1].trim(); return; }
+    if (!g || !/^\|/.test(l.trim())) return;
+    const c = l.trim().replace(/^\||\|\s*$/g, '').split('|').map(x => x.trim());
+    if (!c[0] || /^:?-+:?$/.test(c[0]) || c[0].toLowerCase() === 'rule') return;
+    let it = null;
+    R.forEach(x => x.items.forEach(y => { if (y.name.toLowerCase() === c[0].toLowerCase()) it = y; }));
+    if (!it) {
+      let grp = R.find(x => x.g.toLowerCase() === g.toLowerCase());
+      if (!grp) { grp = { g, items: [] }; R.push(grp); }
+      it = { name: c[0], value: c[1] || '', ctl: 'fixed', level: 'Info', exc: '' };
+      grp.items.push(it);
+    }
+    if (c[1]) it.value = c[1];
+    const lv = TP_LEVELS.find(x => x.toLowerCase() === String(c[2] || '').toLowerCase());
+    if (lv) it.level = lv;
+    it.exc = c[3] || '';
+  });
+  return R;
+}
+function tpRulesMd(R) {
+  const out = ['---', 'type: system', '---', '%%',
+    'FORMAT RULES',
+    'Folio reads this file. Change a Setting, Level or Exceptions cell here, or in',
+    'Folio under Admin > Templates > Format rules. Levels are Warn, Info or Off.',
+    'Keep one rule per row. Exceptions name a template and its own setting.',
+    'Pages are never edited when a rule changes; the next Vault check applies it.',
+    '%%', '', '# Format rules', '',
+    'Rules for every page, whatever its template. A template differs only where Exceptions says so.', ''];
+  R.forEach(grp => {
+    out.push('## ' + grp.g, '', '| Rule | Setting | Level | Exceptions |', '| :------- | :-- | :-- | :-- |');
+    grp.items.forEach(r => out.push('| ' + [r.name, r.value, r.level, r.exc || ''].map(x => String(x).replace(/\|/g, '/')).join(' | ') + ' |'));
+    out.push('');
+  });
+  return out.join('\n');
+}
+function tpRulesText(R) {
+  const out = [];
+  (R || tpRulesDefault()).forEach(grp => {
+    const items = grp.items.filter(r => r.level !== 'Off');
+    if (!items.length) return;
+    out.push(grp.g + ':');
+    items.forEach(r => out.push('- ' + r.name + ': ' + r.value + ' (' + r.level + ')' + (r.exc ? '. Exceptions: ' + r.exc : '')));
+  });
+  return out.join('\n');
+}
+
+// ── AI prompts ──────────────────────────────────────────────────────
+// Stand-ins filled by Folio: {{title}} {{number}} {{filename}} {{folder}}
+// {{type}} {{author}} {{today}} {{template}} {{rules}} {{page}} {{change}}.
+const tpLines = a => a.join('\n');
+const TP_PROMPTS_DEFAULT = {
+  write: { title: 'Write a page', text: tpLines([
+    'You are writing one page for our team\'s knowledge base: a folder of Markdown files that we read in Folio and edit in Obsidian.',
+    '',
+    'Write a new page called "{{title}}" using the template below. Follow it exactly:',
+    '- Keep every heading marked Core. Keep a heading marked Optional only if my notes have something for it. For headings marked "One of", keep at least one from each group.',
+    '- The grey note under each heading (between double percent signs) says what goes there. Follow it, then delete the note. Delete every guide box too (the callouts that start with [!guide]) and the TEMPLATE settings block.',
+    '- Replace every piece of starter text in [square brackets]. Where my notes do not cover a Core section, write [To be written: what is missing] instead of inventing it.',
+    '- Keep References as the last section.',
+    '- Follow the format rules at the end.',
+    '',
+    'Set the properties at the top: type: {{type}}, number: {{number}}, status: To Be Reviewed, author: {{author}}, created: {{today}}, file-in: {{folder}}. Write a one-sentence summary under 160 characters.',
+    '',
+    'Give me back the whole file, ready to save as {{filename}}. Use only facts from my notes.',
+    '',
+    'MY NOTES',
+    '[Paste your notes here]',
+    '',
+    'TEMPLATE',
+    '{{template}}',
+    '',
+    'FORMAT RULES',
+    '{{rules}}']) },
+  fix: { title: 'Fix a page', text: tpLines([
+    'Move the page below into the template below, without changing what it says.',
+    '- Keep every fact, number, name and picture link. Do not add facts and do not drop any.',
+    '- Put each part under the template heading it fits. Anything that fits nowhere goes under a heading "Unsorted", just above References.',
+    '- Keep the page\'s properties and its number. Set type: {{type}}. Add any property the template has that the page is missing.',
+    '- Fix the format to match the rules: headings, list nesting, table header rows, an italic caption line under each picture, picture placement (inlR, inlL) and widths (180, 240, 320).',
+    '- Delete grey notes (between double percent signs), guide boxes (callouts that start with [!guide]) and the TEMPLATE settings block from the result.',
+    '',
+    'Give me back the whole file. Then, after it, a short list of every change you made, so a reviewer can check it.',
+    '',
+    'PAGE',
+    '{{page}}',
+    '',
+    'TEMPLATE',
+    '{{template}}',
+    '',
+    'FORMAT RULES',
+    '{{rules}}']) },
+  check: { title: 'Check a page', text: tpLines([
+    'Check the page below against the template and the format rules. Do not rewrite it.',
+    '',
+    'First say whether any Core section is missing. Then list each problem, grouped by section, as: section, what is wrong, the rule it breaks, a suggested fix. Put rules marked Warn before rules marked Info. If the page passes, say so in one line.',
+    '',
+    'PAGE',
+    '{{page}}',
+    '',
+    'TEMPLATE',
+    '{{template}}',
+    '',
+    'FORMAT RULES',
+    '{{rules}}']) },
+  tpl: { title: 'Update this template', text: tpLines([
+    'Here is a template from our team\'s knowledge base. Change it as I describe below, and give me back the whole file.',
+    '- Keep the settings block at the top (between double percent signs, first line TEMPLATE). Update it if the change needs it, and add one to the version number.',
+    '- Keep one grey note straight under every heading. Each note starts with its badges: Core, Optional or One of: <group>, then optionally · Repeat, · Expects: <shapes>, · Was: <old name>. Then a full stop and the guidance.',
+    '- If you rename a heading, add · Was: <old name> to its note.',
+    '- Keep the guide boxes (callouts that start with [!guide]-) and update any the change affects.',
+    '- A note must never contain two percent signs in a row.',
+    '- Keep References as the last section.',
+    '',
+    'THE CHANGE',
+    '{{change}}',
+    '',
+    'TEMPLATE',
+    '{{template}}',
+    '',
+    'FORMAT RULES',
+    '{{rules}}']) },
+};
+const TP_PROMPT_KEYS = ['write', 'fix', 'check', 'tpl'];
+
+function tpPromptsParse(md) {
+  const out = {};
+  TP_PROMPT_KEYS.forEach(k => { out[k] = { title: TP_PROMPTS_DEFAULT[k].title, text: TP_PROMPTS_DEFAULT[k].text }; });
+  if (!md) return out;
+  const body = tpNl(md).replace(/^---\n[\s\S]*?\n---\n/, '');
+  const parts = body.split(/^##\s+/m).slice(1);
+  parts.forEach(p => {
+    const nl = p.indexOf('\n');
+    const title = (nl < 0 ? p : p.slice(0, nl)).trim();
+    const text = (nl < 0 ? '' : p.slice(nl + 1)).trim();
+    const k = TP_PROMPT_KEYS.find(x => out[x].title.toLowerCase() === title.toLowerCase());
+    if (k && text) out[k].text = text;
+  });
+  return out;
+}
+function tpPromptsMd() {
+  const out = ['---', 'type: system', '---', '%%',
+    'AI PROMPTS',
+    'Folio copies these from Admin > Templates > AI prompts. Change the wording under',
+    'each heading; keep the four headings as they are. Folio fills the stand-ins:',
+    '{{title}} {{number}} {{filename}} {{folder}} {{type}} {{author}} {{today}}',
+    '{{template}} {{rules}} {{page}} {{change}}',
+    '%%', '', '# AI prompts', ''];
+  TP_PROMPT_KEYS.forEach(k => out.push('## ' + TP_PROMPTS_DEFAULT[k].title, '', TP_PROMPTS_DEFAULT[k].text, ''));
+  return out.join('\n');
+}
+function tpFillPrompt(text, vars) {
+  return String(text).replace(/\{\{(\w+)\}\}/g, (m, k) => (vars[k] != null ? String(vars[k]) : m));
+}
+
+// ── Obsidian ────────────────────────────────────────────────────────
+// Open question on file (27 Sep): is the vault called the same on every PC?
+// settings.json obsidianVault wins; otherwise the vault folder's own name.
+function tpObsidianVault() {
+  if (state.obsidianVault) return state.obsidianVault;
+  let n = '';
+  try { n = LOCAL.on ? (LOCAL.root && LOCAL.root.name) : String(CONFIG.vaultRelPath || '').split('/').filter(Boolean).pop(); } catch (_) {}
+  return n || (typeof CONFIG !== 'undefined' && CONFIG.vaultName) || '';
+}
+function tpObsidianHref(url) {
+  return 'obsidian://open?vault=' + encodeURIComponent(tpObsidianVault()) +
+         '&file=' + encodeURIComponent(pdRel(url).replace(/\.md$/i, ''));
+}
+function tpOpenInObsidian(url) {
+  const href = tpObsidianHref(url);
+  tpl.lastObsidian = href;
+  try {
+    const a = document.createElement('a');
+    a.href = href; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch (_) {}
+  return href;
+}
+
+// ── Writing ─────────────────────────────────────────────────────────
+async function tpEnsureFolder(rel) {
+  const parts = String(rel || '').split('/').filter(Boolean);
+  if (!parts.length) return;
+  if (LOCAL.on) { await localGetDir(parts.join('/'), { create: true }); return; }
+  let parent = CONFIG.vaultRelPath;
+  for (const seg of parts) {
+    try { await spCreateFolder(parent, seg); } catch (_) { /* already there */ }
+    parent += '/' + seg;
+  }
+}
+async function tpWrite(file, text) {
+  await tpEnsureFolder(TP_DIR);
+  await spWriteFile(tpUrl(file), text);
+}
+function tpSeedText(name) {
+  const el = document.getElementById('tpl-seed-' + name);
+  return el ? tpNl(el.textContent).replace(/^\n/, '') : '';
+}
+// Adds whichever of the four starter templates, Format rules and Prompts are
+// missing. Never overwrites a file that is there.
+async function tpSeedStarters() {
+  if (!atLeast('admin')) return 0;
+  await tpLoad(true);
+  let n = 0;
+  for (const name of TP_STARTERS) {
+    const file = name + '.md';
+    if (tpl.list.some(t => t.file.toLowerCase() === file.toLowerCase())) continue;
+    if (await readVaultFileOrNull(tpUrl(file)) != null) continue;
+    const txt = tpSeedText(name);
+    if (!txt) continue;
+    await tpWrite(file, txt); n++;
+  }
+  if (!tpl.rulesExists) { await tpWrite(TP_RULES_FILE, tpRulesMd(tpRulesDefault())); n++; }
+  if (!tpl.promptsExists) { await tpWrite(TP_PROMPTS_FILE, tpPromptsMd()); n++; }
+  await tpLoad(true);
+  return n;
+}
+
+// ── New template ────────────────────────────────────────────────────
+function tpHeaderBlock(o) {
+  return tpLines(['%%', 'TEMPLATE',
+    'name: ' + o.name, 'version: 1', 'type: ' + o.type, 'offer-in-new-page: yes',
+    'usual-folder: ' + (o.folder || ''), 'starting-tags: ' + (o.tags || ''),
+    'section-order: in order', 'extra-sections: flagged', 'deepest-heading: H3',
+    'use-for: ' + (o.useFor || ''), 'not-for: ' + (o.notFor || ''),
+    '',
+    'These are the template settings. Folio reads them, so keep each one as',
+    '"name: value" on its own line. The Sample template explains every one.',
+    '%%', '']);
+}
+// From the Sample: settings reset for the new name, grey notes kept, every
+// guide box removed.
+function tpFromSample(S, o) {
+  let s = tpStripGuides(S.md);
+  const m = TP_HDR_RE.exec(s);
+  if (m) s = s.replace(m[0], () => m[1] + tpHeaderBlock(o) + '\n');
+  return setFmKeys(s, [['type', o.type], ['summary', ''], ['tags', '[]'], ['aliases', '[]']]);
+}
+// A copy of another template: everything as it is, renamed.
+function tpFromCopy(T, o) {
+  const s = tpSetHeaderKeys(T.md, [['name', o.name], ['version', '1'], ['type', o.type],
+    ['offer-in-new-page', 'yes'], ['usual-folder', o.folder || T.hdr['usual-folder'] || ''], ['retired', 'no']]);
+  return setFmKeys(s, [['type', o.type]]);
+}
+
+// ── New page ────────────────────────────────────────────────────────
+// Where a page can be filed: every folder that is not the drafts folder,
+// zSystem, or a vault folder itself.
+function tpFilingFolders() {
+  const vaults = vaultFolderIds();
+  const d = pdDraftsFolder().toLowerCase();
+  const out = [];
+  collectFolders().forEach(x => {
+    const id = x.folder.id;
+    const parts = String(id).split('/');
+    let vault = '';
+    if (parts.length && vaults.includes(parts[0])) vault = parts.shift();
+    if (!parts.length) return;
+    const inV = parts.join('/'), lc = inV.toLowerCase();
+    if (lc === d || lc.startsWith(d + '/') || /^zsystem(\/|$)/i.test(inV)) return;
+    out.push({ id, inV, top: parts[0], vault,
+      label: (vault ? vaultNameForId(vault) + ' › ' : '') + parts.map(p => displayFolderName(p)).join(' / ') });
+  });
+  return out;
+}
+// Numbers taken in a top folder: filed pages by name, and drafts that have
+// already reserved one for it (their file-in property).
+function tpUsedNumbers(top, vault) {
+  const used = new Set();
+  const v = vault || '';
+  allMdFiles().forEach(f => {
+    const id = pageIdentity(f.url);
+    if (id.top === top && (id.vault || '') === v && id.number) used.add(Number(id.number));
+  });
+  try {
+    scanCache.forEach((rec, url) => {
+      const fm = rec && rec.fm;
+      if (!fm || !fm['file-in']) return;
+      const id = pageIdentity(url);
+      if (!id.draft || (id.vault || '') !== v) return;
+      if (String(fm['file-in']).split('/')[0].toLowerCase() !== String(top).toLowerCase()) return;
+      const n = fmNumberOf(fm) || pageNumberOf(url);
+      if (n) used.add(Number(n));
+    });
+  } catch (_) {}
+  (tpl.reserved || []).forEach(r => { if (r.top === top && r.vault === v) used.add(r.n); });
+  return used;
+}
+function tpNextNumber(top, vault) {
+  const u = tpUsedNumbers(top, vault);
+  const n = u.size ? Math.max(...u) + 1 : 1;
+  return String(Math.min(n, 999)).padStart(3, '0');
+}
+function tpSafeTitle(t) { return String(t || '').replace(/[\\/:*?"<>|#%]/g, '').replace(/\s+/g, ' ').trim(); }
+function tpNewPageText(T, o) {
+  const s = tpFillStandins(tpRemoveHeader(T.md), o.title);
+  const tags = String(T.hdr['starting-tags'] || '').split(',').map(x => x.trim()).filter(Boolean);
+  const pairs = [['type', T.type], ['status', 'To Be Reviewed'], ['reviewed', ''], ['created', tpToday()]];
+  const who = (() => { try { return wbAuthor(); } catch (_) { return ''; } })();
+  if (who) pairs.push(['author', who]);
+  if (o.number) pairs.push(['number', o.number]);
+  if (tags.length) pairs.push(['tags', '[' + tags.join(', ') + ']']);
+  if (o.folder) pairs.push(['file-in', o.folder]);
+  return setFmKeys(s, pairs);
+}
+function tpDraftRel(vault, fileName) {
+  return (vault ? vault + '/' : '') + pdDraftsFolder() + '/' + fileName;
+}
+
+// ── Screen ──────────────────────────────────────────────────────────
+function tpCur() { return tpl.list.find(t => t.file === tpl.nav) || null; }
+
+// The reader's page styles are all written against #reader-content. The
+// preview borrows them once, re-pointed at #tpl-page, so a template looks
+// here exactly as a page does in the reader.
+function tpCloneReaderCss() {
+  if (document.getElementById('tpl-reader-css')) return;
+  const out = [];
+  const take = rules => {
+    const got = [];
+    for (const r of rules) {
+      if (r.selectorText && r.selectorText.indexOf('#reader-content') !== -1) got.push(r.cssText.replace(/#reader-content/g, '#tpl-page'));
+      else if (r.cssRules && r.media) {
+        const inner = take(r.cssRules);
+        if (inner.length) got.push('@media ' + r.media.mediaText + ' {' + inner.join('\n') + '}');
+      }
+    }
+    return got;
+  };
+  for (const sh of Array.from(document.styleSheets)) {
+    try { out.push(...take(sh.cssRules || [])); } catch (_) {}
+  }
+  const st = document.createElement('style');
+  st.id = 'tpl-reader-css';
+  st.textContent = out.join('\n') + '\nhtml body #tpl-page#tpl-page{display:block !important}';
+  document.head.appendChild(st);
+}
+
+async function renderTemplatesTab() {
+  const body = $('admin-body');
+  if (!body) return;
+  tpCloneReaderCss();
+  if (!tpl.loaded) {
+    body.innerHTML = '<div class="rp-empty">Reading templates…</div>';
+    try { await tpLoad(); }
+    catch (e) { body.innerHTML = '<div class="rp-empty">Could not read ' + TP_DIR + ': ' + escHtml(e.message) + '</div>'; return; }
+  }
+  if (adminActiveTab !== 'templates') return;
+  if (tpl.nav !== 'rules' && !tpCur()) tpl.nav = tpl.list.length ? tpl.list[0].file : null;
+  tpPaint();
+}
+
+function tpPaint() {
+  const body = $('admin-body');
+  if (!body || adminActiveTab !== 'templates') return;
+  const keep = $('tpl-tscroll') ? $('tpl-tscroll').scrollLeft : null;
+  let main;
+  if (tpl.nav === 'rules') main = tpRulesHTML();
+  else if (!tpl.list.length) main = tpEmptyHTML();
+  else main = tpTemplateHTML(tpCur());
+  body.innerHTML = '<div class="tpl-screen">' + tpTabRow() + main + '</div>';
+  const sc = $('tpl-tscroll');
+  if (sc) {
+    if (keep != null) sc.scrollLeft = keep;
+    else { const on = sc.querySelector('.tpl-tt.on'); if (on && on.scrollIntoView) try { on.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch (_) {} }
+    sc.onscroll = tpArrows;
+    tpArrows();
+  }
+  const pg = $('tpl-page');
+  if (pg) {
+    pg.querySelectorAll('.md-h-acts').forEach(n => n.remove());
+    pg.querySelectorAll('[id]').forEach(n => { if (n !== pg) n.removeAttribute('id'); });
+  }
+}
+function tpArrows() {
+  const s = $('tpl-tscroll');
+  if (!s) return;
+  const a = document.querySelectorAll('.tpl-sarr');
+  if (a.length < 2) return;
+  const over = s.scrollWidth > s.clientWidth + 2;
+  a[0].classList.toggle('dim', !over || s.scrollLeft <= 2);
+  a[1].classList.toggle('dim', !over || s.scrollLeft + s.clientWidth >= s.scrollWidth - 2);
+}
+
+function tpTabRow() {
+  const T = tpCur(), adm = atLeast('admin');
+  const tabs = tpl.list.map(t => {
+    const n = t.sample ? 0 : tpUsage(t.type);
+    return '<button type="button" class="tpl-tt' + (tpl.nav === t.file ? ' on' : '') + (t.sample ? ' samp' : '') + (t.retired ? ' ret' : '') +
+      '" data-tp-nav="' + escHtml(t.file) + '" title="' + escHtml(t.retired ? 'Retired' : (t.hdr['use-for'] || '')) + '">' +
+      escHtml(t.name) + (n ? '<span class="c">' + n + '</span>' : '') + '</button>';
+  }).join('');
+  return '<div class="tpl-trow">' +
+    '<button type="button" class="tpl-sarr" data-tp="scroll" data-dir="-1" aria-label="Earlier templates">«</button>' +
+    '<div class="tpl-tscroll" id="tpl-tscroll">' + tabs + '</div>' +
+    '<button type="button" class="tpl-sarr" data-tp="scroll" data-dir="1" aria-label="More templates">»</button>' +
+    (adm ? '<button type="button" class="tpl-tt tpl-newt" data-tp="newtpl">+ New</button>' : '') +
+    '<span class="tpl-tdiv"></span>' +
+    '<button type="button" class="tpl-tt' + (tpl.nav === 'rules' ? ' on' : '') + '" data-tp-nav="rules">Format rules</button>' +
+    '<span class="tpl-sp"></span>' +
+    (tpl.nav !== 'rules' && T && adm
+      ? '<span class="tpl-acts"><button type="button" class="ed-btn" data-tp="edit">Edit template</button>' +
+        (T.sample ? '' : '<button type="button" class="ed-btn" data-tp="retire">' + (T.retired ? 'Restore' : 'Retire') + '</button>') + '</span>'
+      : '') +
+    '</div>';
+}
+
+function tpEmptyHTML() {
+  return '<div class="tpl-empty"><b>No templates yet.</b><p>Templates live in ' + TP_DIR + ' and are edited in Obsidian. ' +
+    (atLeast('admin')
+      ? 'Folio can add the four starters (Guide, Process, Reference and the Sample) with the Format rules and AI prompts. Files already there are never overwritten.</p><button type="button" class="ed-btn ed-save" data-tp="seed">Add the starter templates</button>'
+      : 'An Administrator adds them.</p>') + '</div>';
+}
+
+function tpTemplateHTML(T) {
+  if (!T) return tpEmptyHTML();
+  const h = T.hdr;
+  const sub = T.sample
+    ? 'The guided template that other templates are built from. Never offered in New page.'
+    : (h['use-for'] ? 'Use for ' + h['use-for'] : '');
+  const meta = [T.retired ? 'Retired: not offered in New page' : '',
+    T.sample ? '' : tpUsage(T.type) + ' page' + (tpUsage(T.type) === 1 ? '' : 's'),
+    'version ' + (h.version || '1'), T.file].filter(Boolean).join(' · ');
+  const views = [['sample', 'Sample'], ['outline', 'Outline'], ['prompts', 'AI prompts']];
+  return '<div class="tpl-subline"><span>' + escHtml(sub) + '</span><span class="tpl-meta">' + escHtml(meta) + '</span></div>' +
+    '<div class="tpl-vrow"><div class="tpl-seg" role="tablist">' +
+    views.map(v => '<button type="button" role="tab" class="' + (tpl.view === v[0] ? 'on' : '') + '" data-tp-view="' + v[0] + '">' + v[1] + '</button>').join('') +
+    '</div><span class="tpl-sp"></span>' + (tpl.view === 'sample' ? tpFlyoutHTML(T) : '') + '</div>' +
+    (tpl.view === 'outline' ? tpOutlineHTML(T) : tpl.view === 'prompts' ? tpPromptsHTML(T) : tpSampleHTML(T));
+}
+
+function tpShows(T) {
+  return [['folio', 'In Folio'], ['obsidian', 'In Obsidian'], ['file', 'File'], ['new', T.sample ? 'As a new template' : 'As a new page']];
+}
+function tpFlyoutHTML(T) {
+  const W = [['readable', 'Readable'], ['standard', 'Standard'], ['wide', 'Wide']];
+  const S = tpShows(T);
+  const lab = (S.find(s => s[0] === tpl.show) || S[0])[1] + ' · ' + (W.find(w => w[0] === tpl.width) || W[0])[1];
+  return '<div class="tpl-flywrap"><button type="button" class="ed-btn tpl-flybtn" data-tp="fly" aria-expanded="' + (tpl.fly ? 'true' : 'false') + '">View: ' + escHtml(lab) + ' ▾</button>' +
+    (tpl.fly ? '<div class="tpl-fly" role="menu">' +
+      '<div class="tpl-fh">Width</div><div class="tpl-seg">' + W.map(w => '<button type="button" class="' + (tpl.width === w[0] ? 'on' : '') + '" data-tp-w="' + w[0] + '">' + w[1] + '</button>').join('') + '</div>' +
+      '<div class="tpl-fh">Show</div>' + S.map(s => '<button type="button" class="tpl-fo' + (tpl.show === s[0] ? ' on' : '') + '" data-tp-show="' + s[0] + '">' + s[1] + '</button>').join('') +
+      (atLeast('admin') ? '<div class="tpl-fh">Everywhere in Folio</div><label class="tpl-fchk"><input type="checkbox" data-tp="guidetoggle"' + (TP_RENDER.showGuide ? ' checked' : '') + '> Show guide boxes (Administrator, this session)</label>' : '') +
+      '</div>' : '') + '</div>';
+}
+
+function tpRenderPage(T, obs) {
+  const md = tpFillStandins(obs ? T.md : tpRemoveHeader(T.md), T.name);
+  const savedCopy = mdCopyBlocks;
+  TP_RENDER.tplView = !!obs;
+  let html = '';
+  try { html = parseMarkdown(md); }
+  finally { TP_RENDER.tplView = false; mdCopyBlocks = savedCopy; }
+  return html;
+}
+function tpSourceHTML(md) {
+  let s = escHtml(tpNl(md));
+  s = s.replace(/^---\n[\s\S]*?\n---/, m => '<span class="tpl-s-fm">' + m + '</span>');
+  const L = s.split('\n');
+  for (let i = 0; i < L.length; i++) {
+    if (/^&gt;\s*\[!guide\]/i.test(L[i])) {
+      let j = i;
+      while (j + 1 < L.length && /^&gt;/.test(L[j + 1])) j++;
+      L[i] = '<span class="tpl-s-guide">' + L[i]; L[j] = L[j] + '</span>'; i = j;
+    }
+  }
+  s = tpUnmask(tpMask(L.join('\n')).replace(/%%[\s\S]*?%%/g, m => '<span class="tpl-s-note">' + m + '</span>'));
+  return s.replace(/^(#{1,6} .*)$/gm, '<span class="tpl-s-h">$1</span>');
+}
+function tpSampleHTML(T) {
+  const w = TP_WIDTHS[tpl.width];
+  const style = w ? 'max-width:' + w + 'px' : '';
+  let inner, cls = 'tpl-page', inert = ' inert';
+  if (tpl.show === 'file') { inner = '<pre class="tpl-src">' + tpSourceHTML(T.md) + '</pre>'; inert = ''; }
+  else if (tpl.show === 'new') {
+    const txt = T.sample
+      ? tpFromSample(T, { name: 'New template', type: 'new-template' })
+      : tpNewPageText(T, { title: 'Example page', number: '021', folder: T.hdr['usual-folder'] || '' });
+    inner = '<div class="tpl-newnote">' + (T.sample
+      ? 'What + New writes when it starts from the Sample: settings reset for the new name, grey notes kept, every guide box removed.'
+      : 'What New page writes into ' + escHtml(pdDraftsFolder()) + ': settings removed, title and date filled, properties set. Grey notes and guide boxes stay for the writer; Folio hides both.') +
+      '</div><pre class="tpl-src">' + tpSourceHTML(txt) + '</pre>';
+    inert = '';
+  } else {
+    inner = tpRenderPage(T, tpl.show === 'obsidian');
+    if (tpl.show === 'obsidian') cls += ' tpl-obs';
+  }
+  return '<div class="tpl-prev"><div class="' + cls + '" id="tpl-page" style="' + style + '"' + inert + '>' + inner + '</div></div>';
+}
+
+function tpPills(s) {
+  const P = (c, t, tip) => '<span class="tpl-pl ' + c + '" title="' + escHtml(tip) + '">' + escHtml(t) + '</span>';
+  let h = '';
+  if (s.callout) h += P('p-co', 'Callout', 'Sits straight under the title');
+  if (s.kind === 'core') h += P('p-core', 'Core', 'Every page of this type has it');
+  else if (s.kind === 'opt') h += P('p-opt', 'Optional', 'Keep it only when there is something to say');
+  else if (s.kind === 'one') h += P('p-one', 'One of: ' + s.group, 'Keep at least one section of this group');
+  if (s.repeat) h += P('p-rep', 'Repeat', 'Copy it once for each item');
+  return h;
+}
+function tpOutlineHTML(T) {
+  const h = T.hdr;
+  const set = [['Type', h.type], ['Usual folder', h['usual-folder']], ['Starting tags', h['starting-tags']],
+    ['Section order', h['section-order']], ['Extra sections', h['extra-sections']], ['Deepest heading', h['deepest-heading']],
+    ['Use for', h['use-for']], ['Not for', h['not-for']]].filter(x => x[1]);
+  const rows = T.secs.map(s =>
+    '<div class="tpl-orow lv' + s.lv + '"><div class="tpl-oname">' + (s.lv ? '<span class="tpl-hl">H' + s.lv + '</span>' : '<span class="tpl-hl">Top</span>') + escHtml(s.name) + '</div>' +
+    '<div class="tpl-opills">' + tpPills(s) + '</div>' +
+    '<div class="tpl-onote">' + escHtml(s.note) +
+    (s.expects ? '<span class="tpl-ox">Expects: ' + escHtml(s.expects) + '</span>' : '') +
+    (s.was ? '<span class="tpl-ox">Was: ' + escHtml(s.was) + '</span>' : '') +
+    (s.ok ? '' : '<span class="tpl-bad">No badges in the grey note under this heading.</span>') + '</div></div>').join('');
+  const key = [['p-core', 'Core', 'every page has it'], ['p-opt', 'Optional', 'only when there is something to say'],
+    ['p-one', 'One of', 'at least one of the group'], ['p-rep', 'Repeat', 'once for each item'], ['p-co', 'Callout', 'straight under the title']];
+  return (set.length ? '<div class="tpl-card tpl-set">' + set.map(x => '<div><span>' + x[0] + '</span><b>' + escHtml(x[1]) + '</b></div>').join('') + '</div>' : '') +
+    '<div class="tpl-card tpl-outline">' + (rows || '<div class="rp-empty">No sections found.</div>') + '</div>' +
+    '<div class="tpl-key">' + key.map(k => '<span><span class="tpl-pl ' + k[0] + '">' + k[1] + '</span> ' + k[2] + '</span>').join('') +
+    '<span><span class="tpl-ox">Expects</span> what goes in it</span><span><span class="tpl-ox">Was</span> its old name</span></div>';
+}
+
+const TP_PROMPT_BLURB = {
+  write: 'Your AI writes a new page in this layout from your notes. Properties and number come filled in.',
+  fix: 'Pick an older page. Folio includes it, and your AI moves it into this layout without changing what it says.',
+  check: 'Your AI lists what breaks the rules on a page, without rewriting it. A writer’s check before review.',
+  tpl: 'Describe a change; your AI rewrites this template and keeps its grey notes.',
+};
+function tpPromptsHTML(T) {
+  const keys = T.sample ? ['tpl'] : TP_PROMPT_KEYS;
+  return '<div class="tpl-card tpl-plist">' + keys.map(k =>
+    '<div class="tpl-prow"><div><b>' + escHtml(tpl.prompts[k].title) + '</b><span>' + escHtml(TP_PROMPT_BLURB[k]) + '</span></div>' +
+    '<button type="button" class="ed-btn" data-tp-prompt="' + k + '">Copy…</button></div>').join('') + '</div>' +
+    '<p class="tpl-hint">Every prompt copies with this template and the Format rules.' +
+    (atLeast('admin') ? ' The wording is in <a href="#" data-tp="editprompts">' + TP_PROMPTS_FILE + '</a>.' : '') + '</p>';
+}
+
+function tpRulesDirty() { return JSON.stringify(tpl.rules) !== tpl.rulesSaved; }
+function tpRuleSummary(g) { return g.items.slice(0, 2).map(r => r.name.split(',')[0] + ' ' + r.value).join(' · '); }
+function tpRulesHTML() {
+  const adm = atLeast('admin');
+  const R = tpl.rules || tpRulesDefault();
+  const ctl = (r, gi, ri) => {
+    if (!adm || r.ctl === 'fixed') return '<span class="tpl-fx">' + escHtml(r.value) + '</span>';
+    if (r.ctl === 'num') return '<input class="tpl-inp" data-tp-val="' + gi + ':' + ri + '" value="' + escHtml(r.value) + '" inputmode="numeric" aria-label="' + escHtml(r.name) + '">';
+    if (r.ctl === 'onoff') return '<span class="tpl-seg sm">' + ['On', 'Off'].map(v => '<button type="button" class="' + (r.value === v ? 'on' : '') + '" data-tp-set="' + gi + ':' + ri + ':' + v + '">' + v + '</button>').join('') + '</span>';
+    if (r.ctl.indexOf('sel:') === 0) return '<select class="tpl-inp" data-tp-val="' + gi + ':' + ri + '" aria-label="' + escHtml(r.name) + '">' + r.ctl.slice(4).split(',').map(o => '<option' + (o === r.value ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
+    return '<span class="tpl-fx">' + escHtml(r.value) + '</span>';
+  };
+  const lvl = (r, gi, ri) => adm
+    ? '<span class="tpl-seg sm">' + TP_LEVELS.map(l => '<button type="button" class="' + (r.level === l ? 'on' : '') + '" data-tp-lvl="' + gi + ':' + ri + ':' + l + '">' + l + '</button>').join('') + '</span>'
+    : '<span class="tpl-fx">' + r.level + '</span>';
+  return '<div class="tpl-subline"><span>Rules for every page, whatever its template. Change a setting and the next Vault check applies it everywhere; pages are never edited.</span>' +
+    '<span class="tpl-meta">' + (adm ? 'Administrator only · ' : '') + TP_DIR + '/' + TP_RULES_FILE + (tpl.rulesExists ? '' : ' (not written yet)') + '</span></div>' +
+    '<details class="tpl-how"' + (tpl.how ? ' open' : '') + '><summary data-tp="how">How rules work</summary><div class="tpl-howb">' +
+    '<div><b>Template rules</b> (one type): which sections it has, in what order, and which are core. Set in each template’s grey notes.</div>' +
+    '<div><b>Format rules</b> (every page): headings, lengths, tables, pictures. Set here. A template differs only where Exceptions says so.</div>' +
+    '<div><b>Levels:</b> Warn shows in Vault check as something to fix, Info as a note, Off is not checked. The format check itself comes with S111.</div></div></details>' +
+    (adm && tpRulesDirty() ? '<div class="tpl-savebar"><span>Unsaved changes</span><button type="button" class="ed-btn" data-tp="rulesundo">Undo</button><button type="button" class="ed-btn ed-save" data-tp="rulessave">Save rules</button></div>' : '') +
+    '<div class="tpl-card tpl-rules">' + R.map((g, gi) =>
+      '<div class="tpl-grp' + (tpl.open[gi] ? ' open' : '') + '"><button type="button" class="tpl-gh" data-tp-grp="' + gi + '" aria-expanded="' + (tpl.open[gi] ? 'true' : 'false') + '">' +
+      '<span class="tw">' + (tpl.open[gi] ? '▾' : '▸') + '</span><b>' + escHtml(g.g) + '</b><span class="gc">' + g.items.length + ' rules</span><span class="gs">' + escHtml(tpRuleSummary(g)) + '</span></button>' +
+      (tpl.open[gi] ? '<div class="tpl-gb">' + g.items.map((r, ri) =>
+        '<div class="tpl-rr"><span class="rn">' + escHtml(r.name) + '</span><span class="rv">' + ctl(r, gi, ri) + '</span>' + lvl(r, gi, ri) +
+        (adm ? '<input class="tpl-inp rx" data-tp-exc="' + gi + ':' + ri + '" value="' + escHtml(r.exc || '') + '" placeholder="Exceptions" aria-label="Exceptions for ' + escHtml(r.name) + '">' : '<span class="rx">' + escHtml(r.exc || '') + '</span>') +
+        '</div>').join('') + '</div>' : '') + '</div>').join('') + '</div>';
+}
+
+// ── Dialogs ─────────────────────────────────────────────────────────
+function tpModal(html, wide) {
+  let ov = $('tpl-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'tpl-overlay';
+    ov.addEventListener('click', e => { if (e.target === ov) tpCloseModal(); });
+    document.body.appendChild(ov);
+  }
+  ov.innerHTML = '<div id="tpl-modal" role="dialog" aria-modal="true" class="' + (wide ? 'wide' : '') + '">' + html + '</div>';
+  ov.style.display = 'flex';
+  return ov;
+}
+function tpCloseModal() {
+  const ov = $('tpl-overlay');
+  if (ov) { ov.style.display = 'none'; ov.innerHTML = ''; }
+  tpl.dlg = null;
+}
+
+function tpFolderOptions(sel) {
+  return tpFilingFolders().map(f => '<option value="' + escHtml(f.id) + '"' + (f.id === sel ? ' selected' : '') + '>' + escHtml(f.label) + '</option>').join('');
+}
+function tpFolderFor(T, folders) {
+  const want = String((T && T.hdr['usual-folder']) || '').toLowerCase().trim();
+  if (want && want !== 'none') {
+    const hit = folders.find(f => f.inV.toLowerCase() === want) || folders.find(f => f.top.toLowerCase() === want);
+    if (hit) return hit;
+  }
+  return folders[0] || null;
+}
+
+async function tpOpenNewPage() {
+  if (!reviewAllowed()) return;
+  try { await tpLoad(); } catch (_) {}
+  try { await loadAllFolders(); } catch (_) {}
+  const offer = tpl.list.filter(t => t.offer);
+  if (!offer.length) {
+    tpModal('<div class="cm-title">New page</div><p class="id-sub">No templates to start from yet. ' +
+      (atLeast('admin') ? 'Add the starter templates in Admin › Templates.' : 'An Administrator adds them in Admin › Templates.') +
+      '</p><div class="cm-actions"><button type="button" class="ed-btn" data-tp="close">Close</button>' +
+      (atLeast('admin') ? '<button type="button" class="ed-btn ed-save" data-tp="gotemplates">Open Templates</button>' : '') + '</div>');
+    return;
+  }
+  const folders = tpFilingFolders();
+  const cur = tpCur();
+  const T = (cur && cur.offer) ? cur : offer[0];
+  const f = tpFolderFor(T, folders);
+  tpl.np = { file: T.file, title: '', folder: f ? f.id : '', num: f ? tpNextNumber(f.top, f.vault) : '', picked: false, typedNum: false };
+  tpl.dlg = 'np';
+  tpDrawNewPage();
+}
+function tpNpFolder() { return tpFilingFolders().find(f => f.id === tpl.np.folder) || null; }
+function tpDrawNewPage() {
+  const np = tpl.np;
+  const T = tpl.list.find(t => t.file === np.file);
+  const offer = tpl.list.filter(t => t.offer);
+  tpModal('<div class="cm-title">New page</div><p class="id-sub">Folio sets it up in ' + escHtml(pdDraftsFolder()) + ' and opens it in Obsidian.</p>' +
+    '<div class="tpl-np"><div>' +
+    '<div class="tpl-fr"><div class="tpl-fl">Template</div><div class="tpl-chips">' + offer.map(t => '<button type="button" class="tpl-chip' + (t.file === np.file ? ' on' : '') + '" data-tp-npt="' + escHtml(t.file) + '">' + escHtml(t.name) + '</button>').join('') + '</div></div>' +
+    '<div class="tpl-use">' + (T.hdr['use-for'] ? '<div><b>Use for</b> ' + escHtml(T.hdr['use-for']) + '</div>' : '') + (T.hdr['not-for'] ? '<div><b>Not for</b> ' + escHtml(T.hdr['not-for']) + '</div>' : '') + '</div>' +
+    '<div class="tpl-fr"><label class="tpl-fl" for="tpl-np-title">Title</label><input class="tpl-inp" id="tpl-np-title" autocomplete="off" value="' + escHtml(np.title) + '"></div>' +
+    '<div class="tpl-fr"><label class="tpl-fl" for="tpl-np-folder">Will be filed in</label><select class="tpl-inp" id="tpl-np-folder">' + tpFolderOptions(np.folder) + '</select></div>' +
+    '<div class="tpl-fr"><label class="tpl-fl" for="tpl-np-num">File name</label><div class="tpl-fname"><input class="tpl-inp num" id="tpl-np-num" maxlength="3" inputmode="numeric" value="' + escHtml(np.num) + '" aria-label="Number"><span>-</span><span class="ft" id="tpl-np-ft">' + escHtml(tpSafeTitle(np.title) || 'Title') + '</span><span>.md</span></div><div class="tpl-why" id="tpl-np-why"></div></div>' +
+    '</div><div class="tpl-npprev"><div class="tpl-fl">' + escHtml(T.name) + ' starts with</div>' +
+    T.secs.map(s => '<div class="tpl-inc' + (s.lv > 2 ? ' sub' : '') + '"><span>' + escHtml(s.name) + '</span><span>' + tpPills(s) + '</span></div>').join('') + '</div></div>' +
+    '<div class="cm-actions"><span class="tpl-keys">Enter creates · Esc cancels</span><button type="button" class="ed-btn" data-tp="close">Cancel</button><button type="button" class="ed-btn ed-save" id="tpl-np-go" data-tp="npgo">Create and open in Obsidian</button></div>', true);
+  const ti = $('tpl-np-title');
+  ti.oninput = () => { np.title = ti.value; $('tpl-np-ft').textContent = tpSafeTitle(np.title) || 'Title'; tpNpCheck(); };
+  ti.onkeydown = e => { if (e.key === 'Enter') tpNpGo(); if (e.key === 'Escape') tpCloseModal(); };
+  $('tpl-np-folder').onchange = e => {
+    np.folder = e.target.value;
+    const f = tpNpFolder();
+    np.num = f ? tpNextNumber(f.top, f.vault) : '';
+    tpDrawNewPage();
+  };
+  const ni = $('tpl-np-num');
+  ni.oninput = () => { np.num = ni.value.replace(/\D/g, '').slice(0, 3); ni.value = np.num; tpNpCheck(); };
+  ni.onkeydown = e => { if (e.key === 'Enter') tpNpGo(); if (e.key === 'Escape') tpCloseModal(); };
+  tpNpCheck();
+  setTimeout(() => { try { ti.focus(); } catch (_) {} }, 20);
+}
+function tpNpCheck() {
+  const np = tpl.np, f = tpNpFolder();
+  let msg = '', bad = false;
+  if (!f) { msg = 'No folder to file it in yet. Make one in Obsidian first.'; bad = true; }
+  else if (!/^\d{3}$/.test(np.num) || np.num === '000') { msg = 'Three digits, 001 to 999. The next free one is ' + tpNextNumber(f.top, f.vault) + '.'; bad = true; }
+  else if (tpUsedNumbers(f.top, f.vault).has(Number(np.num))) { msg = np.num + ' is already used in ' + displayFolderName(f.top) + '. The next free one is ' + tpNextNumber(f.top, f.vault) + '.'; bad = true; }
+  else msg = 'Reserved for ' + displayFolderName(f.top) + '. The page waits in ' + pdDraftsFolder() + ' until it is filed there.';
+  const w = $('tpl-np-why');
+  if (w) { w.textContent = msg; w.classList.toggle('bad', bad); }
+  const ni = $('tpl-np-num');
+  if (ni) ni.classList.toggle('bad', bad && !!f);
+  const go = $('tpl-np-go');
+  if (go) go.disabled = bad || !tpSafeTitle(np.title);
+  return !bad && !!tpSafeTitle(np.title);
+}
+async function tpNpGo() {
+  if (!tpNpCheck()) return;
+  const np = tpl.np, f = tpNpFolder();
+  const T = tpl.list.find(t => t.file === np.file);
+  const title = tpSafeTitle(np.title);
+  const fileName = np.num + '-' + title + '.md';
+  const rel = tpDraftRel(f.vault, fileName);
+  const url = pdRootPrefix() + rel;
+  const go = $('tpl-np-go');
+  if (go) go.disabled = true;
+  try {
+    if (await readVaultFileOrNull(url) != null) throw new Error(fileName + ' is already in ' + pdDraftsFolder() + '.');
+    const content = tpNewPageText(T, { title, number: np.num, folder: f.inV });
+    await tpEnsureFolder((f.vault ? f.vault + '/' : '') + pdDraftsFolder());
+    await spWriteFile(url, content);
+    try {
+      const ch = changesUrlFor(url);
+      await ensureZSystemDir(ch);
+      await spWriteFile(ch, buildChangeEntry('', content) + '\n');
+    } catch (_) { /* the page is made either way */ }
+    (tpl.reserved = tpl.reserved || []).push({ top: f.top, vault: f.vault || '', n: Number(np.num) });
+    tpCloseModal();
+    await tpRefreshTree((f.vault ? f.vault + '/' : '') + pdDraftsFolder());
+    try { await openFile(url, fileName); } catch (_) {}
+    tpOpenInObsidian(url);
+    rvNotify('Created ' + fileName + ' in ' + displayFolderName(pdDraftsFolder().split('/').pop()) + '. Opening it in Obsidian.', true);
+    return url;
+  } catch (e) {
+    if (go) go.disabled = false;
+    const w = $('tpl-np-why');
+    if (w) { w.textContent = 'Could not create the page: ' + e.message; w.classList.add('bad'); }
+    else rvNotify('Could not create the page: ' + e.message, false);
+  }
+}
+async function tpRefreshTree(folderId) {
+  try {
+    const fo = findFolder(folderId);
+    if (fo) { state.folderStale[fo.id] = true; await loadFolderFiles(fo); state.openFolders[fo.id] = true; }
+    else await refreshVaultRoot();
+    renderSidebar();
+  } catch (_) {}
+}
+
+function tpOpenNewTemplate() {
+  if (!atLeast('admin')) return;
+  const S = tpl.list.find(t => t.sample);
+  tpl.nt = { from: S ? S.file : (tpl.list[0] ? tpl.list[0].file : ''), name: '', folder: '', useFor: '' };
+  tpl.dlg = 'nt';
+  tpDrawNewTemplate();
+}
+function tpDrawNewTemplate() {
+  const nt = tpl.nt;
+  const folders = tpFilingFolders();
+  const src = tpl.list.map(t => '<button type="button" class="tpl-chip' + (t.file === nt.from ? ' on' : '') + '" data-tp-ntf="' + escHtml(t.file) + '">' + (t.sample ? 'The Sample' : 'Copy of ' + escHtml(t.name)) + '</button>').join('');
+  const S = tpl.list.find(t => t.file === nt.from);
+  tpModal('<div class="cm-title">New template</div><p class="id-sub">Folio makes the file in ' + TP_DIR + ' and opens it in Obsidian for you to finish.</p>' +
+    '<div class="tpl-fr"><div class="tpl-fl">Start from</div><div class="tpl-chips">' + src + '</div></div>' +
+    '<p class="tpl-mini">' + (S && S.sample ? 'Every section and grey note from the Sample, with its guide boxes left out. Delete what the new type does not need.' : 'Everything in that template, as it is, under the new name.') + '</p>' +
+    '<div class="tpl-fr"><label class="tpl-fl" for="tpl-nt-name">Name</label><input class="tpl-inp" id="tpl-nt-name" autocomplete="off" placeholder="Commissioning" value="' + escHtml(nt.name) + '"></div>' +
+    '<div class="tpl-fr"><label class="tpl-fl" for="tpl-nt-use">Use for</label><input class="tpl-inp" id="tpl-nt-use" autocomplete="off" value="' + escHtml(nt.useFor) + '"></div>' +
+    '<div class="tpl-fr"><label class="tpl-fl" for="tpl-nt-folder">Usual folder</label><select class="tpl-inp" id="tpl-nt-folder"><option value="">None</option>' +
+    folders.filter(f => f.inV.indexOf('/') === -1).map(f => '<option value="' + escHtml(f.inV) + '"' + (f.inV === nt.folder ? ' selected' : '') + '>' + escHtml(f.label) + '</option>').join('') + '</select></div>' +
+    '<div class="tpl-why" id="tpl-nt-why"></div>' +
+    '<div class="cm-actions"><button type="button" class="ed-btn" data-tp="close">Cancel</button><button type="button" class="ed-btn ed-save" id="tpl-nt-go" data-tp="ntgo">Create and open in Obsidian</button></div>');
+  const ni = $('tpl-nt-name');
+  ni.oninput = () => { nt.name = ni.value; tpNtCheck(); };
+  ni.onkeydown = e => { if (e.key === 'Enter') tpNtGo(); if (e.key === 'Escape') tpCloseModal(); };
+  $('tpl-nt-use').oninput = e => { nt.useFor = e.target.value; };
+  $('tpl-nt-folder').onchange = e => { nt.folder = e.target.value; };
+  tpNtCheck();
+  setTimeout(() => { try { ni.focus(); } catch (_) {} }, 20);
+}
+function tpNtCheck() {
+  const name = tpSafeTitle(tpl.nt.name), type = tpSlug(name);
+  let msg = '', bad = false;
+  if (!name) bad = true;
+  else if (!type || type === 'sample') { msg = 'Pick another name.'; bad = true; }
+  else if (tpl.list.some(t => t.type === type || t.file.toLowerCase() === (name + '.md').toLowerCase())) { msg = 'There is already a template called ' + name + '.'; bad = true; }
+  else msg = 'Pages made with it get type: ' + type + '.';
+  const w = $('tpl-nt-why');
+  if (w) { w.textContent = msg; w.classList.toggle('bad', bad && !!name); }
+  const go = $('tpl-nt-go');
+  if (go) go.disabled = bad;
+  return !bad;
+}
+async function tpNtGo() {
+  if (!tpNtCheck()) return;
+  const nt = tpl.nt;
+  const name = tpSafeTitle(nt.name), type = tpSlug(name), file = name + '.md';
+  const src = tpl.list.find(t => t.file === nt.from);
+  const o = { name, type, folder: nt.folder, useFor: nt.useFor.trim() };
+  const text = !src ? tpHeaderBlock(o) : src.sample ? tpFromSample(src, o) : tpFromCopy(src, o);
+  const go = $('tpl-nt-go');
+  if (go) go.disabled = true;
+  try {
+    if (await readVaultFileOrNull(tpUrl(file)) != null) throw new Error(file + ' is already in ' + TP_DIR + '.');
+    await tpWrite(file, text);
+    tpCloseModal();
+    await tpLoad(true);
+    tpl.nav = file; tpl.view = 'outline';
+    tpPaint();
+    tpOpenInObsidian(tpUrl(file));
+    rvNotify('Made ' + file + '. Opening it in Obsidian. Folio reads it again when you come back.', true);
+  } catch (e) {
+    if (go) go.disabled = false;
+    const w = $('tpl-nt-why');
+    if (w) { w.textContent = 'Could not make the template: ' + e.message; w.classList.add('bad'); }
+  }
+}
+
+function tpPromptDialog(kind) {
+  const T = tpCur();
+  if (!T) return;
+  tpl.pd = { kind, file: T.offer ? T.file : ((tpl.list.find(t => t.offer) || T).file), title: '', folder: '', page: state.activeUrl || '', change: '' };
+  const folders = tpFilingFolders();
+  const f = tpFolderFor(T, folders);
+  tpl.pd.folder = f ? f.id : '';
+  const pages = allMdFiles().filter(x => !/^zSystem\//i.test(pdRel(x.url)))
+    .map(x => ({ url: x.url, name: displayFileName(x.name) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const pageSel = '<div class="tpl-fr"><label class="tpl-fl" for="tpl-pd-page">Page</label><select class="tpl-inp" id="tpl-pd-page">' +
+    pages.map(p => '<option value="' + escHtml(p.url) + '"' + (p.url === tpl.pd.page ? ' selected' : '') + '>' + escHtml(p.name) + '</option>').join('') + '</select></div>';
+  const body = {
+    write: '<div class="tpl-fr"><label class="tpl-fl" for="tpl-pd-title">Title</label><input class="tpl-inp" id="tpl-pd-title" autocomplete="off"></div>' +
+      '<div class="tpl-fr"><label class="tpl-fl" for="tpl-pd-folder">Will be filed in</label><select class="tpl-inp" id="tpl-pd-folder">' + tpFolderOptions(tpl.pd.folder) + '</select></div>' +
+      '<p class="tpl-mini">Folio fills in the next free number and the properties: type, number, status To Be Reviewed, author, created date.</p>',
+    fix: pageSel + '<p class="tpl-mini">Folio reads the page and includes it. The AI keeps every fact and picture link and moves the content under this template’s headings.</p>',
+    check: pageSel + '<p class="tpl-mini">The AI lists what breaks the Format rules and this template, section by section. It rewrites nothing.</p>',
+    tpl: '<div class="tpl-fr"><label class="tpl-fl" for="tpl-pd-change">The change you want</label><textarea class="tpl-inp" id="tpl-pd-change" rows="3"></textarea></div><p class="tpl-mini">The AI gives back the whole template with every grey note and badge kept.</p>',
+  }[kind];
+  tpModal('<div class="cm-title">' + escHtml(tpl.prompts[kind].title) + '</div><p class="id-sub">Copies with the ' + escHtml(T.name) + ' template and the Format rules.</p>' + body +
+    '<div class="tpl-why" id="tpl-pd-why"></div><div class="cm-actions"><button type="button" class="ed-btn" data-tp="close">Cancel</button><button type="button" class="ed-btn ed-save" data-tp="pdcopy">Copy prompt</button></div>');
+}
+async function tpBuildPrompt() {
+  const pd = tpl.pd, T = tpCur();
+  const val = id => ($(id) ? $(id).value : '');
+  const vars = { type: T.type, today: tpToday(), author: (() => { try { return wbAuthor(); } catch (_) { return ''; } })(),
+    template: tpStripGuides(T.md), rules: tpRulesText(tpl.rules) };
+  if (pd.kind === 'write') {
+    const f = tpFilingFolders().find(x => x.id === val('tpl-pd-folder'));
+    const title = tpSafeTitle(val('tpl-pd-title')) || '[Title]';
+    const num = f ? tpNextNumber(f.top, f.vault) : '';
+    Object.assign(vars, { title, number: num, folder: f ? f.inV : '', filename: (num ? num + '-' : '') + title + '.md' });
+  } else if (pd.kind === 'fix' || pd.kind === 'check') {
+    const url = val('tpl-pd-page');
+    vars.page = url ? ((await readVaultFileOrNull(url)) || '') : '';
+    vars.title = url ? displayNameOf(url.split('/').pop()) : '';
+  } else {
+    vars.change = val('tpl-pd-change').trim() || '[Describe the change]';
+  }
+  return tpFillPrompt(tpl.prompts[pd.kind].text, vars);
+}
+
+// ── Approve: the writer's help comes out ────────────────────────────
+// A page keeps its grey notes and guide boxes while it is drafted; Folio
+// hides both. On approval they have done their job, so Approve offers to
+// take them out (yes by default: OK removes them).
+async function tpOfferCleanup(url) {
+  let txt;
+  try { txt = await readVaultFile(url); } catch (_) { return; }
+  if (/^zSystem\//i.test(pdRel(url))) return;
+  const g = tpCountGuides(txt), n = tpNotesIn(txt).length;
+  if (!g && !n) return;
+  const bits = [n ? n + ' grey note' + (n === 1 ? '' : 's') : '', g ? g + ' guide box' + (g === 1 ? '' : 'es') : ''].filter(Boolean).join(' and ');
+  let ok = true;
+  try { ok = window.confirm('This page still has writer help in it: ' + bits + '. Folio hides them, but the approved page does not need them.\n\nOK removes them, then approves. Cancel approves and keeps them.'); } catch (_) { ok = true; }
+  if (!ok) return;
+  const body = tpStripNotes(tpStripGuides(txt));
+  const out = /\r\n/.test(txt) ? body.replace(/\n/g, '\r\n') : body;
+  if (out !== txt) await spWriteFile(url, out);
+}
+
+// ── The status line on a page ───────────────────────────────────────
+function tpStatusLineHTML(fm, url) {
+  let id;
+  try { id = pageIdentity(url); } catch (_) { return ''; }
+  if (/^zSystem\//i.test(id.rel || '')) return '';
+  if (id.draft) return '<div class="pg-status st-draft" role="note"><span class="pg-st-lab">✎ Draft</span><span>Work in progress. It may change or be wrong.</span></div>';
+  if (fm && /^to be reviewed$/i.test(String(fm.status || '').replace(/^["']|["']$/g, '').trim()))
+    return '<div class="pg-status st-review" role="note"><span class="pg-st-lab">◷ In review</span><span>Not approved yet. Use with care.</span></div>';
+  return '';
+}
+
+// ── Events ──────────────────────────────────────────────────────────
+document.addEventListener('click', async e => {
+  const t = e.target;
+  if (!t || !t.closest) return;
+  const nav = t.closest('[data-tp-nav]');
+  if (nav) { tpl.nav = nav.dataset.tpNav; tpl.fly = false; tpPaint(); return; }
+  const view = t.closest('[data-tp-view]');
+  if (view) { tpl.view = view.dataset.tpView; tpl.fly = false; tpPaint(); return; }
+  const w = t.closest('[data-tp-w]');
+  if (w) { tpl.width = w.dataset.tpW; tpPaint(); return; }
+  const sh = t.closest('[data-tp-show]');
+  if (sh) { tpl.show = sh.dataset.tpShow; tpl.fly = false; tpPaint(); return; }
+  const grp = t.closest('[data-tp-grp]');
+  if (grp) { const g = grp.dataset.tpGrp; tpl.open[g] = !tpl.open[g]; tpPaint(); return; }
+  const lvl = t.closest('[data-tp-lvl]');
+  if (lvl && atLeast('admin')) { const [g, r, l] = lvl.dataset.tpLvl.split(':'); tpl.rules[g].items[r].level = l; tpPaint(); return; }
+  const set = t.closest('[data-tp-set]');
+  if (set && atLeast('admin')) { const [g, r, v] = set.dataset.tpSet.split(':'); tpl.rules[g].items[r].value = v; tpPaint(); return; }
+  const pr = t.closest('[data-tp-prompt]');
+  if (pr) { tpPromptDialog(pr.dataset.tpPrompt); return; }
+  const npt = t.closest('[data-tp-npt]');
+  if (npt && tpl.np) {
+    tpl.np.file = npt.dataset.tpNpt; tpl.np.picked = true;
+    tpl.np.title = $('tpl-np-title') ? $('tpl-np-title').value : tpl.np.title;
+    tpDrawNewPage(); return;
+  }
+  const ntf = t.closest('[data-tp-ntf]');
+  if (ntf && tpl.nt) { tpl.nt.from = ntf.dataset.tpNtf; tpDrawNewTemplate(); return; }
+  const a = t.closest('[data-tp]');
+  if (!a) {
+    if (tpl.fly && !t.closest('.tpl-flywrap')) { tpl.fly = false; tpPaint(); }
+    return;
+  }
+  const act = a.dataset.tp;
+  if (act === 'guidetoggle') return; // handled on change
+  if (a.tagName === 'A' || act === 'how') e.preventDefault();
+  const T = tpCur();
+  switch (act) {
+    case 'close': tpCloseModal(); break;
+    case 'scroll': { const s = $('tpl-tscroll'); if (s) s.scrollBy({ left: Number(a.dataset.dir) * 240, behavior: 'smooth' }); break; }
+    case 'fly': tpl.fly = !tpl.fly; tpPaint(); break;
+    case 'how': tpl.how = !tpl.how; tpPaint(); break;
+    case 'newtpl': tpOpenNewTemplate(); break;
+    case 'ntgo': tpNtGo(); break;
+    case 'npgo': tpNpGo(); break;
+    case 'gotemplates': tpCloseModal(); openAdminScreen('templates'); break;
+    case 'edit':
+      if (T) { tpOpenInObsidian(T.url); rvNotify('Opening ' + T.file + ' in Obsidian. Folio reads it again when you come back.', true); }
+      break;
+    case 'editprompts':
+      if (!tpl.promptsExists) { try { await tpWrite(TP_PROMPTS_FILE, tpPromptsMd()); tpl.promptsExists = true; } catch (err) { rvNotify('Could not write ' + TP_PROMPTS_FILE + ': ' + err.message, false); break; } }
+      tpOpenInObsidian(tpUrl(TP_PROMPTS_FILE));
+      break;
+    case 'retire':
+      if (!T || T.sample || !atLeast('admin')) break;
+      if (!T.retired && !window.confirm('Retire ' + T.name + '?\n\nNew page stops offering it. Pages already written with it are not changed, and you can restore it here.')) break;
+      try {
+        await spWriteFile(T.url, tpSetHeaderKeys(T.md, [['retired', T.retired ? 'no' : 'yes']]));
+        await tpLoad(true); tpPaint();
+        rvNotify(T.name + (T.retired ? ' is offered in New page again.' : ' is retired.'), true);
+      } catch (err) { rvNotify('Could not change ' + T.file + ': ' + err.message, false); }
+      break;
+    case 'seed':
+      try { const n = await tpSeedStarters(); tpl.nav = null; await renderTemplatesTab(); rvNotify('Added ' + n + ' file' + (n === 1 ? '' : 's') + ' to ' + TP_DIR + '.', true); }
+      catch (err) { rvNotify('Could not add the starter templates: ' + err.message, false); }
+      break;
+    case 'rulesundo': tpl.rules = JSON.parse(tpl.rulesSaved); tpPaint(); break;
+    case 'rulessave':
+      if (!atLeast('admin')) break;
+      try {
+        await tpWrite(TP_RULES_FILE, tpRulesMd(tpl.rules));
+        tpl.rulesSaved = JSON.stringify(tpl.rules); tpl.rulesExists = true; tpPaint();
+        rvNotify('Format rules saved. The next Vault check uses them.', true);
+      } catch (err) { rvNotify('Could not save the rules: ' + err.message, false); }
+      break;
+    case 'pdcopy': {
+      const text = await tpBuildPrompt();
+      const ok = await writeClipboard(text);
+      tpl.lastPrompt = text;
+      tpCloseModal();
+      rvNotify(ok ? 'Prompt copied. Paste it into your AI.' : 'Could not reach the clipboard.', !!ok);
+      break;
+    }
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (!t || !t.dataset) return;
+  if (t.dataset.tp === 'guidetoggle') {
+    TP_RENDER.showGuide = !!t.checked;
+    tpPaint();
+    try { if (state.activeUrl && typeof openFile === 'function') { const u = state.activeUrl, n = state.activeName; openFile(u, n); } } catch (_) {}
+    return;
+  }
+  if (t.dataset.tpVal && atLeast('admin')) { const [g, r] = t.dataset.tpVal.split(':'); tpl.rules[g].items[r].value = t.value; tpPaint(); return; }
+  if (t.dataset.tpExc && atLeast('admin')) { const [g, r] = t.dataset.tpExc.split(':'); tpl.rules[g].items[r].exc = t.value.trim(); tpPaint(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('tpl-overlay') && $('tpl-overlay').style.display === 'flex') tpCloseModal();
+});
+// Templates are edited in Obsidian. Coming back to Folio re-reads them.
+window.addEventListener('focus', () => {
+  if (adminActiveTab === 'templates' && tpl.loaded && !tpl.busy && !(tpl.nav === 'rules' && tpRulesDirty())) {
+    tpLoad(true).then(() => tpPaint()).catch(() => {});
+  }
+});
 
 // ── Admin > Users (S97) ──────────────────────────────────────────
 // The roster, and the only place access is set.
@@ -13210,7 +15806,7 @@ async function openFile(url, name) {
   try {
     const text = await readVaultFile(url);
     const fm = parseFm(text); // Session 2 -- byline reads author/due off this
-    rc.innerHTML = inlineTitleHTML(name) + summaryHTML(fm) +
+    rc.innerHTML = tpStatusLineHTML(fm, url) + inlineTitleHTML(name) + summaryHTML(fm) +  // S110 status line
                    readerNoticeHTML(text, url) + parseMarkdown(text) +
                    bylineHTML(fm, url); // round 2 close -- footer, not a strap under the title
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
@@ -14599,6 +17195,8 @@ function refreshEditControls() {
   const allowed = editingAllowed();
   $('btn-new').style.display  = allowed ? '' : 'none';
   $('btn-move').style.display = allowed ? '' : 'none';
+  const np = $('bt-newpage');           // S110
+  if (np) np.hidden = !reviewAllowed();
   updateEditBtn();
 }
 
@@ -17739,6 +20337,7 @@ async function rvSignOff(url, opts) {
 }
 async function rvApprovePage(url) {
   try {
+    if (reviewAllowed()) await tpOfferCleanup(url); // S110 -- writer help out, if they want
     await rvSignOff(url);
     if (state.activeUrl === url) await openFile(url, state.activeName);
     await rvAfterAction(url, 'Approved. The page is marked Reviewed.');
@@ -20025,6 +22624,10 @@ function bylineHTML(fm, url) {
   const when = strapUpdated(url);
   if (when) parts.push(`Updated ${escHtml(when)}`);
   if (fm && fm.due) parts.push(`Due ${escHtml(fm.due)}`);
+  // S110 -- a reviewed page says when, in the footer; drafts and pages in
+  // review say so at the top instead (tpStatusLineHTML).
+  if (fm && /^reviewed$/i.test(String(fm.status || '').trim()) && /^\d{4}-\d{2}-\d{2}/.test(String(fm.reviewed || '')))
+    parts.push(`Reviewed ${escHtml(String(fm.reviewed).slice(0, 10))}`);
   const flag = fm ? bylineFlag(fm) : null;
   if (flag) parts.push(`<span class="reader-byline-flag ${flag.cls}">${flag.label}</span>`);
   // P6 — last, and only when there is more than one vault to be in. On a
@@ -23407,11 +26010,13 @@ function appSettingsFileUrl() {
 async function loadAppSettings() {
   state.defaultPage = null;
   state.draftsFolder = null;   // S107 -- null means PD_DRAFTS_DEFAULT
+  state.obsidianVault = null;  // S110 -- the vault's name in Obsidian, when it differs
   try {
     const txt = await readVaultFileOrNull(appSettingsFileUrl());
     if (!txt) return;
     const obj = JSON.parse(txt);
     if (obj && typeof obj.draftsFolder === 'string' && obj.draftsFolder.trim()) state.draftsFolder = obj.draftsFolder.trim();
+    if (obj && typeof obj.obsidianVault === 'string' && obj.obsidianVault.trim()) state.obsidianVault = obj.obsidianVault.trim();
     if (obj && obj.defaultPage && obj.defaultPage.url) {
       state.defaultPage = { url: String(obj.defaultPage.url), name: String(obj.defaultPage.name || obj.defaultPage.url) };
     }
@@ -23438,6 +26043,7 @@ async function saveDefaultPage(url, name) {
 function appSettingsJson() {
   const o = { defaultPage: state.defaultPage };
   if (state.draftsFolder) o.draftsFolder = state.draftsFolder;
+  if (state.obsidianVault) o.obsidianVault = state.obsidianVault;
   return JSON.stringify(o, null, 2);
 }
 
@@ -23522,7 +26128,7 @@ async function buildSearchIndex() {
   const out = [];
   await Promise.all(allMdFiles().map(async f => {
     const text = await readVaultFileOrNull(f.url);
-    if (text !== null) out.push({ name: displayFileName(f.name), url: f.url, text });
+    if (text !== null) out.push({ name: displayFileName(f.name), url: f.url, text: tpStripGuides(text) }); // S110
   }));
   searchIndex = out;
 }
@@ -25467,7 +28073,7 @@ async function rereadActivePage() {
       const rc = $('reader-content');
       if (rc && rc.dataset.wbText !== text) {
         const fm = parseFm(text); // Session 2 -- byline stays in sync on a live re-render too
-        rc.innerHTML = inlineTitleHTML(state.activeName) + summaryHTML(fm) +
+        rc.innerHTML = tpStatusLineHTML(fm, state.activeUrl) + inlineTitleHTML(state.activeName) + summaryHTML(fm) +
                        readerNoticeHTML(text, state.activeUrl) + parseMarkdown(text) +
                        bylineHTML(fm, state.activeUrl); // round 2 close -- footer, not a strap
         rc.dataset.wbText = text;

@@ -8,6 +8,35 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.77.0 — 2026-09-27
+
+**Changed:** `index.html`, `help-edit.md` (section 2 rewritten for New page and Templates, guide boxes under Hidden comments), `help.md` (Draft and In review); new `supporting/tests/s110-templates.test.js` (147 checks); updated `p10-vault-check`, `round2-destinations` and `s102-foundations` for the seventh Admin door.
+
+*S110, Templates and New page. Built from the approved pass-3 sample (`Claude outputs/s110-templates-pass3.html`) and the four template files (`Claude outputs/s110-*-template.md`).*
+
+### New page
+- A **New page** button beside Home, for Contributors and Administrators. Pick a template (Use for and Not for shown), a title and the folder it will be filed in.
+- The next free **three-digit number** in that folder is reserved, editable, and checked: a number already used, or not three digits, is refused with the next free one named.
+- The page is made in Working Drafts as `021-Title.md` with the template's sections, `{{title}}` and `{{date}}` filled, and its properties set (type, number, status To Be Reviewed, author, created, starting tags, `file-in:`). Folio opens it, then asks Obsidian to open it.
+
+### Admin › Templates
+- A seventh Admin door. Templates are read from `zSystem/Templates` (hidden from the vault tree, as all of zSystem is) and edited in Obsidian. Folio re-reads them when you come back.
+- Tabs for each template, the Sample in italics, « » when they overflow, **+ New**, then **Format rules**. Edit template (opens Obsidian) and Retire sit on the same row.
+- Three views: **Sample** (with a View menu: Readable, Standard or Wide; In Folio, In Obsidian, File, or As a new page / As a new template), **Outline** (settings, every section with its badges, Expects and Was lines, and a key), and **AI prompts** (Write, Fix, Check a page, Update this template; each copies with the template and the Format rules, Fix and Check with the chosen page).
+- **+ New** starts from the Sample (settings reset, grey notes kept, every guide box left out) or copies another template as it is.
+- **Format rules**: seven folded groups, each rule with a setting, a level (Warn, Info, Off) and exceptions. Administrators edit them in place and Save writes `Format rules.md`. The format check that reads them is S111.
+- **Add the starter templates** writes Guide, Process, Reference, the Sample, Format rules and Prompts when they are missing. It never overwrites a file.
+
+### Guide boxes and grey notes
+- `> [!guide]` callouts are writer help and never draw in Folio, in any file, or turn up in search. An Administrator can show them for the session from the View menu.
+- **Approve** offers to take a page's grey notes and guide boxes out first (OK removes them, Cancel keeps them). `%%wide%%` stays.
+
+### Status on the page
+- **Draft** (Working Drafts) and **In review** (status To Be Reviewed) show as a full-width line at the top of the page, with a mark and a word, not colour alone. A reviewed page's footer says when it was reviewed.
+
+### Settings
+- `zSystem/settings.json` can carry `obsidianVault`, the vault's name in Obsidian, where it differs from the folder name.
+
 ## 0.76.2 — 2026-09-24
 
 **Changed:** `index.html`, `help-edit.md` (Tables rewritten, version line), `help.md` (version line only); updated `supporting/tests/s109b-reading.test.js` (63 checks; the new width checks fail on 0.76.1).

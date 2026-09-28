@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.76.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.77.0**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -145,6 +145,10 @@ The first time anyone opens Folio on a device, it walks through the screen: Home
 ### Who owns this page
 
 Under the title, a line names the page's **owner** and, if a review date is set, when it's due. A green check means it's on schedule, amber means it's coming due soon, and red means it's overdue. No line at all just means nobody has set an owner or a due date on this page yet — not every page needs one.
+
+### Draft and In review
+
+A line across the top of a page says when it is not approved yet. **Draft** means it is still in Working Drafts: work in progress that may change or be wrong. **In review** means it has been written or changed and nobody has approved it yet, so use it with care. An approved page has no line; its footer says when it was reviewed.
 
 ### Where you are
 

@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.76.2**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.77.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -47,30 +47,13 @@ If your name is not on the `editors` list in the app's config, these stay unavai
 
 ## 2. Creating and moving files
 
-**New at the vault root** — the **+** in the header. Choose file or folder, type a name, Create. The `.md` is added for you.
+**New page** (0.77.0) is the button beside **Home** in the header, for Contributors and Administrators. Pick a template, type a title and choose the folder the page will be filed in. Folio reserves the next free three-digit number in that folder (you can change it; a number already used is refused), makes the page in **Working Drafts** as `021-Title.md`, and opens it in Obsidian. The page starts with the template's sections, its properties filled in (type, number, status To Be Reviewed, author, created date, and `file-in:` for the folder it is headed to), and the template's grey notes and guide boxes to help you write it. Folio hides both.
 
-**New inside a folder** — hover that folder's row in the sidebar and click the **+** that appears on it. Folders can only be created at the root.
+A draft shows **Draft** at the top of the page; a page not yet approved shows **In review**. Approving a page offers to take the grey notes and guide boxes out.
 
-**Move a file** — the **⇄** in the header. Pick the file, pick the destination. Its comments and change-log sidecars move with it automatically, so nothing is orphaned.
+**Templates** live in `zSystem/Templates` and are edited in Obsidian. **Admin › Templates** shows each one three ways: **Sample** (how a page made from it looks, in Folio or in Obsidian, or as the file), **Outline** (its sections and badges: Core, Optional, One of, Repeat, Callout) and **AI prompts** (Write, Fix or Check a page, or Update the template, each copied with the template and the Format rules). Administrators also get **+ New** (start from the Sample, which leaves out its guide boxes, or copy another template), **Edit template** (opens it in Obsidian), **Retire**, and **Format rules**, the rules for every page. The **Sample** template explains how a template file is written; it is never offered in New page.
 
-New files are created with the full property block already filled in, plus an H1 of the file's own name, so they behave properly in Obsidian's own Properties view:
-
-```yaml
----
-tags: []
-aliases: []
-status: Needs Review
-reviewed: false
-created: 2026-08-03
-due: 
-section: 
-author: Your Name
-edited-by: Your Name
-edited-at: 2026-08-03T09:14
----
-```
-
-`due` and `section` are left blank for you to fill in; the rest are filled from your profile and today's date.
+Moving and renaming files is done in Obsidian, so its links follow.
 
 ---
 
@@ -353,6 +336,8 @@ This needs a citation[^1].
 ### Hidden comments
 
 `%% text %%` is visible only in the raw file. It never renders in the reader, by design. Use it for notes to yourself or to a future editor.
+
+A **guide box** is a callout of type `guide`: `> [!guide]- Guide: Steps`. Templates use them for writer help (examples, do and don't). Folio never draws one, in any page. Obsidian shows it folded.
 
 This is different from a Folio **comment**, which is a threaded note posted from the Comments tab and stored in a sidecar file. See [Comments](help.md).
 
