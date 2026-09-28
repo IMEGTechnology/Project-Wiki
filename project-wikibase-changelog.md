@@ -8,6 +8,18 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.77.1 — 2026-09-28
+
+**Changed:** `index.html`, `help.md` (Images section); version line only in `README.md` and `help-edit.md`; new `supporting/tests/image-zoom.test.js` (19 checks).
+
+*Jayson, same day: a picture should have a zoom button, like other apps, seamless and matching the app's own icon style.*
+
+### Picture zoom
+- Hover a picture and a magnify icon fades in at its corner, in the same icon style used everywhere else in the app.
+- Click it to see the picture large and centred, with its caption. Click anywhere, or press Escape, to return to the page.
+- Works for a single picture, a captioned one, and a row of pictures side by side — each picture in a row gets its own button.
+- Same open/close pattern as the table full-view expand, so it feels like one app rather than a bolted-on feature.
+
 ## 0.77.0 — 2026-09-27
 
 **Changed:** `index.html`, `help-edit.md` (section 2 rewritten for New page and Templates, guide boxes under Hidden comments), `help.md` (Draft and In review); new `supporting/tests/s110-templates.test.js` (147 checks); updated `p10-vault-check`, `round2-destinations` and `s102-foundations` for the seventh Admin door.

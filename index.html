@@ -4576,6 +4576,52 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
 #reader-content .md-img-row { display: flex; gap: 12px; justify-content: center; flex-wrap: nowrap; }
 #reader-content .md-img-row img.md-img { margin: 0; min-width: 0; flex: 0 1 auto; max-width: 100%; }
 #reader-content .md-img-cap { font-size: 0.85em; color: var(--text-muted); font-style: italic; margin-top: 0.45em; line-height: 1.45; }
+
+/* Image zoom (confirmed 28 Sep) -- a magnify button appears over a picture
+   on hover/focus; click opens it large in #img-zoom-view (below). The
+   button sits inside its own small wrapper rather than on .md-img-wrap
+   directly, because a picture row (.md-img-row) holds more than one
+   picture and each needs its own corner button. */
+#reader-content .md-img-zoomable { position: relative; display: inline-block; max-width: 100%; }
+#reader-content .md-img-wrap.md-img-inlR .md-img-zoomable,
+#reader-content .md-img-wrap.md-img-inlL .md-img-zoomable { display: block; width: 100%; }
+#reader-content .md-img-row .md-img-zoomable { display: block; flex: 0 1 auto; min-width: 0; }
+#reader-content .md-img-zoom-btn {
+  position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-strong); border-radius: var(--radius);
+  background: var(--bg-reader); color: var(--text-secondary);
+  opacity: 0; transform: translateY(-3px); pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease, color .15s ease, border-color .15s ease;
+  cursor: pointer;
+}
+#reader-content .md-img-zoomable:hover .md-img-zoom-btn,
+#reader-content .md-img-zoom-btn:focus-visible {
+  opacity: 1; transform: translateY(0); pointer-events: auto;
+}
+#reader-content .md-img-zoom-btn:hover { color: var(--accent); border-color: var(--accent); }
+#reader-content .md-img-zoom-btn svg { width: 15px; height: 15px; }
+
+/* The zoomed-in view itself -- a classic lightbox: dim the page, show the
+   picture large and centred, any click or Escape returns to the page.
+   Same idea as #table-view's expand, different shape because a picture
+   wants to fill the screen rather than sit in a bordered panel. */
+#img-zoom-view {
+  display: none; position: fixed; inset: 0; z-index: 950;
+  background: rgba(0,0,0,.72);
+  align-items: center; justify-content: center; flex-direction: column; gap: 14px;
+  padding: 40px; box-sizing: border-box; cursor: zoom-out;
+}
+#img-zoom-view.open { display: flex; }
+body[data-theme="light"] #img-zoom-view { background: rgba(20,22,26,.6); }
+#img-zoom-view .iz-img {
+  max-width: 100%; max-height: calc(100% - 40px);
+  border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+#img-zoom-view .iz-cap {
+  color: rgba(255,255,255,.85); font-size: 13.5px; line-height: 1.5;
+  text-align: center; max-width: 44rem;
+}
 </style>
 
 
@@ -4739,7 +4785,7 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.77.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.77.1</button>
       </div>
 
       <div class="ud-actions">
@@ -8081,6 +8127,9 @@ const ICON = {
   foldChevron:`<svg class="md-fold-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`,
   embedFile:  `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   imgErr:     `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="4" y1="4" x2="20" y2="20"/></svg>`,
+  // Image zoom (confirmed 28 Sep) -- same magnifying-glass shape as the
+  // search icon elsewhere in the app, with a plus so it reads as "expand".
+  zoomIn:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
   // Outline collapse/expand-all symbol (S34). One control, two glyphs —
   // the lock pair that used to live here went with the shared-fold mode.
   // Same double-chevron shapes the sidebar's own fold buttons use, so the
@@ -10617,7 +10666,11 @@ function renderSingleBlock(block, seenIds) {
       const fl = block.float === 'inlR' || block.float === 'inlL' ? ' md-img-' + block.float : '';
       const boxW = fl && /^\d+$/.test(block.size || '') ? ` style="width:${block.size}px"` : '';
       const cap = block.caption ? `<div class="md-img-cap">${renderInline(block.caption)}</div>` : '';
-      return `<div class="md-img-wrap${fl}"${boxW}>${imgTag(block.name, block.size)}${cap}</div>`;
+      // Image zoom (confirmed 28 Sep) -- wrap the picture with its own
+      // magnify button rather than adding the button to .md-img-wrap, so
+      // the corner icon sits on the picture itself even when the wrap is
+      // wider (captions, floats).
+      return `<div class="md-img-wrap${fl}"${boxW}><span class="md-img-zoomable">${imgTag(block.name, block.size)}<button type="button" class="md-img-zoom-btn" title="Expand image" aria-label="Expand image">${ICON.zoomIn}</button></span>${cap}</div>`;
     }
 
     case 'imgrow': {
@@ -10625,7 +10678,8 @@ function renderSingleBlock(block, seenIds) {
         const src = safeUrl(attachmentSrcFor(it.name), { image: true });
         const srcAttr = src ? ` src="${escHtml(src)}"` : '';
         const widthAttr = /^\d+$/.test(it.width || '') ? ` width="${it.width}"` : '';
-        return `<img class="md-img" data-wb-asset="${escHtml(it.name)}"${srcAttr} alt="${escHtml(it.name)}"${widthAttr} onerror="wbImgError(this)">`;
+        const img = `<img class="md-img" data-wb-asset="${escHtml(it.name)}"${srcAttr} alt="${escHtml(it.name)}"${widthAttr} onerror="wbImgError(this)">`;
+        return `<span class="md-img-zoomable">${img}<button type="button" class="md-img-zoom-btn" title="Expand image" aria-label="Expand image">${ICON.zoomIn}</button></span>`;
       }).join('');
       const cap = block.caption ? `<div class="md-img-cap">${renderInline(block.caption)}</div>` : '';
       return `<div class="md-img-wrap"><div class="md-img-row">${cells}</div>${cap}</div>`;
@@ -25098,6 +25152,37 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTableView(); });
 window.addEventListener('resize', () => { layoutReaderTables(); updateSectionTrail(); });
+
+// Image zoom (confirmed 28 Sep) -- click the magnify button over a picture
+// to see it large; any click on the lightbox, or Escape, returns to the
+// page. Mirrors the table full-view open/close pair just above.
+function openImageZoom(img) {
+  if (!img) return;
+  let iv = $('img-zoom-view');
+  if (!iv) {
+    iv = document.createElement('div');
+    iv.id = 'img-zoom-view';
+    iv.setAttribute('role', 'dialog');
+    iv.innerHTML = '<img class="iz-img"><div class="iz-cap"></div>';
+    document.body.appendChild(iv);
+  }
+  iv.querySelector('.iz-img').src = img.currentSrc || img.src;
+  iv.querySelector('.iz-img').alt = img.alt || '';
+  const wrap = img.closest('.md-img-wrap');
+  const capEl = wrap && wrap.querySelector(':scope > .md-img-cap');
+  const capBox = iv.querySelector('.iz-cap');
+  capBox.textContent = capEl ? capEl.textContent.trim() : '';
+  capBox.style.display = capEl ? '' : 'none';
+  iv.classList.add('open');
+}
+function closeImageZoom() { const iv = $('img-zoom-view'); if (iv) iv.classList.remove('open'); }
+document.addEventListener('click', e => {
+  const zb = e.target.closest('.md-img-zoom-btn');
+  if (zb) { e.preventDefault(); openImageZoom(zb.closest('.md-img-zoomable').querySelector('img.md-img')); return; }
+  if (e.target.closest('#img-zoom-view')) { closeImageZoom(); return; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImageZoom(); });
+
 
 // ── Saved (P7) ───────────────────────────────────────────────────
 // Replaces S30's separate Bookmarks + Favorites with one list. A page can

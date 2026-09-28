@@ -1,7 +1,7 @@
 # Folio Help
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.77.0**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Press the **?** icon in the header to come back here at any time. Written for **Version 0.77.1**.
 
 **This page covers using Folio** — finding your way around, reading, searching, saving, and making it look the way you want.
 
@@ -221,6 +221,8 @@ A link to a network folder or drive path (`file://` UNC, or `X:\\...`) cannot op
 ### Images
 
 Each note's images live in a subfolder next to it, named "Attachments" by default here, following Obsidian's **"in subfolder under current folder"** setting. That subfolder is hidden from the tree automatically.
+
+Hover a picture and a magnify icon appears in its corner; click it to see the picture large, with its caption. Click anywhere, or press Escape, to close it.
 
 ### Tables, and widening a column
 
