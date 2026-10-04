@@ -8,6 +8,25 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.83.0 — 2026-10-04
+
+**Changed:** `index.html`, `help.md` (a note on the amber bar, version line), `help-contrib.md` (new), `help-admin.md` (new), `help-edit.md` (rewritten), `README.md` (version line and file list), `supporting/release.sh` (ships ten files now). `help-assets/` pictures are unchanged.
+
+*H3, second half: the other three help guides, and four fixes from reading Using Folio in the app. This finishes the help guides.*
+
+### Help screens
+- **Help now has the whole width.** The folder list and the Outline are hidden while you are in help, and come back when you leave.
+- **Back and forward work in help.** Every guide and topic has its own address, so the arrow buttons and the browser's back and forward step through what you read, and a link to one topic opens that topic. The old `#help` link in the staff email still opens Using Folio.
+- **The amber bar is explained.** The first help page and the Using Folio guide now say what it is: you are in help, **Back** returns to your page, **Help** shows all the guides.
+- **The bar is slimmer.** The guide tabs are gone from it, because the Help page already lists the guides. It keeps the Help badge, the trail and Back.
+
+### Guides
+- **Contributing** (new): find what needs your review, approve or flag a page, answer comments, start a new page, look at the templates, and a Something is wrong topic.
+- **Administering** (new, 11 topics): access levels, users, passwords, must reads, onboarding, Vault check, usage, the staff update, editing in Folio, the Working Drafts folder, and Something is wrong. Includes the assign clip and the onboarding plan picture.
+- **Editing in Obsidian** (rewritten to the same pattern): getting started, writing a page, file names, properties, Markdown, links, pictures in three layouts, tables, callouts, what Folio does not show, and Something is wrong.
+- **The Templates picture moved** from Administering to Contributing, because Contributors can open Templates.
+- **Release script:** `supporting/release.sh` now ships ten files and stamps the version in all four guides.
+
 ## 0.82.0 — 2026-10-04
 
 **Changed:** `help.md` (rewritten as the Using Folio guide), `help-assets/` (three pictures retaken, four old drawings retired), `index.html`, `help-edit.md` (version line only), `README.md` (version line); the help test suites updated for the new guide shape.

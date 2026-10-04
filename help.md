@@ -1,7 +1,9 @@
 # Using Folio
 
 > [!NOTE] About this guide
-> This guide lives with the app, not inside your vault, so it never appears in the folder list. Press the **?** in the header to come back at any time. Written for **Version 0.82.0**.
+> This guide lives with the app, not inside your vault, so it never appears in the folder list. Press the **?** in the header to come back at any time.
+>
+> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.83.0**.
 
 Folio is the team's shared reference: a folder of notes you can browse, search, save and comment on. **New here? Do the first two topics and stop.** That is enough to use Folio. The rest is there when you need it.
 

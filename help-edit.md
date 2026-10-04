@@ -1,503 +1,264 @@
-# Folio Help — Editing and Markdown
+# Editing in Obsidian
+
+> [!NOTE] About this guide
+> This guide is for Contributors and Administrators. Pages are written in Obsidian, and Folio is where people read them. This guide covers setting Obsidian up, writing a page so it looks right in Folio, and what Folio does and does not show. Reading and commenting are in [Using Folio](help.md). Reviewing is in [Contributing](help-contrib.md). Written for **Version 0.83.0**.
+
+Folio and Obsidian read the same folder of files. Change a page in one and it is changed in the other, with nothing to copy across. **New here? Do the first two topics.** The rest is a reference you can come back to.
+
+## Open the vault and add the Folio look
+%% card: Set Obsidian up once so pages look the same as in Folio | icon: palette | updated: 0.83 | key: get-started %%
+
+Set Obsidian up once. After that, what you see while you write is what readers see.
+
+1. In Obsidian, choose **Open folder as vault** and pick your OneDrive copy of the vault. It is the same folder Folio reads.
+2. Open **Settings**, then **Appearance**, then **Themes**, and choose **Folio**. If it is not in the list, ask your Administrator for the Folio theme.
+3. Under **Editor**, turn **Readable line length** on. Under **Appearance**, set **Font size** to 16.
+4. To see the Guided look, install the free **Style Settings** plugin and switch it on for Folio.
+
+> [!tip]
+> Obsidian's own Reading view and Folio now match closely. Headings, tables and pictures all sit the way they will in Folio.
+
+> [!note]- More detail
+> **Two looks.** The theme has the same two looks as Folio: Default, and Guided with coloured markers beside the smaller headings. Without Style Settings it shows Default.
+>
+> **The vault name.** New page opens Obsidian by the vault's name. If it does not open, see Something is wrong in [Contributing](help-contrib.md).
+>
+> **Not everything matches.** A few things look different in Obsidian, and each topic below says so where it matters.
+
+## Write a new page from its template
+%% card: Start with New page, then follow the grey notes | icon: file | updated: 0.83 | key: write-page %%
+
+Every page starts as a template. Folio sets up the file, and you fill it in.
+
+1. In Folio, click **New page** and make the page. See [Contributing](help-contrib.md). It opens in Obsidian.
+2. Under each heading, read the grey note. It says what goes there. Write it, then delete the note.
+3. Replace every piece of starter text in [square brackets].
+4. Keep the Core headings. Keep an Optional heading only if you have something for it. In a One of group, keep at least one.
+5. Keep **References** as the last section.
+
+> [!tip]
+> Guide boxes, the callouts that start with the word guide, tell you how to write each part. Folio hides them from readers, so deleting them is tidy, not required.
+
+> [!note]- More detail
+> **The badges.** In the New page window and in Admin, Templates, each heading is marked Core, Repeat, One of, or Optional. Repeat means you can add more of that heading.
+>
+> **A summary.** Write one sentence, under 160 characters, in the page's summary property. Folio shows it under the title.
+>
+> **Saving.** Obsidian saves as you type. The page stays a draft, and marked To be reviewed, until a Contributor approves it.
+>
+> **Using an AI.** Admin, then Templates, then **AI prompts** copies a ready-made request with the template and the rules. See [Contributing](help-contrib.md).
+
+## Name and move a file
+%% card: Three digits, a hyphen, then the title | icon: folder | updated: 0.83 | key: file-names %%
+
+Every page name is a three digit number, a hyphen, then the title. For example `021-Intrusion Detection.md`.
+
+1. Use exactly three digits. Not two, not four.
+2. Follow the number with a hyphen, then the title.
+3. Leave out these characters: `\ / : * ? " < > | # ^ [ ]`. They break file names or links.
+4. Rename and move pages in Obsidian, never in Folio.
+
+> [!tip]
+> The number only has to be unique inside its top folder. 10_Processes and 20_Guides can both have a 021.
+
+> [!note]- More detail
+> **Why Obsidian.** When you rename or move a page in Obsidian, every link to it follows. Folio never renames a page itself.
+>
+> **What follows the page.** Its saved pages, comments, review history and usage follow a renamed or moved page the next time Folio looks at the vault. A page that was only renamed keeps its sign-off.
+>
+> **Do not do both at once.** If a page's name, number and text all change before Folio has looked, it cannot tell which page is which, and its comments show under Comments with no page. Rename a page, or edit it, but not both in one go.
+>
+> **Numbers.** New page picks the next free number for you. The number is also kept in the page's number property.
+
+## Fill in a page's properties
+%% card: The block at the top of a page that says who, when and what | icon: sliders | updated: 0.83 | key: properties %%
+
+Properties are a block at the very top of the file, between two lines of three dashes. Folio reads them. Obsidian shows them as a neat panel.
+
+1. Keep the block at the very top, before anything else in the file.
+2. Leave the ones Folio filled in alone: **type**, **number** and **file-in**.
+3. Put your name in **author**.
+4. Add a **due** date only if the page should be read again by then.
+5. Write a one sentence **summary**. Folio shows it under the title.
+
+> [!tip]
+> Anything extra you add is kept exactly as you wrote it. Folio only changes what it has to.
+
+> [!note]- More detail
+> **What Folio reads.** **status**, **reviewed**, **created**, **author**, **due**, **tags**, **aliases** and **summary**, and the three that New page adds.
+>
+> **Status.** It has two values, To Be Reviewed and Reviewed. Do not set Reviewed by hand. Approving a page in Review does that, and writes today's date in **reviewed**.
+>
+> **Due.** It means this page needs looking at again. Review lists a page whose due date has passed.
+>
+> **Missing properties.** On a page that has been approved, an Administrator finds and fixes them in Vault check. They do not come back to Review.
+>
+> **Must reads and onboarding** are set in Admin, then Users, not with properties. The old must-read and onboarding properties do nothing now.
+
+## Write the basics
+%% card: Bold, headings, lists, quotes and the rest of the syntax | icon: sliders | updated: 0.83 | key: markdown %%
+
+Folio reads standard Obsidian Markdown, so write it in Obsidian the way you normally would.
+
+1. **Bold** is `**bold**`, *italic* is `*italic*`, and ==highlight== is `==highlight==`.
+2. Headings start with `#`, `##`, `###` and so on. Use them for where a part sits in the page, not for how big they look.
+3. A list item starts with `-` or `1.`. Indent to nest. A task starts with `- [ ]`.
+4. A quote starts with `>`. Three dashes alone on a line draw a line across the page.
+5. Press Enter once for a new line. Folio keeps every line break you type.
+
+> [!tip]
+> Text pasted from an email or a PDF arrives already wrapped at someone else's width. Join those lines back into paragraphs after pasting.
+
+> [!note]- More detail
+> **Line breaks.** Standard Markdown joins neighbouring lines into one paragraph. Folio does not, because the shape you see while you type is the shape you meant. A blank line starts a new paragraph.
+>
+> **Strikethrough** is `~~struck~~`, and inline code is a word between backticks. A footnote is `[^1]` in the text, with `[^1]: The note.` further down.
+>
+> **Hidden notes.** Text between two `%%` marks shows in the file but never in Folio. Use it for notes to yourself or a future editor. It is not a comment. Comments are made in Folio.
+>
+> **Tab trees.** One real `-` on the first line makes Folio treat everything tab-indented below it as a list, even with no marker of its own. It is handy for folder diagrams. Every line is its own row, so do not press Enter in the middle of a sentence.
+>
+> **Tags.** Write `#tag`, or `#parent/child`. They show as small coloured chips. They are display only in Folio, with no click to filter.
+
+## Link to other pages
+%% card: Links that keep working when a page is renamed | icon: link | updated: 0.83 | key: wikilinks %%
+
+A link written the Obsidian way follows the page when it is renamed.
+
+1. Type `[[` and start the page name. Obsidian suggests pages as you type.
+2. To show different words, write `[[Page name|your words]]`.
+3. To link to a heading, write `[[Page name#Heading]]`. For a heading on the same page, `[[#Heading]]`.
+4. For a website, write `[words](https://example.com)`.
+
+> [!tip]
+> Write `![[Page name]]` to show a page as a clickable card. It does not copy the page in.
+
+> [!note]- More detail
+> **Folders and drives.** A web page cannot open Explorer, so clicking a link to a network folder copies its path instead, ready to paste into Explorer's address bar.
+>
+> **Odd links.** A link to anything other than a normal web, mail, file share or Obsidian address shows as plain text.
+>
+> **Broken links.** Vault check lists every link that points nowhere, so an Administrator can find them.
 
-> [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.82.0**.
+## Place pictures
+%% card: Beside the text, below it, or two side by side | icon: image | updated: 0.83 | key: pictures %%
 
-**This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
+Write pictures the normal Obsidian way and Folio places them the same way. The Folio theme shows it in Obsidian too. There are three layouts.
 
-**For using Folio**, panels, search, bookmarks and themes, see **[Help](help.md)**.
+![[ob-pic-beside.png|inlR|320]]
+**Beside the text.** Put the picture first, then the paragraph on the very next line. Write `![[photo.png|inlR|240]]` to put it on the right with the text wrapping on the left. `inlL` puts it on the left. Give a wrapped picture no caption, and say what it shows in the text beside it.
 
-> [!TIP] You do not need this page to leave a comment
-> Commenting works for everyone with no setup. See [Comments](help.md).
+![[ob-pic-below.png|inlR|320]]
+**Below the text.** Write `![[photo.png]]` on its own line for full width, or `![[photo.png|600]]` for a width in pixels. An italic line straight under it is its caption, like `*The whole site at a glance*`.
 
----
+![[ob-pic-pair.png|inlR|320]]
+**Side by side.** Put two pictures on one line, such as `![[before.png|320]] ![[after.png|320]]`. Make them the same width. A caption underneath covers both.
 
-## Contents
+> [!tip]
+> The next heading always starts below a wrapped picture, so the layout never runs on.
 
-1. [[#1. Before you start]] — read-only by default, and how to change that
-2. [[#2. Creating and moving files]]
-3. [[#3. Editing a note]]
-4. [[#4. Properties]] — including the two that drive What's New
-5. [[#5. Review]] — what happens after someone edits
-6. [[#6. Writing Markdown]] — the full syntax reference
-7. [[#7. What Folio does not render]]
+> [!note]- More detail
+> **Where the file goes.** Put each picture in the attachments folder beside the page, not in one folder for the whole vault. Obsidian creates it for you when you paste a picture into a page. Folio follows the Obsidian setting called "in subfolder under current folder".
+>
+> **The name has to match exactly,** capital letters included.
+>
+> **Pictures from the web.** Write `![words](https://example.com/picture.jpg)`.
+>
+> **While editing.** If the cursor behaves oddly around a wrapped picture in Obsidian, the Folio theme has a Style Settings switch to keep it on its own line while you edit. Reading view always wraps.
 
----
+## Draw table column widths
+%% card: The line of dashes under the header sets how wide each column is | icon: table | updated: 0.83 | key: tables %%
 
-## 1. Before you start
+In a table, the line of dashes under the header does two jobs. It sets the alignment, and it sets the widths. The numbers match the picture.
 
-Folio is **read-only unless your access says otherwise**. On the default **User** level, nothing you click can change a file.
+![[ob-table-dash.png|514]]
+*Four or more dashes under Notes: that column takes the spare room.*
 
-**Editing is Administrator.** You cannot give it to yourself: an Administrator sets it against your name in **Admin → Users**, and it reaches you the next time you open Folio. To see where you stand, open Settings from your initials badge, top right, and expand Advanced Settings.
+1. A column with three dashes or fewer is as wide as its words. `|---|---|` gives a compact table.
+2. A column with four or more dashes takes the spare room. Draw only the column that needs it, usually Notes.
 
-Your access follows you to every PC you open Folio on, because it belongs to your name and not to the machine.
+> [!tip]
+> Obsidian ignores dash counts, so a drawn table looks different while you edit. Folio is where the widths show.
 
-That one change turns on all of it:
+> [!note]- More detail
+> **Sharing the room.** Two drawn columns of 10 and 30 dashes split the spare room a quarter and three quarters.
+>
+> **Alignment.** A colon on the left of the dashes aligns left, on both sides centres, and on the right aligns right.
+>
+> **Margin to margin.** Put `%%wide%%` on its own line above the table. Obsidian hides that line, so only Folio uses it.
+>
+> **Too many columns.** A table that cannot fit even when wrapped grows into the margins, then scrolls sideways, with **Open full table** above it. Text in a table always wraps.
 
-- **New page** in the header
-- **Edit** and **Properties** at the reader's top right
-- Clickable task checkboxes in the reader
+## Add callouts
+%% card: Notes, tips, warnings and folded details | icon: sparkle | updated: 0.83 | key: callouts %%
 
-If your name is not on the `editors` list in the app's config, these stay unavailable even with the setting on. Ask whoever manages the app to add you.
+A callout is a quote with a type on its first line. Write `> [!tip]` and the text on the lines under it.
 
-> [!IMPORTANT] Two apps, one set of files
-> Your vault is the same folder Obsidian opens. Edit a note here and it is edited there, and the reverse. There is no separate Folio copy to reconcile.
+![[ob-callouts.png|inlR|320]]
+Add a title after the type, like `> [!warning] Mind the step`. Add a minus, as in `> [!faq]-`, and the callout starts folded. A plus, as in `[!faq]+`, starts open but lets people fold it. The same types and colours show in Obsidian and in Folio.
 
----
+> [!tip]
+> The types are note, abstract, info, todo, tip, success, question, warning, failure, danger, bug, example and quote.
 
-## 2. Creating and moving files
+> [!note]- More detail
+> **Nesting.** Callouts nest. Start the inner one with `>>`.
+>
+> **The copy callout.** Folio has one type of its own. `> [!copy] Standard reply` adds a **Copy** button that puts the text on the clipboard, formatted, ready to paste into email or Word. Use it for wording that has to be exact. In Obsidian it shows as a plain callout titled Copy, with no button.
+>
+> **What gets copied.** What you see, never the Markdown marks. Bold copies as bold, and a link copies as its words.
+>
+> **Guide boxes.** A callout of type guide is writer help from a template. Folio never shows one, in any page.
 
-**New page** (0.77.0) is the button beside **Home** in the header, for Contributors and Administrators. Pick a template, type a title and choose the folder the page will be filed in. Folio reserves the next free three-digit number in that folder (you can change it; a number already used is refused), makes the page in **Working Drafts** as `021-Title.md`, and opens it in Obsidian. The page starts with the template's sections, its properties filled in (type, number, status To Be Reviewed, author, created date, and `file-in:` for the folder it is headed to), and the template's grey notes and guide boxes to help you write it. Folio hides both.
+## What Folio does not show
+%% card: Things that look different, or do not appear, in Folio | icon: alert | updated: 0.83 | key: not-shown %%
 
-A draft shows **Draft** at the top of the page; a page not yet approved shows **In review**. Approving a page offers to take the grey notes and guide boxes out.
+Folio follows Obsidian closely, with a few deliberate gaps.
 
-**Templates** live in `zSystem/Templates` and are edited in Obsidian. **Admin › Templates** shows each one three ways: **Sample** (how a page made from it looks, in Folio or in Obsidian, or as the file), **Outline** (its sections and badges: Core, Optional, One of, Repeat, Callout) and **AI prompts** (Write, Fix or Check a page, or Update the template, each copied with the template and the Format rules). Administrators also get **+ New** (start from the Sample, which leaves out its guide boxes, or copy another template), **Edit template** (opens it in Obsidian), **Retire**, and **Format rules**, the rules for every page. The **Sample** template explains how a template file is written; it is never offered in New page.
+1. **Raw HTML** shows as typed. Underline has no Markdown form, so use bold or highlight instead.
+2. **Mermaid diagrams and maths** show as plain code, not as a diagram or a formula.
+3. **Unusual link types** show as plain text.
+4. **Tags** are display only.
+5. **Tab trees under a bullet** read as a nested list in Folio, which Obsidian's own Reading view does not.
 
-**Numbers.** A page's number is counted inside its top-level folder, so `10_Processes` and `20_Guides` each have their own 001, 002 and so on. The number sits in the page's `number` property as well as its file name. A draft can wait in Working Drafts without a number until it is filed.
+> [!tip]
+> If something looks different in Folio, it is almost always one of these five. Write it in Obsidian if you like, and expect it to look different here.
 
-**The drafts folder.** New pages, and any page found loose outside a folder, go to **Working Drafts** unless an Administrator picks another place under **account menu › Drafts folder**.
+> [!note]- More detail
+> **Why raw HTML.** Showing it would let anything pasted into a page run in every reader's browser. Markdown covers nearly everything.
+>
+> **Further reading.** Folio uses Obsidian's own syntax, so Obsidian's help applies. Search for Obsidian basic formatting syntax, advanced formatting syntax and callouts.
 
-**Renaming and moving** is done in Obsidian, so its links follow. Folio never renames a page itself. When a page is renamed, renumbered or moved, its saved pages, saved sections, comments and review history follow it, and Usage and search reports join the old and new names, the next time Folio looks at the vault. A page that was only renamed or moved keeps its sign-off. One case Folio cannot follow: if the name, the number and the text of a page all change before Folio has looked, it cannot tell which page is which, and the comments show under **Comments with no page**. Rename a page, or edit it, but not both in one go.
+## Something is wrong
+%% card: Fixes by what you see | icon: alert | updated: 0.83 | key: trouble %%
 
-**Vault check rows for numbers and folders** (Administrator). Each one is fixed from its row, and nothing is deleted:
+Find what you see below and open it. Each one says why it happens, then what to do.
 
-| Row | What it means | Fix |
-|---|---|---|
-| **Number property missing** | The page has a number in its name but not in its properties. One row for all of them. | **Write numbers** adds the line to each page after you confirm. |
-| **No number** | The page has no number. Report only. The row shows the next free number in that folder. | Rename it in Obsidian. |
-| **Number does not match name** | The `number` property and the file name disagree. | **Match the name** |
-| **Number used twice** | Two pages in the same top-level folder share a number. | Rename one in Obsidian. |
-| **Page outside a folder** | A page sits loose at the vault root. | **Move to drafts** |
-| **Old page files** | Comment and change files from before 0.72.0, left beside the pages. | **Park old files** moves them to `zSystem/_old/`. |
-| **Comments with no page** | Page data whose page cannot be found. | Check for a rename that changed everything at once, or tidy it by hand. |
+### A picture shows as text in Folio
+Cause: the file name does not match exactly, or the picture is not in the attachments folder beside the page.
 
----
+Fix: check the spelling and capital letters, and move the picture into the attachments folder next to the page.
 
-## 3. Editing a note
+### A table looks too narrow in Folio
+Cause: the line of dashes under the header has three or fewer dashes in every column.
 
-The **pencil** at the reader's top right opens the raw Markdown in a plain text editor with colour-coded syntax.
+Fix: draw four or more dashes under the column that needs the room, usually Notes.
 
-It is **not** a live-preview editor. You see Markdown while editing, and rendered output when you save. This was a deliberate choice: a live-preview editor is where most of the risk in an app like this lives, and the vault is read far more often than it is written.
+### My page looks different in Folio
+Cause: one of the gaps in What Folio does not show, such as raw HTML or a diagram.
 
-**Link autocomplete** — typing `[[` offers file names. `[[file#` or `[[#` offers that file's headings. Arrow keys to move, Enter or Tab to pick, Esc to dismiss.
+Fix: use Markdown for it instead, or accept that it looks different in Folio.
 
-**What happens when you save:**
+### The grey notes or guide boxes show in Obsidian
+Cause: only Folio hides them. Obsidian shows them, folded or grey, because they are part of the file.
 
-1. Folio checks nobody else saved the file while you had it open. If they did, it stops and tells you rather than overwriting them.
-2. The note is marked **To Be Reviewed** until someone approves it in Review.
-3. A line-by-line record of what changed is appended to that note's `.changes.md` sidecar.
+Fix: delete them as you write, or let a Contributor remove them when approving the page.
 
-That third step is what makes [[#5. Review]] possible, and it happens whether or not anyone has review tools switched on.
+### A link goes nowhere
+Cause: the page was renamed without Obsidian following the link, or the name is spelled differently.
 
-**Ticking a checkbox is different.** `- [ ]` items are clickable straight from the reader, and ticking one writes quietly — no change-log entry, no status flip. It is a status tick, not an edit.
+Fix: retype the link with `[[` so Obsidian suggests the right page. An Administrator can list every broken link in Vault check.
 
----
+### The theme is not in Obsidian's list
+Cause: the Folio theme has not been added to this vault yet.
 
-## 4. Properties
-
-The **sliders icon** next to the pencil opens the note's properties.
-
-| Field | Type |
-|---|---|
-| Tags | Frontmatter tags and inline `#tags` combined, matching Obsidian |
-| Status | Dropdown: To Be Reviewed or Reviewed |
-| Reviewed | The date of the last sign-off, set when a page is approved in Review |
-| Due | Date picker |
-| Section | Text |
-| Author | Click to edit |
-| Aliases | Click to edit |
-| Created | Read-only |
-| Modified | Read-only |
-
-Property edits **apply quietly**: no change-log entry, no status flip, and the page does not show as Updated in What's New. Properties and review are two separate questions, so changing a property never signs a page off. Approving is done in Review.
-
-Anything not listed here, edit in the file's own frontmatter, see [[#Properties, frontmatter]].
-
-### Must reads and onboarding
-
-**These are assigned in Admin → Users now, not with page properties** (0.79.0). An Administrator picks the page (or one section of it), who owes it (All, or named people), and a priority from Critical to Casual that sets the due date. Onboarding is a separate plan in two tracks, New staff and Existing staff, with each page given the day of someone's plan it appears on.
-
-The old `must-read`, `must-read-start`, `onboarding` and `onboarding-due` properties no longer do anything and have left the Properties panel. Pages that still carry them are left alone; Admin → Users offers once to turn them into must reads or onboarding pages so nothing set the old way is lost. You can delete them from a page whenever it is next edited.
-
----
-
-## 5. Review
-
-**Review is part of the Contributor tier**, the same tier as editing. There is no separate switch for it.
-
-That pairing is deliberate: only an edit made in the app writes a change record, so a reviewer who cannot edit would be looking at an empty list.
-
-Change records are always written whether or not anyone is on Contributor. The tier only decides whether you see the review interface, so a reader who never reviews anything is not shown machinery they do not need.
-
-On Contributor you get **Home → Admin → Review**: the review dashboard for the whole vault, with a count of open items on its tab.
-
-### It is sequential, per file
-
-The oldest unresolved change on a file is the only one you can act on. Later ones show **⏳ queued** until it is dealt with. This stops changes being resolved out of order, which would make the revert below unsafe.
-
-| Action | What happens |
-|---|---|
-| **Accept** | The change stands. When every entry on a file is accepted, the note flips to Reviewed. |
-| **Reject** | **The file is reverted** to its state before that edit, and any later pending changes on it are discarded. |
-| **Accept all** | Accepts every open entry on that file at once. |
-
-> [!WARNING] Reject undoes the edit
-> Rejecting does not just flag a change for the author. It restores the previous version of the file. Use it when the edit should not stand at all. If you just want to raise a question about it, leave a comment instead.
-
-### What Review lists
-
-Review has three kinds of row:
-
-| Kind | What it is |
-|---|---|
-| **To be reviewed** | Anything not yet signed off: a new page, a change made in Obsidian or in Folio since the last sign-off, a section added, a status set back by hand, or a due date that has passed. The row says which. |
-| **Flagged** | A Flag or Report left on a page, with the person's note under the row. |
-| **Questions** | Open questions on a page. Escalated ones show in red. |
-
-**Approve** records the text as signed off, sets the status to **Reviewed**, writes today's date in `reviewed`, and clears a due date that has passed. Status has only two values, **To Be Reviewed** and **Reviewed**.
-
-Folio marks a page **To Be Reviewed** itself once its text is new or changed and has sat for two minutes (never while someone is typing). A page that was only renamed or moved keeps its sign-off.
-
-**Approve all as they are (N)**, Administrator only, signs off every to-be-reviewed row once. Use it to accept the vault as it stands. After that, every new page and every change comes back for review.
-
-### The list is pages, oldest first
-
-Review lists **pages**, not items. One row per page, saying everything that page owes you: a chip for each thing, and the row disappears once the page owes nothing. A page that has been edited in Obsidian, carries an open question and is overdue is one row and one visit, not three.
-
-The list is ordered **oldest first**, by the oldest thing each page owes. **Start review** walks it in the order you see, from the top. While you review, the side columns step aside so the page and the bar at the bottom get the full width; drag the bar's top edge to give the bottom more room. **Home**, opening any other page, **Dashboard** or the **✕** on the bar all end the review. A page whose age cannot be read from anything on it sits at the end rather than the top, because not knowing how long it has waited is not the same as it having waited longest.
-
-Every row has **Review page**. A page owing exactly one thing that can be settled without reading it also carries that button, so you can approve a new section or clear a due date from the list. A page owing several does not: the button would be acting on one of the things in a row that lists three.
-
-### New pages
-
-A page nobody has signed off, whether it was added from Obsidian or started with New page, is **To be reviewed**, whatever properties it already carries. **Approve** signs off the text. It never fills in a property: missing properties are Vault check's job, below.
-
-### Missing properties are Vault check's now
-
-A page that **has** been approved and is missing some of its keys is a repair, not an approval. It is listed in **Home → Admin → Vault check**, under **Format health**, as **Properties complete**. **Preview fix** on a page, or **Fix all** on the rule, shows exactly what will be added, and **Apply** writes only the keys that are absent.
-
-The split is what stops the two lists chasing each other: a repair made in Vault check never creates work in Review.
-
-### Format health
-
-The lower half of **Vault check** checks every page against its template and the **Format rules** (Admin › Templates › Format rules). It never judges what a page says, only its shape: headings, lengths, properties, tables, pictures, callouts, and the sections its template asks for.
-
-- **One row per rule**, with how many pages break it. **Show pages** lists them and says where on the page. **Edit rule** opens that rule in Format rules.
-- **Warning** is open; **Information** is folded until you open it.
-- **Pages with no template** (no `type`, or a type with no template) are checked against the Format rules only, one level lighter: a Warn rule shows under Information, and an Info rule is counted but not listed. The **No type** row names them.
-- **Pages last edited before their template changed** are one grouped row per template, not listed rule by rule.
-- **Small fixes**, Administrator only: leftover guide boxes, grey notes on a reviewed page, missing properties, and properties out of order. Each opens a **diff** first; **Apply** writes it to the page's change log and it never shows in What's New. A page that was signed off stays signed off. Drafts keep their guide boxes without a finding.
-- **Everything else** is fixed by hand: **Copy Fix a page prompt** copies the page with its template and the rules for your AI, and **Open in Obsidian** opens it.
-- **Dismiss** a page with a note, as with any Vault check row.
-
-> [!NOTE] Why the list may be long the first time
-> Pages written before templates existed have no `type`, so most of them start under Information. That is expected: fix them as they are next edited, or give them a type.
-
-### Changes made in Obsidian
-
-Most edits to your vault do not happen in Folio. It is a reader, and people write in Obsidian. Those edits show up too, as **Vault change** items in orange.
-
-Folio notices them by comparing the note against the last version somebody approved. Approving does **not** mean the change was allowed through — it already happened, and nothing Folio does can undo it. It means a competent person has seen it.
-
-Clicking a Vault change row opens the note with the change marked where it actually sits, and a bar at the bottom of the reader:
-
-| Marking | Means |
-|---|---|
-| **Green, NEW SECTION** | This heading was not there last time. |
-| **Amber, CHANGED** | This section's text is different. |
-| **Red, dashed, REMOVED** | This section is **gone**. Folio draws it back in so you can see what went. It is not part of the file and is never written back. |
-
-Use **↑ prev** and **↓ next** to walk the changes, then:
-
-| Button | What happens |
-|---|---|
-| **Approve file** | Records that you read it, in your own audit log. The note is not touched. |
-| **Flag** | Posts an ordinary comment on the file. **No revert** — see the warning below. |
-| **Version history ↗** | Reminds you where to find who changed it: right-click the file in the synced vault folder. |
-
-> [!NOTE] Why Flag does not revert
-> Reject reverts an edit made *in this app*, because the app still has the text it wrote. A change made in Obsidian is different: the file has already synced to everyone, and someone may have it open right now. Overwriting it would destroy their work. So Flag raises the problem and a person fixes it, which is the only safe answer.
-
-### A file whose only change is a new heading
-
-That is additive: nothing was altered and nothing was lost. Those sort into **New section** in yellow, under *Needs acknowledgement*, where **Acknowledge all** clears them in one go. Everything else needs opening.
-
-### Where approvals are recorded
-
-Each person writes their own file at `zSystem/audit/YYYY-MM-<your email>.md`. Rows are only ever added, never changed, so two people approving at the same moment cannot collide. The record is permanent and carries your name.
-
-Anyone on Contributor can approve anything, including their own edits. That is a deliberate choice for a small team: the log makes a careless approval findable afterwards, which is the honest trade when there may only be two of you.
-
-> [!TIP] The first run is quiet on purpose
-> The first time someone opens Folio on Contributor, the whole vault is recorded as approved. Otherwise day one would open with every note in the queue, which tells you nothing.
-
----
-
-## 6. Writing Markdown
-
-Everything here is standard Obsidian Markdown. Write it in either app and it renders the same in both.
-
-### Text
-
-| What | Syntax | Renders as |
-|---|---|---|
-| Bold | `**Bold text**` | **Bold text** |
-| Italic | `*Italic text*` | *Italic text* |
-| Bold and italic | `***Both***` | ***Both*** |
-| Strikethrough | `~~Struck~~` | ~~Struck~~ |
-| Highlight | `==Highlighted==` | ==Highlighted== |
-| Inline code | `` `code` `` | `code` |
-
-### Headings
-
-```md
-# H1
-## H2
-### H3
-#### H4
-##### H5
-###### H6
-```
-
-All six levels render, fold and appear in the Outline. Their colours, underlines and capitals are set per reader under Theme → Headings, so do not use a particular level just because of how it looks on your screen — use it because of where it sits in the structure.
-
-### Paragraphs
-
-A blank line starts a new one.
-
-**Every line break you type is kept.** Press Enter once and the next line starts on its own line, exactly as it looks while you are writing it in Obsidian. You do not need two trailing spaces or `Shift+Enter`, though both still work.
-
-This is deliberate, and it is not what standard Markdown does. Most Markdown renderers merge consecutive lines into one flowing paragraph, and Folio did too before version 0.24.0. The change was made because pages here are written in Obsidian's editor, so the shape you see while typing is the shape you meant.
-
-**One thing to watch.** Text pasted from an email or a PDF often arrives already wrapped at someone else's line width, and it will render with those wraps intact, giving short ragged lines. Join those lines back together after pasting and it flows normally.
-
-### Links and embeds
-
-| What | Syntax |
-|---|---|
-| Wikilink | `[[Note Name]]` |
-| Aliased | `[[Note Name\|Display text]]` |
-| Heading in another note | `[[Note Name#Heading]]` |
-| Heading in this note | `[[#Heading]]` |
-| External | `[Link text](https://example.com)` |
-| Note embed | `![[Note Name]]` — a clickable stub card, not transcluded |
-| Image, vault | `![[image.png]]`, or `![[image.png\|600]]` to set width |
-| Image, external | `![alt](https://example.com/image.jpg)` |
-
-Typing `[[` in the editor offers completion for all of the wikilink forms, so you rarely have to type a note name in full.
-
-### Images
-
-Put the image in the **attachments subfolder beside the note**, not in one shared folder for the whole vault. Folio follows Obsidian's **"in subfolder under current folder"** setting, so `![[image.png]]` looks in that subfolder of the current note's own folder. Obsidian creates it for you when you paste an image into a note.
-
-The filename must match exactly, including case.
-
-**Placing a picture.** Everything is written the normal Obsidian way, and the Folio theme for Obsidian shows it the same way while you write.
-
-| You write | You get |
-|---|---|
-| `![[photo.png]]` | Full width, centred |
-| `![[photo.png\|400]]` | 400 pixels wide |
-| `![[photo.png\|inlR\|240]]`, then the paragraph on the very next line | Picture on the right, text wraps on the left |
-| `![[photo.png\|inlL\|240]]` | Picture on the left, text wraps on the right |
-| `![[a.png\|320]] ![[b.png\|320]]` on one line | Side by side |
-| `*Caption text*` on the line straight under a picture | A caption under it |
-
-The next heading always starts below a wrapped picture. Leave wrapped pictures without a caption and say what the photo shows in the text beside it.
-
-### Lists
-
-```md
-- Unordered item
-  - Nested item
-
-1. Ordered item
-   1. Nested item
-
-- [ ] Incomplete task
-- [x] Completed task
-```
-
-Nesting works with real tabs or 2-space indents, matching Obsidian's own rule. There is no distinction between bullet, numbered and checkbox lists.
-
-### Tab trees under a bullet
-
-> [!INFO] A deliberate difference from Obsidian
-> This is one place Folio does not match Obsidian's reading view, on purpose.
-
-One real `-` (or `1.`, or `- [ ]`) on the **first line** makes Folio treat everything tab-indented below it as a list, even where none of those lines have their own marker:
-
-```md
-- Project Directory/
-	BidPhase
-		00_Support Documents
-	Construction
-```
-
-That renders as a full nested tree — fold arrows, guide lines, everything — from the one marker at the top. Useful for folder diagrams and org charts that were never meant to be a "real" list.
-
-**The trade-off, on purpose:** inside a list this way, every line is its own row. It is never merged as wrapped continuation text of the row above, because there is no marker to say which you meant. If two sentences should read together under one row, write them as one line and let it wrap. Do not press Enter between them.
-
-### Quotes, rules and code
-
-```md
-> Quoted text.
-> — Attribution
-```
-
-`---`, `***` or `___` alone on a line draws a horizontal rule.
-
-````md
-```js
-console.log("hello")
-```
-````
-
-The language label after the opening backticks is optional and drives the syntax colouring.
-
-### Footnotes
-
-```md
-This needs a citation[^1].
-
-[^1]: The citation text.
-```
-
-### Hidden comments
-
-`%% text %%` is visible only in the raw file. It never renders in the reader, by design. Use it for notes to yourself or to a future editor.
-
-A **guide box** is a callout of type `guide`: `> [!guide]- Guide: Steps`. Templates use them for writer help (examples, do and don't). Folio never draws one, in any page. Obsidian shows it folded.
-
-This is different from a Folio **comment**, which is a threaded note posted from the Comments tab and stored in a sidecar file. See [Comments](help.md).
-
-### Tables
-
-```md
-| Left | Center | Right |
-|:--|:--:|--:|
-| a | b | c |
-```
-
-Column alignment follows the separator row: `:--` left, `:--:` center, `--:` right, plain `--` left (the default). Obsidian reads the same syntax. Text in a table always wraps.
-
-**Width is set by the separator row too.** Think of it as a ruler:
-
-- **3 dashes or less** (`---`, `:-:`): the column is as wide as its content. A table drawn this way is compact.
-- **4 dashes or more** (`:------`): the table fills the text column, and the drawn columns share the room by their dash count. Plain columns stay tight. Draw only the column that needs the room, usually Notes. Two drawn columns of 10 and 30 dashes split the room one quarter to three quarters.
-- **`%%wide%%`** on its own line above the table (a blank line between is fine) takes it margin to margin. Obsidian hides that line, so only Folio reads it.
-
-```md
-%%wide%%
-
-| Door | Height | Notes |
-|:--|:-:|:----------|
-| DH-101 | 1.0 m | Mantrap outer, interlocked with DH-102. |
-```
-
-A table with too many columns to fit, even wrapped, widens into the margins and then scrolls sideways, with **Open full table** above it. Obsidian ignores dash counts, so a drawn table looks different while you edit; Folio is where the widths show.
-
-### Properties, frontmatter
-
-```yaml
----
-tags:
-  - construction-admin
-status: In Progress
-reviewed: false
-due: 2026-11-15
----
-```
-
-A YAML block at the **very top** of the file, before anything else. Folio reads all of it. Six fields are editable through the Properties panel — Tags, Status, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched. Author and Due are also what the reader's byline reads, right under the title. The old `must-read` and `onboarding` keys are no longer read, see [[#Must reads and onboarding]].
-
-### Callouts
-
-```md
-> [!tip] Optional custom title
-> Body text here.
-```
-
-| Type | Aliases | Icon |
-|---|---|---|
-| `note` | — | 📝 |
-| `abstract` | `summary`, `tldr` | 📋 |
-| `info` | — | ℹ️ |
-| `todo` | — | ☑️ |
-| `tip` | `hint`, `important` | 🔥 |
-| `success` | `check`, `done` | ✅ |
-| `question` | `help`, `faq` | ❓ |
-| `warning` | `caution`, `attention` | ⚠️ |
-| `failure` | `fail`, `missing` | ❌ |
-| `danger` | `error` | ⚡ |
-| `bug` | — | 🐛 |
-| `example` | — | ☰ |
-| `quote` | `cite` | ❝ |
-| `copy` | — | 📄 |
-
-`copy` is Folio's own addition and behaves differently from the rest — see below.
-
-Add `-` after the type for collapsed-by-default, `+` for expanded-but-foldable: `> [!faq]-`.
-
-Callouts nest — `>>` and `>>>` work to any depth:
-
-```md
-> [!warning] Outer
-> Body text.
->> [!note] Inner
->> Nested body.
-```
-
-### The copy callout
-
-`[!copy]` is Folio's own type, not one of Obsidian's. It renders like any other callout but adds a **Copy** button to its title row, which puts the block on the clipboard.
-
-```md
-> [!copy] Standard reply
-> Thanks for reaching out. Your ticket number is [NUMBER]
-> and someone will be in touch within one business day.
-```
-
-Use it for text people are meant to paste somewhere else: a standard reply, a mailing address, a form of words that has to be exact. It's deliberately opt-in — no other callout gets a button, so the affordance only shows up where you asked for it.
-
-**What lands on the clipboard is what you see, never the Markdown source.** `**Bold**` copies as bold text, `[[Some Note|this note]]` copies as `this note`, and the leading `>` is never included. **No destination anywhere sees a Markdown marker** — that is the whole point of the feature.
-
-One copy carries two versions and the destination picks. Somewhere that understands formatting — Outlook, Word, Teams, most web editors — takes the formatted one, with real bold, real bullet and numbered lists, real headings, real tables and working links. Somewhere plain takes plain text, with bullet and number markers kept as characters and tables tab-separated, which is what a spreadsheet expects. Fenced code is copied exactly as written either way, markers and all.
-
-**On nesting.** Indented bullets and numbers keep their levels. A few editors build their own paste handling and understand a list but not a list inside a list — Autodesk Forma is the one we know of — so each nested item also carries its own indent, which those editors keep even when they discard the nesting. Two levels come through correctly everywhere we have tried. Three or more may arrive flattened to two in an editor of that kind; every mainstream one handles the full depth.
-
-**On line breaks.** Your hard line breaks are preserved. Press Enter and you get a new line in the clipboard; leave a `>` on its own for a blank line and you get a paragraph gap. A line that simply looks wrapped on screen is not a break and costs you nothing, so write a paragraph as one long line and let it wrap. Note that a rendered callout still joins consecutive lines into one paragraph, exactly as Obsidian does — only the copied text keeps your breaks.
-
-Opening the same note in Obsidian is safe. Obsidian doesn't recognise the type, so it draws a plain note-styled callout titled "Copy" and shows the text normally. There's no button and nothing breaks, because the button only ever exists at render time. Nothing is written to the file.
-
-### Tags
-
-`#tag` for a flat tag, `#parent/child` for a nested one. They render as coloured chips and are display-only in Folio — no click-to-filter yet, though Obsidian will still index them normally.
-
----
-
-## 7. What Folio does not render
-
-| | Why |
-|---|---|
-| **Raw HTML** | Typed HTML shows as literal text. Rendering author-supplied HTML would let anything pasted into a note run as code in every reader's browser. Markdown covers nearly everything; the one real gap is underline, which Markdown has no syntax for — use `**bold**` or `==highlight==` instead. Obsidian is more permissive here, so a note using raw HTML looks different in the two apps. |
-| **Unusual link schemes** | Links to anything other than a normal web, mail, file share or Obsidian address render as plain text, for the same reason. |
-| **Mermaid diagrams and MathJax** | Deferred. They display as plain code blocks, not rendered output. Write them if you want them in Obsidian; just expect a code block here. |
-| **Clicking a tag to filter** | Not built. Tags are display-only. |
-
----
-
-## Further reading
-
-Folio follows Obsidian's own Markdown syntax, so Obsidian's documentation applies directly:
-
-- [Basic formatting syntax](https://obsidian.md/help/syntax)
-- [Advanced formatting syntax](https://obsidian.md/help/advanced-syntax)
-- [Callouts](https://obsidian.md/help/callouts)
-- [Tags](https://obsidian.md/help/tags)
-- [Properties](https://obsidian.md/help/properties)
-- [Obsidian Help home](https://obsidian.md/help)
-
----
-
-Back to **[Help](help.md)** for panels, search, bookmarks and themes.
+Fix: ask your Administrator for the Folio theme.

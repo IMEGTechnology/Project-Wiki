@@ -4691,15 +4691,15 @@ body.beta-shell.console-home #help-bar, body.beta-shell.console-dest #help-bar {
   padding: 3px 6px; margin-right: 6px; border-radius: 6px; cursor: pointer; }
 #help-bar .help-badge svg { width: 16px; height: 16px; }
 #help-bar .help-badge:hover { background: var(--hover); }
-#help-bar .help-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-#help-bar .help-tab { font: inherit; font-size: 12.5px; color: var(--text-primary); background: none; border: 1px solid transparent;
-  padding: 3px 9px; border-radius: 6px; cursor: pointer; }
-#help-bar .help-tab:hover { background: var(--hover); }
-#help-bar .help-tab.on { background: var(--bg-reader); border-color: var(--help-amber); font-weight: 600; }
 #help-bar .help-back { margin-left: auto; font: inherit; font-size: 11.5px; color: var(--text-primary); background: var(--bg-reader);
   border: 1px solid var(--border-strong); padding: 3px 10px; border-radius: 6px; cursor: pointer; }
 #help-bar .help-back:hover { border-color: var(--accent); color: var(--accent); }
 body.help-mode #section-trail { top: var(--help-h, 0px); }
+/* 0.83.0 -- help takes the whole width. Vault Files and Outline describe a
+   vault page, and help is not one. !important for the same inline-width
+   reason as the review rule above: setPanelOpen() writes widths inline. */
+body.beta-shell.help-mode #sidebar, body.beta-shell.help-mode #rh-sidebar,
+body.beta-shell.help-mode #right-panel, body.beta-shell.help-mode #rh-right { display: none !important; }
 #bt-crumbs .help-crumb { color: var(--text-secondary); cursor: pointer; text-decoration: none; }
 #bt-crumbs .help-crumb:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
 /* A heading's own actions (copy link, save, comment) address a vault page;
@@ -5041,7 +5041,7 @@ body.help-mode #reader-content .md-h-acts { display: none; }
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.82.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.83.0</button>
       </div>
 
       <div class="ud-actions">
@@ -17751,6 +17751,37 @@ const HOME_HASH = '#home';
 // "How to mark a page read" has to land ON the instructions rather than
 // near them, so this one hash opens the help page.
 const HELP_HASH = '#help';
+// 0.83.0 -- every help screen is a history entry, so Back and Forward step
+// through help the way they step through pages. #help alone still means the
+// Using Folio landing, which is what the staff email links to.
+//   #help/hub                 the list of guides
+//   #help/<guide id>          a guide's landing
+//   #help/<guide id>/<topic>  one topic
+function isHelpHash(h) { h = String(h || ''); return h === HELP_HASH || h.indexOf(HELP_HASH + '/') === 0; }
+function helpHashFor(g, topicKey) {
+  if (!g) return HELP_HASH + '/hub';
+  return HELP_HASH + '/' + encodeURIComponent(g.id) + (topicKey ? '/' + encodeURIComponent(topicKey) : '');
+}
+function parseHelpHash(h) {
+  h = String(h || '');
+  if (h === HELP_HASH) return { file: 'help.md', topic: null };
+  if (h.indexOf(HELP_HASH + '/') !== 0) return null;
+  const parts = h.slice(HELP_HASH.length + 1).split('/');
+  let id = '', topic = null;
+  try { id = decodeURIComponent(parts[0] || ''); topic = parts[1] ? decodeURIComponent(parts[1]) : null; } catch (_) {}
+  if (id === 'hub') return { file: null, topic: null };
+  const g = HELP_GUIDES.find(x => x.id === id);
+  return g ? { file: g.file, topic } : { file: null, topic: null };
+}
+function wbHistoryPushHelp(g, topicKey) {
+  const h = helpHashFor(g, topicKey);
+  if (location.hash === h) { try { history.replaceState({ wb: 1, i: state.histIdx }, '', h); } catch (_) {} updateBackButtons(); return; }
+  wbSaveScrollForCurrent();
+  state.histIdx += 1;
+  state.histMax = state.histIdx;
+  try { history.pushState({ wb: 1, i: state.histIdx }, '', h); } catch (_) {}
+  updateBackButtons();
+}
 
 function wbHistoryPushHome() {
   const atHome = location.hash === HOME_HASH;
@@ -17801,8 +17832,11 @@ async function wbOpenFromHash(opts) {
   // S94 -- same shape as Home: no note= part, so it has to be answered
   // before the note branch reads it as "no address" and leaves whatever
   // was on screen sitting there.
-  if (location.hash === HELP_HASH) {
-    openHelpDoc('help.md');
+  if (isHelpHash(location.hash)) {
+    const hp = parseHelpHash(location.hash);
+    state.navFromHistory   = true;   // the address is already right, helpShow must not push
+    state.navRestoreScroll = (opts && opts.restoreScroll) || 0;
+    await helpShow(hp.file, hp.topic);
     return true;
   }
   const parsed = parseNoteHash(location.hash);
@@ -17905,7 +17939,7 @@ async function openFile(url, name) {
   // replace further down then overwrote the #home entry with the page, and
   // Back from a page opened by Continue or Browse jumped past Home to
   // whatever came before it.
-  const leavingPlace = !state.activeUrl && (location.hash === HOME_HASH || location.hash === HELP_HASH);
+  const leavingPlace = !state.activeUrl && (location.hash === HOME_HASH || isHelpHash(location.hash));
   if (!isNavRestore && ((state.activeUrl && state.activeUrl !== url) || leavingPlace)) wbHistoryPush(url, '');
   updateBackButtons();
 
@@ -18488,10 +18522,10 @@ const HELP_GUIDES = [
   { file: 'help.md',         id: 'using',    name: 'Using Folio',         min: 'user',
     who: 'Everyone', icon: 'book',
     blurb: 'Finding, reading, saving and commenting, and making Folio look the way you want.' },
-  { file: 'help-contrib.md', id: 'contrib',  name: 'Contributing',        min: 'contributor', ready: false,
+  { file: 'help-contrib.md', id: 'contrib',  name: 'Contributing',        min: 'contributor',
     who: 'Contributors and Administrators', icon: 'check',
     blurb: 'Reviewing pages, approving changes and working through comments.' },
-  { file: 'help-admin.md',   id: 'admin',    name: 'Administering',       min: 'admin', ready: false,
+  { file: 'help-admin.md',   id: 'admin',    name: 'Administering',       min: 'admin',
     who: 'Administrators', icon: 'shield',
     blurb: 'Access, users, must reads and onboarding, templates and vault health.' },
   { file: 'help-edit.md',    id: 'obsidian', name: 'Editing in Obsidian', min: 'contributor',
@@ -18698,7 +18732,7 @@ function helpHubHTML() {
     icon: g.icon, title: g.name, summary: g.blurb, who: 'For ' + (g.who === 'Everyone' ? 'everyone' : g.who),
     attrs: 'data-wb-helpnav="guide" data-wb-guide="' + escHtml(g.file) + '"' })).join('');
   return parseMarkdown('# Help') +
-    '<p class="md-p help-lede">Pick a guide. You see the guides your access level includes.</p>' +
+    '<p class="md-p help-lede">Pick a guide. You see the guides your access level includes. The amber bar above means you are in help: <b>Back</b> returns you to the page you were on, and <b>Help</b> brings you back to this list.</p>' +
     '<div class="help-cards">' + cards + '</div>';
 }
 // R3 -- a guide's landing page: its intro, then one card per topic. The
@@ -18735,14 +18769,10 @@ function helpPageLabel(name) {
   return displayNameOf(String(name || '')).replace(/\.md$/i, '') || 'your page';
 }
 function helpBarHTML() {
-  const cur = state.help && state.help.guide;
-  const tabs = helpGuidesForMe().map(g =>
-    '<button type="button" class="help-tab' + (g.file === cur ? ' on' : '') + '" data-wb-helpnav="guide" data-wb-guide="' +
-    escHtml(g.file) + '">' + escHtml(g.name) + '</button>').join('');
   const r = state.helpReturn;
   const back = r && r.label ? r.label : (r && r.url ? 'Back to ' + helpPageLabel(r.name) : 'Back to Home');
   return '<button type="button" class="help-badge" data-wb-helpnav="hub" title="All guides">' + helpIcon('book') +
-    '<span>Help</span></button><span class="help-tabs">' + tabs + '</span>' +
+    '<span>Help</span></button>' +
     '<button type="button" class="help-back" data-wb-helpnav="back">' + escHtml(back) + '</button>';
 }
 function helpSyncBar() {
@@ -18776,6 +18806,10 @@ async function helpShow(file, topicKey) {
   const enteringHelp = !state.helpOpen;
   const wasUrl = state.activeUrl, wasName = state.activeName;
   const wasScroll = ($('reader') || {}).scrollTop || 0;
+  // 0.83.0 -- a help screen reached by Back, Forward or an arrival link already
+  // has its address; any other route in is a new entry of its own.
+  const fromNav = !!state.navFromHistory, restoreScroll = state.navRestoreScroll || 0;
+  state.navFromHistory = false; state.navRestoreScroll = 0;
 
   exitConsoleHome();
   rightResetTabs(); betaCloseSlide();
@@ -18786,6 +18820,7 @@ async function helpShow(file, topicKey) {
   // cannot be opened either, by a link, an address or anything else.
   if (g && !helpGuideAllowed(g)) { g = null; topicKey = null; }
 
+  if (!fromNav) wbHistoryPushHelp(g, topicKey);
   if (enteringHelp) state.helpReturn = helpReturnNext || (wasUrl ? { url: wasUrl, name: wasName, scroll: wasScroll } : null);
   helpReturnNext = null;
 
@@ -18837,7 +18872,9 @@ async function helpShow(file, topicKey) {
   }
   rc.scrollTop = 0;
   const reader = $('reader');
-  if (reader) reader.scrollTop = 0;
+  if (reader) reader.scrollTop = restoreScroll;
+  // The address names the topic that actually showed, not the one asked for.
+  try { history.replaceState({ wb: 1, i: state.histIdx }, '', helpHashFor(g, state.help.topic)); } catch (_) {}
   renderBetaTopbar(); // the crumbs now know the topic
 
   // Comments/backlinks/review don't apply to help — they'll correctly show
@@ -29963,7 +30000,7 @@ async function bootVault() {
     const deep     = parseNoteHash(location.hash);
     // S94 -- a #help arrival is a link too, and it carries no note=
     // part, so it has to be named here or it lands on Home instead.
-    const helpLink = location.hash === HELP_HASH;
+    const helpLink = isHelpHash(location.hash);
     if (deep || helpLink) {
       state.navFromHistory = true;   // suppress the push for the arrival page
       wbOpenFromHash({ fromHistory: true });
