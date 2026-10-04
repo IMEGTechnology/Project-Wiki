@@ -3,7 +3,7 @@
 > [!NOTE] About this guide
 > This guide lives with the app, not inside your vault, so it never appears in the folder list. Press the **?** in the header to come back at any time.
 >
-> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.85.0**.
+> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.86.0**.
 
 Folio is the team's shared reference: a folder of notes you can browse, search, save and comment on. **New here? Do the first two topics and stop.** That is enough to use Folio. The rest is there when you need it.
 
@@ -21,14 +21,14 @@ You do this once. After that Folio opens straight to your notes.
 > [!tip]
 > Open Folio from the Start menu, taskbar or desktop after this. If you still see the install icon, you are in a browser tab, not the installed app.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Why install.** Installing is what lets the browser remember your folder for good. A bookmark asks every time.
 >
 > **If the install icon is missing.** Use the browser's own route: the install icon at the right of the address bar, or the **⋯** menu, then **Apps**, then **Install this site as an app**.
 >
 > **On a new computer.** Folio walks installing, connecting and your name as one connected sequence. The steps are the same.
 >
-> **Your name and email.** The name goes on your comments. The email is the key your saved pages are filed under, so typing the same email on another computer brings them back. To change either, use your initials, top right, then **Switch** beside your name.
+> **Your name and email.** The name goes on your comments. The email is the key your saved pages are filed under, so typing the same email on another computer brings them back. To change either, use your initials, top right, then **Switch** beside your name. **Cancel** on that card keeps you signed in as you were.
 >
 > **If you can only view the folder.** Folio needs to save your profile there. If your access is view only, it stops and asks you to contact your system administrator.
 >
@@ -37,7 +37,7 @@ You do this once. After that Folio opens straight to your notes.
 > **The tour.** The first time anyone opens Folio on a computer, a short tour points out Home, search, Vault Files and Comments. To see it again: **Settings**, then **Walkthrough**, then **Run again**.
 
 ## Find your way around the screen
-%% card: The folder list, the page, and the tools beside it | icon: file | updated: 0.82 | key: screen %%
+%% card: The folder list, the page, and the tools beside it | icon: file | updated: 0.86 | key: screen %%
 
 Folio is a few parts, and everything else opens beside or over them. The numbers match the picture.
 
@@ -53,8 +53,14 @@ Folio is a few parts, and everything else opens beside or over them. The numbers
 > [!tip]
 > Every picture in this guide is taken in dark mode. Light mode is the same screen with light colours.
 
-> [!note]- More detail
-> A few screens are not about one page, so they take over the middle instead of sharing it: the full search results, Saved, and Admin. See [[#Know what shares the screen and what takes over]].
+> [!note]+ More detail
+> **Resizing.** Drag the inner edge of a side column to make it wider or narrower. Folio remembers the widths on this computer.
+>
+> **Hiding Vault Files.** The icon at the far left of the header shows or hides it, so the page can use the room.
+>
+> **Screens that take over.** A few screens are not about one page, so they take over the middle instead of sharing it: the full search results, Saved, and Admin. See [[#Know what shares the screen and what takes over]].
+>
+> **Help** uses the full width too, and hides Vault Files and the Outline while it is open. Back and forward step through help topics like pages.
 
 ## Use the header bar
 %% card: Home, search, theme, help and your account, all in one strip | icon: sliders | updated: 0.82 | key: header %%
@@ -75,7 +81,7 @@ The strip along the top is always there, on every screen. The numbers match the 
 > [!tip]
 > The icon at the far left shows or hides Vault Files.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Up arrow.** When a newer version is ready, an up arrow appears next to the install icon. Click it to reload into the new version.
 >
 > **No gear.** Settings lives under your initials.
@@ -83,25 +89,36 @@ The strip along the top is always there, on every screen. The numbers match the 
 > **Vault name.** The header shows only the name Folio. Which vault you are reading is shown in Settings and on Home.
 
 ## Start from Home
-%% card: Pick up where you left off, browse, or see what needs you | icon: home | updated: 0.82 | key: home %%
+%% card: Pick up where you left off, browse, or see what needs you | icon: home | updated: 0.86 | key: home %%
 
 Home is the front door. Click **Home** in the header whenever you want it. The numbers match the picture.
 
 ![[uf-home.png|760]]
-*Home: search, the doors, and what is waiting for you.*
+*Home: search, the doors, what changed on the left, and what you owe on the right.*
 
 1. **Search** the vault from the box at the top.
 2. The **doors**: **Continue** reopens the page you were last reading. **Browse** opens the folder list. **Saved** opens what you kept. **What's new** shows what changed. **How it works** opens this guide.
-3. **New and changed pages** since you last looked.
-4. Your **must reads** and **onboarding**, with due dates.
+3. On the left, **What's new** since you last looked, and your **Saved** pages under it.
+4. On the right, your **Must read** list, overdue first, then by due date, your **Onboarding** plan in its order, and **Recently opened** under them.
 
 > [!tip]
 > Home also refreshes the vault. If someone else's change is missing, click Home.
 
-> [!note]- More detail
+> [!note]+ More detail
+> **Lists that need more room.** Each list gets a fair share of its column. When one has more than fits, its heading says how many more, such as **+3 more**. Point at that list and, after a moment, it opens to its full length while the others shrink to make room. Move away and they go back. On a touch screen, tap the list's heading instead.
+>
+> **Long lists.** Once open, a list too long for the whole column scrolls inside its card, with a **Scroll for 4 more** line at the bottom. Must read and Onboarding show up to 15 pages, then say how many more come after.
+>
+> **Recently opened.** When your owed lists need the whole column, Recently opened folds down to its heading, which then says how many pages it holds. Point at it to open it.
+>
+> **Nothing owed.** When you are current, the right column says so in one line, and Recently opened takes the space.
+>
+> **The meters.** The bar under Must read and Onboarding fills as you finish pages. Red means something is overdue. During your first two weeks a missed date shows as **Catch up** instead.
+>
 > **Admin.** Contributors and Administrators get a sixth door, Admin.
 >
 > **Vault chips.** The row under the search box shows which vault you are reading.
+
 
 ## Search the vault
 %% card: Find a page by its name or by what is written in it | icon: search | updated: 0.82 | key: search %%
@@ -120,7 +137,7 @@ Click **See all results** at the bottom for everything the short list left out.
 > [!tip]
 > With the box empty, search shows your saved pages and what you opened recently.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Keys.** `↑` and `↓` move through results, `Enter` opens the highlighted one, `Esc` clears the box, and `Esc` again closes search.
 >
 > **Results.** Each page shows its folder, how many lines matched, and up to three of them with your words marked.
@@ -146,7 +163,7 @@ A slim bar sits above every page. Under it, a thin trail names the section you a
 > [!tip]
 > Point at any heading and a small row appears at its right: copy a link to that section, save it, or comment on it.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **A fourth heading control,** Highlight, is greyed out because it has nowhere to live yet.
 >
 > **The section trail** appears once you scroll into the first main section. Short pages never show it. You can turn it off under Theme, Reading.
@@ -163,7 +180,7 @@ A line across the top of a page says when it is **not approved yet**. **Draft** 
 > [!tip]
 > Use the **Outline** on the right as a map of a long page. Click a heading to jump to it.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Outline.** It lists every heading from H1 to H6, indented by level, and highlights the one you are on. The badge counts the headings. **Alt-click** (Option on a Mac) a row to fold everything under it. The single button at the right of its bar folds or opens the whole list.
 >
 > **The Outline and the page fold separately.** Folding the Outline gives you a quick map without closing anything on the page. Neither survives a reload.
@@ -183,7 +200,7 @@ Every heading has an arrow on its left. Click it to fold that section away, and 
 > [!tip]
 > Nested lists have their own arrows, and a callout has one at the right of its coloured title.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Collapse all and Expand all** are in the Outline, not on the page.
 >
 > **Lists.** Hover a list and a small **All** appears on its first row to fold the whole list. To make every page open fully open, turn off **Remember collapsed lists** under Settings, Navigation. That also clears the folds already saved.
@@ -202,7 +219,7 @@ Whoever opens it lands on that page, or at that section.
 > [!tip]
 > If somebody renames a heading, links to it stop finding it and open the top of the page instead. Think twice before pasting a section link into something permanent.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Outline rows** have the same link control when you point at them, which is handier when the section you want is not the one on screen.
 >
 > **Page links** keep working as long as the file is not renamed.
@@ -219,7 +236,7 @@ A link that looks **faded with a dashed line** points into a folder you have not
 > [!tip]
 > **More**, then **Links**, shows what a page links to and which pages link back to it.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Outgoing links** are everything this page points to, sorted into pages, websites, folders and other. This list is always complete.
 >
 > **Backlinks** are pages that point to this one. Folio only knows about pages you have opened this visit, so the list grows as you browse. It is not a vault-wide index.
@@ -237,7 +254,7 @@ A link that looks **faded with a dashed line** points into a folder you have not
 > [!tip]
 > The list remembers which folders you left open, on your own computer.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Show or hide** it with the icon at the far left of the header. Dragging the edge never closes it, so a stray drag cannot make the list disappear.
 >
 > **Sorting.** Folders with a number at the start sort by that number, then the rest alphabetically.
@@ -251,11 +268,11 @@ A link that looks **faded with a dashed line** points into a folder you have not
 > **Never shown.** Comment and change files, anything starting with a dot, the system folder, attachment folders, the config, themes and assets folders, and these guides.
 
 ## Work with pictures and tables
-%% card: Zoom a picture, widen a table, and open a wide one on its own | icon: table | updated: 0.82 | key: images-and-tables %%
+%% card: Zoom a picture, widen a table, and open a wide one on its own | icon: table | updated: 0.86 | key: images-and-tables %%
 
 Point at a picture and click the magnifier in its corner to see it large with its caption. Click anywhere, or press `Esc`, to close.
 
-A table that fits stays in line with the text. A wider one grows into the margins, and one wider than the page keeps one line per row. The numbers match the picture.
+A table that fits stays in line with the text. Text in a table always wraps, so most tables fit. One that still cannot fit grows into the margins, and one wider than the whole reading area scrolls sideways. The numbers match the picture.
 
 ![[uf-wide-table.png|562]]
 *A table too wide for the page scrolls sideways. Open full table shows it on its own.*
@@ -266,7 +283,7 @@ A table that fits stays in line with the text. A wider one grows into the margin
 > [!tip]
 > A table's header row stays in view while you scroll a long one.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Where pictures live.** Each page's pictures sit in a folder next to it, which Folio hides from the list.
 >
 > **Alignment.** A colon in the dashes under a header sets it: `:--` left, `:--:` centre, `--:` right.
@@ -288,7 +305,7 @@ Click **What's New** above the folder list, or the **What's new** door on Home. 
 > [!tip]
 > A page you must read is skipped by Mark all seen. You can only clear it by opening it.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **New or Updated.** New means the page did not exist last time Folio looked. Updated means its text changed. Touching a file without changing it does not count.
 >
 > **Sections.** Clicking a section clears that section only. A section you have read stays in the list, greyed, so you can go back to it. If it is edited again it goes back to unread.
@@ -320,7 +337,7 @@ Keep the pages and sections you come back to one click away. The numbers match t
 > [!tip]
 > Saved is yours. It follows you to another computer.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Layout.** A page you saved whole sits under **Pinned** at the top. A page where you saved only a section or two sits below, with those sections listed under it.
 >
 > **Moved pages.** Renaming or moving a page carries your saves across. If two pages could be the one, or none fit, the save shows **Repair**, which lists pages and leaves it broken unless you pick one. A renamed heading shows its new name.
@@ -346,7 +363,7 @@ An Administrator can ask you to read a page, or one section of it. That page car
 > [!tip]
 > **Undo** stays on the banner while you are still on the page.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Your list.** Home's **Must read** and **Onboarding** meters show what you owe, with due dates.
 >
 > **Onboarding.** If you are new, your plan arrives a few pages at a time over your first months, and you only see pages whose day has come. For your first two weeks only the most urgent must reads reach you, and a date you miss then shows as **Catch up** rather than red.
@@ -371,7 +388,7 @@ Anyone can comment. You never need editing turned on. Click **Comments** in the 
 > [!tip]
 > Use **Report** under a page's title for something wrong with the whole page. It opens a comment already set to Flag.
 
-> [!note]- More detail
+> [!note]+ More detail
 > | Type | Use for |
 > |---|---|
 > | Note | Observations or context |
@@ -403,7 +420,7 @@ Click your **initials**, then **Theme**. The page stays visible behind it and ev
 > [!tip]
 > The sun in the header flips dark and light without opening the panel.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Default** uses one accent colour for a short mark under the title and for links, and tells heading levels apart by size, weight and space. **Guided** adds a coloured marker beside each H2, H3 and H4 so you can see the level at a glance.
 >
 > | Reading control | Options | Default |
@@ -435,7 +452,7 @@ Click your **initials**, then **Settings**. Each change applies as soon as you m
 > [!tip]
 > **Continue** on Home already reopens the page you were last reading, so there is no setting for it.
 
-> [!note]- More detail
+> [!note]+ More detail
 > Settings has two tabs. **General** holds the everyday switches. **Advanced** shows your **access** level and the vaults Folio is reading.
 >
 > **More than one vault.** An Administrator publishes the list of vaults once, and it reaches everyone the same way pages do.
@@ -456,7 +473,7 @@ Everything beside the page you are reading is one of two things.
 > [!tip]
 > Click **Close** in a destination's corner to go back to the page you were on, or to Home.
 
-> [!note]- More detail
+> [!note]+ More detail
 > Open more than one companion and a small strip of tabs appears above the column to switch between them. The control that opened a companion closes it.
 
 ## Know your access level
@@ -473,7 +490,7 @@ Folio has three levels, and each includes the one below it. Anything your level 
 > [!tip]
 > To find your level, open **Settings**, then the **Advanced** tab. If you need a different one, ask whoever runs Folio.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Your level belongs to you, not the computer.** It is saved against your name in the vault, so it follows you everywhere. An Administrator sets it in **Admin**, then **Users**, and it reaches you the next time you open Folio.
 >
 > **You can also move yourself** on the Advanced tab. Moving up asks for that level's password. Moving down never does.
@@ -554,4 +571,4 @@ Nobody is locked out. Ask whoever runs Folio: an Administrator can reset it from
 
 ---
 
-Written for **Version 0.85.0**.
+Written for **Version 0.86.0**.

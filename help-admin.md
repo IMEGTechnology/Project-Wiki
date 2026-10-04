@@ -1,7 +1,7 @@
 # Administering
 
 > [!NOTE] About this guide
-> This guide is for Administrators only. It covers running Folio for your team: who can do what, must reads and onboarding, the health of the vault, what people read, and the staff update. Everything a Contributor does is in [Contributing](help-contrib.md). Everything a reader does is in [Using Folio](help.md). Written for **Version 0.85.0**.
+> This guide is for Administrators only. It covers running Folio for your team: who can do what, must reads and onboarding, the health of the vault, what people read, and the staff update. Everything a Contributor does is in [Contributing](help-contrib.md). Everything a reader does is in [Using Folio](help.md). Written for **Version 0.86.0**.
 
 You open almost all of this from **Admin** on Home. **New here? Do Find your way around Admin, then Set the passwords.** Until the passwords are set, anyone can make themselves an Administrator.
 
@@ -24,7 +24,7 @@ Admin is a row of doors on Home. Each one opens a screen of its own. A number on
 > [!tip]
 > Review, All comments and Templates are shared with Contributors, and [Contributing](help-contrib.md) covers them. The other four are yours alone.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Approve all as they are.** At the top of Review, only Administrators see this button. It signs off every page waiting for review in one go, so use it once to accept the vault as it stands. After that, every new page and every change comes back for review.
 >
 > **Hidden is not secret.** A door your access does not include is not shown at all. That keeps people out of controls they do not need. It does not lock the vault. See Set the passwords.
@@ -45,7 +45,7 @@ Users is a report of your people. On Home, open **Admin**, then **Users**. Red i
 > [!tip]
 > A change of access reaches the person the next time they open Folio, on whichever computer they use.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **People appear by using Folio.** Nobody is added here. A person shows up the first time they open Folio and type their name. Removing someone is a job for the vault folder, not for Folio.
 >
 > **Your own access.** You cannot change your own here. Use **Settings**, then the **Advanced** tab, then **Access**. It writes the same record.
@@ -68,7 +68,7 @@ A new vault has no passwords, and until it does, every level is open to anyone w
 > [!tip]
 > This keeps people out of controls they do not need. It is not security. The check runs in the browser, and anyone who can open the vault in Obsidian can edit any page whatever their level in Folio.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Where it is kept.** Both passwords are stored scrambled in the vault, in `zSystem/auth.json`, never in the app. An app update never wipes them.
 >
 > **Locked out.** There is no reset button, on purpose. The way back is the vault itself. Open the vault in Obsidian or in SharePoint, delete the file `zSystem/auth.json`, and go back to Folio. Moving up stops asking for a password. Choose Administrator, then set both passwords again. You do not need to reload Folio.
@@ -96,7 +96,7 @@ A must read is a page, or one section of a page, that someone has to read by a d
 > [!tip]
 > Standard gives two weeks. Critical gives two working days, and Casual a month. You can change what each step means in Users, under **Settings**.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **What they see.** The next time they open Folio, a banner stays at the top of the page, a line shows on Home, and it goes in the weekly email. A new person who is still in their cushion gets it when the cushion ends, unless it is Critical.
 >
 > **Mark as read is not instant.** It unlocks once they reach the end of the page, and after half the page's reading time, never under 20 seconds and never over 3 minutes. Change the rule under **Settings**.
@@ -126,7 +126,7 @@ Onboarding is a plan of pages, each with a day, so a new person never gets every
 > [!tip]
 > Nobody sees a page before its day. The day counts working days from their start date.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **The cushion.** The first milestone is the new staff cushion, ten working days by default. A new person gets onboarding pages one day at a time, and only Critical must reads. Everything else waits until the cushion ends. You can **Extend cushion a week** or **End cushion now** from their row.
 >
 > **A missed date.** It reads **Catch up** to the person, in yellow, and shows red to you.
@@ -163,7 +163,7 @@ Below that, **Format health** checks every page against its template. It never j
 > [!tip]
 > Do not chase the list to zero the first time. Pages written before templates existed have no type, so most of them start under Information.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Hard failures.** A broken link. A page with two blocks of properties. A number used by two pages in the same top folder.
 >
 > **Warnings and information.** Two pages about the same subject. A page that no other page links to. A page with no number, or a number that does not match its name. A page sitting outside any folder. Comments whose page cannot be found.
@@ -193,7 +193,7 @@ Usage shows what the team actually reads. On Home, open **Admin**, then **Usage*
 > [!tip]
 > A read is 15 seconds of real attention, so a wrong click does not count. A page that is opened often but read rarely is the one to look at.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Pages.** Most read, **Never opened**, and **Gone quiet**, which is a page that used to be read and stopped for a month or more. Click the readers badge on a row to see who read it and how many times. Never opened has nobody to name, and Gone quiet is left anonymous on purpose.
 >
 > **Searches.** What people looked for and found nothing for, what they clicked that was the wrong page, and what they had to reword. It never names anyone.
@@ -221,7 +221,7 @@ Staff update turns what changed in the vault into an email. It collects, you cho
 > [!tip]
 > To send: untick what you do not want, click **Copy for email**, paste it into a new message, send it, then click **Mark sent**.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **It is a list, not a schedule.** New pages, changed pages, must reads and app updates land on the list as they happen. They stay until you deal with each one. Send when there is something worth sending.
 >
 > **The three choices.** **Mark sent** takes everything ticked off the list. **Skip** drops an item that is too small to mention. **Delay** keeps it on the list, at the bottom, and leaves it out of the copy. **Undo** reverses your last marking.
@@ -246,7 +246,7 @@ Most pages are written in Obsidian. For a quick fix, Administrators can edit in 
 > [!tip]
 > Typing `[[` offers page names, and `[[page#` offers that page's headings.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **When you save.** Folio first checks nobody else saved the page while you had it open. If they did, it stops and tells you. Then the page is marked To be reviewed, and a record of exactly what changed is kept so a Contributor can accept or reject it.
 >
 > **Properties.** **More**, then **Properties** edits a page's properties. This applies quietly: no review is triggered and the page does not show as updated.
@@ -258,7 +258,7 @@ Most pages are written in Obsidian. For a quick fix, Administrators can edit in 
 > **Writing it.** [Editing in Obsidian](help-edit.md) covers the syntax.
 
 ## Choose where new pages wait
-%% card: The Drafts folder, and the page Folio opens first | icon: folder | updated: 0.83 | key: drafts-folder %%
+%% card: The Drafts folder, and the page Folio opens first | icon: folder | updated: 0.86 | key: drafts-folder %%
 
 New pages, and any page found loose outside a folder, go to one folder until they are filed. It starts as Working Drafts.
 
@@ -269,14 +269,39 @@ New pages, and any page found loose outside a folder, go to one folder until the
 > [!tip]
 > Pages in the Drafts folder show **Draft** at the top, so readers know they are work in progress.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **Default page.** Vault setup also has a Default page, the page the **Browse** door opens first.
 >
-> **Demo.** Vault setup also has **Demo**, for showing Folio to someone. It opens a sample vault in this window and leaves yours untouched. A purple bar at the top switches between three sample people, one per access level, and its **Guide** button opens a printable walkthrough. **Exit demo**, or closing the window, brings your own vault back.
+> **Demo.** Vault setup also has **Demo**. See Show Folio to someone.
 >
 > **Renaming and moving** are done in Obsidian, so every link follows. Folio never renames a page. A page that is renamed, renumbered or moved keeps its saved pages, comments, review history and usage.
 >
 > **One case Folio cannot follow.** If a page's name, number and text all change before Folio has looked, it cannot tell which page is which, and its comments show under **Comments with no page** in Vault check. Rename a page, or edit it, but not both at once.
+
+## Show Folio to someone
+%% card: A sample vault to demonstrate every feature, then reset | icon: sparkle | updated: 0.86 | key: demo %%
+
+Demo opens a sample vault in this window, so you can show Folio without touching your own vault or anyone's reading record. It suits a meeting or an introduction for leaders.
+
+1. Click your initials, top right, then **Settings**, then the **Advanced** tab.
+2. Under **Vault setup**, click **Start** beside **Demo**. A purple bar appears along the top.
+3. Click **Guide** on the bar to open the walkthrough. Print it to follow beside the demo: for each person it says what to click, what to say, and what they will see.
+4. Use **Viewing as** to switch between the seven people in the sample vault, grouped as Users, Contributors and Administrators.
+5. Click **Exit demo** when you are done. Your own vault comes back.
+
+> [!tip]
+> Start as Ellen Ward, a new hire. Her must reads, onboarding plan and What's New show the reader's side first. Then switch to a Contributor and an Administrator.
+
+> [!note]+ More detail
+> **What it starts with.** Every built feature has something waiting: changed pages in What's New and Review, open comments, must reads and onboarding owed, a month of usage, templates and a company section of process, travel, IT and contact pages with links to example company systems.
+>
+> **The clock.** The demo always opens on a Monday morning and runs on from there, so due dates and What's New read the same every time. The must read timer is shortened to 15 seconds so the demo keeps moving.
+>
+> **Nothing is kept.** Anything done in the demo, comments, approvals and reads included, is thrown away at Exit or when the window closes. **Reset** starts it over without leaving.
+>
+> **Your own settings.** Folio puts them aside while the demo runs and gives them back when it ends, even if the window was closed. Switch in your initials menu opens the Viewing as list during a demo, not the real sign-in.
+>
+> **Obsidian is not part of it.** Writing in Obsidian is shown separately.
 
 ## Something is wrong
 %% card: Fixes by what you see | icon: alert | updated: 0.83 | key: trouble %%

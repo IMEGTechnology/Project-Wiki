@@ -1260,7 +1260,9 @@
        hidden tab, before the first paint) none of it runs and every section
        keeps its natural height, which still reads correctly. */
     .ch-trade { gap: 0; }
-    .ch-trade .ch-sec { display: flex; flex-direction: column; min-height: 0; }
+    .ch-trade .ch-sec { display: flex; flex-direction: column; min-height: 0; flex-shrink: 0; }
+    /* S122 -- the right column is sized to the left panel (chTradeSizeRail). */
+    #ch-rail { overflow: hidden; }
     /* PADDING, never margin. A margin between two sections is panel space and
        belongs to neither of them, so a cursor crossing it reads as "off both",
        drops the focus and kills the handover -- which is rule 4 failing again
@@ -1276,6 +1278,12 @@
       overflow: hidden; transition: height .16s cubic-bezier(.2,0,0,1);
     }
     .ch-trade.ch-measured .ch-sec-head { cursor: pointer; }
+    /* S122 -- a focused list longer than the column scrolls inside the card. */
+    .ch-trade.ch-measured .ch-sec-body.ch-scroll { overflow-y: auto; }
+    .ch-more { font-size: 11.5px; color: var(--text-muted); padding-top: 4px; height: 18px; flex: none; }
+    .ch-mhint { margin-left: auto; margin-right: 8px; font-size: 11.5px; font-weight: 400; color: var(--text-muted); }
+    .ch-mhint + .ch-mval { margin-left: 0; }
+    .ch-rec-hint { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11.5px; }
 
     /* The obligation meters. They hide themselves at zero and come back
        when something new arrives, and they never READ zero while showing --
@@ -4488,13 +4496,21 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
 #demo-bar[hidden] { display: none; }
 #demo-bar .db-badge { font-size: 11.5px; font-weight: 800; letter-spacing: 0.08em; color: var(--co-purple-txt); border: 1px solid var(--co-purple-bd); border-radius: 999px; padding: 2px 9px; }
 #demo-bar .db-label { color: var(--text-secondary); }
-#demo-bar .db-people { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
-#demo-bar .db-person { font: inherit; font-size: 12.5px; border: none; border-left: 1px solid var(--border-strong); background: var(--bg-reader); color: var(--text-secondary); padding: 4px 10px; cursor: pointer; }
-#demo-bar .db-person:first-child { border-left: none; }
-#demo-bar .db-person b { font-weight: 600; color: var(--text-primary); }
-#demo-bar .db-person.on { background: var(--co-purple-bd); color: #1b1530; }
-#demo-bar .db-person.on b { color: #1b1530; }
-#demo-bar .db-person:not(.on):hover { color: var(--text-primary); }
+/* S122 -- one Viewing as dropdown instead of three pills, which did not read as a control. */
+#demo-bar .db-pick { position: relative; }
+#demo-bar { position: relative; z-index: 101; }   /* S122 -- the Viewing as list opens over #header (100) */
+#demo-bar .db-who { font: inherit; font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--co-purple-bd); background: var(--bg-reader); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+#demo-bar .db-who b { font-weight: 600; color: var(--text-primary); }
+#demo-bar .db-who:hover, #demo-bar .db-who[aria-expanded="true"] { border-color: var(--co-purple-txt); }
+#demo-bar .db-caret { font-size: 10.5px; color: var(--co-purple-txt); }
+#demo-bar .db-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 70; min-width: 280px; padding: 6px; background: var(--bg-reader); border: 1px solid var(--border-strong); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.35); }
+#demo-bar .db-menu[hidden] { display: none; }
+#demo-bar .db-group { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 8px 8px 4px; }
+#demo-bar .db-person { font: inherit; display: flex; width: 100%; align-items: baseline; gap: 8px; text-align: left; border: none; background: none; color: var(--text-primary); border-radius: 6px; padding: 6px 8px; cursor: pointer; font-size: 12.5px; }
+#demo-bar .db-person:hover { background: var(--bg-hover, rgba(127,127,127,0.12)); }
+#demo-bar .db-person.on { background: var(--co-purple-bg); }
+#demo-bar .db-person .db-note { color: var(--text-muted); font-size: 11.5px; }
+#demo-bar .db-person .db-on { margin-left: auto; color: var(--co-purple-txt); font-size: 11.5px; }
 #demo-bar .db-sp { flex: 1; }
 #demo-bar .db-btn { font: inherit; font-size: 12.5px; border: 1px solid var(--border-strong); background: var(--bg-reader); color: var(--text-primary); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 #demo-bar .db-btn:hover { border-color: var(--co-purple-bd); color: var(--co-purple-txt); }
@@ -5112,7 +5128,7 @@ body.help-mode #reader-content .md-h-acts { display: none; }
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.85.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.86.0</button>
       </div>
 
       <div class="ud-actions">
@@ -5505,8 +5521,8 @@ body.help-mode #reader-content .md-h-acts { display: none; }
   <!-- ── Identity modal (S15) — first run / new-device prompt ──── -->
   <div id="identity-overlay" style="display:none">
     <div id="identity-modal" role="dialog" aria-label="Account setup" onclick="event.stopPropagation()">
-      <div class="cm-title">Welcome to Folio</div>
-      <p class="id-sub">Enter your name and email so comments and saved pages are yours.</p>
+      <div class="cm-title" id="id-title">Welcome to Folio</div>
+      <p class="id-sub" id="id-sub">Enter your name and email so comments and saved pages are yours.</p>
       <div class="pp-row">
         <div class="pp-label">Name</div>
         <input type="text" id="id-name" class="pp-input" placeholder="Jane Smith" autocomplete="name">
@@ -5517,6 +5533,10 @@ body.help-mode #reader-content .md-h-acts { display: none; }
       </div>
       <p class="id-note" id="id-note">Recognized. This email already has a profile in the vault. Your saved name and saved pages were restored.</p>
       <div class="cm-actions">
+        <!-- S122 -- Cancel only when someone is already signed in (Switch): the
+             old person stays signed in until a new one is saved. First run has
+             no Cancel, because no person means no vault. -->
+        <button class="ed-btn" id="id-cancel-btn" onclick="cancelIdentity()" style="display:none">Cancel</button>
         <button class="ed-btn ed-save" id="id-continue-btn" onclick="submitIdentity()">Continue</button>
       </div>
     </div>
@@ -11861,7 +11881,9 @@ function chSecHTML(key, heading, rows, headHTML) {
 // every section keeps its natural height, which still reads correctly.
 const CH_TRADE_DELAY = 110;   // before the first open, so a passing mouse is ignored
 const CH_TRADE_DAMP  = 150;   // a release this soon after a change is a wobble
-const CH_TRADE_CEIL  = 0.55;  // an obligation may maximise, not dominate
+const CH_TRADE_CEIL  = 0.55;  // left panel only since S122
+const CH_MORE_H      = 22;    // S122 -- room for the "Scroll for N more" line
+const CH_LIST_MAX    = 15;    // S122 -- Home lists up to 15 owed rows
 let chTradeCache = [];
 let chTradeWired = false;
 const chTrade = { focus: null, panel: null, trail: false, at: 0, timer: null, last: null };
@@ -11871,9 +11893,28 @@ function chTradeSchedule() {
   else chTradeInit();
 }
 
+// S122 -- the left panel sets the height of the row; the right column fills
+// it rather than stretching the page. Before this the row took the taller of
+// the two, so a long must-read list made the whole Home longer instead of
+// trading space. Side by side only: stacked on a narrow screen, both keep
+// their natural height.
+const CH_RAIL_MIN = 360;
+function chTradeSizeRail() {
+  const rail = document.getElementById('ch-rail'), left = document.getElementById('ch-left');
+  if (!rail || !left) return;
+  rail.style.height = '';
+  if (getComputedStyle(rail.parentElement).gridTemplateColumns.trim().split(/\s+/).length < 2) return;
+  left.classList.remove('ch-measured');
+  left.querySelectorAll('.ch-sec-body').forEach(b => { b.style.height = ''; });
+  rail.style.height = '0px';
+  const hgt = Math.max(left.offsetHeight, CH_RAIL_MIN);
+  rail.style.height = hgt + 'px';
+}
+
 function chTradeInit() {
   chTradeCache = [];
   chTrade.focus = null; chTrade.panel = null; chTrade.trail = false; chTrade.last = null;
+  chTradeSizeRail();
   const panels = document.querySelectorAll('.ch-trade');
   for (let i = 0; i < panels.length; i++) {
     const m = chTradeMeasure(panels[i]);
@@ -11946,38 +11987,92 @@ function chTradeApply(m) {
       h.saved  = Math.min(by.saved.full, m.avail - h['new']);
     }
   } else if (by.rec) {
-    // Right: the two obligations borrow from Recently opened, never from each
-    // other when the cursor is travelling downwards. Rule 4.
-    const ceiling = Math.floor(m.avail * CH_TRADE_CEIL);
-    const recMin  = Math.min(rows('rec', 3), m.avail);
-    const mustWant = by.must ? Math.min(rows('must', 4), ceiling) : 0;
-    h.must = (f === 'must' || (f === 'onb' && chTrade.trail)) ? mustWant : 0;
-    h.onb  = (f === 'onb' && by.onb) ? Math.min(rows('onb', 4), ceiling) : 0;
-    if (m.avail - h.must - h.onb < recMin) {
-      // The trail yields first, and in WHOLE rows: a half row reads as a bug.
-      const room = m.avail - h.onb - recMin;
-      let n = 0;
-      if (by.must) while (by.must.ends[n] !== undefined && by.must.ends[n] <= room) n++;
-      h.must = n ? by.must.ends[n - 1] : 0;
-    }
-    h.rec = Math.min(by.rec.full, m.avail - h.must - h.onb);   // same: no stretch
+    // S122 -- the right column, Jayson's rule (sample s122-home-column-sample).
+    // At rest the owed lists fill first, sharing the column evenly in whole
+    // rows; Recently opened takes what is left, or folds to its heading.
+    // A focused section opens to its full list. The room comes from BELOW it
+    // first (S99 rule 4: folding a section above the cursor drags the target
+    // up out from under it), and only then, row by row, from the sections
+    // above, nearest first; whatever it does not need goes back to the
+    // sections below. Past what fits, it scrolls inside the card, with room
+    // kept for its "Scroll for N more" line. Replaces the S99 rule
+    // (obligations folded at rest, a 4-row cap, Recently opened kept 3).
+    const fit = (k, room) => { const x = by[k]; let n = 0; while (x.ends[n] !== undefined && x.ends[n] <= room + 0.5) n++; return n ? x.ends[n - 1] : 0; };
+    const keys = ['must', 'onb', 'rec'].filter(k => by[k]);
+    const rest = () => {
+      const r = {}; let room = m.avail;
+      const owed = keys.filter(k => k !== 'rec');
+      if (owed.length === 2) {
+        const half = Math.floor(room / 2);
+        const a = Math.min(by.must.full, half), b = Math.min(by.onb.full, half);
+        r.must = fit('must', a + Math.max(0, half - b));
+        r.onb  = fit('onb', room - r.must);
+      } else if (owed.length === 1) r[owed[0]] = fit(owed[0], room);
+      owed.forEach(k => { room -= r[k]; });
+      r.rec = fit('rec', room);
+      return r;
+    };
+    const r = rest();
+    if (f && by[f]) {
+      const i = keys.indexOf(f), above = keys.slice(0, i), below = keys.slice(i + 1);
+      above.forEach(k => { h[k] = r[k]; });
+      const used = () => above.reduce((t, k) => t + h[k], 0);
+      for (let j = above.length - 1; j >= 0 && by[f].full > m.avail - used(); j--) {
+        const k = above[j], need = by[f].full - (m.avail - used());
+        h[k] = fit(k, h[k] - need);
+      }
+      const room = m.avail - used();
+      h[f] = by[f].full <= room ? by[f].full : fit(f, room - CH_MORE_H);
+      let left = room - h[f] - (h[f] < by[f].full ? CH_MORE_H : 0);
+      below.forEach(k => { h[k] = fit(k, left); left -= h[k]; });
+    } else Object.assign(h, r);
   }
 
   m.secs.forEach(x => {
     if (h[x.key] === undefined) return;
-    x.body.style.height = Math.max(0, Math.round(h[x.key])) + 'px';
+    const px = Math.max(0, Math.round(h[x.key]));
+    x.body.style.height = px + 'px';
     const mt = x.sec.querySelector('.ch-meter');
-    if (mt) mt.setAttribute('aria-expanded', h[x.key] > 0 ? 'true' : 'false');
+    if (mt) mt.setAttribute('aria-expanded', px > 0 ? 'true' : 'false');
+    const ct = x.sec.querySelector('.ch-mcaret');
+    if (ct) ct.textContent = px > 0 ? '\u25bc' : '\u25b6';
+    // S122 -- the focused list scrolls when it is longer than the column.
+    const hidden = x.ends.filter(e => e > px + 0.5).length;
+    const scroll = (x.key === f) && hidden > 0 && px > 0;
+    x.body.classList.toggle('ch-scroll', scroll);
+    if (!scroll) x.body.scrollTop = 0;
+    let more = x.sec.querySelector(':scope > .ch-more');
+    if (scroll) {
+      if (!more) { more = document.createElement('div'); more.className = 'ch-more'; x.sec.appendChild(more); }
+      more.textContent = 'Scroll for ' + hidden + ' more';
+    } else if (more) more.remove();
+    // An owed list at rest says how many rows its fold is holding.
+    const top = x.sec.querySelector('.ch-mtop');
+    if (top) {
+      let mh = top.querySelector('.ch-mhint');
+      const want = (!scroll && hidden > 0 && px > 0) ? '+' + hidden + ' more' : '';
+      if (want && !mh) { mh = document.createElement('span'); mh.className = 'ch-mhint'; top.insertBefore(mh, top.querySelector('.ch-mval')); }
+      if (mh) { if (want) mh.textContent = want; else mh.remove(); }
+    }
+    // Recently opened says what its fold is holding.
+    if (x.key === 'rec') {
+      const hd = x.sec.querySelector('.ch-sec-head h4');
+      let hint = hd && hd.querySelector('.ch-rec-hint');
+      if (hd && !hint) { hint = document.createElement('span'); hint.className = 'ch-rec-hint'; hd.appendChild(hint); }
+      const total = x.ends.length;
+      if (hint) hint.textContent = (!hidden || !total || x.body.querySelector('.ch-empty')) ? '' :
+        hidden >= total ? total + ' pages \u00b7 hover to show' : (total - hidden) + ' of ' + total + ' shown';
+    }
   });
   m.panel.classList.add('ch-measured');
 }
 
-// Recently opened is the filler and never takes the focus.
+// S122 -- Recently opened takes the focus too: at rest it can be folded to
+// its heading, and hovering it is how it opens.
 function chTradeKeyAt(el, panel) {
   const sec = el && el.closest ? el.closest('.ch-sec') : null;
   if (!sec || !panel || !panel.contains(sec)) return null;
-  const k = sec.getAttribute('data-ch-sec');
-  return (k === 'rec') ? null : k;
+  return sec.getAttribute('data-ch-sec');
 }
 
 function chTradeHidden(panel, k) {
@@ -12123,12 +12218,12 @@ function chRailHTML() {
 
   if (must.left.length) {
     const nOver = must.left.filter(x => x.status === 'overdue');
-    const rows = must.left.map(it => {
+    const rows = must.left.slice(0, CH_LIST_MAX).map(it => {
       const f = mrFileFor(it);
       return '<div class="ch-item"' + (f ? ' data-wb-chopen="' + escHtml(f.url) + '" data-wb-chname="' + escHtml(f.name) + '"' : '') + '>' +
         '<span class="ch-body"><span class="ch-title">' + escHtml(mrNameFor(it)) + (it.sec ? ' \u00a7 ' + escHtml(it.sec) : '') + '</span></span>' +
         '<span class="ch-lead" style="width:auto">' + chDueHTML(it) + '</span></div>';
-    }).join('');
+    }).join('') + (must.left.length > CH_LIST_MAX ? '<div class="ch-mdone">' + (must.left.length - CH_LIST_MAX) + ' more after these</div>' : '');
     const soon = must.left.find(x => x.status !== 'overdue');
     const sub = (nOver.length ? nOver.length + (nOver.every(x => x.catchUp) ? ' to catch up' : ' overdue') : '') +
                 (nOver.length && soon ? ' \u00b7 ' : '') + (soon ? (nOver.length ? 'next ' : must.left.length + ' left \u00b7 next ') + 'due ' + mrFmtDate(soon.due) : '');
@@ -12139,7 +12234,7 @@ function chRailHTML() {
   if (onb.done < onb.total) {
     const next = onb.rows.find(r => !r.done);
     const over = onb.rows.filter(r => !r.done && r.it && r.it.status === 'overdue');
-    const rows = onb.rows.map(r => r.done
+    const rows = onb.rows.slice(0, CH_LIST_MAX).map(r => r.done
       ? '<div class="ch-mdone"><span class="ch-tick">\u2713</span>' + escHtml(r.label) + '</div>'
       : (r.url
         ? '<div class="ch-item" data-wb-chopen="' + escHtml(r.url) + '" data-wb-chname="' + escHtml(r.name) + '">' +
@@ -12147,6 +12242,7 @@ function chRailHTML() {
             (r.it ? '<span class="ch-lead" style="width:auto">' + chDueHTML(r.it) + '</span>' : '') + '</div>'
         : '<div class="ch-item"><span class="ch-body"><span class="ch-title">' + escHtml(r.label) + '</span></span></div>')
     ).join('') +
+    (onb.rows.length > CH_LIST_MAX ? '<div class="ch-mdone">' + (onb.rows.length - CH_LIST_MAX) + ' more after these</div>' : '') +
     (onb.coming.length ? '<div class="ch-mdone">' + onb.coming.length + ' more page' + (onb.coming.length === 1 ? ' appears' : 's appear') +
       ' from ' + escHtml(mrFmtDate(onb.coming[0].appear)) + '</div>' : '');
     const sub = over.length ? over.length + (over.every(r => r.it.catchUp) ? ' to catch up' : ' overdue') + (next ? ', next is ' + next.label : '')
@@ -14608,6 +14704,9 @@ function fhCheckPage(p, ctx) {
   }
   if (on('Callout kinds')) {
     const ok = String(val('Callout kinds')).split(',').map(x => x.trim().toLowerCase()).filter(Boolean).concat(['guide', 'template']);
+    // 0.86.0 -- Summary is written [!abstract] (the Sample's own table, and
+    // every starter template), so the house name allows its Obsidian names too.
+    if (ok.includes('summary')) ok.push('abstract', 'tldr');
     const bad = [];
     txt.forEach(x => { const c = /^(?:>\s*)+\[!(\w+)\]/.exec(x.t); if (c && !ok.includes(c[1].toLowerCase()) && !bad.includes(c[1])) bad.push(c[1]); });
     if (bad.length) add('Callout kinds', 'Uses ' + bad.map(k => '<b>' + escHtml(k) + '</b>').join(', '));
@@ -18891,6 +18990,9 @@ async function helpShow(file, topicKey) {
   // A guide above your level opens the hub instead. It is not shown, so it
   // cannot be opened either, by a link, an address or anything else.
   if (g && !helpGuideAllowed(g)) { g = null; topicKey = null; }
+  // S122 -- a hub with one card is a step for nothing. Someone who can see
+  // only one guide (a User sees only Using Folio) goes straight into it.
+  if (!g) { const mine = helpGuidesForMe(); if (mine.length === 1) { g = mine[0]; topicKey = null; } }
 
   if (!fromNav) wbHistoryPushHelp(g, topicKey);
   if (enteringHelp) state.helpReturn = helpReturnNext || (wasUrl ? { url: wasUrl, name: wasName, scroll: wasScroll } : null);
@@ -19635,17 +19737,29 @@ function demoPaintBar() {
   const bar = $('demo-bar'); if (!bar) return;
   const d = demoState();
   if (!d) { bar.hidden = true; bar.innerHTML = ''; return; }
-  bar.innerHTML = '<span class="db-badge">DEMO</span><span class="db-label">You are</span>' +
-    '<span class="db-people" role="group" aria-label="Demo person">' + d.people.map(p =>
-      '<button type="button" class="db-person' + (p.email === d.person ? ' on' : '') + '" data-email="' + escHtml(p.email) + '">' +
-      '<b>' + escHtml(p.name) + '</b> &middot; ' + escHtml(p.role) + '</button>').join('') + '</span>' +
+  // S122 -- Viewing as: one button naming the person, opening a list of
+  // everyone in the sample vault grouped by access level.
+  const me = d.people.find(p => p.email === d.person) || d.people[0];
+  const groups = ['User', 'Contributor', 'Administrator'].map(role => {
+    const ps = d.people.filter(p => p.role === role);
+    if (!ps.length) return '';
+    return '<div class="db-group">' + escHtml(role === 'User' ? 'Users' : role + 's') + '</div>' + ps.map(p =>
+      '<button type="button" class="db-person' + (p.email === d.person ? ' on' : '') + '" role="menuitem" data-email="' + escHtml(p.email) + '">' +
+      '<b>' + escHtml(p.name) + '</b>' + (p.note ? '<span class="db-note">' + escHtml(p.note) + '</span>' : '') +
+      (p.email === d.person ? '<span class="db-on">viewing</span>' : '') + '</button>').join('');
+  }).join('');
+  bar.innerHTML = '<span class="db-badge">DEMO</span><span class="db-label">Viewing as</span>' +
+    '<span class="db-pick"><button type="button" class="db-who" id="db-who" aria-haspopup="menu" aria-expanded="false" title="Switch to another person in the sample vault">' +
+      '<b>' + escHtml(me.name) + '</b> &middot; ' + escHtml(me.role) + '<span class="db-caret">\u25bc</span></button>' +
+    '<div class="db-menu" id="db-menu" role="menu" hidden>' + groups + '</div></span>' +
     '<span class="db-sp"></span>' +
     '<button type="button" class="db-btn" data-db="guide" title="The printable walkthrough">Guide</button>' +
     '<button type="button" class="db-btn" data-db="reset" title="Start the demo over">Reset</button>' +
     '<button type="button" class="db-btn" data-db="exit" title="Leave the demo and go back to your vault">Exit demo</button>';
   bar.hidden = false;
   bar.onclick = e => {
-    const p = e.target.closest('.db-person'); if (p) { demoSwitch(p.dataset.email); return; }
+    if (e.target.closest('#db-who')) { e.stopPropagation(); demoOpenPeople(); return; }
+    const p = e.target.closest('.db-person'); if (p) { demoClosePeople(); demoSwitch(p.dataset.email); return; }
     const b = e.target.closest('[data-db]'); if (!b) return;
     if (b.dataset.db === 'guide') demoGuide();
     else if (b.dataset.db === 'reset') demoReset();
@@ -19654,6 +19768,20 @@ function demoPaintBar() {
 }
 
 // Boot, in a demo window: open the demo folder instead of the remembered one.
+// S122 -- the people list. Also what the user menu's Switch opens in a demo.
+function demoOpenPeople() {
+  const m = $('db-menu'), w = $('db-who'); if (!m) return;
+  const open = m.hidden;
+  m.hidden = !open; if (w) w.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) { const f = m.querySelector('.db-person.on') || m.querySelector('.db-person'); if (f) f.focus(); }
+}
+function demoClosePeople() {
+  const m = $('db-menu'), w = $('db-who'); if (!m || m.hidden) return;
+  m.hidden = true; if (w) w.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('.db-pick')) demoClosePeople(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') demoClosePeople(); });
+
 async function demoBoot() {
   const d = demoState();
   demoPaintBar();
@@ -19895,8 +20023,24 @@ function openIdentityModal(prefillEmail) {
   $('id-email').value = prefillEmail || '';
   $('id-note').classList.remove('show');
   $('id-note').textContent = ID_NOTE_RECOGNIZED;
+  // S122 -- a person already signed in can back out; nobody yet cannot.
+  const canCancel = !!(state.user && state.user.email);
+  identityPrevEmail = canCancel ? state.user.email : null;
+  $('id-cancel-btn').style.display = canCancel ? '' : 'none';
+  $('id-title').textContent = canCancel ? 'Switch user' : 'Welcome to Folio';
+  $('id-sub').textContent = canCancel
+    ? 'Enter the name and email of the person using Folio. Cancel keeps ' + state.user.name + ' signed in.'
+    : 'Enter your name and email so comments and saved pages are yours.';
   $('identity-overlay').style.display = 'flex';
 }
+
+// S122 -- Cancel and Escape. Nothing was changed when the card opened, so
+// closing it is the whole of backing out.
+function cancelIdentity() {
+  if ($('id-cancel-btn').style.display === 'none') return;
+  closeIdentityModal();
+}
+$('identity-overlay').addEventListener('keydown', e => { if (e.key === 'Escape') cancelIdentity(); });
 
 function closeIdentityModal() {
   $('identity-overlay').style.display = 'none';
@@ -19967,13 +20111,27 @@ async function saveIdentityFrom(rawName, rawEmail) {
 
 async function submitIdentity() {
   // Second click, after the "recognized" note is already showing — just close.
-  if ($('id-note').classList.contains('show')) { closeIdentityModal(); return; }
+  if ($('id-note').classList.contains('show')) { closeIdentityModal(); identitySwitchedReload(); return; }
   const r = await saveIdentityFrom($('id-name').value, $('id-email').value);
   if (r === 'invalid')    return;               // no inline validation UI yet
-  if (r === 'recognized') { $('id-note').classList.add('show'); return; }
+  if (r === 'recognized') { $('id-note').classList.add('show'); $('id-cancel-btn').style.display = 'none'; return; }
   if (r === 'failed')     { handleIdentitySaveFailed(true); return; }
   closeIdentityModal();
+  identitySwitchedReload();
 }
+
+// S122 -- a Switch that lands on a DIFFERENT person reopens Folio as them.
+// Must reads, onboarding, Saved, access and Home all hang off the person, and
+// a reload rebuilds every one of them the way a fresh start would, which is
+// how the demo switch already works. First run and same-person saves skip it.
+var identityPrevEmail = null;   // var: openIdentityModal can run before this line is reached
+function identitySwitchedReload() {
+  const prev = identityPrevEmail; identityPrevEmail = null;
+  if (!prev || !state.user || state.user.email === prev) return;
+  try { localStorage.removeItem('wb_last_file'); } catch (_) {}
+  identityReload();
+}
+function identityReload() { location.reload(); }   // its own name so a test can stand in for it
 
 function updateUserBadge() {
   if (!state.user) return;
@@ -20002,13 +20160,13 @@ function closeUserDropdown() {
   $('user-dropdown').classList.remove('open');
 }
 
+// S122 -- Switch no longer signs the current person out first. They stay
+// signed in until a new person is saved, so Cancel has something to go back
+// to. In a demo, Switch opens the demo's own people list instead of the
+// real sign-in card.
 function switchUser() {
   closeUserDropdown();
-  localStorage.removeItem('wb_user_email');
-  state.user = null;
-  $('user-badge').style.display = 'none';
-  updateSavedTabBadge();
-  if (isSavedPaneOpen()) renderSavedTab();
+  if (demoActive()) { setTimeout(demoOpenPeople, 0); return; }   // after this click's own outside-click close
   openIdentityModal('');
 }
 

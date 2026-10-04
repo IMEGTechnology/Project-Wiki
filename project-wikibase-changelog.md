@@ -8,6 +8,28 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.86.0 — 2026-10-04
+
+**Changed:** `index.html`, all four help guides, `help-assets/` (two new pictures, `ob-table-plain.png` and `ob-table-wide.png`, and `uf-home.png` retaken for the new Home), `demo/` (seven people in the demo, the guide reworded and reprinted), version lines. Tests: `s122-fixes.test.js` (new, 34 checks); `s111-format-health` gains 2 for the callout fix; `h1a-help`, `h3-guides`, `help-area`, `s115-demo` and `s99-home-trade` updated.
+
+*S122, two sessions, one release: Jayson's fix list after 0.85.0, then a depth pass on help.*
+
+### Fixes
+- **Switch user has a way back.** The card that asks for your name and email now has **Cancel** when someone is already signed in (and Escape does the same). Folio only reloads if you actually became someone else. With nobody signed in yet there is still no way past it: no person, no vault.
+- **Demo: Viewing as.** The demo bar's person switch is one **Viewing as** button that opens a list of all seven people in the sample vault, grouped as Users, Contributors and Administrators, each with a one-line note. Switch in your initials menu opens the same list during a demo instead of the real sign-in. The printed guide follows the new wording.
+- **A User goes straight into Using Folio.** With only one guide to choose from, help skips the guide picker.
+- **Home's right column fills.** Must read and Onboarding show every page owed, up to 15, overdue first then by due date, instead of stopping at four. Each list gets a fair share of the column and says how many more it is holding (**+3 more**). Point at a list and it opens to its full length while the others give way; a list longer than the column scrolls inside its card with a **Scroll for N more** line. Recently opened folds to its heading when the owed lists need the room, and opens the same way.
+- **Format health no longer flags Summary callouts.** A Summary callout is written `[!abstract]` (the Sample template's own instruction, and every starter template uses one), but the Callout kinds rule only accepted the word summary, so every page with one was flagged.
+
+### Help
+- **More detail is shown open.** Every topic's More detail is now an open box rather than a fold, so nothing is hidden behind a click. It can still be folded. Troubleshooting stays as one fold per symptom.
+- **Editing in Obsidian, deepened.** Tables now cover compact versus drawn columns, the wide line, alignment, what happens when a table cannot fit, and the house rules, with two new pictures and a what-you-type example. Pictures gain what-you-type examples, the three beside-the-text widths and when a caption is needed. Callouts list the seven house kinds and what each means. Properties show a finished block in the house order and say which lines to keep even when empty. Links cover section links, the Links panel and why bare addresses are flagged. Filing an approved draft is explained.
+- **New topic: Keep a page inside the format rules,** the starting limits Format health checks every page against, and how to use the Check a page prompt before review.
+- **Corrected:** footnotes are not drawn in Folio (the guide said they were), highlight and nesting callouts are flagged by the format check, missing properties are listed in Vault check for every page, and a wide table wraps its text rather than keeping one line per row.
+- **Using Folio:** Start from Home rewritten for the new right column, with the picture retaken. Find your way around the screen says how to resize and hide the side columns.
+- **Contributing:** filing a draft after approval, and two new symptoms (a page that still says Draft, and Check a page listing problems on a page you are approving).
+- **Administering:** a new topic, **Show Folio to someone**, for Demo mode.
+
 ## 0.85.0 — 2026-10-04
 
 **Changed:** `index.html`, `help-admin.md` (a line on Demo under Vault setup), version lines, and **new: `demo/`** (`demo-vault.json`, the sample vault in one file, and `Folio-demo-guide.pdf`, the printable walkthrough). Source: `demo-vault/` gained a `50_Company` folder; `supporting/build_demo.py` packs `demo/` and `release.sh` runs it; `supporting/demo-guide/` holds the guide. Tests: `s115-demo.test.js` (new, 58 checks); `release-integrity` covers `demo/`.

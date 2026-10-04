@@ -1,7 +1,7 @@
 # Contributing
 
 > [!NOTE] About this guide
-> This guide is for Contributors and Administrators. It covers the jobs you have on top of everything in [Using Folio](help.md): reviewing pages, answering comments, starting a new page and looking at the templates. Writing a page is a separate guide, [Editing in Obsidian](help-edit.md). Written for **Version 0.85.0**.
+> This guide is for Contributors and Administrators. It covers the jobs you have on top of everything in [Using Folio](help.md): reviewing pages, answering comments, starting a new page and looking at the templates. Writing a page is a separate guide, [Editing in Obsidian](help-edit.md). Written for **Version 0.86.0**.
 
 Most of what you do here starts from **Admin** on Home. Review, All comments and Templates are three of its doors. **New page** is in the header. **New here? Do Find what needs your review and Approve or flag a page.** That is the heart of the job.
 
@@ -21,7 +21,7 @@ Review is the list of pages that are waiting for a person. On Home, open **Admin
 > [!tip]
 > A page is one row, however much it owes. The row says everything the page needs, so you deal with it in one visit.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **What lands here.** A new page made with New page. A page someone changed, in Obsidian or in Folio, since it was last approved. A page someone flagged, or reported with the **Report** button at its foot. A question or escalation in its comments. A page whose due date has passed.
 >
 > **How Folio notices a change.** Once a page's text is new or different and has sat for two minutes, it is marked **To be reviewed**. A page that was only renamed or moved keeps its sign-off.
@@ -49,7 +49,7 @@ Open a page from Review and Folio marks what changed, with the review bar along 
 > [!tip]
 > Approving says you looked at the changes. It does not say every fact was checked.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **The colours.** Green **NEW SECTION**: the heading was not there last time. Amber **CHANGED**: that section's words are different. Red dashed **REMOVED**: the section is gone. Folio draws it back in so you can see what went. It is not in the file.
 >
 > **What approving does.** It signs the page off: the status becomes Reviewed and today's date goes in the page's reviewed property. It never changes the words. It is recorded under your name, and anyone at Contributor can approve anything, including their own edits.
@@ -84,7 +84,7 @@ All comments gathers every open comment in the vault, grouped by page. On Home, 
 > [!tip]
 > A closed comment is not deleted. Choose **Closed** or **All** to see it again.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **A question or escalation on the review bar.** When a walk reaches one, the bar shows the whole thread. Type in the box and press **Post reply**. **Jump to section** shows the part of the page it is about. **Assign / due…** lets you type a name and a due date. **Close** closes it.
 >
 > **Assign is a typed name.** Folio has no list of people to pick from, so a name that matches nobody is still saved.
@@ -94,7 +94,7 @@ All comments gathers every open comment in the vault, grouped by page. On Home, 
 > **Writing a comment** is in [Using Folio](help.md).
 
 ## Start a new page
-%% card: Pick a template, give it a title, and open it in Obsidian | icon: file | updated: 0.83 | key: new-page %%
+%% card: Pick a template, give it a title, and open it in Obsidian | icon: file | updated: 0.86 | key: new-page %%
 
 New page sets up a page from a template, with its number already chosen, and opens it in Obsidian so you can write. Click **New page** in the header. The numbers match the picture.
 
@@ -110,8 +110,8 @@ New page sets up a page from a template, with its number already chosen, and ope
 > [!tip]
 > The list on the right shows the headings the page starts with, and which are Core, Repeat, One of, or Optional.
 
-> [!note]- More detail
-> **Where the page goes.** Into the Working Drafts folder, as a draft. It waits there until someone files it in the folder you chose. Drafts say so at the top of the page.
+> [!note]+ More detail
+> **Where the page goes.** Into the Working Drafts folder, as a draft. Drafts say so at the top of the page. It waits there until it is filed: once it is approved, drag it in Obsidian from Working Drafts into the folder its **file-in** property names. Moving it keeps its sign-off, comments and history. See [Editing in Obsidian](help-edit.md).
 >
 > **Numbers.** Always three digits, counted separately in each top folder. Folio never renames a page for you.
 >
@@ -137,7 +137,7 @@ Templates are the starting shape for each kind of page. On Home, open **Admin**,
 > [!tip]
 > The AI prompts copy together with the template and the Format rules, so what your AI writes follows the same rules Folio checks.
 
-> [!note]- More detail
+> [!note]+ More detail
 > **The four prompts.** **Write a page** turns your notes into a new page. **Fix a page** moves an older page into the template without changing what it says. **Check a page** lists what breaks the rules without rewriting it. **Update this template** is for Administrators changing a template.
 >
 > **View.** The button at the right of the Sample switches between **In Folio**, **In Obsidian**, the raw **File**, and **As a new page**.
@@ -147,7 +147,7 @@ Templates are the starting shape for each kind of page. On Home, open **Admin**,
 > **Templates are edited in Obsidian.** Folio only shows them.
 
 ## Something is wrong
-%% card: Fixes by what you see | icon: alert | updated: 0.83 | key: trouble %%
+%% card: Fixes by what you see | icon: alert | updated: 0.86 | key: trouble %%
 
 Find what you see below and open it. Each one says why it happens, then what to do.
 
@@ -165,3 +165,13 @@ Fix: open Obsidian once, choose **Open folder as vault**, and pick the vault fol
 Cause: the page still owes something else, such as an open comment or a due date.
 
 Fix: open the page. Its row says what it still owes.
+
+### A page I approved still says Draft at the top
+Cause: it is still in the Working Drafts folder. Approving signs it off but never moves it.
+
+Fix: in Obsidian, drag it into the folder its **file-in** property names. It keeps its sign-off.
+
+### The Check a page prompt lists problems on a page I am approving
+Cause: the page breaks one of the Format rules, such as a long paragraph or a missing caption.
+
+Fix: you can still approve it, because approving is about what the page says. Ask the writer to fix the format, or fix it yourself in Obsidian. Approve leaves the format alone.
