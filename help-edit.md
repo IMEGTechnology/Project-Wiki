@@ -1,7 +1,7 @@
 # Folio Help — Editing and Markdown
 
 > [!NOTE] About this page
-> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.77.1**.
+> This page lives with the app, not inside your vault, so it never appears in the navigation tree. Written for **Version 0.82.0**.
 
 **This page covers changing notes** — turning on editing, creating and moving files, the editor, properties, review, and how to write Markdown.
 
@@ -34,7 +34,7 @@ Your access follows you to every PC you open Folio on, because it belongs to you
 
 That one change turns on all of it:
 
-- **New** and **Move** in the header
+- **New page** in the header
 - **Edit** and **Properties** at the reader's top right
 - Clickable task checkboxes in the reader
 
@@ -53,7 +53,23 @@ A draft shows **Draft** at the top of the page; a page not yet approved shows **
 
 **Templates** live in `zSystem/Templates` and are edited in Obsidian. **Admin › Templates** shows each one three ways: **Sample** (how a page made from it looks, in Folio or in Obsidian, or as the file), **Outline** (its sections and badges: Core, Optional, One of, Repeat, Callout) and **AI prompts** (Write, Fix or Check a page, or Update the template, each copied with the template and the Format rules). Administrators also get **+ New** (start from the Sample, which leaves out its guide boxes, or copy another template), **Edit template** (opens it in Obsidian), **Retire**, and **Format rules**, the rules for every page. The **Sample** template explains how a template file is written; it is never offered in New page.
 
-Moving and renaming files is done in Obsidian, so its links follow.
+**Numbers.** A page's number is counted inside its top-level folder, so `10_Processes` and `20_Guides` each have their own 001, 002 and so on. The number sits in the page's `number` property as well as its file name. A draft can wait in Working Drafts without a number until it is filed.
+
+**The drafts folder.** New pages, and any page found loose outside a folder, go to **Working Drafts** unless an Administrator picks another place under **account menu › Drafts folder**.
+
+**Renaming and moving** is done in Obsidian, so its links follow. Folio never renames a page itself. When a page is renamed, renumbered or moved, its saved pages, saved sections, comments and review history follow it, and Usage and search reports join the old and new names, the next time Folio looks at the vault. A page that was only renamed or moved keeps its sign-off. One case Folio cannot follow: if the name, the number and the text of a page all change before Folio has looked, it cannot tell which page is which, and the comments show under **Comments with no page**. Rename a page, or edit it, but not both in one go.
+
+**Vault check rows for numbers and folders** (Administrator). Each one is fixed from its row, and nothing is deleted:
+
+| Row | What it means | Fix |
+|---|---|---|
+| **Number property missing** | The page has a number in its name but not in its properties. One row for all of them. | **Write numbers** adds the line to each page after you confirm. |
+| **No number** | The page has no number. Report only. The row shows the next free number in that folder. | Rename it in Obsidian. |
+| **Number does not match name** | The `number` property and the file name disagree. | **Match the name** |
+| **Number used twice** | Two pages in the same top-level folder share a number. | Rename one in Obsidian. |
+| **Page outside a folder** | A page sits loose at the vault root. | **Move to drafts** |
+| **Old page files** | Comment and change files from before 0.72.0, left beside the pages. | **Park old files** moves them to `zSystem/_old/`. |
+| **Comments with no page** | Page data whose page cannot be found. | Check for a rename that changed everything at once, or tidy it by hand. |
 
 ---
 
@@ -68,7 +84,7 @@ It is **not** a live-preview editor. You see Markdown while editing, and rendere
 **What happens when you save:**
 
 1. Folio checks nobody else saved the file while you had it open. If they did, it stops and tells you rather than overwriting them.
-2. The note's status is set to **Needs Review** and **reviewed** is unticked.
+2. The note is marked **To Be Reviewed** until someone approves it in Review.
 3. A line-by-line record of what changed is appended to that note's `.changes.md` sidecar.
 
 That third step is what makes [[#5. Review]] possible, and it happens whether or not anyone has review tools switched on.
@@ -84,8 +100,8 @@ The **sliders icon** next to the pencil opens the note's properties.
 | Field | Type |
 |---|---|
 | Tags | Frontmatter tags and inline `#tags` combined, matching Obsidian |
-| Status | Dropdown: In Progress, Draft, Needs Review, In Review, Reviewed, Master, Archived |
-| Reviewed | Checkbox |
+| Status | Dropdown: To Be Reviewed or Reviewed |
+| Reviewed | The date of the last sign-off, set when a page is approved in Review |
 | Due | Date picker |
 | Section | Text |
 | Author | Click to edit |
@@ -93,29 +109,15 @@ The **sliders icon** next to the pencil opens the note's properties.
 | Created | Read-only |
 | Modified | Read-only |
 
-Property edits **apply quietly** — no change-log entry and no status flip, since Status and Reviewed *are* the review controls. Changing them is the act of reviewing, not something to be reviewed.
+Property edits **apply quietly**: no change-log entry, no status flip, and the page does not show as Updated in What's New. Properties and review are two separate questions, so changing a property never signs a page off. Approving is done in Review.
 
 Anything not listed here, edit in the file's own frontmatter, see [[#Properties, frontmatter]].
 
-### Flagging a page in What's New
+### Must reads and onboarding
 
-Two optional properties change how a note appears in [What's New](help.md). Neither has a field in the Properties panel yet — add them in the file's own frontmatter, or in Obsidian.
+**These are assigned in Admin → Users now, not with page properties** (0.79.0). An Administrator picks the page (or one section of it), who owes it (All, or named people), and a priority from Critical to Casual that sets the due date. Onboarding is a separate plan in two tracks, New staff and Existing staff, with each page given the day of someone's plan it appears on.
 
-```yaml
----
-must-read: true
-onboarding: true
----
-```
-
-| Property | What it does |
-|---|---|
-| `must-read` | Puts the note in the **Required reading** group with an orange pill, and excludes it from Mark all seen — so a bulk clear can never wipe it unread. It stops being required 30 days after it first surfaced **to each person**, counted per reader rather than from the file's date, so someone on leave still gets their full window. After that it keeps its unseen dot and stays in the list until they actually open it. |
-| `onboarding` | Marks the note as one a new starter should read. Never expires. Separate from `must-read` on purpose: one key cannot mean both "everyone needs to see this change" and "this is part of learning the job". |
-
-Both default to absent, which means false. No existing file needs changing.
-
-**Use `must-read` sparingly.** Its whole value is that it overrides someone's Mark all seen, and that only works while it stays rare.
+The old `must-read`, `must-read-start`, `onboarding` and `onboarding-due` properties no longer do anything and have left the Properties panel. Pages that still carry them are left alone; Admin → Users offers once to turn them into must reads or onboarding pages so nothing set the old way is lost. You can delete them from a page whenever it is next edited.
 
 ---
 
@@ -142,6 +144,22 @@ The oldest unresolved change on a file is the only one you can act on. Later one
 > [!WARNING] Reject undoes the edit
 > Rejecting does not just flag a change for the author. It restores the previous version of the file. Use it when the edit should not stand at all. If you just want to raise a question about it, leave a comment instead.
 
+### What Review lists
+
+Review has three kinds of row:
+
+| Kind | What it is |
+|---|---|
+| **To be reviewed** | Anything not yet signed off: a new page, a change made in Obsidian or in Folio since the last sign-off, a section added, a status set back by hand, or a due date that has passed. The row says which. |
+| **Flagged** | A Flag or Report left on a page, with the person's note under the row. |
+| **Questions** | Open questions on a page. Escalated ones show in red. |
+
+**Approve** records the text as signed off, sets the status to **Reviewed**, writes today's date in `reviewed`, and clears a due date that has passed. Status has only two values, **To Be Reviewed** and **Reviewed**.
+
+Folio marks a page **To Be Reviewed** itself once its text is new or changed and has sat for two minutes (never while someone is typing). A page that was only renamed or moved keeps its sign-off.
+
+**Approve all as they are (N)**, Administrator only, signs off every to-be-reviewed row once. Use it to accept the vault as it stands. After that, every new page and every change comes back for review.
+
 ### The list is pages, oldest first
 
 Review lists **pages**, not items. One row per page, saying everything that page owes you: a chip for each thing, and the row disappears once the page owes nothing. A page that has been edited in Obsidian, carries an open question and is overdue is one row and one visit, not three.
@@ -152,16 +170,28 @@ Every row has **Review page**. A page owing exactly one thing that can be settle
 
 ### New pages
 
-A page Folio has never touched, usually one added straight from Obsidian, has no `status` property, because only this app writes one. Nobody has approved it, so it is an **approval** and it belongs here. Its row names the property keys it is missing, and **Approve** writes only the keys that are absent, never overwriting what is already there.
+A page nobody has signed off, whether it was added from Obsidian or started with New page, is **To be reviewed**, whatever properties it already carries. **Approve** signs off the text. It never fills in a property: missing properties are Vault check's job, below.
 
 ### Missing properties are Vault check's now
 
-A page that **has** been approved and is missing some of its keys is a different thing: a repair, not an approval. Those live in **Home → Admin → Vault check**, alongside the other repairs, with a **Repair** button on each row and one **Fill all** for the lot. Both write only the keys that are absent.
+A page that **has** been approved and is missing some of its keys is a repair, not an approval. It is listed in **Home → Admin → Vault check**, under **Format health**, as **Properties complete**. **Preview fix** on a page, or **Fix all** on the rule, shows exactly what will be added, and **Apply** writes only the keys that are absent.
 
-The split is what stops the two lists chasing each other. A repair run from Vault check used to be able to create new work in Review; it cannot now, because they are not the same list.
+The split is what stops the two lists chasing each other: a repair made in Vault check never creates work in Review.
 
-> [!NOTE] Why the Vault check list may be long the first time
-> `must-read` and `onboarding` arrived after most vaults were already written, so every note predating them is missing at least those two. Those two are deliberately not counted, so what is left is real gaps. One **Fill all** clears them.
+### Format health
+
+The lower half of **Vault check** checks every page against its template and the **Format rules** (Admin › Templates › Format rules). It never judges what a page says, only its shape: headings, lengths, properties, tables, pictures, callouts, and the sections its template asks for.
+
+- **One row per rule**, with how many pages break it. **Show pages** lists them and says where on the page. **Edit rule** opens that rule in Format rules.
+- **Warning** is open; **Information** is folded until you open it.
+- **Pages with no template** (no `type`, or a type with no template) are checked against the Format rules only, one level lighter: a Warn rule shows under Information, and an Info rule is counted but not listed. The **No type** row names them.
+- **Pages last edited before their template changed** are one grouped row per template, not listed rule by rule.
+- **Small fixes**, Administrator only: leftover guide boxes, grey notes on a reviewed page, missing properties, and properties out of order. Each opens a **diff** first; **Apply** writes it to the page's change log and it never shows in What's New. A page that was signed off stays signed off. Drafts keep their guide boxes without a finding.
+- **Everything else** is fixed by hand: **Copy Fix a page prompt** copies the page with its template and the rules for your AI, and **Open in Obsidian** opens it.
+- **Dismiss** a page with a note, as with any Vault check row.
+
+> [!NOTE] Why the list may be long the first time
+> Pages written before templates existed have no `type`, so most of them start under Information. That is expected: fix them as they are next edited, or give them a type.
 
 ### Changes made in Obsidian
 
@@ -379,7 +409,7 @@ due: 2026-11-15
 ---
 ```
 
-A YAML block at the **very top** of the file, before anything else. Folio reads all of it. Six fields are editable through the Properties panel — Tags, Status, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched. Author and Due are also what the reader's byline reads, right under the title. `must-read` and `onboarding` are read here but have no panel field yet, see [[#Flagging a page in What's New]].
+A YAML block at the **very top** of the file, before anything else. Folio reads all of it. Six fields are editable through the Properties panel — Tags, Status, Reviewed, Due, Author, Aliases — and anything else you add is preserved untouched. Author and Due are also what the reader's byline reads, right under the title. The old `must-read` and `onboarding` keys are no longer read, see [[#Must reads and onboarding]].
 
 ### Callouts
 

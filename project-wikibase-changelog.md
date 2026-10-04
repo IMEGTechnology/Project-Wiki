@@ -8,6 +8,141 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.82.0 — 2026-10-04
+
+**Changed:** `help.md` (rewritten as the Using Folio guide), `help-assets/` (three pictures retaken, four old drawings retired), `index.html`, `help-edit.md` (version line only), `README.md` (version line); the help test suites updated for the new guide shape.
+
+*H3, first half: the first of the four help guides, written to the pattern from the help overhaul (docs/HELP-SPEC.md). The other three follow.*
+
+### Help
+- **Using Folio is a guide of 22 topics.** Each opens from a card, says in a line what it is for, gives a few steps and a picture, and keeps the long detail behind a More detail fold. The first two topics are marked Start here. It ends with a Something is wrong topic, one fold per thing you might see.
+- **Pictures and clips are real screens.** Every topic has the picture or clip that was made for it, in the layout it was made for. One note says they are all taken in dark mode.
+- **A short Your access level topic** says what User, Contributor and Administrator each see, and why a screen can be missing.
+- **Corrected against the app:** the access levels table (Templates, New page and Review are Contributor), the Settings list (there is no Open last note setting; Continue on Home does that), and the page bar's More menu (Links and Properties).
+- **Retaken pictures:** the two theme pictures and the comments picture were cut off mid-sentence. They end cleanly now, and the two theme pictures are the same size.
+- **Not written yet:** Contributing, Administering and Editing in Obsidian. Until they are, the topics that only an Administrator needs (Users, Usage, Staff update, passwords, Vault check) are not in help. The old text is kept in `archive/help-0.81.1-old-source.md`.
+
+## 0.81.1 — 2026-10-03
+
+**Changed:** `index.html`, `help.md` and `help-edit.md` (version line only), `README.md` (version line), `help-assets/` (pictures retaken on the fixed app, including the two held at H2); new `supporting/tests/bugfix-0811.test.js` (20 checks, 10 reverts all red).
+
+*The fix round from H2: four bugs found while taking the help pictures.*
+
+### Fixed
+- **Folding a heading works again.** Since 0.76.0 the arrow turned but the section stayed open, because the reading view's picture rule overrode the fold. The fold wins now.
+- **Comments are signed by the person who posts them.** Every comment posted in Folio was signed "Anonymous", and Report and the review walk's Flag wrote a placeholder instead of a name. All three now use your name from your profile (your email if the profile has no name). Comments already in the vault keep the name they were saved with. Templates' author and a page's edited-by line use the same name.
+- **The review bar names a person.** "Last approved by" showed the audit file's name (an email with the @ swapped out). It now shows the person's name.
+- **A wide table opened from Home fits the reader.** It was laid out at Home's full width and slid under the folder list with Open full table off screen until the window was resized. Tables now lay out again whenever the reading column changes width.
+- **Quick search no longer sticks on "Indexing vault...".** Letters typed while the first index was building were dropped and nothing redrew. When indexing finishes it now shows results for whatever is in the box.
+
+## 0.81.0 — 2026-10-03
+
+**Changed:** `index.html`, `help.md` and `help-edit.md` (version line only), `README.md` (version line); new `supporting/tests/h1b-help.test.js` (68 checks, 17 reverts all red).
+
+*H1b, the second half of the help overhaul's app build (S114 spec, `docs/HELP-SPEC.md`, O1-O4, L1, L2). Like H1a it ships ahead of the rewrite: most of it shows only once H3 writes the guides with topic cards.*
+
+### ? buttons that open help at the right place
+- A small amber **?** sits on the must read banner, the Theme panel, Settings, the Admin header (it follows the tab you are on), New page, and the connect screen of setup. It opens help at the topic for that screen.
+- You only see a ? if your access level includes the guide it opens. Today that means the Using Folio ones; the Admin and New page ones appear when H3 writes Contributing and Administering.
+- Back returns to where the ? was: the page, Admin on the same tab, or the setup screen. "Open the full guide" at the end of the walkthrough now aims at the first-five-minutes topic.
+- Until a guide has the topic a ? names, the ? opens that guide's front page instead.
+
+### Help in search
+- Quick search lists matching help topics in a **Help** group under your pages, only from guides you can see. Picking one opens it in help mode. While help is still one long page, a match opens that page.
+
+### Updated chip
+- A topic changed since you last read it shows **Updated in 0.8x** on its card and title until you open it. It is kept in your own file, so it follows you between computers. The first time you open a guide nothing is marked, so new staff do not see every topic flagged.
+
+### Print card
+- The shortcuts and controls topic gets a **Print this card** button. It prints just the topic, in the light theme, without the help bar or side columns.
+
+### Clips
+- A short video placed in a help topic plays in the topic with a play button. It never starts by itself. Videos in your own vault pages are unchanged.
+
+### Was this helpful?
+- Each help topic ends with **Was this helpful? Yes / No**, once per person per version of the topic. Answers are counted on **Admin › Usage › Pages** in a new **Help topics** table: topic, yes, no, with no names, most "no" first. They never count as page reads.
+
+## 0.80.0 — 2026-10-03
+
+**Changed:** `index.html`, `help.md` and `help-edit.md` (version line only), `README.md` (version line); new `supporting/tests/h1a-help.test.js` (75 checks); updated `help-split`, `section18-shell` and `session2-reading` for the move of the help render into one place.
+
+*H1a, the first half of the help overhaul's app build (S114 spec, `docs/HELP-SPEC.md`). The help text itself is unchanged until H3 rewrites it.*
+
+### Help mode
+- Opening help puts you in **help mode**: an amber bar pinned to the top of the reader with a **HELP** badge, a tab for each guide you can use, and **Back to** the page you came from. Back returns to the same spot on that page, or to Home if that is where you were.
+- The bar above the reader reads **Help › Guide › Topic**, each part a link. It used to keep showing the last page's path while help was open.
+- A heading's copy, save and comment buttons are hidden in help, since there is no page for them to act on.
+
+### Four guides, shown by access level
+- Help is now four guides: **Using Folio** (everyone), **Contributing** (Contributors and Administrators), **Administering** (Administrators) and **Editing in Obsidian** (Contributors and Administrators). A guide your level does not include is not shown anywhere: not in the tabs, the hub, or as a link.
+- Contributing and Administering are switched off until their text is written (H3), so today an Administrator sees two guides and a User sees one.
+- The **?** in the header opens a **help hub** of guide cards. The staff email's help link still lands on Using Folio.
+
+### Guides as cards and topics
+- A guide written in the new format opens on a landing page of cards, one per topic, each with an icon, a one-line summary, and **Start here** on the first two. A card opens that one topic on its own.
+- Topics are plain Markdown, one `##` section each, with a hidden card line (summary, icon, version, key) so it still edits in Obsidian. A link to `help.md#key` opens the topic.
+- A guide's **Something is wrong** topic shows one collapsed fold per symptom.
+- Guides not yet in the new format (both of today's) still show whole, inside help mode.
+
+### Pictures in help
+- `![[picture]]` in a guide now loads from `help-assets/`, so help gets the vault's picture rules: width, wrapping, captions and click to zoom.
+
+## 0.79.0 — 2026-10-03
+
+**Changed:** `index.html`, `help.md` (must reads and onboarding), `help-edit.md` (the old properties retired), `README.md` (version line); new `supporting/tests/s113-must-reads.test.js` (113 checks) and its shared seed `supporting/tests/mr-seed.js`; updated `b2-home`, `s99-home-trade`, `round2-destinations`, `staff-update`, `whats-new`, `frontmatter-and-tables`, `review-dashboard` and `review-bugfix-0321` for the retired properties and the new source of must reads.
+
+*S113, must reads and onboarding per person. Built from sample v3 (`Claude outputs/s113-must-reads-sample-v3.html`) and Jayson's four rounds of calls on 3 Oct.*
+
+### Must reads, per person
+- **Admin › Users › New must read**: pick a page or one section of it, assign to **All** (everyone on staff that day) or to named people, and set a **priority** from Critical to Casual with a slider. The priority fills in the due date (Critical 2 working days, Soon 1 week, Standard 2 weeks, Relaxed 3 weeks, Casual 1 month); the date can be changed by hand.
+- **A banner pinned to the top of the page** while you owe it, whichever way the page was opened. Yellow while owed, red once overdue.
+- **Mark as read** is in the banner and unlocks once you have reached the end of the page (or the section) and spent about half its reading time on it, never less than 20 seconds or more than 3 minutes. It records the date and the time spent. Undo is there while you stay on the page.
+- **A read stands** when the page changes later. The Must reads view notes the change; **Ask again** on a person puts one page back on one person's list.
+- Read marks are saved on each person's own profile in the vault, so they follow people between computers.
+
+### Onboarding, a separate 6-month plan
+- Two tracks, **New staff** and **Existing staff**. Each page has a **day** (the working day of someone's plan it appears on) and a **priority** (how long they then have). Nobody sees a page before its day.
+- **Milestones** group the plan (Settling in, First month, Months 2 and 3, Months 4 to 6 to start with) and are editable in Users › Settings.
+- **The new staff cushion** is the first milestone, 10 working days to start with: only Critical must reads reach a new person, anything else waits and arrives when it ends. A date missed in the cushion reads **Catch up** to them and red to Administrators. Extend it or end it early on the person's row.
+- People who first open Folio after the plan exists start on New staff by themselves (switchable in Settings). Each person's track and start date are set on their row in People.
+
+### Admin › Users, rebuilt as a report
+- Four views: **People** (who owes what, overdue first, with access as before and the password at the foot), **Must reads** (each one, who has read it, how long each spent, under a minute in red), **Onboarding** (the two tracks by milestone) and **Settings** (the five step lengths, milestones, the unlock rule, and the looks people read with, unused options dashed).
+- A person's reading settings are copied onto their profile when they change, which is what the looks count reads.
+
+### Home, What's New and the weekly email
+- Home's **Must read** and **Onboarding** meters read the person's own list: due dates, overdue in red, Catch up in the cushion, and a count of onboarding pages still to come rather than the whole plan.
+- What's New's Required reading group comes from the same list. **The 30-day must-read expiry is gone**: a must read has a due date now.
+- The weekly email lists must reads assigned to All and says to mark them read in the banner.
+
+### Retired
+- The `must-read`, `must-read-start`, `onboarding` and `onboarding-due` page properties no longer decide anything and have left the Properties panel. Admin › Users offers once to turn pages still marked the old way into must reads or New staff onboarding pages.
+
+### All comments on the report layout
+- The explainer bar, the shared count block, one band per page and one row per comment with a coloured stripe (red flag or escalation, yellow question, blue otherwise). The centred empty message and the boxed SharePoint note are gone; the alert tip is one quiet line and names the right folder now.
+
+## 0.78.0 — 2026-09-29
+
+**Changed:** `index.html`, `help-edit.md` (Missing properties rewritten, new Format health section); new `supporting/tests/s111-format-health.test.js` (106 checks); updated `p10-vault-check`, `j2-review-b`, `s110-templates`, `s108-number-sweep` and `s100-usage-views` for the moved rows, the eighth rules group and the new hash version.
+
+*S111, Format health. Built from the approved sample (`Claude outputs/s111-format-health-sample.html`) with Jayson's calls of 28 to 29 Sep.*
+
+### Format health, the lower half of Vault check
+- Every page is checked against its template and the Format rules, on the same run as the rest of Vault check. Content is never judged, only shape.
+- One row per rule with its setting and a page count. **Show pages** names each page and where the problem is. **Edit rule** opens the rule in Templates › Format rules.
+- Its own count line. It does not add to the Vault check number or the Admin badge. Warning is open, Information is folded.
+- Template checks: core sections, one-of groups, sections holding what they expect (tables, callouts, lists, pictures, code), section order, sections the template does not know, and old section names.
+- Pages with no template get the Format rules only, one level lighter. A **No type** row names them. Pages last edited before their template changed are one grouped row per template.
+- **Small fixes**, Administrator only: remove leftover guide boxes, remove grey notes from a reviewed page, add missing properties, put properties in house order. Each shows a diff first. **Apply** writes the page's change log, keeps a signed-off page signed off, and leaves a page alone if it changed since the preview.
+- Everything else offers **Copy Fix a page prompt** (the page, its template and the rules) and **Open in Obsidian**. Dismiss works as on any Vault check row.
+
+### Moved
+- **Missing properties**, **Repeated heading**, **Oversized** and **Stale** left the top of Vault check. They are Format health rules now (Properties complete, Same heading twice, Words per page, Not reviewed in) and follow the Format rules settings. They are warnings, no longer hard failures.
+- Format rules gained **Properties complete**, **Properties in order** and a **Template sections** group. An older Format rules file picks them up with their defaults.
+
+### What's New
+- Guide boxes, grey notes and extra blank lines no longer count as an edit, because Folio never shows them. Everyone's list re-reads each page once after this update, silently: nothing shows as Updated because of it.
+
 ## 0.77.1 — 2026-09-28
 
 **Changed:** `index.html`, `help.md` (Images section); version line only in `README.md` and `help-edit.md`; new `supporting/tests/image-zoom.test.js` (19 checks).
