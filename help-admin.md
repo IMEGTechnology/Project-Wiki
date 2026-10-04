@@ -1,7 +1,7 @@
 # Administering
 
 > [!NOTE] About this guide
-> This guide is for Administrators only. It covers running Folio for your team: who can do what, must reads and onboarding, the health of the vault, what people read, and the staff update. Everything a Contributor does is in [Contributing](help-contrib.md). Everything a reader does is in [Using Folio](help.md). Written for **Version 0.83.0**.
+> This guide is for Administrators only. It covers running Folio for your team: who can do what, must reads and onboarding, the health of the vault, what people read, and the staff update. Everything a Contributor does is in [Contributing](help-contrib.md). Everything a reader does is in [Using Folio](help.md). Written for **Version 0.85.0**.
 
 You open almost all of this from **Admin** on Home. **New here? Do Find your way around Admin, then Set the passwords.** Until the passwords are set, anyone can make themselves an Administrator.
 
@@ -48,7 +48,7 @@ Users is a report of your people. On Home, open **Admin**, then **Users**. Red i
 > [!note]- More detail
 > **People appear by using Folio.** Nobody is added here. A person shows up the first time they open Folio and type their name. Removing someone is a job for the vault folder, not for Folio.
 >
-> **Your own access.** You cannot change your own here. Use **Settings**, then **Advanced Settings**, then **Access**. It writes the same record.
+> **Your own access.** You cannot change your own here. Use **Settings**, then the **Advanced** tab, then **Access**. It writes the same record.
 >
 > **A person's row opens.** It lists everything assigned to them and where each stands. **Ask again** puts a page they have read back on their list. The **×** takes one off. It also holds their onboarding track and start date, **Extend cushion a week**, **End cushion now**, and the look they read with.
 >
@@ -59,7 +59,7 @@ Users is a report of your people. On Home, open **Admin**, then **Users**. Red i
 
 A new vault has no passwords, and until it does, every level is open to anyone who picks it. Settings says so plainly while that is true. Set both once.
 
-1. Click your initials, top right, then **Settings**, then open **Advanced Settings**.
+1. Click your initials, top right, then **Settings**, then the **Advanced** tab.
 2. Under **Access**, choose **Administrator**. While there are no passwords, it asks for nothing.
 3. Under **Passwords**, choose **Administrator** and click **Change…**. Type a password.
 4. Choose **Contributor** and click **Change…**. It has to be a different password.
@@ -262,15 +262,17 @@ Most pages are written in Obsidian. For a quick fix, Administrators can edit in 
 
 New pages, and any page found loose outside a folder, go to one folder until they are filed. It starts as Working Drafts.
 
-1. Click your initials, top right.
-2. Choose **Drafts folder**.
+1. Click your initials, top right, then **Settings**, then the **Advanced** tab.
+2. Under **Vault setup**, click **Change** beside **Drafts folder**.
 3. Pick the folder and confirm.
 
 > [!tip]
 > Pages in the Drafts folder show **Draft** at the top, so readers know they are work in progress.
 
 > [!note]- More detail
-> **Default page.** The menu also has a Default page, the page the **Browse** door opens first.
+> **Default page.** Vault setup also has a Default page, the page the **Browse** door opens first.
+>
+> **Demo.** Vault setup also has **Demo**, for showing Folio to someone. It opens a sample vault in this window and leaves yours untouched. A purple bar at the top switches between three sample people, one per access level, and its **Guide** button opens a printable walkthrough. **Exit demo**, or closing the window, brings your own vault back.
 >
 > **Renaming and moving** are done in Obsidian, so every link follows. Folio never renames a page. A page that is renamed, renumbered or moved keeps its saved pages, comments, review history and usage.
 >

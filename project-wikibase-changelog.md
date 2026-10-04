@@ -8,6 +8,41 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.85.0 — 2026-10-04
+
+**Changed:** `index.html`, `help-admin.md` (a line on Demo under Vault setup), version lines, and **new: `demo/`** (`demo-vault.json`, the sample vault in one file, and `Folio-demo-guide.pdf`, the printable walkthrough). Source: `demo-vault/` gained a `50_Company` folder; `supporting/build_demo.py` packs `demo/` and `release.sh` runs it; `supporting/demo-guide/` holds the guide. Tests: `s115-demo.test.js` (new, 58 checks); `release-integrity` covers `demo/`.
+
+*S115, second half: Demo mode, for showing Folio to leadership.*
+
+### Demo mode
+- **Start it from Settings, Advanced, Vault setup, Demo** (Administrators only). A fresh copy of the sample vault opens in the same window. **Your own vault is never touched**: the folder Folio remembers, your saved settings and your identity are put aside and come back exactly as they were.
+- **A purple bar** sits across the top while a demo runs: **You are** Ellen Ward (User), Dana Whitfield (Contributor) or Jayson Stickrod (Administrator), one click to switch; **Guide** opens the printable walkthrough; **Reset** starts the demo over; **Exit demo** goes back to your vault.
+- **It resets every time.** Each Start is a clean copy, so it can be shown again and again. A reload keeps the demo running; closing the window ends it, and the next open puts your own Folio back.
+- **Always the same week.** The demo runs on its own calendar, Monday 5 October 2026, moving on in real time from the moment it starts, so due dates, What's New, onboarding and Usage look current whatever day it is shown.
+- **Everything has something waiting:** Ellen is a new hire in her second week with an onboarding plan and a timed Mark as read (15 seconds in the demo); What's New has a new page and three updated ones; Review, All comments, Vault check, Usage, Users and Staff update all have content.
+
+### The sample vault
+- **A Company folder, for an executive audience:** New Hire First Week, Travel and Expenses, IT Help and Tools, Who to Ask, Our Project Lifecycle. They show Folio as a wiki for the whole firm that points to the systems people already use (links go to example.com, a web address reserved for examples) rather than replacing them.
+- **Three new pictures** (a first-week timeline, the project lifecycle, an org chart), in all three picture layouts, plus tables, every callout type, a copy box, a code box, task lists and links both ways between company and team pages.
+- **Start Here** now points to the Company folder, as this week's change in What's New.
+
+### The guide
+- **Folio-demo-guide.pdf**, three pages, opened from the demo bar: a script for about 20 minutes in three parts (new hire, contributor, administrator), each step with what to click, what to say and what the audience sees, and a box to tick. Writing pages in Obsidian is noted as a separate demo.
+
+### Smaller
+- The must read settings line shows seconds when the cap is under two minutes (it read "0 minutes" for the demo's 15 seconds).
+
+## 0.84.0 — 2026-10-04
+
+**Changed:** `index.html`, `help.md` and `help-admin.md` (where Switch, Default page and Drafts folder now live), version lines. Tests: `s115-settings.test.js` (new, 24 checks); `reconnect-vault`, `access-tiers` and `s107-identity` updated for the new places.
+
+*S115, first half: a tidier user menu and Settings as two tabs, ahead of Demo mode.*
+
+- **Switch sits beside your name.** The user menu shows a small **Switch** button on the name line, the way most apps do it, instead of a Switch user row further down.
+- **The menu is shorter.** **Default page** and **Drafts folder** left it. They are Administrator setup, not things you reach for daily.
+- **Settings has two tabs.** **General** holds the everyday switches (number prefixes, file counts, collapsed lists, page title, walkthrough). **Advanced** holds Vault setup (Administrators only: Default page and Drafts folder, each showing what is set, with a Change button), your access level and passwords, and the vaults Folio is reading. The folded Advanced Settings is gone. Settings always opens on General.
+- **Install Folio** already hides once the app is installed; checked, unchanged.
+
 ## 0.83.0 — 2026-10-04
 
 **Changed:** `index.html`, `help.md` (a note on the amber bar, version line), `help-contrib.md` (new), `help-admin.md` (new), `help-edit.md` (rewritten), `README.md` (version line and file list), `supporting/release.sh` (ships ten files now). `help-assets/` pictures are unchanged.

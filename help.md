@@ -3,7 +3,7 @@
 > [!NOTE] About this guide
 > This guide lives with the app, not inside your vault, so it never appears in the folder list. Press the **?** in the header to come back at any time.
 >
-> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.83.0**.
+> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.85.0**.
 
 Folio is the team's shared reference: a folder of notes you can browse, search, save and comment on. **New here? Do the first two topics and stop.** That is enough to use Folio. The rest is there when you need it.
 
@@ -28,7 +28,7 @@ You do this once. After that Folio opens straight to your notes.
 >
 > **On a new computer.** Folio walks installing, connecting and your name as one connected sequence. The steps are the same.
 >
-> **Your name and email.** The name goes on your comments. The email is the key your saved pages are filed under, so typing the same email on another computer brings them back. To change either, use your initials, top right, then **Switch user**.
+> **Your name and email.** The name goes on your comments. The email is the key your saved pages are filed under, so typing the same email on another computer brings them back. To change either, use your initials, top right, then **Switch** beside your name.
 >
 > **If you can only view the folder.** Folio needs to save your profile there. If your access is view only, it stops and asks you to contact your system administrator.
 >
@@ -70,7 +70,7 @@ The strip along the top is always there, on every screen. The numbers match the 
 4. **Install**: only shown until Folio is installed.
 5. **Theme**: the sun flips between dark and light straight away.
 6. **Help**: this guide.
-7. **Your initials**: Theme, Settings, Switch user, Reconnect to vault and the version.
+7. **Your initials**: Switch (beside your name), Theme, Settings, Reconnect to vault and the version.
 
 > [!tip]
 > The icon at the far left shows or hides Vault Files.
@@ -436,7 +436,7 @@ Click your **initials**, then **Settings**. Each change applies as soon as you m
 > **Continue** on Home already reopens the page you were last reading, so there is no setting for it.
 
 > [!note]- More detail
-> **Advanced Settings** is folded at the bottom. Your **access** level is shown there.
+> Settings has two tabs. **General** holds the everyday switches. **Advanced** shows your **access** level and the vaults Folio is reading.
 >
 > **More than one vault.** An Administrator publishes the list of vaults once, and it reaches everyone the same way pages do.
 >
@@ -471,12 +471,12 @@ Folio has three levels, and each includes the one below it. Anything your level 
 | **Administrator** | Everything above, plus Edit, properties, Users, Usage, Vault check, Staff update and changing templates |
 
 > [!tip]
-> To find your level, open **Settings**, then **Advanced Settings**. If you need a different one, ask whoever runs Folio.
+> To find your level, open **Settings**, then the **Advanced** tab. If you need a different one, ask whoever runs Folio.
 
 > [!note]- More detail
 > **Your level belongs to you, not the computer.** It is saved against your name in the vault, so it follows you everywhere. An Administrator sets it in **Admin**, then **Users**, and it reaches you the next time you open Folio.
 >
-> **You can also move yourself** in Advanced Settings. Moving up asks for that level's password. Moving down never does.
+> **You can also move yourself** on the Advanced tab. Moving up asks for that level's password. Moving down never does.
 >
 > **What this is.** It keeps people out of controls they do not need. It is not a lock: anyone who can open the vault in Obsidian can edit any page.
 
@@ -494,7 +494,7 @@ Folio has three levels, and each includes the one below it. Anything your level 
 
 | Looking for | It is at |
 |---|---|
-| Settings, Theme, Switch user | Your initials, top right |
+| Settings, Theme, Switch | Your initials, top right |
 | Dark or light | The sun in the header |
 | A different vault folder | Your initials, then **Reconnect to vault** |
 | Install Folio | The header icon, or your initials |
@@ -532,7 +532,7 @@ It points into a folder you have not opened yet. Open that folder in Vault Files
 A picture must sit in the attachments folder next to its page, with the name matching exactly, including capital letters. If every picture in the vault is broken, tell whoever runs Folio, because the attachments folder name set in Folio does not match what Obsidian made.
 
 ### I cannot find New page, Edit or Admin
-Your level does not include them. Ask whoever runs Folio to set your level in **Admin**, then **Users**, and reopen Folio. **Settings**, then **Advanced Settings**, shows your level now.
+Your level does not include them. Ask whoever runs Folio to set your level in **Admin**, then **Users**, and reopen Folio. **Settings**, then the **Advanced** tab, shows your level now.
 
 ### Someone's changes are not showing
 The vault syncs through OneDrive, so there is a delay. Check OneDrive has finished, then come back to the tab. Folio rereads the folders you have open when you return, and **Home** refreshes everything.
@@ -554,4 +554,4 @@ Nobody is locked out. Ask whoever runs Folio: an Administrator can reset it from
 
 ---
 
-Written for **Version 0.82.0**.
+Written for **Version 0.85.0**.

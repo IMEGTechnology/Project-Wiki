@@ -5,6 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1c1c1a">
 
+  <!-- S115 -- Demo mode, the part that has to run before anything else.
+       1. A demo left running (window closed without Exit) hands this browser
+          back: the person's own saved settings are put back exactly as they
+          were. A demo still running in another window keeps a heartbeat, and
+          that window is left alone.
+       2. While a demo runs, the clock reads 5 Oct 2026 at the moment the demo
+          started and moves on in real time from there. The sample vault is
+          written for that week, so its due dates, What's New and Usage look
+          current on whatever day the demo is shown. Nothing outside the demo
+          window sees this clock. -->
+  <script>
+  (function () {
+    try {
+      var R = Date, d = null;
+      try { d = JSON.parse(sessionStorage.getItem('wb_demo') || 'null'); } catch (e) {}
+      if (!d) {
+        var bk = localStorage.getItem('wb_demo_backup');
+        var live = +(localStorage.getItem('wb_demo_live') || 0);
+        if (bk && R.now() - live > 15000) {
+          var o = JSON.parse(bk);
+          localStorage.clear();
+          Object.keys(o).forEach(function (k) { localStorage.setItem(k, o[k]); });
+        }
+        return;
+      }
+      if (typeof d.off !== 'number') return;
+      var off = d.off;
+      class DemoDate extends R {
+        constructor() { if (arguments.length) super(...arguments); else super(R.now() - off); }
+        static now() { return R.now() - off; }
+      }
+      window.__wbRealDate = R;
+      window.Date = DemoDate;
+    } catch (e) { /* a demo that cannot start its clock still runs, on today's date */ }
+  })();
+  </script>
+
   <!-- SECURITY (S12-sec): Content-Security-Policy. This is the backstop,
        not the fix. Escaping and the URL allowlist are what actually stop
        injection; the CSP is what limits the damage if either is ever
@@ -4436,6 +4473,36 @@ body.beta-shell.console-dest[data-dest="admin"] #cd-head { border-bottom: none; 
 .ud-head .ud-email { display: block; font-size: 11.5px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #settings-panel { padding: 0 0 6px; max-height: calc(100vh - 72px); overflow-y: auto; }
 #settings-panel .s-section { padding-top: 10px; }
+/* S115 -- Switch on the name line; Settings as two tabs. */
+.ud-nameline { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.ud-head .ud-nameline .ud-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ud-switch { flex: none; border: 1px solid var(--border-strong); background: transparent; color: var(--text-secondary); font: inherit; font-size: 11.5px; line-height: 1; padding: 3px 8px; border-radius: 999px; cursor: pointer; }
+.ud-switch:hover { color: var(--accent); border-color: var(--accent); }
+.s-tabs { display: flex; gap: 2px; padding: 0 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; background: var(--bg-sidebar); }
+.s-tab { border: none; background: transparent; font: inherit; font-size: 12.5px; color: var(--text-secondary); padding: 7px 10px 6px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.s-tab:hover { color: var(--text-primary); }
+.s-tab.on { color: var(--text-primary); font-weight: 600; border-bottom-color: var(--accent); }
+.s-pane[hidden] { display: none; }
+/* S115 -- the demo bar: purple, so nobody mistakes it for help's amber. */
+#demo-bar { flex: none; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 12px; background: var(--co-purple-bg); border-bottom: 1px solid var(--co-purple-bd); font-size: 12.5px; color: var(--text-primary); }
+#demo-bar[hidden] { display: none; }
+#demo-bar .db-badge { font-size: 11.5px; font-weight: 800; letter-spacing: 0.08em; color: var(--co-purple-txt); border: 1px solid var(--co-purple-bd); border-radius: 999px; padding: 2px 9px; }
+#demo-bar .db-label { color: var(--text-secondary); }
+#demo-bar .db-people { display: inline-flex; border: 1px solid var(--border-strong); border-radius: 8px; overflow: hidden; }
+#demo-bar .db-person { font: inherit; font-size: 12.5px; border: none; border-left: 1px solid var(--border-strong); background: var(--bg-reader); color: var(--text-secondary); padding: 4px 10px; cursor: pointer; }
+#demo-bar .db-person:first-child { border-left: none; }
+#demo-bar .db-person b { font-weight: 600; color: var(--text-primary); }
+#demo-bar .db-person.on { background: var(--co-purple-bd); color: #1b1530; }
+#demo-bar .db-person.on b { color: #1b1530; }
+#demo-bar .db-person:not(.on):hover { color: var(--text-primary); }
+#demo-bar .db-sp { flex: 1; }
+#demo-bar .db-btn { font: inherit; font-size: 12.5px; border: 1px solid var(--border-strong); background: var(--bg-reader); color: var(--text-primary); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+#demo-bar .db-btn:hover { border-color: var(--co-purple-bd); color: var(--co-purple-txt); }
+#demo-cover { position: fixed; inset: 0; z-index: 940; display: flex; align-items: center; justify-content: center; background: var(--bg-app); color: var(--text-primary); font-size: 13.5px; }
+#demo-cover .dc-box { text-align: center; }
+#demo-cover .dc-box b { display: block; font-size: 16px; margin-bottom: 6px; }
+.s-setrow > span { min-width: 0; }
+.s-val { display: block; font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px; }
 .s-label { font-size: 12.5px; font-weight: 600; color: var(--text-primary); text-transform: none; letter-spacing: 0; }
 .tp-title { font-weight: 600; }
 #bt-more-menu { min-width: 190px; }
@@ -4890,6 +4957,10 @@ body.help-mode #reader-content .md-h-acts { display: none; }
 <body data-theme="dark" class="h2-underline-on h5-caps-on" data-doors="block">
 <div id="app">
 
+  <!-- S115 -- the demo bar. Shown only while a demo runs: who you are (three
+       sample people, one per access level), the printable guide, Reset, Exit. -->
+  <div id="demo-bar" hidden></div>
+
   <!-- ── Header ─────────────────────────────────────────── -->
   <header id="header">
     <!-- S41: New and Move moved out of the header to the foot of the dock
@@ -5004,7 +5075,7 @@ body.help-mode #reader-content .md-h-acts { display: none; }
       <!-- S103 (item 10) -- one panel frame: title and Close on top, the same
            head Theme has. Here the title is you. -->
       <div class="tp-head ud-head">
-        <span class="tp-title"><span class="ud-name" id="ud-name"></span><span class="ud-email" id="ud-email"></span></span>
+        <span class="tp-title"><!-- S115 -- Switch sits on the name line, the way Google and Slack put it beside who you are. --><span class="ud-nameline"><span class="ud-name" id="ud-name"></span><button class="ud-switch" id="ud-switch" title="Sign in as someone else" onclick="switchUser()">Switch</button></span><span class="ud-email" id="ud-email"></span></span>
         <button class="icon-btn" title="Close" aria-label="Close" onclick="closeUserDropdown()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
 
@@ -5041,7 +5112,7 @@ body.help-mode #reader-content .md-h-acts { display: none; }
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.83.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.85.0</button>
       </div>
 
       <div class="ud-actions">
@@ -5069,25 +5140,8 @@ body.help-mode #reader-content .md-h-acts { display: none; }
           </svg>
           Settings
         </button>
-        <!-- Usage (Session 1, S60). Admin-tier gated the same way the
-             dock registry already gates it — hidden rather than shown-
-             locked, matching how every other gated tool behaves. -->
-        <!-- Quick pass, 2026-09-05 -- Default page (Admin only). Same
-             gating pattern as Usage above: hidden rather than shown-locked
-             for anyone below Admin, toggled in refreshAccountMenu(). -->
-        <button class="ud-item" id="ud-defaultpage" onclick="openDefaultPageModal()">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16"/><path d="M9 4v16"/></svg>
-          Default page
-        </button>
-        <!-- S107 -- Drafts folder (Admin only), same gating as Default page. -->
-        <button class="ud-item" id="ud-draftsfolder" onclick="openDraftsFolderModal()">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5"/><path d="M9.5 13.5h5"/></svg>
-          Drafts folder
-        </button>
-        <button class="ud-item" onclick="switchUser()">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          Switch user
-        </button>
+        <!-- S115 -- Default page and Drafts folder moved to Settings > Advanced;
+             Switch moved onto the name line above. -->
         <!-- Reconnect to vault — local FSA mode only (SharePoint mode has no
              folder to pick, the path comes from CONFIG). Shown/hidden by
              toggleUserDropdown() on every open rather than once at boot, so
@@ -5625,6 +5679,14 @@ body.help-mode #reader-content .md-h-acts { display: none; }
       <button class="icon-btn" title="Close" aria-label="Close" onclick="closeSettingsPanel()"><svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
 
+    <!-- S115 -- two tabs replace the folded Advanced Settings. General is what
+         everyone changes; Advanced holds access, vaults and the Administrator
+         setup (Default page, Drafts folder, Demo). Opens on General every time. -->
+    <div class="s-tabs" role="tablist">
+      <button class="s-tab on" role="tab" data-stab="general" onclick="settingsTab('general')">General</button>
+      <button class="s-tab" role="tab" data-stab="advanced" onclick="settingsTab('advanced')">Advanced</button>
+    </div>
+    <div class="s-pane" id="s-pane-general">
     <div class="s-section">
       <div class="s-label">Navigation</div>
       <div class="toggle-row">
@@ -5690,15 +5752,16 @@ body.help-mode #reader-content .md-h-acts { display: none; }
       </div>
     </div>
 
-    <!-- Vaults (P6). READ ONLY on purpose: the list is a file in the vault
-         so that an admin publishes it once and it syncs to everyone, and an
-         editor for it belongs with the other admin tools rather than in a
-         panel every reader opens. -->
-    <div class="s-section">
-      <div class="s-label">Vaults</div>
-      <div id="s-vaults"></div>
+    </div><!-- /s-pane-general -->
+    <div class="s-pane" id="s-pane-advanced" hidden>
+    <!-- S115 -- Administrator setup, moved here from the user menu. Same two
+         modals as before; this row only shows what is set and opens them. -->
+    <div class="s-section" id="s-admin-setup" style="display:none">
+      <div class="s-label">Vault setup</div>
+      <div class="toggle-row s-setrow"><span>Default page<span class="s-val" id="s-dp-val"></span></span><button class="ed-btn" onclick="openDefaultPageModal()">Change</button></div>
+      <div class="toggle-row s-setrow"><span>Drafts folder<span class="s-val" id="s-df-val"></span></span><button class="ed-btn" onclick="openDraftsFolderModal()">Change</button></div>
+      <div class="toggle-row s-setrow" id="s-demo-row"><span>Demo<span class="s-val" id="s-demo-val">A sample vault to show Folio</span></span><button class="ed-btn" id="s-demo-btn" onclick="startDemo()">Start</button></div>
     </div>
-
     <!-- Advanced Settings — Access (S14, 0.27.0; rebuilt S97).
          Access is no longer chosen here. It belongs to the PERSON, is set by
          an Administrator in Admin > Users, and arrives with the profile at
@@ -5706,12 +5769,8 @@ body.help-mode #reader-content .md-h-acts { display: none; }
          themselves: claim Administrator on a vault that has none, which is
          also the way back in if the last Administrator is removed. -->
     <div class="s-section">
-      <div class="s-label s-label-collapsible" id="adv-settings-toggle" onclick="toggleAdvancedSettings()">
-        <svg class="s-adv-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-        Advanced Settings
-      </div>
-      <div id="adv-settings-body" style="display:none">
-        <div class="s-sublabel">Access</div>
+      <div class="s-label">Access</div>
+      <div id="adv-settings-body">
         <div class="tier-row">
           <select class="s-select" id="sel-tier">
             <option value="user">User</option>
@@ -5754,6 +5813,16 @@ body.help-mode #reader-content .md-h-acts { display: none; }
         </div>
       </div>
     </div>
+    <!-- Vaults (P6). READ ONLY on purpose: the list is a file in the vault
+         so that an admin publishes it once and it syncs to everyone, and an
+         editor for it belongs with the other admin tools rather than in a
+         panel every reader opens. -->
+    <div class="s-section">
+      <div class="s-label">Vaults</div>
+      <div id="s-vaults"></div>
+    </div>
+
+    </div><!-- /s-pane-advanced -->
 
   </div>
 
@@ -8043,7 +8112,7 @@ async function startLocalVault(root, fresh = false) {
   // follows -- make the failure describe itself, and name the consequence
   // rather than the operation, because the consequence is what gets reported.
   try {
-    await idbSet(root);
+    if (!demoActive()) await idbSet(root); // S115 -- the demo folder is never remembered
   } catch (e) {
     console.warn('Folio: could not remember this folder, so the next launch will ask for it again.', e);
   }
@@ -8095,6 +8164,7 @@ async function pickLocalVault(fresh = false) {
 // until a folder is actually chosen, so a misclick costs nothing.
 async function reconnectVault() {
   closeUserDropdown();
+  if (demoActive()) return; // S115 -- the demo has Exit, not a folder to pick
   if (!guardLeaveEdit()) return; // unsaved edit in the CURRENT vault wins
   await pickLocalVault(true);
 }
@@ -8128,8 +8198,9 @@ async function reopenLocalVault() {
 async function localStat(handle) {
   try {
     const f = await handle.getFile();
+    const lm = demoFileTime(f.lastModified); // S115 -- the demo's own calendar
     return {
-      modified: f.lastModified ? new Date(f.lastModified).toISOString() : null,
+      modified: lm ? new Date(lm).toISOString() : null,
       size: typeof f.size === 'number' ? f.size : null,
     };
   } catch (_) {
@@ -12214,6 +12285,7 @@ function chVaultsHTML() {
 function renderAppBanner() {
   const el   = $('app-banner');
   if (!el) return;
+  if (demoActive()) { el.innerHTML = ''; el.hidden = true; return; } // S115 -- the demo bar is the only banner
 
   const needsFolder = configIsPlaceholder() && !LOCAL.on;
   // B3 -- ...&& !ranInstalledHere(). Offering to install an app the person is
@@ -15630,7 +15702,7 @@ function mrPeopleViewHTML() {
     '<div class="us-foot">People appear the first time they open Folio. Access, assignments and onboarding changes reach each person the next time they open Folio. ' +
       'Your own access is not editable here; claiming or removing an Administrator is a password job, below. Removing someone is a job for the vault folder.</div>' +
     '<p class="tier-ok" id="admin-pw-msg" style="padding:0 14px"></p>' +
-    '<div class="us-pw"><div class="us-pw-note"><b>Administrator password.</b> Anyone who knows it can make themselves an Administrator from Settings &rarr; Advanced Settings. ' +
+    '<div class="us-pw"><div class="us-pw-note"><b>Administrator password.</b> Anyone who knows it can make themselves an Administrator from Settings &rarr; Advanced. ' +
       'It is how the first Administrator is set on a new vault, and how anyone gets back in if the last one here is removed.</div>' +
       '<div class="tier-row" style="padding:4px 14px 14px"><button class="ed-btn" id="admin-pw-change">' + (authArmed() ? 'Change…' : 'Set a password…') + '</button></div></div>';
 }
@@ -15919,7 +15991,7 @@ function mrSettingsViewHTML() {
       [['half', 'Unlocks at the end, after half the reading time'], ['end', 'Unlocks at the end only'], ['off', 'Always available']].map(o =>
         '<option value="' + o[0] + '"' + (st.unlock === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>' +
       '<span class="mr-sub2">Reading time comes from the page’s length at ' + MR_READ_WPM + ' words a minute. Never less than ' +
-      st.unlockFloor + ' seconds, never more than ' + Math.round(st.unlockCap / 60) + ' minutes.</span></div></div>' +
+      st.unlockFloor + ' seconds, never more than ' + (st.unlockCap < 120 ? st.unlockCap + ' seconds' : Math.round(st.unlockCap / 60) + ' minutes') + '.</span></div></div>' +
     '<div class="vc-row mr-set"><div class="mr-sk">New people</div><div class="mr-opts"><label class="mr-ck"><input type="checkbox" data-wb-mrauto="1"' + (st.autoNew ? ' checked' : '') +
       '> Start anyone who opens Folio for the first time on the New staff track</label></div></div></div></div>';
   h += mrLookRollupHTML();
@@ -19331,11 +19403,6 @@ function refreshAccountMenu() {
   const menuItem = $('ud-install');
   if (menuItem) menuItem.style.display = installedNow ? 'none' : 'flex';
 
-  // P9 -- Usage moved inside the Admin screen; Home's Admin door reaches it.
-  const defaultPageItem = $('ud-defaultpage');
-  if (defaultPageItem) defaultPageItem.style.display = atLeast('admin') ? 'flex' : 'none';
-  const draftsItem = $('ud-draftsfolder');
-  if (draftsItem) draftsItem.style.display = atLeast('admin') ? 'flex' : 'none';
 
   // P6 — install state just moved, and the banner is the loud half of it.
   renderAppBanner();
@@ -19398,8 +19465,236 @@ function openSettingsFromBadge() {
   closeThemePanel(); // only one anchored popup at a time — they share a corner
   state.settingsOpen = true;
   renderSettingsVaults(); // P6 — drawn on open, so it is never a stale list
+  settingsTab('general'); // S115 -- always opens on General
+  renderSettingsAdmin();
   const sq = $('s-helpq'); if (sq) sq.innerHTML = helpQ('settings');   // O1
   $('settings-panel').classList.add('open');
+}
+
+// S115 -- the two Settings tabs. Not remembered: General is what people come for.
+function settingsTab(name) {
+  document.querySelectorAll('#settings-panel .s-tab').forEach(b => {
+    const on = b.dataset.stab === name;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  const g = $('s-pane-general'), a = $('s-pane-advanced');
+  if (g) g.hidden = name !== 'general';
+  if (a) a.hidden = name !== 'advanced';
+}
+
+// ── S115 · Demo mode ─────────────────────────────────────────────
+// A fresh copy of the sample vault, hosted beside this file in demo/, copied
+// into the browser's private folder storage and opened the normal way. The
+// person's own vault, its remembered folder, and their saved settings are
+// never touched: settings are put aside at Start and put back at Exit (or on
+// the next open, if the window was simply closed; see the head script).
+// A reload keeps the demo running. Closing the window ends it.
+// The whole vault is ONE file, demo/demo-vault.json, not a folder of pages:
+// GitHub Pages would turn any page that starts with properties into a web
+// page and stop serving the page itself.
+const DEMO_DIR = 'demo/';
+const DEMO_BUNDLE = 'demo-vault.json';
+function demoState() { try { return JSON.parse(sessionStorage.getItem('wb_demo') || 'null'); } catch (_) { return null; } }
+function demoSave(d) { try { sessionStorage.setItem('wb_demo', JSON.stringify(d)); } catch (_) {} }
+function demoActive() { return !!demoState(); }
+function demoAvailable() { return !!(navigator.storage && navigator.storage.getDirectory) && configIsPlaceholder(); }
+function demoRealNow() { return (window.__wbRealDate || Date).now(); }
+// A file's modified time on the demo's calendar. Every page was copied in at
+// the same moment, so the copy reads as nine days old (last week, when the
+// sample vault was written); anything written after that, this week's edits
+// and whatever is done in the demo, reads as when it happened.
+function demoFileTime(ms) {
+  const d = demoState();
+  if (!d || !ms || typeof d.off !== 'number') return ms;
+  return ms - d.off - (d.seeded && ms <= d.seeded ? 9 * 864e5 : 0);
+}
+
+function demoCover(title, line) {
+  let c = $('demo-cover');
+  if (!title) { if (c) c.remove(); return; }
+  if (!c) { c = document.createElement('div'); c.id = 'demo-cover'; document.body.appendChild(c); }
+  c.innerHTML = '<div class="dc-box"><b>' + escHtml(title) + '</b>' + escHtml(line || '') + '</div>';
+}
+
+async function demoWrite(dir, rel, blob) {
+  const parts = rel.split('/');
+  let d = dir;
+  for (const seg of parts.slice(0, -1)) d = await d.getDirectoryHandle(seg, { create: true });
+  const fh = await d.getFileHandle(parts[parts.length - 1], { create: true });
+  const wr = await fh.createWritable(); await wr.write(blob); await wr.close();
+}
+async function demoLoad() {
+  const r = await fetch(DEMO_DIR + DEMO_BUNDLE, { cache: 'no-store' });
+  if (!r.ok) throw new Error('the demo is not on this server (' + r.status + ')');
+  return r.json();
+}
+// One entry of the bundle: {t: text} or {b: base64 bytes}.
+function demoBlob(e) {
+  if (e && typeof e.t === 'string') return new Blob([e.t]);
+  const bin = atob((e && e.b) || ''); const u = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new Blob([u]);
+}
+
+// Copies the sample vault in. Pages that "changed this week" go in as they
+// were last week; demoAfterBoot() lays this week's versions over them once
+// Folio has seen the vault, so What's New and Review have something to show.
+async function demoSeed(man) {
+  const root = await navigator.storage.getDirectory();
+  try { await root.removeEntry(man.folder, { recursive: true }); } catch (_) {}
+  const v = await root.getDirectoryHandle(man.folder, { create: true });
+  const added = new Set(man.week.added);
+  const rels = Object.keys(man.files);
+  let n = 0;
+  for (const rel of rels) {
+    if (added.has(rel)) continue;
+    await demoWrite(v, rel, demoBlob(man.pre[rel] || man.files[rel]));
+    if (++n % 20 === 0) demoCover('Setting up the demo', 'Copying the sample vault, ' + n + ' of ' + rels.length);
+  }
+}
+
+async function demoBegin(man, keepBackup) {
+  // Put the person's own settings aside, once. A Reset keeps the first copy:
+  // copying the demo's own settings over it would lose the real ones.
+  if (!keepBackup) {
+    const o = {};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); o[k] = localStorage.getItem(k); }
+    localStorage.setItem('wb_demo_backup', JSON.stringify(o));
+  }
+  const bk = localStorage.getItem('wb_demo_backup');
+  const theme = (JSON.parse(bk || '{}'))['wb_theme_v2'];
+  localStorage.clear();
+  localStorage.setItem('wb_demo_backup', bk);
+  if (theme) localStorage.setItem('wb_theme_v2', theme);
+  localStorage.setItem('wb_user_email', JSON.stringify(man.people[0].email));
+  localStorage.setItem('wb_demo_live', String(demoRealNow()));
+  const anchor = new (window.__wbRealDate || Date)(man.anchor).getTime();
+  demoSave({ off: demoRealNow() - anchor, folder: man.folder, people: man.people, seeded: demoRealNow(),
+             person: man.people[0].email, guide: man.guide, weekDone: false });
+  location.reload();
+}
+
+async function startDemo() {
+  if (!atLeast('admin') || !demoAvailable() || demoActive()) return;
+  if (!guardLeaveEdit()) return;
+  closeSettingsPanel();
+  demoCover('Setting up the demo', 'Your own vault is not touched.');
+  try {
+    const man = await demoLoad();
+    await demoSeed(man);
+    await demoBegin(man, false);
+  } catch (e) {
+    console.error('Folio: demo could not start', e);
+    demoCover(null);
+    alert('The demo could not start: ' + e.message);
+  }
+}
+
+async function demoReset() {
+  const d = demoState(); if (!d) return;
+  if (!confirm('Start the demo over? Everything done in it so far is cleared.')) return;
+  demoCover('Starting the demo over', '');
+  try {
+    const man = await demoLoad();
+    await demoSeed(man);
+    await demoBegin(man, true);
+  } catch (e) { demoCover(null); alert('The demo could not restart: ' + e.message); }
+}
+
+async function demoExit() {
+  const d = demoState();
+  demoCover('Leaving the demo', 'Putting your own Folio back.');
+  try { const root = await navigator.storage.getDirectory(); await root.removeEntry((d && d.folder) || 'Folio Demo', { recursive: true }); } catch (_) {}
+  const bk = localStorage.getItem('wb_demo_backup');
+  try { sessionStorage.removeItem('wb_demo'); } catch (_) {}
+  if (bk) {
+    const o = JSON.parse(bk);
+    localStorage.clear();
+    Object.keys(o).forEach(k => localStorage.setItem(k, o[k]));
+  }
+  location.reload();
+}
+
+function demoSwitch(email) {
+  const d = demoState(); if (!d || d.person === email) return;
+  if (!guardLeaveEdit()) return;
+  d.person = email; demoSave(d);
+  localStorage.setItem('wb_user_email', JSON.stringify(email));
+  localStorage.removeItem('wb_last_file');
+  demoCover('Switching', 'Opening Folio as ' + ((d.people.find(p => p.email === email) || {}).name || email));
+  location.reload();
+}
+
+function demoGuide() {
+  const d = demoState();
+  window.open(DEMO_DIR + ((d && d.guide) || 'Folio-demo-guide.pdf'), '_blank', 'noopener');
+}
+
+function demoPaintBar() {
+  const bar = $('demo-bar'); if (!bar) return;
+  const d = demoState();
+  if (!d) { bar.hidden = true; bar.innerHTML = ''; return; }
+  bar.innerHTML = '<span class="db-badge">DEMO</span><span class="db-label">You are</span>' +
+    '<span class="db-people" role="group" aria-label="Demo person">' + d.people.map(p =>
+      '<button type="button" class="db-person' + (p.email === d.person ? ' on' : '') + '" data-email="' + escHtml(p.email) + '">' +
+      '<b>' + escHtml(p.name) + '</b> &middot; ' + escHtml(p.role) + '</button>').join('') + '</span>' +
+    '<span class="db-sp"></span>' +
+    '<button type="button" class="db-btn" data-db="guide" title="The printable walkthrough">Guide</button>' +
+    '<button type="button" class="db-btn" data-db="reset" title="Start the demo over">Reset</button>' +
+    '<button type="button" class="db-btn" data-db="exit" title="Leave the demo and go back to your vault">Exit demo</button>';
+  bar.hidden = false;
+  bar.onclick = e => {
+    const p = e.target.closest('.db-person'); if (p) { demoSwitch(p.dataset.email); return; }
+    const b = e.target.closest('[data-db]'); if (!b) return;
+    if (b.dataset.db === 'guide') demoGuide();
+    else if (b.dataset.db === 'reset') demoReset();
+    else if (b.dataset.db === 'exit') demoExit();
+  };
+}
+
+// Boot, in a demo window: open the demo folder instead of the remembered one.
+async function demoBoot() {
+  const d = demoState();
+  demoPaintBar();
+  setInterval(() => { try { localStorage.setItem('wb_demo_live', String(demoRealNow())); } catch (_) {} }, 5000);
+  try { localStorage.setItem('wb_demo_live', String(demoRealNow())); } catch (_) {}
+  if (!d.weekDone) demoCover('Setting up the demo', 'Opening the sample vault.');
+  const root = await navigator.storage.getDirectory();
+  const v = await root.getDirectoryHandle(d.folder);
+  await startLocalVault(v);
+  if (!d.weekDone) demoAfterBoot(v);
+}
+
+async function demoAfterBoot(v) {
+  try {
+    for (let i = 0; i < 100 && !(typeof vaultReady !== 'undefined' && vaultReady === true); i++) await new Promise(r => setTimeout(r, 100));
+    await openWhatsNew(); wnMarkAllSeen();
+    const d = demoState();
+    const man = await demoLoad();
+    for (const rel of [...Object.keys(man.pre), ...man.week.added]) await demoWrite(v, rel, demoBlob(man.files[rel]));
+    state.folderStale = Object.fromEntries(Object.keys(state.folderLoaded).map(k => [k, true]));
+    await loadAllFolders();
+    d.weekDone = true; demoSave(d);
+    openConsoleHome();
+  } catch (e) { console.warn('Folio: demo week edits did not apply', e); }
+  demoCover(null);
+}
+
+// S115 -- Administrator setup rows: show what is set; the Change buttons open
+// the same modals the user menu used to.
+function renderSettingsAdmin() {
+  const box = $('s-admin-setup');
+  if (!box) return;
+  const admin = atLeast('admin');
+  box.style.display = admin ? '' : 'none';
+  if (!admin) return;
+  const dp = $('s-dp-val');
+  if (dp) dp.textContent = state.defaultPage && state.defaultPage.name ? state.defaultPage.name.replace(/\.md$/i, '') : 'Not set';
+  const df = $('s-df-val');
+  if (df) { try { df.textContent = pdDraftsFolder(); } catch (_) { df.textContent = ''; } }
+  const dr = $('s-demo-row');
+  if (dr) dr.style.display = demoAvailable() && !demoActive() ? '' : 'none';
 }
 
 // P6 — what this app is reading, and where that list came from. Read only:
@@ -19698,7 +19993,7 @@ function toggleUserDropdown(e) {
   }
   closeThemePanel();
   const rc = $('ud-reconnect');
-  if (rc) rc.style.display = LOCAL.on ? '' : 'none';
+  if (rc) rc.style.display = LOCAL.on && !demoActive() ? '' : 'none';
   refreshAccountMenu(); // S60 -- health rows, install item, Usage gating
   $('user-dropdown').classList.toggle('open');
 }
@@ -22676,7 +22971,7 @@ async function usageListLogs(subdir, withTime) {
       for await (const [name, h] of dir.entries()) {
         if (h.kind === 'file' && name.endsWith('.md')) {
           const rec = { name, url: `local:/${sub}/${name}` };
-          if (withTime) { try { rec.modified = (await h.getFile()).lastModified; } catch (_) {} }
+          if (withTime) { try { rec.modified = demoFileTime((await h.getFile()).lastModified); } catch (_) {} }
           out.push(rec);
         }
       }
@@ -25246,12 +25541,14 @@ async function submitDefaultPage() {
   if (!opt || !opt.value) { closeDefaultPageModal(); return; }
   await saveDefaultPage(opt.value, opt.dataset.name || opt.value);
   closeDefaultPageModal();
+  if (state.settingsOpen) renderSettingsAdmin();
   if (state.consoleHome) renderConsoleHome(false);
 }
 
 async function clearDefaultPage() {
   await saveDefaultPage(null, null);
   closeDefaultPageModal();
+  if (state.settingsOpen) renderSettingsAdmin();
   if (state.consoleHome) renderConsoleHome(false);
 }
 
@@ -25960,15 +26257,6 @@ if (window.matchMedia) {
   else if (mq.addListener) mq.addListener(onSystemChange);
 }
 
-// Advanced Settings — collapsed by default, remembers open/closed.
-function toggleAdvancedSettings(forceOpen) {
-  const header = $('adv-settings-toggle');
-  const body   = $('adv-settings-body');
-  const open   = forceOpen !== undefined ? forceOpen : body.style.display === 'none';
-  body.style.display = open ? '' : 'none';
-  header.classList.toggle('open', open);
-  persist('wb_adv_open', open);
-}
 
 // Header sun/moon button — unchanged behaviour, now writing the same
 // mode value the Theme panel reads. From 'system' it flips to whichever
@@ -26515,8 +26803,6 @@ function loadPersistedState() {
     // reverting this file restores the previous look untouched.
     loadThemePrefs();
 
-    const advOpen = localStorage.getItem('wb_adv_open');
-    if (advOpen !== null) toggleAdvancedSettings(JSON.parse(advOpen));
 
     // S97 — wb_tier is not restored HERE, and S98 did not change that.
     // Access arrives with the profile (applyAccessFromProfile), so granting
@@ -28947,6 +29233,7 @@ async function submitDraftsFolder() {
     state.draftsFolder = v;
     await spWriteFile(appSettingsFileUrl(), appSettingsJson());
     rvNotify('Drafts folder set to ' + v + '.', true);
+    if (state.settingsOpen) renderSettingsAdmin();
   } catch (e) {
     console.error('Folio: failed to write app settings', e);
     alert('Could not write to the vault. Check your permissions.');
@@ -30097,6 +30384,11 @@ function frAdvance(id) {
 }
 
 async function renderFirstRunEntry() {
+  // S115 -- a demo window opens the demo folder, never the remembered one.
+  if (demoActive()) {
+    try { await demoBoot(); return; }
+    catch (e) { console.error('Folio: the demo folder is gone, leaving the demo', e); await demoExit(); return; }
+  }
   renderAppBanner(); // nothing connected yet — the connect state
   const fsOk  = !!window.showDirectoryPicker;
   const saved = fsOk ? await savedVaultHandle() : null;
@@ -30799,6 +31091,7 @@ function rerunWalkthrough() {
 }
 
 async function firstRunFullReset() {
+  if (demoActive()) return; // S115 -- never forget the real folder from inside a demo
   try { await idbDel(); } catch (_) { /* nothing remembered is the same outcome */ }
   try { localStorage.removeItem('wb_user_email'); } catch (_) {}
   try { localStorage.removeItem('wb_last_file'); } catch (_) {}
