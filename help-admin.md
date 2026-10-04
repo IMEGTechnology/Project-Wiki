@@ -1,7 +1,7 @@
 # Administering
 
 > [!NOTE] About this guide
-> This guide is for Administrators only. It covers running Folio for your team: who can do what, must reads and onboarding, the health of the vault, what people read, and the staff update. Everything a Contributor does is in [Contributing](help-contrib.md). Everything a reader does is in [Using Folio](help.md). Written for **Version 0.86.0**.
+> This guide is for Administrators only. It covers running Folio for your team: who can do what, must reads and onboarding, the health of the vault, what people read, and the staff update. Everything a Contributor does is in [Contributing](help-contrib.md). Everything a reader does is in [Using Folio](help.md). Written for **Version 0.86.1**.
 
 You open almost all of this from **Admin** on Home. **New here? Do Find your way around Admin, then Set the passwords.** Until the passwords are set, anyone can make themselves an Administrator.
 

@@ -935,7 +935,10 @@
        preferred size; when the window is tight it now gives way instead of
        the page falling off. !important for the reason the rules below give:
        setPanelOpen() and the fit write min-width inline. */
-    body.beta-shell #right-panel:not(.closed) { flex-shrink: 1; min-width: 240px !important; }
+    body.beta-shell #right-panel:not(.closed) { flex-shrink: 1; min-width: 200px !important; }
+    /* S116 -- the left column follows the same rule: one floor (PANEL_FLOOR_W,
+       200) and both columns give way the same when the window is tight. */
+    body.beta-shell #sidebar:not(.closed) { flex-shrink: 1; min-width: 200px !important; }
 
     /* 0.44.2 -- B1b item 2. Outline is the only thing this column ever
        shows in the new shell, and there is no manual way to close it, so
@@ -3645,8 +3648,12 @@
     /* === Reader panel ======================================== */
     /* Responsive minimum width — panels can never squeeze reader below these values */
     #reader-wrap { min-width: 600px; }
-    @media (min-width: 1440px) { #reader-wrap { min-width: 900px;  } }
-    @media (min-width: 1920px) { #reader-wrap { min-width: 1200px; } }
+    /* S116 -- on a wide window the reader keeps room for the chosen reading
+       width plus a margin (--reader-min, set beside --read-width), not a
+       fixed step. The old 1200 at 1920 held 464px more than the text needed
+       and left the side columns nothing to grow into. getReaderMin() mirrors
+       this rule; change both together. */
+    @media (min-width: 1440px) { #reader-wrap { min-width: var(--reader-min, 900px); } }
 
     /* === Right panel ========================================= */
     #right-panel {
@@ -5128,7 +5135,7 @@ body.help-mode #reader-content .md-h-acts { display: none; }
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.86.0</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.86.1</button>
       </div>
 
       <div class="ud-actions">
@@ -5864,10 +5871,6 @@ due:
 author:
 edited-by:
 edited-at:
-must-read: false
-must-read-start:
-onboarding: false
-onboarding-due:
 ---
 %%
 TEMPLATE
@@ -6076,10 +6079,6 @@ due:
 author:
 edited-by:
 edited-at:
-must-read: false
-must-read-start:
-onboarding: false
-onboarding-due:
 ---
 %%
 TEMPLATE
@@ -6208,10 +6207,6 @@ due:
 author:
 edited-by:
 edited-at:
-must-read: false
-must-read-start:
-onboarding: false
-onboarding-due:
 ---
 %%
 TEMPLATE
@@ -6311,10 +6306,6 @@ due:
 author:
 edited-by:
 edited-at:
-must-read: false
-must-read-start:
-onboarding: false
-onboarding-due:
 ---
 %%
 TEMPLATE
@@ -6438,8 +6429,6 @@ RULES FOR THE NOTES THEMSELVES
 > | due | Admin | A date the page must be finished by, if any | 2026-10-15 |
 > | author | Folio | Who started the page | Jayson Stickrod |
 > | edited-by, edited-at | Folio | Who changed it last, and when | |
-> | must-read, must-read-start | Admin | Whether everyone must read it, and from when | false |
-> | onboarding, onboarding-due | Admin | Whether new staff must read it, and by when | false |
 >
 > > [!warning] Leave the property names alone
 > > Change what comes after the colon, never the word before it. A misspelled property name is a new, empty property, and Folio will not find the real one.
@@ -11738,6 +11727,12 @@ function exitConsoleHome(nextUrl) {
   if (!state.consoleHome) return;
   state.consoleHome = false;
   document.body.classList.remove('console-home');
+  // S116 -- Folio opens on Home, where both columns are zero wide, so the
+  // once-per-session fit in renderSidebar() found nothing to measure and the
+  // left column never fitted at all. Leaving Home is when both columns first
+  // appear; each call does nothing once the person has a width of their own.
+  fitPanelIfUnsized('sidebar', 'left', 'wb_sb_width');
+  fitPanelIfUnsized('right-panel', 'right', 'wb_rp_width');
 }
 
 function chRecentRows() {
@@ -14405,7 +14400,7 @@ let fhInfoOpen = false;   // the Information band, folded by default
 let fhDlg = null;         // the diff waiting for Apply
 
 const FH_PROP_ORDER = ['type', 'summary', 'status', 'reviewed', 'created', 'author', 'number', 'tags', 'aliases',
-  'due', 'must-read', 'must-read-start', 'onboarding', 'onboarding-due', 'file-in'];
+  'due', 'file-in'];   // S116 -- the four retired must-read / onboarding properties left the house order (S113 retired them)
 // Rules Vault check reports elsewhere, or cannot check from the text alone.
 const FH_ELSEWHERE = {
   'Three-digit number in the file name': 'reported above as No number',
@@ -17113,6 +17108,7 @@ const SU_OPENING_DEFAULT =
 // rides with the code that shipped it. A release that earns no line adds
 // none, which is the same judgement Skip makes on a page.
 const SU_APP_UPDATES = [
+  { v: '0.86.1', line: 'The side columns now open just wide enough for their names, and both stretch the same way.' },
   { v: '0.79.0', line: 'Must reads now have due dates, and you mark one read from the banner at the top of the page.' },
   { v: '0.64.0', line: 'Staff updates are written from Folio itself, on the new Admin tab.' },
   { v: '0.63.0', line: 'Review is now a single list, oldest first.' },
@@ -18282,17 +18278,30 @@ const CLICK_THRESHOLD = 4;   // mouse moved less than this → treat as a click,
 // does not change. So a drag here stops at a floor instead of falling through
 // into a close. Narrow enough to be worth dragging to, wide enough that nobody
 // arrives at a column they cannot see and cannot explain.
-const PANEL_FLOOR_W = 180;
+const PANEL_FLOOR_W = 200;   // S116 -- one floor for both columns, the drag, the fit and the CSS (min-width: 200px on both)
+
+// S116 -- a column that sizes ITSELF (no width of the person's own yet) never
+// opens wider than this. The fit is for cutting off a name, not for taking
+// the room the other column needs. A drag or double-click can still go wider.
+const PANEL_AUTO_MAX_W = 340;
 
 // True where a panel's visibility is NOT the drag's business. Reads the shell
 // rather than the panel, because that is what the rule is actually about.
 
 // Reader floor scales with viewport — matches CSS media queries above
 function getReaderMin() {
-  const w = window.innerWidth;
-  if (w >= 1920) return 1200;
-  if (w >= 1440) return 900;
-  return 600;
+  // S116 -- read the floor the stylesheet is actually holding, so the drag's
+  // arithmetic and the layout can never disagree again (they did: 1200 here
+  // against whatever the CSS step said). Falls back to the small-window 600.
+  const rw = document.getElementById('reader-wrap');
+  const v = rw ? parseFloat(getComputedStyle(rw).minWidth) : NaN;
+  return v > 0 ? v : 600;
+}
+// S116 -- the reading width plus 64px of margin; Full width (100%) keeps 900.
+function readerMinFor(readWidth) {
+  const px = parseInt(String(readWidth || '').trim(), 10);
+  if (!px || /%/.test(String(readWidth))) return 900;
+  return px + 64;
 }
 
 // Shared "does the label overlap the button group" check for headers that
@@ -18338,12 +18347,15 @@ function fitToolbarLabel(containerId, labelSel, groupId) {
 // FIT_ROW_SEL is shared with nothing else on purpose — it is the list of
 // things that carry a NAME a person could be trying to read in full. Adding a
 // container to it re-introduces the bug above.
+// S116 -- the Outline is measured by its whole ROW, not the heading button:
+// the row also carries the comment count and the save mark beside the name,
+// so a fit to the button alone landed short and cut "Mistakes we see".
 // Every entry below was checked against the markup. `.ot-row` used to be in
 // this list and has never existed — the outline's row is `.rp-outline-item`.
 // A selector that matches nothing is silent, so the Outline pane has been
 // fitting to nothing but its header this whole time.
 const FIT_ROW_SEL = [
-  '.file-row', '.folder-row', '.rp-outline-item', '.saved-row', '.search-hit',
+  '.file-row', '.folder-row', '.rp-outline-row', '.saved-row', '.search-hit',
   '.backlink-item', '.comment-card', '.rv-file-name', '.rvp-row',
   '.ph-label', '.sbt-label', '.wn-row', '.vc-row',
 ].join(', ');
@@ -18396,7 +18408,12 @@ function fitPanelToContent(panel, side, max) {
   const rows = [...panel.querySelectorAll(FIT_ROW_SEL)]
     .filter(el => el.offsetParent || el.offsetWidth);
   const prevRowW = rows.map(el => el.style.width);
-  rows.forEach(el => { el.style.width = 'max-content'; });
+  const prevRowF = rows.map(el => el.style.flex);
+  // S116 -- AND without flex. An Outline row is `flex: 1` inside its own flex
+  // line, so max-content alone still stretched it to the panel and every
+  // heading measured as wide as the cap. The right column opened at 500-700px
+  // and left the left column no room to grow.
+  rows.forEach(el => { el.style.width = 'max-content'; el.style.flex = 'none'; });
 
   let widest = 0;
   rows.forEach(el => {
@@ -18407,7 +18424,7 @@ function fitPanelToContent(panel, side, max) {
     if (w > widest) widest = w;
   });
 
-  rows.forEach((el, i) => { el.style.width = prevRowW[i]; });
+  rows.forEach((el, i) => { el.style.width = prevRowW[i]; el.style.flex = prevRowF[i]; });
   panel.style.width    = prevW;
   panel.style.minWidth = prevMinW;
   // transition stays suppressed until the FINAL width below is set — Session
@@ -18418,7 +18435,7 @@ function fitPanelToContent(panel, side, max) {
   // does. Fit-to-content is a decisive action, not a drag; it should land
   // instantly.
 
-  if (!widest) { panel.style.transition = prevTran; return; }
+  if (!widest) { panel.style.transition = prevTran; return 0; }
   let w = Math.ceil(widest) + 24; // breathing room + scrollbar gutter
   w = Math.min(max, w);
 
@@ -18439,11 +18456,12 @@ function fitPanelToContent(panel, side, max) {
   const otherWidth = squeezeNeighbour(otherPanel, otherKey);
   const bodyWidth  = $('body').offsetWidth;
   w = Math.min(w, bodyWidth - otherWidth - HANDLE_TOTAL - getReaderMin());
-  w = Math.max(w, SNAP_THRESHOLD);
+  w = Math.max(w, PANEL_FLOOR_W);   // S116 -- the same floor as a drag
 
   panel.style.width    = w + 'px';
   panel.style.minWidth = w + 'px';
   panel.style.transition = prevTran;
+  return w;
 }
 
 // v0.32.1: was 480. A long note name three folders deep needs more room than
@@ -18474,8 +18492,11 @@ function makeResizable(handleId, panelId, side, storageKey, onClose, onOpen, max
   handle.addEventListener('dblclick', e => {
     if (panel.classList.contains('closed')) return;
     clearTimeout(collapseTimer);
-    fitPanelToContent(panel, side, max);
-    persist(storageKey, panel.offsetWidth);
+    // S116 -- save the width the fit SET. offsetWidth here is read while the
+    // panel's 0.18s width transition is still running, so it returned the
+    // width it started from and a fitted width never survived a reopen.
+    const fitted = fitPanelToContent(panel, side, max);
+    if (fitted) persist(storageKey, fitted);
   });
 
   handle.addEventListener('mousedown', e => {
@@ -18599,7 +18620,7 @@ function setPanelOpen(panelId, handleId, storageKey, open) {
       const ceiling    = $('body').offsetWidth - otherWidth - HANDLE_TOTAL - getReaderMin();
       let w = JSON.parse(saved);
       w = Math.min(w, PANEL_MAX_W, ceiling);
-      w = Math.max(w, 0);
+      w = Math.max(w, PANEL_FLOOR_W);   // S116 -- the shared floor
       panel.style.width    = w + 'px';
       panel.style.minWidth = w + 'px';
     } else {
@@ -18649,7 +18670,7 @@ function fitPanelIfUnsized(panelId, side, storageKey) {
     if (localStorage.getItem(storageKey)) return;
     if (panel.classList.contains('closed')) return;
     if (!panel.offsetWidth) return;   // auto-collapsed, or Home: nothing to fit
-    fitPanelToContent(panel, side, PANEL_MAX_W);
+    fitPanelToContent(panel, side, PANEL_AUTO_MAX_W);   // S116 -- capped; see PANEL_AUTO_MAX_W
   }));
 }
 
@@ -26270,6 +26291,7 @@ function applyThemePrefs() {
   for (let i = 0; i < 6; i++) s.setProperty('--heading-' + (i + 1), heads[i]);
 
   s.setProperty('--read-width', READ_WIDTHS[OLD_WIDTHS[p.width] || p.width] || READ_WIDTHS.readable);
+  s.setProperty('--reader-min', readerMinFor(READ_WIDTHS[OLD_WIDTHS[p.width] || p.width] || READ_WIDTHS.readable) + 'px');   // S116
   s.setProperty('--body-size',  BODY_SIZES[p.size]   || BODY_SIZES.m);
   s.setProperty('--body-lead',  BODY_LEADS[p.lead]   || BODY_LEADS.relaxed);
   const gaps = BODY_GAPS[p.lead] || BODY_GAPS.relaxed;

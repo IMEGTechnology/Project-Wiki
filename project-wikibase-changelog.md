@@ -8,6 +8,24 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.86.1 — 2026-10-04
+
+**Changed:** `index.html`, `help.md` (Resizing and Email digests lines), version lines in all four guides, `demo/` (demo vault templates no longer carry the retired properties). Tests: `s116-columns.test.js` (new, 35 checks); `docks`, `p11-columns`, `review-bugfix-0321` and `s103-screens` updated for the new floor and measurement; `change-detection` no longer depends on today's date.
+
+*S116, the deep audit, and the fixes Jayson approved from it.*
+
+### Fixes
+- **The side columns follow one set of rules.** Reported by Jayson: the left and right columns behaved differently, one would not expand or expanded too far. Causes found in a real browser at four screen sizes:
+  - The right column fitted itself to every Outline heading at its stretched width, so it opened at 500 to 700 px and left the left column no room. It now measures the heading row by its text, and a column that sizes itself never opens wider than 340 px.
+  - On a wide window the reading area held 900 px, and 1200 px from 1920 wide, though the text is 736. It now keeps the chosen reading width plus 64 px (800 Readable, 940 Standard, 1180 Wide, 900 Full width).
+  - Double-click saved the width the column had before the fit, so a fitted width did not survive a reopen. It now saves the width it lands on.
+  - One floor, 200 px, for both columns, the drag and the fit (it was 180 left, 240 right, 80 for a fit), and both columns give way the same on a narrow window.
+  - The left column now fits to its names too: Folio opens on Home, where both columns are hidden, and the fit had been spending itself there.
+- **New pages no longer get the retired must-read and onboarding properties.** The built-in templates and the Sample still wrote them after 0.79.0 moved must reads to Admin > Users; Format health no longer expects them. A page still carrying them the old way is still offered the one-time carry-over in Users.
+
+### Housekeeping
+- A What's New test held a fixed 90-day window against an August fixture and would have crashed its whole suite from 5 Nov 2026; the window now follows the fixture.
+
 ## 0.86.0 — 2026-10-04
 
 **Changed:** `index.html`, all four help guides, `help-assets/` (two new pictures, `ob-table-plain.png` and `ob-table-wide.png`, and `uf-home.png` retaken for the new Home), `demo/` (seven people in the demo, the guide reworded and reprinted), version lines. Tests: `s122-fixes.test.js` (new, 34 checks); `s111-format-health` gains 2 for the callout fix; `h1a-help`, `h3-guides`, `help-area`, `s115-demo` and `s99-home-trade` updated.

@@ -3,7 +3,7 @@
 > [!NOTE] About this guide
 > This guide lives with the app, not inside your vault, so it never appears in the folder list. Press the **?** in the header to come back at any time.
 >
-> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.86.0**.
+> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.86.1**.
 
 Folio is the team's shared reference: a folder of notes you can browse, search, save and comment on. **New here? Do the first two topics and stop.** That is enough to use Folio. The rest is there when you need it.
 
@@ -54,7 +54,7 @@ Folio is a few parts, and everything else opens beside or over them. The numbers
 > Every picture in this guide is taken in dark mode. Light mode is the same screen with light colours.
 
 > [!note]+ More detail
-> **Resizing.** Drag the inner edge of a side column to make it wider or narrower. Folio remembers the widths on this computer.
+> **Resizing.** Drag the inner edge of a side column to make it wider or narrower, or double-click the edge to fit what the column shows. Until you set a width yourself, each column opens just wide enough for its names. Folio remembers the widths on this computer.
 >
 > **Hiding Vault Files.** The icon at the far left of the header shows or hides it, so the page can use the room.
 >
@@ -402,7 +402,7 @@ Anyone can comment. You never need editing turned on. Click **Comments** in the 
 >
 > **Every open comment in the vault** is on **Home**, then **Admin**, then **All comments**, for Contributors and Administrators.
 >
-> **Email digests.** If the vault lives in a SharePoint or Teams library, SharePoint can email you when comments change. Open the vault folder in SharePoint in a browser, point at it, click the three dots, choose **Alert me**, **All changes**, then **Send a daily summary**. Set the alert on one comments file instead if you only care about one page.
+> **Email digests.** If the vault lives in a SharePoint or Teams library, SharePoint can email you when comments change. Open the vault folder in SharePoint in a browser, point at it, click the three dots, choose **Alert me**, **All changes**, then **Send a daily summary**. Comments are kept in the vault's **zSystem/pages** folder, so an alert on that folder alone tells you about comments and nothing else.
 
 ## Change how Folio looks
 %% card: Dark or light, Default or Guided, and how wide and large to read | icon: palette | updated: 0.82 | key: theme %%
@@ -571,4 +571,4 @@ Nobody is locked out. Ask whoever runs Folio: an Administrator can reset it from
 
 ---
 
-Written for **Version 0.86.0**.
+Written for **Version 0.86.1**.

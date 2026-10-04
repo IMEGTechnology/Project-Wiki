@@ -1,7 +1,7 @@
 # Contributing
 
 > [!NOTE] About this guide
-> This guide is for Contributors and Administrators. It covers the jobs you have on top of everything in [Using Folio](help.md): reviewing pages, answering comments, starting a new page and looking at the templates. Writing a page is a separate guide, [Editing in Obsidian](help-edit.md). Written for **Version 0.86.0**.
+> This guide is for Contributors and Administrators. It covers the jobs you have on top of everything in [Using Folio](help.md): reviewing pages, answering comments, starting a new page and looking at the templates. Writing a page is a separate guide, [Editing in Obsidian](help-edit.md). Written for **Version 0.86.1**.
 
 Most of what you do here starts from **Admin** on Home. Review, All comments and Templates are three of its doors. **New page** is in the header. **New here? Do Find what needs your review and Approve or flag a page.** That is the heart of the job.
 

@@ -1,7 +1,7 @@
 # Editing in Obsidian
 
 > [!NOTE] About this guide
-> This guide is for Contributors and Administrators. Pages are written in Obsidian, and Folio is where people read them. This guide covers setting Obsidian up, writing a page so it looks right in Folio, and what Folio does and does not show. Reading and commenting are in [Using Folio](help.md). Reviewing is in [Contributing](help-contrib.md). Written for **Version 0.86.0**.
+> This guide is for Contributors and Administrators. Pages are written in Obsidian, and Folio is where people read them. This guide covers setting Obsidian up, writing a page so it looks right in Folio, and what Folio does and does not show. Reading and commenting are in [Using Folio](help.md). Reviewing is in [Contributing](help-contrib.md). Written for **Version 0.86.1**.
 
 Folio and Obsidian read the same folder of files. Change a page in one and it is changed in the other, with nothing to copy across. **New here? Do the first two topics.** The rest is a reference you can come back to. For every rule here written out as a finished page, open **Admin**, then **Templates**, then the **Sample** tab.
 
