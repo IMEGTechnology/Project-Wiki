@@ -4689,6 +4689,103 @@ body.beta-shell #reader-content .md-table-wrap.overflow .md-tscroll thead th { p
 #table-view th:first-child, #table-view td:first-child { position: sticky; left: 0; z-index: 2; box-shadow: 1px 0 0 var(--border-strong); }
 #table-view th:first-child { z-index: 4; }
 
+/* ---------- Canvas boards (CV, 21 Oct 2026) ----------
+   Obsidian .canvas files, read only. One viewer in three places: a board
+   opened from the file list (fills the reading column), a board embedded
+   in a page (fitted to the column, height from the board's shape), and
+   full screen over everything. Colours set in Obsidian keep their hue and
+   take Folio's light and dark tones. Text sizes are the app's own scale. */
+.cv-c-red    { --cv-col: var(--co-red-bd); }
+.cv-c-orange { --cv-col: var(--co-orange-bd); }
+.cv-c-yellow { --cv-col: var(--co-yellow-bd); }
+.cv-c-green  { --cv-col: var(--co-green-bd); }
+.cv-c-cyan   { --cv-col: var(--co-cyan-bd); }
+.cv-c-purple { --cv-col: var(--co-purple-bd); }
+.file-icon.cv-ic, body.nav-file-color .file-icon.cv-ic { color: var(--co-purple-txt); }
+.cv-ic-inline { display: inline-flex; width: 14px; height: 14px; flex-shrink: 0; color: var(--co-purple-txt); vertical-align: -2px; }
+.cv-ic-inline svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cv-tag { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; color: var(--co-purple-txt); background: var(--co-purple-bg); border-radius: 4px; padding: 0 6px; margin-left: 6px; white-space: nowrap; }
+
+.cv-view { position: relative; overflow: hidden; border: 1px solid var(--border-strong); border-radius: 8px;
+  background-color: var(--bg-app); background-image: radial-gradient(var(--cv-dot) 1px, transparent 1px);
+  --cv-dot: rgba(0,0,0,0.13); touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+body[data-theme="dark"] .cv-view { --cv-dot: rgba(255,255,255,0.10); }
+.cv-view.cv-dragging { cursor: grabbing; }
+.cv-view.cv-mode-embed { touch-action: pan-y; margin: 1.2em 0; }
+#reader-content.cv-board-page { max-width: none; padding: 20px 24px 16px; }
+.cv-view.cv-mode-page  { margin: 4px 0 8px; min-height: 360px; }
+.cv-view.cv-mode-mini  { cursor: pointer; border: 0; border-radius: 0 0 7px 7px; height: 150px; }
+.cv-view.cv-mode-mini .cv-world { pointer-events: none; }
+.cv-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cv-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 12.5px; padding: 16px; text-align: center; }
+
+.cv-group, .cv-card { position: absolute; box-sizing: border-box; border-radius: 8px; }
+.cv-group { border: 2px solid var(--cv-col, var(--border-strong)); }
+.cv-group::before, .cv-card.cv-col::before { content: ''; position: absolute; inset: 0; border-radius: 6px; background: var(--cv-col); opacity: .07; pointer-events: none; }
+body[data-theme="dark"] .cv-group::before, body[data-theme="dark"] .cv-card.cv-col::before { opacity: .10; }
+.cv-glabel { position: absolute; left: 0; bottom: 100%; margin-bottom: 6px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; padding: 2px 8px; border-radius: 5px; background: var(--bg-reader); border: 1px solid var(--cv-col, var(--border-strong)); }
+.cv-card { background: var(--bg-reader); border: 2px solid var(--cv-col, var(--border-strong)); overflow: hidden; color: var(--text-primary); }
+.cv-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+.cv-body { position: relative; height: 100%; overflow: auto; padding: 10px 14px; font-size: 13.5px; line-height: 1.5; color: var(--text-secondary); cursor: auto; user-select: text; -webkit-user-select: text; }
+.cv-md > :first-child, .cv-md .md-section > :first-child { margin-top: 0; }
+.cv-md p, .cv-md ul, .cv-md ol { margin: 0 0 .5em; }
+.cv-md h1, .cv-md h2, .cv-md h3, .cv-md h4, .cv-md h5, .cv-md h6 { margin: .2em 0 .4em; line-height: 1.25; color: var(--text-primary); }
+.cv-md h1 { font-size: 1.5em; } .cv-md h2 { font-size: 1.3em; } .cv-md h3 { font-size: 1.15em; } .cv-md h4, .cv-md h5, .cv-md h6 { font-size: 1em; }
+.cv-md .cv-h-row { display: block; }
+.cv-md img { max-width: 100%; height: auto; }
+.cv-md .md-callout { margin: .4em 0; }
+
+.cv-page, .cv-board, .cv-other, .cv-link { cursor: pointer; }
+.cv-page .cv-ptitle { font-size: 16px; font-weight: 700; color: var(--accent); padding: 10px 14px 4px; }
+.cv-page { display: flex; flex-direction: column; }
+.cv-page .cv-ptitle { flex: none; }
+.cv-page .cv-pbody { position: relative; flex: 1; min-height: 0; overflow: hidden; padding: 0 14px; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); pointer-events: none; }
+.cv-page .cv-pbody h1, .cv-page .cv-pbody h2, .cv-page .cv-pbody h3 { font-size: 13.5px; }
+.cv-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; background: linear-gradient(rgba(0,0,0,0), var(--bg-reader)); pointer-events: none; }
+.cv-image { background: var(--bg-reader); }
+.cv-image img { width: 100%; height: 100%; object-fit: contain; display: block; pointer-events: none; }
+.cv-fcard { display: flex; align-items: center; gap: 10px; height: 100%; padding: 10px 14px; overflow: hidden; }
+.cv-fcard .cv-fic { width: 22px; height: 22px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; color: var(--text-muted); }
+.cv-board .cv-fcard .cv-fic { color: var(--co-purple-txt); }
+.cv-fname { font-size: 13.5px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; }
+.cv-fsub { font-size: 11.5px; color: var(--text-muted); }
+.cv-missing .cv-fname { color: var(--text-muted); }
+.cv-link .cv-lbody { padding: 10px 14px; overflow: hidden; height: 100%; }
+.cv-ldom { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text-muted); }
+.cv-ldom svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.cv-ltitle { font-size: 13.5px; font-weight: 700; color: var(--text-primary); margin: 4px 0; word-break: break-word; }
+.cv-lopen { font-size: 12.5px; color: var(--accent); }
+.cv-card.cv-hit { box-shadow: 0 0 0 3px var(--accent); }
+
+.cv-edges { position: absolute; overflow: visible; pointer-events: none; }
+.cv-e { fill: none; stroke: var(--cv-col, var(--text-muted)); stroke-width: 2; }
+.cv-ah { fill: var(--cv-col, var(--text-muted)); stroke: none; }
+.cv-elabel { position: absolute; transform: translate(-50%, -50%); font-size: 12.5px; color: var(--text-secondary); background: var(--bg-app); padding: 1px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; }
+
+.cv-ctl { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 4px; z-index: 2; }
+.cv-ctl button, .cv-close { height: 28px; min-width: 28px; padding: 0 8px; font-size: 12.5px; color: var(--text-secondary); background: var(--bg-reader); border: 1px solid var(--border-strong); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.cv-ctl button:hover, .cv-close:hover { color: var(--accent); border-color: var(--accent); }
+.cv-ctl svg, .cv-close svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cv-mode-mini .cv-ctl { display: none; }
+
+/* Full screen: the whole window, the way Open full table works. */
+#cv-full { display: none; position: fixed; inset: 0; z-index: 900; background: var(--bg-app); }
+#cv-full.open { display: block; }
+#cv-full .cv-view { position: absolute; inset: 0; border: 0; border-radius: 0; margin: 0; }
+#cv-full .cv-fhead { position: absolute; left: 12px; top: 12px; z-index: 3; display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; color: var(--text-primary); background: var(--bg-reader); border: 1px solid var(--border-strong); border-radius: 6px; padding: 4px 10px; }
+#cv-full .cv-close { position: absolute; right: 12px; top: 12px; z-index: 3; height: 32px; padding: 0 12px; }
+
+/* Compact card: ![[board.canvas|inlR]] or |inlL. Floats like a picture. */
+.cv-mini-card { width: 240px; max-width: 45%; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-reader); cursor: pointer; overflow: hidden; }
+.cv-mini-card:hover { border-color: var(--co-purple-bd); }
+.cv-mini-card.cv-inlR { float: right; margin: 0.3em 0 0.8em 1.4em; }
+.cv-mini-card.cv-inlL { float: left;  margin: 0.3em 1.4em 0.8em 0; }
+.cv-mini-head { display: flex; align-items: center; gap: 6px; padding: 7px 10px; font-size: 12.5px; font-weight: 600; color: var(--text-primary); border-bottom: 1px solid var(--border); }
+.cv-mini-head .cv-mini-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cv-chip { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); cursor: pointer; }
+.cv-chip:hover { text-decoration: underline; }
+.cv-slot { color: var(--text-muted); font-size: 12.5px; margin: 1.2em 0; }
+
 /* ---------- Images ----------
    Obsidian's own syntax; Folio reads the same words the Folio Obsidian theme
    does: a width number, inlR / inlL to wrap text, several on one line for a
@@ -5135,7 +5232,7 @@ body.help-mode #reader-content .md-h-acts { display: none; }
              release-integrity.test.js both match it by its onclick and text,
              not by where it sits, which is why moving it here cost them
              nothing. -->
-        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.86.1</button>
+        <button id="app-version" title="View changelog" aria-label="View changelog" onclick="openChangelog()">Version 0.87.1</button>
       </div>
 
       <div class="ud-actions">
@@ -7250,7 +7347,7 @@ function stripNumPrefix(s) {
 // jobs in two functions is the entire safety of this feature: the display one
 // is free to change, this one is not.
 function fileStem(raw) {
-  return String(raw).replace(/\.md$/i, '');
+  return String(raw).replace(/\.(md|canvas)$/i, ''); // CV -- a board's name shows without .canvas too
 }
 
 function displayFolderName(raw) {
@@ -8047,6 +8144,7 @@ function resetVaultState(fresh) {
   vaultFolders   = [];
   vaultRootFiles = [];
   searchIndex    = null; // rebuilt lazily on next search
+  cvResetVault();        // CV -- boards belong to the folder being left too
 
   state.folderLoaded = {};
   state.folderFiles  = {};
@@ -8220,6 +8318,7 @@ async function localStat(handle) {
 async function localEnumRoot() {
   const folders = [];
   const files   = [];
+  const boards  = []; // CV -- .canvas files, kept apart from pages
   for await (const [name, handle] of LOCAL.root.entries()) {
     if (handle.kind === 'directory') {
       if (isIgnored(name)) continue;
@@ -8230,10 +8329,15 @@ async function localEnumRoot() {
       LOCAL.files[url] = handle;
       const st = await localStat(handle);
       files.push({ name, url, modified: st.modified, size: st.size });
+    } else if (handle.kind === 'file' && cvIsUrl(name) && !isIgnored(name)) {
+      const url = `local:/${name}`;
+      LOCAL.files[url] = handle;
+      boards.push({ name, url });
     }
   }
   files.sort((a, b) => a.name.localeCompare(b.name));
   files.forEach(f => indexFile(f, null));
+  cvNoteFolderCanvases(null, boards);
   return { folders: numericSort(folders, 'name'), files };
 }
 
@@ -8241,6 +8345,7 @@ async function localEnumFolder(folder) {
   const dir   = LOCAL.dirs[folder.id];
   const files = [];
   const kids  = [];
+  const boards = []; // CV
   if (dir) {
     for await (const [name, handle] of dir.entries()) {
       if (handle.kind === 'directory') {
@@ -8253,10 +8358,15 @@ async function localEnumFolder(folder) {
         LOCAL.files[url] = handle;
         const st = await localStat(handle);
         files.push({ name, url, modified: st.modified, size: st.size });
+      } else if (handle.kind === 'file' && cvIsUrl(name) && !isIgnored(name)) {
+        const url = `local:/${folder.id}/${name}`;
+        LOCAL.files[url] = handle;
+        boards.push({ name, url });
       }
     }
   }
   files.sort((a, b) => a.name.localeCompare(b.name));
+  cvNoteFolderCanvases(folder.id, boards);
   state.folderFiles[folder.id]  = files;
   state.folderKids[folder.id]   = numericSort(kids, 'name');
   files.forEach(f => indexFile(f, folder.id));
@@ -8417,6 +8527,8 @@ async function loadVaultRoot() {
     .map(f => ({ name: f.Name, url: f.ServerRelativeUrl, modified: f.TimeLastModified }));
 
   files.forEach(f => indexFile(f, null));
+  cvNoteFolderCanvases(null, (filesData.value || []).filter(f => cvIsUrl(f.Name) && !isIgnored(f.Name))
+    .map(f => ({ name: f.Name, url: f.ServerRelativeUrl })));
 
   return { folders, files };
 }
@@ -8441,6 +8553,8 @@ async function loadFolderFiles(folder) {
   );
 
   state.folderFiles[folder.id].forEach(f => indexFile(f, folder.id));
+  cvNoteFolderCanvases(folder.id, (data.value || []).filter(f => cvIsUrl(f.Name) && !isIgnored(f.Name))
+    .map(f => ({ name: f.Name, url: f.ServerRelativeUrl })));
   state.folderLoaded[folder.id] = true;
   delete state.folderStale[folder.id];
 }
@@ -8468,6 +8582,9 @@ const ICON = {
   // way the folder glyph's do. Used in the sidebar, backlinks and review
   // lists — all of them pick up the setting for free.
   file:       `<span class="file-icon"><svg class="icon-sm ic-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><svg class="ic-dot" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="3"/></svg></span>`,
+  // CV -- a board in the file list: the shape Obsidian uses for canvas files,
+  // in the canvas purple. The dot alternate rides along like the file's.
+  canvas:     `<span class="file-icon cv-ic"><svg class="icon-sm ic-file" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><svg class="ic-dot" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="3"/></svg></span>`,
   foldChevron:`<svg class="md-fold-icon" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`,
   embedFile:  `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   imgErr:     `<svg style="width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="4" y1="4" x2="20" y2="20"/></svg>`,
@@ -8515,7 +8632,7 @@ function renderSidebar() {
   function renderFolderBlock(folder, idx) {
     const isOpen = !!state.openFolders[folder.id];
     const dname  = displayFolderName(folder.name);
-    const files  = state.folderFiles[folder.id] || [];
+    const files  = cvTreeEntries(state.folderFiles[folder.id] || [], (state.folderCanvases || {})[folder.id]); // CV -- boards among the pages
     const kids   = state.folderKids[folder.id]  || [];
     const loaded = state.folderLoaded[folder.id];
     const rb     = `var(--rb-${idx % 6})`;
@@ -8553,7 +8670,7 @@ function renderSidebar() {
           const dn     = displayFileName(f.name);
           const active = state.activeUrl === f.url;
           out += `<div class="file-row${active ? ' active' : ''}" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(dn)}">
-            ${ICON.file} ${escHtml(dn)}
+            ${cvIsUrl(f.url) ? ICON.canvas : ICON.file} ${escHtml(dn)}
           </div>`;
         });
       }
@@ -8568,7 +8685,7 @@ function renderSidebar() {
     const dn     = displayFileName(f.name);
     const active = state.activeUrl === f.url;
     return `<div class="root-file${active ? ' active' : ''}" data-wb-open="${escHtml(f.url)}" data-wb-name="${escHtml(dn)}">
-      ${ICON.file} ${escHtml(dn)}
+      ${cvIsUrl(f.url) ? ICON.canvas : ICON.file} ${escHtml(dn)}
     </div>`;
   };
 
@@ -8586,7 +8703,7 @@ function renderSidebar() {
       if (!vaultIsHere(v)) return;
       html += `<div class="sb-vault-head"><span class="sb-vault-dot"></span>${escHtml(v.name)}</div>`;
       const kids  = state.folderKids[v.id]  || [];
-      const files = state.folderFiles[v.id] || [];
+      const files = cvTreeEntries(state.folderFiles[v.id] || [], (state.folderCanvases || {})[v.id]); // CV
       let body = '';
       kids.forEach((k, ki) => { body += renderFolderBlock(k, ki); });
       files.forEach(f => { body += fileRowHTML(f); });
@@ -8594,10 +8711,10 @@ function renderSidebar() {
     });
 
     const strays = vaultFolders.filter(f => !vaultIds.includes(f.id));
-    if (strays.length || vaultRootFiles.length) {
+    if (strays.length || vaultRootFiles.length || vaultRootCanvases.length) {
       html += `<div class="sb-vault-head"><span class="sb-vault-dot"></span>${escHtml(VAULT_GENERAL_NAME)}</div>`;
       strays.forEach((f, i) => { html += renderFolderBlock(f, i); });
-      vaultRootFiles.forEach(f => { html += fileRowHTML(f); });
+      cvTreeEntries(vaultRootFiles, vaultRootCanvases).forEach(f => { html += fileRowHTML(f); });
     }
 
     // Listed but not here yet: phase 2's vaults, shown so nobody has to be
@@ -8608,9 +8725,9 @@ function renderSidebar() {
   } else {
     vaultFolders.forEach((folder, idx) => { html += renderFolderBlock(folder, idx); });
 
-    if (vaultRootFiles.length) {
+    if (vaultRootFiles.length || vaultRootCanvases.length) {
       if (vaultFolders.length) html += '<div class="sb-divider"></div>';
-      vaultRootFiles.forEach(f => { html += fileRowHTML(f); });
+      cvTreeEntries(vaultRootFiles, vaultRootCanvases).forEach(f => { html += fileRowHTML(f); });
     }
   }
 
@@ -9082,6 +9199,9 @@ function renderInline(text) {
     // S109b -- the width can come after other words (inlR|240), so take it
     // from the parsed options, not just the second part.
     const size = parseImageEmbed(raw).width || (sizePart || '').trim();
+    // CV -- a board mid-sentence is a link to it; only a board on its own
+    // line is drawn.
+    if (CV_EXT.test(rawName)) return slot(cvInlineChipHTML(rawName));
     if (isImageExt(name)) {
       // attachmentSrcFor() runs encodeURIComponent internally, so it must
       // be given the DECODED name — feeding it "Q1 &amp; Q2.png" would
@@ -10408,6 +10528,12 @@ function parseBlocks(lines) {
         i++;
         continue;
       }
+      // CV -- a board on its own line is drawn in the page.
+      if (CV_EXT.test(opts.name)) {
+        blocks.push({ type: 'canvas', name: opts.name, float: opts.float });
+        i++;
+        continue;
+      }
       if (isImageExt(opts.name)) {
         i++;
         // S109b -- an italic-only line straight under a picture is its caption.
@@ -11053,6 +11179,9 @@ function renderSingleBlock(block, seenIds) {
     case 'embed':
       return buildEmbedStub(block.name, false);
 
+    case 'canvas':   // CV -- filled by cvMountEmbeds once the page is on screen
+      return cvEmbedSlotHTML(block.name, block.float);
+
     default:
       return '';
   }
@@ -11569,7 +11698,8 @@ function betaPaletteHead(hit, nameHTML, folder, count) {
   const idx = betaPaletteHits.length;
   betaPaletteHits.push(hit);
   return `<div class="bp-row bp-head" data-si="${idx}" onclick="betaPaletteGo(${idx})">` +
-         `<span class="bp-name">${nameHTML}</span>` +
+         (hit && cvIsUrl(hit.url) ? cvInlineIcon() + ' ' : '') + // CV -- icon and label mark a board
+         `<span class="bp-name">${nameHTML}</span>` + (hit && cvIsUrl(hit.url) ? '<span class="cv-tag">CANVAS</span>' : '') +
          (folder ? `<span class="bp-path">\u00b7 ${escHtml(folder)}</span>` : '') +
          (count ? `<span class="bp-n">${count}</span>` : '') +
          `</div>`;
@@ -12563,9 +12693,10 @@ function betaPaletteSearchHTML(q) {
   // vault they came from, in vault-name order. The two rules INSIDE a group
   // are the ones this app has always used and are deliberately unchanged:
   // filename matches first, then content matches.
+  const pool = searchIndex.concat(searchCanvasIndex); // CV -- boards too
   const groups = vaultsOn()
-    ? groupByVault(searchIndex, f => f.url)
-    : [{ id: '', name: '', items: searchIndex }];
+    ? groupByVault(pool, f => f.url)
+    : [{ id: '', name: '', items: pool }];
 
   // S95 — a result is a PAGE, and the lines that matched are rows under it.
   // Before this, a page with four matching lines produced one row carrying
@@ -17108,6 +17239,7 @@ const SU_OPENING_DEFAULT =
 // rides with the code that shipped it. A release that earns no line adds
 // none, which is the same judgement Skip makes on a page.
 const SU_APP_UPDATES = [
+  { v: '0.87.0', line: 'Folio now shows Obsidian Canvas boards, on their own or inside a page, and search finds the words on their cards.' },
   { v: '0.86.1', line: 'The side columns now open just wide enough for their names, and both stretch the same way.' },
   { v: '0.79.0', line: 'Must reads now have due dates, and you mark one read from the banner at the top of the page.' },
   { v: '0.64.0', line: 'Staff updates are written from Folio itself, on the new Admin tab.' },
@@ -18076,6 +18208,7 @@ function updateBackButtons() {
 // ── Open file ────────────────────────────────────────────────────
 async function openFile(url, name) {
   if (!guardLeaveEdit()) return; // S9 — unsaved edit stays put
+  cvCloseFull();        // CV -- full screen never stays over the next page
   exitConsoleHome(url); // Section 18 — home is a mode, and opening a page leaves it
   // B2 / R1 -- a companion describes the page it was summoned for, so it
   // leaves with that page. Same call on every other route into a surface
@@ -18140,12 +18273,29 @@ async function openFile(url, name) {
 
   try {
     const text = await readVaultFile(url);
+    // CV -- a board is not a page: no comments, must reads, What's New or
+    // reading time, just the board, the address, Recent and the file list.
+    if (cvIsUrl(url)) {
+      rc.innerHTML = cvPageHTML(name);
+      rc.dataset.wbText = text;
+      cvRenderPage(rc, url, text);
+      $('reader').scrollTop = 0;
+      persist('wb_last_file', { url, name, folderId: state.fileFolder[url] ?? null });
+      wbHistoryReplace(url, '');
+      openFile._addrAnchor = null;
+      openFile._pendingAnchor = null;
+      recentNoteOpen(url, name);
+      refreshRightPanel();
+      folioRefreshFolderOf(url);
+      return;
+    }
     const fm = parseFm(text); // Session 2 -- byline reads author/due off this
     rc.innerHTML = tpStatusLineHTML(fm, url) + inlineTitleHTML(name) + summaryHTML(fm) +  // S110 status line
                    readerNoticeHTML(text, url) + parseMarkdown(text) +
                    bylineHTML(fm, url); // round 2 close -- footer, not a strap under the title
     rc.dataset.wbText = text; // lets the focus-regain refresh detect real changes
     hydrateLocalImages(rc); // no-op unless local test mode
+    cvMountEmbeds(rc);      // CV -- boards embedded in the page
     finishReaderRender(); // Session 2 -- table-width measurement + section bar
     // P7 — before refreshRightPanel() below, so Outline's first render for
     // this file already has real counts; before the badge update right
@@ -18248,11 +18398,13 @@ async function folioRefreshFolderOf(url) {
     const folder = id ? findFolder(id) : null;
     if (!folder) return;
     const before = (state.folderFiles[folder.id] || []).map(f => f.url).join('|') + '#' +
-                   (state.folderKids[folder.id] || []).map(k => k.id).join('|');
+                   (state.folderKids[folder.id] || []).map(k => k.id).join('|') + '#' +
+                   ((state.folderCanvases || {})[folder.id] || []).map(f => f.url).join('|');
     state.folderLoaded[folder.id] = false;
     await loadFolderFiles(folder);
     const after = (state.folderFiles[folder.id] || []).map(f => f.url).join('|') + '#' +
-                  (state.folderKids[folder.id] || []).map(k => k.id).join('|');
+                  (state.folderKids[folder.id] || []).map(k => k.id).join('|') + '#' +
+                  ((state.folderCanvases || {})[folder.id] || []).map(f => f.url).join('|');
     if (before !== after) renderSidebar();
   } catch (_) { /* the tree stays as it was */ }
 }
@@ -18759,6 +18911,7 @@ const HELP_ICON_PATHS = {
   alert:    '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
   clock:    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
   template: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+  board:    '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',   // CV
 };
 function helpIcon(name) {
   const p = HELP_ICON_PATHS[name] || HELP_ICON_PATHS.book;
@@ -20467,9 +20620,12 @@ function updateEditBtn() {
   // over Admin. Found by rendering it; nothing measures a button nobody
   // expected to be there.
   const open = !!(state.activeUrl && !state.editing);
+  // CV -- a board keeps Copy link only: it has no comments, properties or
+  // editing, and Saved follows page content it cannot read.
+  const board = cvIsUrl(state.activeUrl);
   ['bt-copy', 'bt-save', 'bt-comments', 'bt-more'].forEach(id => {
     const el = $(id);
-    if (el) el.style.display = open ? '' : 'none';
+    if (el) el.style.display = (open && (!board || id === 'bt-copy')) ? '' : 'none';
   });
   if (!state.activeUrl || state.editing) closePropsPanel();
 }
@@ -28404,9 +28560,695 @@ window.addEventListener('resize', () => { layoutReaderTables(); updateSectionTra
     lastW = w;
     if (queued) return;
     queued = true;
-    requestAnimationFrame(() => { queued = false; layoutReaderTables(); updateSectionTrail(); });
+    requestAnimationFrame(() => { queued = false; layoutReaderTables(); updateSectionTrail(); cvRelayout(); }); // CV -- boards too
   }).observe(reader);
 })();
+
+// ================================================================
+// CV · Canvas boards (21 Oct 2026). Obsidian .canvas files, read only.
+// ================================================================
+//
+// One viewer, four places it appears:
+//   page   a board opened from the file list, filling the reading column
+//   embed  ![[Board.canvas]] on its own line in a page, fitted to the column
+//   mini   ![[Board.canvas|inlR]] (or inlL), a small floated card, a still
+//          picture of the board; a click opens it full screen
+//   full   full screen over everything, with a return button top right
+//
+// Jayson's calls (docs/CANVAS-VIEWER-KICKOFF.md): the default view fits the
+// cards, not the endless canvas, never above 100% and never below 25%; an
+// embed's width is the reading column's and its height follows the board's
+// shape between 300 and 600; in a page a plain scroll keeps scrolling the
+// page and Ctrl or a pinch zooms; a page card shows the top of its page and
+// a click opens it; a web link card opens in the default browser; colours
+// set in Obsidian keep their hue in Folio's light and dark modes.
+//
+// Boards are kept OUT of state.folderFiles on purpose. Every vault-wide
+// feature (What's New, Review, Vault check, must reads, comments, the search
+// index Vault check reads) walks that list and means pages by it. Boards
+// live in their own list and join only the two places that want them: the
+// file list and search.
+
+const CV_EXT          = /\.canvas$/i;
+const CV_FIT_MAX      = 1;      // a small board is shown at its real size, never blown up
+const CV_FIT_MIN      = 0.25;   // a huge board opens here, centred, and you zoom in
+const CV_ZOOM_MIN     = 0.1;
+const CV_ZOOM_MAX     = 2.5;
+const CV_EMBED_MIN_H  = 300;
+const CV_EMBED_MAX_H  = 600;
+const CV_PAD          = 28;     // screen pixels kept clear around the fitted cards
+const CV_DRAG_PX      = 4;      // further than this is a pan, not a click
+const CV_PRESET       = { '1': 'red', '2': 'orange', '3': 'yellow', '4': 'green', '5': 'cyan', '6': 'purple' };
+const CV_SIDES        = ['top', 'right', 'bottom', 'left'];
+const CV_GLYPH        = '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>';
+
+let vaultRootCanvases = [];   // boards at the vault root; folders keep theirs in state.folderCanvases
+let searchCanvasIndex = [];   // [{name, url, text}] -- built beside searchIndex, read only by the two searches
+
+function cvIsUrl(u) { return CV_EXT.test(String(u || '')); }
+function cvInlineIcon() { return '<span class="cv-ic-inline">' + CV_GLYPH + '</span>'; }
+
+// The file list's own lists, kept beside the page lists. Called from the
+// folder and root listings, both local and SharePoint, so a board is known
+// the moment its folder is.
+function cvNoteFolderCanvases(folderId, list) {
+  if (!state.folderCanvases) state.folderCanvases = {};
+  if (!state.canvasIndex) state.canvasIndex = {};
+  const sorted = list.slice().sort((a, b) => a.name.localeCompare(b.name));
+  if (folderId === null) vaultRootCanvases = sorted;
+  else state.folderCanvases[folderId] = sorted;
+  sorted.forEach(f => {
+    if (state.fileFolder) state.fileFolder[f.url] = folderId; // the file list opens down to it
+    state.canvasIndex[f.name.toLowerCase()] = f.url;
+    state.canvasIndex[fileStem(f.name).toLowerCase()] = state.canvasIndex[fileStem(f.name).toLowerCase()] || f.url;
+  });
+  return sorted;
+}
+function cvResetVault() {
+  vaultRootCanvases = [];
+  searchCanvasIndex = [];
+  state.folderCanvases = {};
+  state.canvasIndex = {};
+}
+function allCanvasFiles() {
+  const out = [...vaultRootCanvases];
+  Object.values(state.folderCanvases || {}).forEach(list => list.forEach(f => out.push(f)));
+  return out;
+}
+// Pages and boards in one name order, for the file list.
+function cvTreeEntries(files, canvases) {
+  if (!canvases || !canvases.length) return files;
+  return files.concat(canvases).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// ── Reading a board ─────────────────────────────────────────────
+// JSON Canvas 1.0, the format Obsidian writes: nodes (text, file, link,
+// group) and edges between them. Anything malformed is dropped rather than
+// allowed to stop the rest of the board drawing.
+function cvParse(text) {
+  let o;
+  try { o = JSON.parse(String(text || '').trim() || '{}'); }
+  catch (_) { throw new Error('this board could not be read. The file is not canvas data.'); }
+  const num = v => (typeof v === 'number' && isFinite(v)) ? v : (isFinite(parseFloat(v)) ? parseFloat(v) : null);
+  const nodes = (Array.isArray(o && o.nodes) ? o.nodes : []).filter(n => n && n.id != null && num(n.x) !== null && num(n.y) !== null)
+    .map(n => Object.assign({}, n, { id: String(n.id), x: num(n.x), y: num(n.y),
+      width: Math.max(1, num(n.width) || 250), height: Math.max(1, num(n.height) || 60) }));
+  const ids = new Map(nodes.map(n => [n.id, n]));
+  const edges = (Array.isArray(o && o.edges) ? o.edges : [])
+    .filter(e => e && ids.has(String(e.fromNode)) && ids.has(String(e.toNode)))
+    .map(e => Object.assign({}, e, { fromNode: String(e.fromNode), toNode: String(e.toNode) }));
+  return { nodes, edges, ids };
+}
+
+function cvBounds(board) {
+  if (!board.nodes.length) return { x: 0, y: 0, w: 400, h: 300 };
+  let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+  board.nodes.forEach(n => {
+    // A group's label sits above its box, so the box top is not the top.
+    const top = n.type === 'group' && n.label ? n.y - 34 : n.y;
+    x1 = Math.min(x1, n.x); y1 = Math.min(y1, top);
+    x2 = Math.max(x2, n.x + n.width); y2 = Math.max(y2, n.y + n.height);
+  });
+  return { x: x1, y: y1, w: Math.max(1, x2 - x1), h: Math.max(1, y2 - y1) };
+}
+
+// Every word on a board, one line per line of card text, for search.
+function cvSearchText(board) {
+  const lines = [];
+  board.nodes.forEach(n => {
+    if (n.type === 'text' && n.text) String(n.text).split('\n').forEach(l => { if (l.trim()) lines.push(l); });
+    else if (n.type === 'group' && n.label) lines.push(String(n.label));
+    else if (n.type === 'link' && n.url) lines.push(String(n.url));
+    else if (n.type === 'file' && n.file) lines.push(displayNameOf(String(n.file)));
+  });
+  board.edges.forEach(e => { if (e.label) lines.push(String(e.label)); });
+  return lines.join('\n');
+}
+
+// Colour: "1" to "6" are Obsidian's presets, which map onto Folio's own red,
+// orange, yellow, green, cyan and purple; a hex colour is used as written.
+function cvColor(c) {
+  if (c === undefined || c === null || c === '') return { cls: '', style: '' };
+  const k = String(c).trim();
+  if (CV_PRESET[k]) return { cls: ' cv-col cv-c-' + CV_PRESET[k], style: '' };
+  if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(k)) return { cls: ' cv-col', style: '--cv-col:' + k + ';' };
+  return { cls: '', style: '' };
+}
+
+// Card markdown through the page renderer, made inert: a board is not a
+// page, so its headings are not the page's headings (no ids, no fold, no
+// heading buttons, nothing the Outline or the section trail will count).
+// The renderer's per-page counters are put back afterwards, the way the
+// template preview already does, so rendering a board never disturbs the
+// page it sits in.
+function cvMd(text) {
+  const saved = [mdTaskCounter, mdListCounter, mdCopyBlocks];
+  let html = '';
+  try { html = parseMarkdown(String(text || '')); }
+  finally { mdTaskCounter = saved[0]; mdListCounter = saved[1]; mdCopyBlocks = saved[2]; }
+  const box = document.createElement('div');
+  box.innerHTML = html;
+  box.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  box.querySelectorAll('.md-h-actions, .md-fold-icon, button, input[type="checkbox"]').forEach(el => el.remove());
+  box.querySelectorAll('[onclick]').forEach(el => el.removeAttribute('onclick'));
+  box.querySelectorAll('.md-h-row').forEach(el => { el.className = 'cv-h-row'; });
+  box.querySelectorAll('.md-h-block').forEach(el => { el.className = 'cv-h-block'; });
+  box.querySelectorAll('.md-h').forEach(el => el.classList.remove('md-h'));
+  return box.innerHTML;
+}
+
+// Where a file named on a board lives. Obsidian writes vault paths
+// ("Folder/Page.md"). Tried as written, then under the board's own top
+// folder (a vault that is one folder inside the folder Folio was given),
+// then by name, the way a [[link]] resolves.
+function cvPathUrl(path) {
+  const p = String(path || '').replace(/^\/+/, '');
+  return LOCAL.on ? 'local:/' + p : CONFIG.vaultRelPath + '/' + p;
+}
+function cvPathCandidates(path, boardUrl) {
+  const p = String(path || '').replace(/^\/+/, '');
+  const out = [cvPathUrl(p)];
+  const top = String(auditPathKey(boardUrl) || '').split('/').filter(Boolean);
+  if (top.length > 1 && p.split('/')[0] !== top[0]) out.push(cvPathUrl(top[0] + '/' + p));
+  return out;
+}
+async function cvFileExists(url) {
+  if (LOCAL.on) { try { await localGetHandle(url); return true; } catch (_) { return false; } }
+  return true; // SharePoint: the picture or link reports its own failure
+}
+async function cvResolveFile(path, boardUrl) {
+  const name = String(path || '').split('/').pop();
+  if (/\.md$/i.test(name)) {
+    for (const u of cvPathCandidates(path, boardUrl)) {
+      const t = await readVaultFileOrNull(u);
+      if (t !== null) return { url: u, text: t };
+    }
+    const byName = resolveNoteUrl(fileStem(name).toLowerCase());
+    if (byName) { const t = await readVaultFileOrNull(byName); if (t !== null) return { url: byName, text: t }; }
+    return null;
+  }
+  if (cvIsUrl(name)) {
+    for (const u of cvPathCandidates(path, boardUrl)) if (await cvFileExists(u)) return { url: u };
+    const hit = state.canvasIndex && state.canvasIndex[name.toLowerCase()];
+    return hit ? { url: hit } : null;
+  }
+  for (const u of cvPathCandidates(path, boardUrl)) if (await cvFileExists(u)) return { url: u };
+  return null;
+}
+// A file's address the browser can open: a blob for a local vault, the
+// file's own path on SharePoint. Blobs are kept per session; boards are
+// small and a picture shown twice should not be read twice.
+const cvBlobCache = new Map();
+async function cvFileHref(url) {
+  if (!LOCAL.on) return url;
+  if (cvBlobCache.has(url)) return cvBlobCache.get(url);
+  const h = LOCAL.files[url] || await localGetHandle(url);
+  const href = URL.createObjectURL(await h.getFile());
+  cvBlobCache.set(url, href);
+  return href;
+}
+
+// A board named in a page: ![[Site plan.canvas]] or ![[Plans/Site plan.canvas]].
+// The whole vault is listed once if the name is not known yet, so a board in
+// a folder nobody has opened still embeds.
+async function cvResolveName(name, fromUrl) {
+  const raw = String(name || '').trim();
+  const base = raw.split('/').pop().toLowerCase();
+  const look = () => (state.canvasIndex || {})[base] || (state.canvasIndex || {})[base + '.canvas'] || null;
+  if (raw.includes('/')) {
+    for (const u of cvPathCandidates(/\.canvas$/i.test(raw) ? raw : raw + '.canvas', fromUrl)) {
+      if (allCanvasFiles().some(f => f.url === u)) return u;
+    }
+  }
+  let hit = look();
+  if (!hit) { try { await loadAllFolders(); } catch (_) {} hit = look(); }
+  return hit;
+}
+
+// ── Drawing ─────────────────────────────────────────────────────
+function cvNodeHTML(n) {
+  const c = cvColor(n.color);
+  const pos = 'left:' + n.x + 'px;top:' + n.y + 'px;width:' + n.width + 'px;height:' + n.height + 'px;';
+  const id = escHtml(n.id);
+  if (n.type === 'group') {
+    const lab = n.label ? '<div class="cv-glabel">' + escHtml(String(n.label)) + '</div>' : '';
+    return '<div class="cv-group' + c.cls + '" data-cv-node="' + id + '" style="' + pos + c.style + '">' + lab + '</div>';
+  }
+  if (n.type === 'text') {
+    return '<div class="cv-card cv-text' + c.cls + '" data-cv-node="' + id + '" style="' + pos + c.style + '"><div class="cv-body cv-md">' + cvMd(n.text) + '</div></div>';
+  }
+  if (n.type === 'link') {
+    const href = safeUrl(String(n.url || ''));
+    const ok = /^(https?:|mailto:)/i.test(href);
+    let dom = '', title = String(n.url || '');
+    try { const u = new URL(href); dom = u.hostname.replace(/^www\./, ''); title = (u.hostname + u.pathname).replace(/^www\./, '').replace(/\/$/, ''); } catch (_) {}
+    const globe = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>';
+    return '<div class="cv-card cv-link' + c.cls + '" data-cv-node="' + id + '" style="' + pos + c.style + '"' +
+      (ok ? ' data-wb-external="' + escHtml(href) + '" title="Opens in your browser"' : '') + '><div class="cv-lbody">' +
+      '<div class="cv-ldom">' + globe + escHtml(dom || 'web link') + '</div>' +
+      '<div class="cv-ltitle">' + escHtml(title) + '</div>' +
+      (ok ? '<div class="cv-lopen">Open in browser ↗</div>' : '<div class="cv-fsub">This address cannot be opened from Folio.</div>') +
+      '</div></div>';
+  }
+  if (n.type === 'file') {
+    // Filled in once the file is found (cvFillFiles); the name shows meanwhile.
+    return '<div class="cv-card cv-file' + c.cls + '" data-cv-node="' + id + '" data-cv-file="' + escHtml(String(n.file || '')) + '" style="' + pos + c.style + '">' +
+      '<div class="cv-fcard"><div><div class="cv-fname">' + escHtml(displayNameOf(String(n.file || ''))) + '</div><div class="cv-fsub">Loading…</div></div></div></div>';
+  }
+  return '<div class="cv-card' + c.cls + '" data-cv-node="' + id + '" style="' + pos + c.style + '"><div class="cv-fcard"><div class="cv-fsub">A card type Folio does not show yet.</div></div></div>';
+}
+
+// Where a line between two cards leaves and arrives: the side Obsidian
+// recorded, or the facing sides when it recorded none.
+function cvSidePoint(n, side) {
+  if (side === 'top')    return { x: n.x + n.width / 2, y: n.y,            nx: 0,  ny: -1 };
+  if (side === 'bottom') return { x: n.x + n.width / 2, y: n.y + n.height, nx: 0,  ny: 1 };
+  if (side === 'left')   return { x: n.x,               y: n.y + n.height / 2, nx: -1, ny: 0 };
+  return                        { x: n.x + n.width,     y: n.y + n.height / 2, nx: 1,  ny: 0 };
+}
+function cvEdgeGeom(e, ids) {
+  const a = ids.get(e.fromNode), b = ids.get(e.toNode);
+  const dx = (b.x + b.width / 2) - (a.x + a.width / 2), dy = (b.y + b.height / 2) - (a.y + a.height / 2);
+  let fs, ts;
+  if (Math.abs(dx) >= Math.abs(dy)) { fs = dx >= 0 ? 'right' : 'left'; ts = dx >= 0 ? 'left' : 'right'; }
+  else { fs = dy >= 0 ? 'bottom' : 'top'; ts = dy >= 0 ? 'top' : 'bottom'; }
+  if (CV_SIDES.includes(e.fromSide)) fs = e.fromSide;
+  if (CV_SIDES.includes(e.toSide)) ts = e.toSide;
+  const p1 = cvSidePoint(a, fs), p2 = cvSidePoint(b, ts);
+  const k = Math.min(Math.max(Math.hypot(p2.x - p1.x, p2.y - p1.y) * 0.4, 30), 160);
+  const c1 = { x: p1.x + p1.nx * k, y: p1.y + p1.ny * k }, c2 = { x: p2.x + p2.nx * k, y: p2.y + p2.ny * k };
+  const at = t => { const u = 1 - t; return {
+    x: u * u * u * p1.x + 3 * u * u * t * c1.x + 3 * u * t * t * c2.x + t * t * t * p2.x,
+    y: u * u * u * p1.y + 3 * u * u * t * c1.y + 3 * u * t * t * c2.y + t * t * t * p2.y }; };
+  return { p1, p2, c1, c2, mid: at(0.5) };
+}
+function cvArrowHead(tip, from) {
+  let vx = tip.x - from.x, vy = tip.y - from.y;
+  const L = Math.hypot(vx, vy) || 1; vx /= L; vy /= L;
+  const bx = tip.x - vx * 12, by = tip.y - vy * 12, px = -vy * 5, py = vx * 5;
+  return tip.x + ',' + tip.y + ' ' + (bx + px) + ',' + (by + py) + ' ' + (bx - px) + ',' + (by - py);
+}
+function cvEdgesHTML(board, bounds) {
+  if (!board.edges.length) return { svg: '', labels: '' };
+  const pad = 200;
+  const vx = bounds.x - pad, vy = bounds.y - pad, vw = bounds.w + pad * 2, vh = bounds.h + pad * 2;
+  let paths = '', labels = '';
+  board.edges.forEach(e => {
+    const g = cvEdgeGeom(e, board.ids);
+    const c = cvColor(e.color);
+    const cls = c.cls.replace(' cv-col', '');
+    const st = c.style ? ' style="' + c.style + '"' : '';
+    paths += '<path class="cv-e' + cls + '"' + st + ' d="M' + g.p1.x + ' ' + g.p1.y + ' C' + g.c1.x + ' ' + g.c1.y + ' ' + g.c2.x + ' ' + g.c2.y + ' ' + g.p2.x + ' ' + g.p2.y + '"/>';
+    if (e.toEnd !== 'none')   paths += '<polygon class="cv-ah' + cls + '"' + st + ' points="' + cvArrowHead(g.p2, g.c2) + '"/>';
+    if (e.fromEnd === 'arrow') paths += '<polygon class="cv-ah' + cls + '"' + st + ' points="' + cvArrowHead(g.p1, g.c1) + '"/>';
+    if (e.label) labels += '<div class="cv-elabel" style="left:' + g.mid.x + 'px;top:' + g.mid.y + 'px">' + escHtml(String(e.label)) + '</div>';
+  });
+  const svg = '<svg class="cv-edges" style="left:' + vx + 'px;top:' + vy + 'px;width:' + vw + 'px;height:' + vh + 'px" viewBox="' + vx + ' ' + vy + ' ' + vw + ' ' + vh + '">' + paths + '</svg>';
+  return { svg, labels };
+}
+
+function cvWorldHTML(board) {
+  const bounds = cvBounds(board);
+  // Groups underneath (largest first, so a group inside a group sits on top
+  // of it), then lines, then cards, then the lines' labels.
+  const groups = board.nodes.filter(n => n.type === 'group').sort((a, b) => b.width * b.height - a.width * a.height);
+  const cards  = board.nodes.filter(n => n.type !== 'group');
+  const ed = cvEdgesHTML(board, bounds);
+  return groups.map(cvNodeHTML).join('') + ed.svg + cards.map(cvNodeHTML).join('') + ed.labels;
+}
+
+const CV_ICON_FILE  = '<svg class="cv-fic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+const CV_ICON_BOARD = '<svg class="cv-fic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>';
+
+// File cards, one by one, after the board is on screen. A page shows its
+// top and opens on a click; a picture shows itself; another board opens as
+// a board; anything else opens in the browser.
+async function cvFillFiles(view) {
+  const cv = view._cv;
+  const cards = [...view.querySelectorAll('.cv-file[data-cv-file]')];
+  for (const card of cards) {
+    const path = card.dataset.cvFile;
+    const name = String(path).split('/').pop();
+    let hit = null;
+    try { hit = await cvResolveFile(path, cv.url); } catch (_) { hit = null; }
+    if (!view.isConnected) return;
+    if (!hit) {
+      card.classList.add('cv-missing');
+      card.innerHTML = '<div class="cv-fcard">' + CV_ICON_FILE + '<div><div class="cv-fname">' + escHtml(displayNameOf(path)) + '</div><div class="cv-fsub">Not found in the vault</div></div></div>';
+      continue;
+    }
+    if (/\.md$/i.test(name)) {
+      const dn = displayNameOf(hit.url);
+      // The card has its own title, so the page's own first heading is not
+      // repeated under it. Frontmatter is the renderer's to drop.
+      let lines = String(hit.text || '').split('\n');
+      if (lines[0] === '---') { const end = lines.indexOf('---', 1); if (end > 0) lines = lines.slice(end + 1); }
+      const first = lines.findIndex(l => l.trim());
+      if (first >= 0 && /^#\s/.test(lines[first])) lines.splice(first, 1);
+      const top = lines.slice(0, 60).join('\n');
+      card.classList.add('cv-page');
+      card.dataset.wbOpen = hit.url;
+      card.dataset.wbName = dn;
+      card.title = 'Open ' + dn;
+      card.innerHTML = '<div class="cv-ptitle">' + escHtml(dn) + '</div><div class="cv-pbody cv-md">' + cvMd(top) + '</div><div class="cv-fade"></div>';
+    } else if (cvIsUrl(name)) {
+      const dn = displayNameOf(hit.url);
+      card.classList.add('cv-board');
+      card.dataset.wbOpen = hit.url;
+      card.dataset.wbName = dn;
+      card.innerHTML = '<div class="cv-fcard">' + CV_ICON_BOARD + '<div><div class="cv-fname">' + escHtml(dn) + '</div><div class="cv-fsub">Board. Click to open.</div></div></div>';
+    } else if (isImageExt(name)) {
+      card.classList.add('cv-image');
+      let href = '';
+      try { href = await cvFileHref(hit.url); } catch (_) { href = ''; }
+      card.innerHTML = href ? '<img alt="' + escHtml(name) + '" src="' + escHtml(href) + '">' :
+        '<div class="cv-fcard">' + CV_ICON_FILE + '<div><div class="cv-fname">' + escHtml(name) + '</div><div class="cv-fsub">Picture could not be read</div></div></div>';
+    } else {
+      card.classList.add('cv-other');
+      card.dataset.cvHref = hit.url;
+      card.title = 'Open ' + name;
+      card.innerHTML = '<div class="cv-fcard">' + CV_ICON_FILE + '<div><div class="cv-fname">' + escHtml(name) + '</div><div class="cv-fsub">Click to open</div></div></div>';
+    }
+  }
+}
+
+// ── The viewer ──────────────────────────────────────────────────
+const CV_BTN = {
+  zout: '<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  zin:  '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  full: '<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+  back: '<svg viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+};
+function cvControlsHTML(mode) {
+  if (mode === 'mini') return '';
+  return '<div class="cv-ctl">' +
+    '<button type="button" data-cv-act="zout" title="Zoom out" aria-label="Zoom out">' + CV_BTN.zout + '</button>' +
+    '<button type="button" data-cv-act="zin" title="Zoom in" aria-label="Zoom in">' + CV_BTN.zin + '</button>' +
+    '<button type="button" data-cv-act="fit" title="Show the whole board">Fit</button>' +
+    (mode === 'full' ? '' : '<button type="button" data-cv-act="full" title="Full screen" aria-label="Full screen">' + CV_BTN.full + '</button>') +
+    '</div>';
+}
+
+// Builds a viewer inside `host` (emptied first) and returns its element.
+function cvMount(host, url, board, mode) {
+  host.innerHTML = '';
+  const view = document.createElement('div');
+  view.className = 'cv-view cv-mode-' + mode;
+  view.innerHTML = '<div class="cv-world">' + cvWorldHTML(board) + '</div>' +
+    (board.nodes.length ? '' : '<div class="cv-msg">This board is empty.</div>') + cvControlsHTML(mode);
+  host.appendChild(view);
+  view._cv = { url, board, mode, s: 1, tx: 0, ty: 0, moved: false, bounds: cvBounds(board) };
+  hydrateLocalImages(view);
+  cvSize(view);
+  cvFit(view);
+  cvWire(view);
+  cvFillFiles(view);
+  return view;
+}
+
+// The height a viewer takes. A board page fills what is left of the reading
+// column; an embed takes the board's own shape between 300 and 600, at
+// the column's width. Full screen and the mini card are set by CSS.
+function cvSize(view) {
+  const cv = view._cv;
+  if (cv.mode === 'embed') {
+    const w = view.clientWidth || 600;
+    const s = Math.min(CV_FIT_MAX, Math.max(CV_FIT_MIN, (w - CV_PAD * 2) / cv.bounds.w));
+    const h = Math.round(cv.bounds.h * s + CV_PAD * 2);
+    view.style.height = Math.min(CV_EMBED_MAX_H, Math.max(CV_EMBED_MIN_H, h)) + 'px';
+  } else if (cv.mode === 'page') {
+    const reader = $('reader');
+    if (!reader) return;
+    const r = reader.getBoundingClientRect(), v = view.getBoundingClientRect();
+    view.style.height = Math.max(360, Math.floor(r.bottom - v.top - 24)) + 'px';
+  }
+}
+
+function cvApply(view) {
+  const cv = view._cv;
+  const world = view.querySelector('.cv-world');
+  if (world) world.style.transform = 'translate(' + cv.tx + 'px,' + cv.ty + 'px) scale(' + cv.s + ')';
+  const g = 20 * cv.s;
+  view.style.backgroundSize = g + 'px ' + g + 'px';
+  view.style.backgroundPosition = cv.tx + 'px ' + cv.ty + 'px';
+}
+
+// Zoom extents: the cards, not the canvas. One box round every card, scaled
+// to fit and centred, never above 100% and never below 25%.
+function cvFitScale(view) {
+  const cv = view._cv, W = view.clientWidth || 600, H = view.clientHeight || 400, b = cv.bounds;
+  // The small floated card is a picture of the whole board, so it has no
+  // floor: cutting it at 25% would show a corner of the board instead.
+  const pad = cv.mode === 'mini' ? 8 : CV_PAD;
+  const floor = cv.mode === 'mini' ? 0.02 : CV_FIT_MIN;
+  return Math.min(CV_FIT_MAX, Math.max(floor, Math.min((W - pad * 2) / b.w, (H - pad * 2) / b.h)));
+}
+function cvFit(view) {
+  const cv = view._cv, W = view.clientWidth || 600, H = view.clientHeight || 400, b = cv.bounds;
+  cv.s = cvFitScale(view);
+  cv.tx = (W - b.w * cv.s) / 2 - b.x * cv.s;
+  cv.ty = (H - b.h * cv.s) / 2 - b.y * cv.s;
+  cv.moved = false;
+  cvApply(view);
+}
+function cvZoomAt(view, factor, px, py) {
+  const cv = view._cv;
+  const s2 = Math.min(CV_ZOOM_MAX, Math.max(CV_ZOOM_MIN, cv.s * factor));
+  if (px === undefined) { px = view.clientWidth / 2; py = view.clientHeight / 2; }
+  cv.tx = px - (px - cv.tx) * (s2 / cv.s);
+  cv.ty = py - (py - cv.ty) * (s2 / cv.s);
+  cv.s = s2;
+  cv.moved = true;
+  cvApply(view);
+}
+
+// Mouse and trackpad. Drag pans everywhere. Ctrl or a pinch zooms
+// everywhere. A plain scroll pans a board page and full screen, but in an
+// embed it is left alone so the page keeps scrolling: nobody gets trapped
+// inside a board on the way down a page.
+function cvWire(view) {
+  const cv = view._cv;
+  if (cv.mode === 'mini') return;
+  view.addEventListener('wheel', e => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const r = view.getBoundingClientRect();
+      cvZoomAt(view, Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+      return;
+    }
+    if (cv.mode === 'embed') return;
+    const body = e.target.closest && e.target.closest('.cv-body');
+    if (body && body.scrollHeight > body.clientHeight + 1) {
+      const down = e.deltaY > 0;
+      const room = down ? body.scrollTop + body.clientHeight < body.scrollHeight - 1 : body.scrollTop > 0;
+      if (room) return; // a long card scrolls its own text first
+    }
+    e.preventDefault();
+    cv.tx -= e.deltaX; cv.ty -= e.deltaY; cv.moved = true;
+    cvApply(view);
+  }, { passive: false });
+
+  view.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || e.target.closest('.cv-ctl') || e.target.closest('.cv-body')) return;
+    if (e.pointerType === 'touch' && cv.mode === 'embed') return; // a finger on an embed scrolls the page
+    const start = { x: e.clientX, y: e.clientY, tx: cv.tx, ty: cv.ty, moved: false };
+    const move = ev => {
+      const dx = ev.clientX - start.x, dy = ev.clientY - start.y;
+      if (!start.moved && Math.hypot(dx, dy) < CV_DRAG_PX) return;
+      start.moved = true;
+      view.classList.add('cv-dragging');
+      cv.tx = start.tx + dx; cv.ty = start.ty + dy; cv.moved = true;
+      cvApply(view);
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      view.classList.remove('cv-dragging');
+      // A pan that ends over a card is not a click on that card.
+      if (start.moved) {
+        const eat = ev => { ev.stopPropagation(); ev.preventDefault(); };
+        view.addEventListener('click', eat, { capture: true, once: true });
+        setTimeout(() => view.removeEventListener('click', eat, { capture: true }), 0);
+      }
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  });
+}
+
+// One click handler for every board control, the way the rest of the app
+// reads data-wb-* attributes. The page and link cards ride the app's own
+// handlers (data-wb-open, data-wb-external).
+document.addEventListener('click', e => {
+  const t = e.target;
+  if (!t || !t.closest) return;
+  const other = t.closest('.cv-other[data-cv-href]');
+  if (other) { e.preventDefault(); cvOpenOther(other.dataset.cvHref); return; }
+  const chip = t.closest('[data-cv-chip]');
+  if (chip) { e.preventDefault(); cvOpenByName(chip.dataset.cvChip, state.activeUrl, false); return; }
+  const mini = t.closest('.cv-mini-card');
+  if (mini && mini.dataset.cvUrl) {
+    e.preventDefault();
+    const v = mini.querySelector('.cv-view');
+    cvOpenFull(mini.dataset.cvUrl, mini.dataset.cvName || '', v && v._cv ? v._cv.board : null);
+    return;
+  }
+  const btn = t.closest('[data-cv-act]');
+  if (btn) {
+    e.preventDefault();
+    const act = btn.dataset.cvAct;
+    if (act === 'close') { cvCloseFull(); return; }
+    const view = btn.closest('.cv-view');
+    if (!view || !view._cv) return;
+    if (act === 'zin')  cvZoomAt(view, 1.25);
+    if (act === 'zout') cvZoomAt(view, 0.8);
+    if (act === 'fit')  cvFit(view);
+    if (act === 'full') cvOpenFull(view._cv.url, displayNameOf(view._cv.url), view._cv.board);
+    return;
+  }
+  // Opening a page from a full-screen board leaves full screen: the page
+  // opens underneath, and staying over it would hide what was asked for.
+  if ($('cv-full') && $('cv-full').classList.contains('open') && t.closest('#cv-full [data-wb-open]')) cvCloseFull();
+});
+
+async function cvOpenOther(url) {
+  try { window.open(await cvFileHref(url), '_blank', 'noopener'); } catch (_) { rvNotify('That file could not be opened.', false); }
+}
+async function cvOpenByName(name, fromUrl, full) {
+  const url = await cvResolveName(name, fromUrl);
+  if (!url) { rvNotify('No board called ' + name + ' in this vault.', false); return; }
+  if (full) return cvOpenFull(url, displayNameOf(url), null);
+  openFile(url, displayNameOf(url));
+}
+
+// ── Full screen ─────────────────────────────────────────────────
+async function cvOpenFull(url, name, board) {
+  let el = $('cv-full');
+  if (!el) { el = document.createElement('div'); el.id = 'cv-full'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Board, full screen'); document.body.appendChild(el); }
+  el.innerHTML = '<div class="cv-fhead">' + cvInlineIcon() + escHtml(name || displayNameOf(url)) + '</div>' +
+    '<button type="button" class="cv-close" data-cv-act="close" title="Back to the page (Esc)">' + CV_BTN.back + 'Back</button><div class="cv-fhost"></div>';
+  el.classList.add('open');
+  try {
+    if (!board) board = cvParse(await readVaultFile(url));
+    cvMount(el.querySelector('.cv-fhost'), url, board, 'full');
+  } catch (e) {
+    el.querySelector('.cv-fhost').innerHTML = '<div class="cv-msg">Could not open the board: ' + escHtml(e.message) + '</div>';
+  }
+}
+function cvCloseFull() { const el = $('cv-full'); if (el) { el.classList.remove('open'); el.innerHTML = ''; } }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('cv-full') && $('cv-full').classList.contains('open')) cvCloseFull();
+});
+
+// ── A board opened from the file list ───────────────────────────
+function cvPageHTML(name) { return inlineTitleHTML(name) + '<div class="cv-pagehost"></div>'; }
+function cvRenderPage(rc, url, text) {
+  const host = rc.querySelector('.cv-pagehost');
+  if (!host) return;
+  rc.classList.add('cv-board-page'); // now, so the board is measured at its full width
+  try { cvMount(host, url, cvParse(text), 'page'); }
+  catch (e) { host.innerHTML = '<p class="md-p" style="color:var(--text-muted)">Could not show the board: ' + escHtml(e.message) + '</p>'; }
+}
+
+// ── Boards in pages ─────────────────────────────────────────────
+// The page renders a placeholder for each board (parseBlocks, type
+// 'canvas'); this fills them once the page is on screen.
+function cvEmbedSlotHTML(name, float) {
+  const fl = float === 'inlR' || float === 'inlL' ? float : '';
+  return '<div class="cv-slot" data-cv-embed="' + escHtml(name) + '" data-cv-float="' + fl + '">' + cvInlineIcon() + ' ' + escHtml(displayNameOf(name)) + '</div>';
+}
+function cvInlineChipHTML(name) {
+  return '<span class="cv-chip" data-cv-chip="' + escHtml(name) + '">' + cvInlineIcon() + escHtml(displayNameOf(name)) + '</span>';
+}
+async function cvMountEmbeds(container) {
+  if (!container) return;
+  const fromUrl = state.activeUrl;
+  const slots = [...container.querySelectorAll('.cv-slot[data-cv-embed]')];
+  for (const slot of slots) {
+    const name = slot.dataset.cvEmbed, fl = slot.dataset.cvFloat;
+    slot.removeAttribute('data-cv-embed');
+    let url = null, board = null, err = '';
+    try {
+      url = await cvResolveName(name, fromUrl);
+      if (url) board = cvParse(await readVaultFile(url));
+    } catch (e) { err = e.message; }
+    if (!slot.isConnected || state.activeUrl !== fromUrl) return;
+    if (!url || !board) {
+      slot.innerHTML = cvInlineIcon() + ' ' + escHtml(displayNameOf(name)) + (url ? ': ' + escHtml(err) : ': no board by that name in this vault.');
+      continue;
+    }
+    const dn = displayNameOf(url);
+    if (fl) {
+      const card = document.createElement('div');
+      card.className = 'cv-mini-card cv-' + fl;
+      card.dataset.cvUrl = url;
+      card.dataset.cvName = dn;
+      card.title = 'Open ' + dn + ' full screen';
+      card.innerHTML = '<div class="cv-mini-head">' + cvInlineIcon() + '<span class="cv-mini-name">' + escHtml(dn) + '</span></div><div class="cv-mini-host"></div>';
+      slot.replaceWith(card);
+      cvMount(card.querySelector('.cv-mini-host'), url, board, 'mini');
+    } else {
+      const host = document.createElement('div');
+      host.className = 'cv-embed';
+      slot.replaceWith(host);
+      cvMount(host, url, board, 'embed');
+    }
+  }
+}
+
+// Width changes (the window, a side column opening): an embed takes its new
+// height, and a board nobody has moved is fitted again. One that has been
+// zoomed or panned keeps where it was put.
+function cvRelayout() {
+  document.querySelectorAll('.cv-view').forEach(v => {
+    if (!v._cv) return;
+    cvSize(v);
+    if (!v._cv.moved) cvFit(v); else cvApply(v);
+  });
+}
+// A board opened as a page takes the whole reading area, not the reading
+// width: it is a picture to move around, not lines to read. Watched on the
+// reader itself, so every route that puts something else there (Home, help,
+// a page) drops it again without having to remember to.
+(function cvWatchBoardPage() {
+  const rc = $('reader-content');
+  if (!rc || typeof MutationObserver !== 'function') return;
+  new MutationObserver(() => {
+    rc.classList.toggle('cv-board-page', !!rc.querySelector(':scope > .cv-pagehost'));
+  }).observe(rc, { childList: true });
+})();
+// The window's own resize; the reader's width changes ride the table
+// watcher just below (watchReaderWidth), which calls cvRelayout too.
+window.addEventListener('resize', cvRelayout);
+
+// A search result inside a board: centre the card that holds the line and
+// mark it, the way a page marks its matching line.
+function cvReveal(line) {
+  const view = document.querySelector('#reader-content .cv-view');
+  if (!view || !view._cv) return false;
+  const want = normalizeMdLine(line).toLowerCase();
+  if (want.length < 2) return true;
+  const cards = [...view.querySelectorAll('[data-cv-node]')];
+  const hit = cards.find(el => el.textContent.replace(/\s+/g, ' ').toLowerCase().includes(want)) ||
+              cards.find(el => (el.dataset.cvFile || '').toLowerCase().includes(want));
+  if (!hit) return true;
+  const n = view._cv.board.ids.get(hit.dataset.cvNode);
+  if (!n) return true;
+  const cv = view._cv, W = view.clientWidth, H = view.clientHeight;
+  cv.s = Math.min(1, Math.max(cv.s, Math.min((W - CV_PAD * 2) / n.width, (H - CV_PAD * 2) / n.height, 0.8)));
+  cv.tx = W / 2 - (n.x + n.width / 2) * cv.s;
+  cv.ty = H / 2 - (n.y + n.height / 2) * cv.s;
+  cv.moved = true;
+  cvApply(view);
+  view.querySelectorAll('.cv-hit').forEach(el => el.classList.remove('cv-hit'));
+  if (hit.classList.contains('cv-card')) {
+    hit.classList.add('cv-hit');
+    setTimeout(() => hit.classList.remove('cv-hit'), 2500);
+  }
+  return true;
+}
 
 // Image zoom (confirmed 28 Sep) -- click the magnify button over a picture
 // to see it large; any click on the lightbox, or Escape, returns to the
@@ -29471,6 +30313,15 @@ async function buildSearchIndex() {
     const text = await readVaultFileOrNull(f.url);
     if (text !== null) out.push({ name: displayFileName(f.name), url: f.url, text: tpStripGuides(text), raw: text }); // S110; raw for S111
   }));
+  // CV -- boards are searched by their card text. Their own list, so Vault
+  // check and Format health, which read searchIndex, still see only pages.
+  const boards = [];
+  await Promise.all(allCanvasFiles().map(async f => {
+    const text = await readVaultFileOrNull(f.url);
+    if (text === null) return;
+    try { boards.push({ name: displayFileName(f.name), url: f.url, text: cvSearchText(cvParse(text)) }); } catch (_) {}
+  }));
+  searchCanvasIndex = boards;
   searchIndex = out;
 }
 
@@ -29519,7 +30370,8 @@ async function runSearch() {
     const idx = searchHits.length;
     searchHits.push({ url: f.url, name: f.name, line: null });
     return `<div class="search-hit sh-head" data-si="${idx}" onclick="gotoSearchHit(${idx})">` +
-           `<span>${markMatch(f.name, q)}</span>` +
+           (cvIsUrl(f.url) ? cvInlineIcon() + ' ' : '') + // CV -- icon and label mark a board
+           `<span>${markMatch(f.name, q)}</span>` + (cvIsUrl(f.url) ? '<span class="cv-tag">CANVAS</span>' : '') +
            (paletteFolderOf(f.url) ? `<span class="s-path">\u00b7 ${escHtml(paletteFolderOf(f.url))}</span>` : '') +
            (count ? `<span class="sh-n">${count}</span>` : '') + `</div>`;
   };
@@ -29546,7 +30398,7 @@ async function runSearch() {
   let html = '';
   // group 1 — the open file, which gets a deeper cap because you are in it
   if (state.activeUrl) {
-    const cur = searchIndex.find(f => f.url === state.activeUrl);
+    const cur = searchIndex.concat(searchCanvasIndex).find(f => f.url === state.activeUrl); // CV
     if (cur) html += pageBlock(cur, 20);
   }
   // group 2 — the vault, or one group per vault once the manifest names them
@@ -29555,7 +30407,7 @@ async function runSearch() {
   // The vault label only appears when there is more than one vault to tell
   // apart; with a single vault it said "Vault" above everything and earned
   // nothing.
-  const rest   = searchIndex.filter(f => f.url !== state.activeUrl);
+  const rest   = searchIndex.concat(searchCanvasIndex).filter(f => f.url !== state.activeUrl); // CV -- boards too
   const groups = vaultsOn()
     ? groupByVault(rest, f => f.url)
     : [{ id: '', name: '', items: rest }];
@@ -29604,6 +30456,7 @@ async function gotoSearchHit(idx) {
 // pane's own click handler.
 function revealSearchLine(line) {
   clearSearchHit();
+  if (cvIsUrl(state.activeUrl) && cvReveal(line)) return; // CV -- a board centres the card instead
   const text = normalizeMdLine(line);
   if (text.length < 2) return;
   for (const el of document.querySelectorAll(READER_BLOCKS)) {
@@ -31412,6 +32265,13 @@ async function rereadActivePage() {
         return;
       }
       const rc = $('reader-content');
+      if (rc && rc.dataset.wbText !== text && cvIsUrl(state.activeUrl)) {
+        // CV -- a board changed in Obsidian is drawn again, fitted.
+        rc.innerHTML = cvPageHTML(state.activeName);
+        rc.dataset.wbText = text;
+        cvRenderPage(rc, state.activeUrl, text);
+        return;
+      }
       if (rc && rc.dataset.wbText !== text) {
         const fm = parseFm(text); // Session 2 -- byline stays in sync on a live re-render too
         rc.innerHTML = tpStatusLineHTML(fm, state.activeUrl) + inlineTitleHTML(state.activeName) + summaryHTML(fm) +
@@ -31419,6 +32279,7 @@ async function rereadActivePage() {
                        bylineHTML(fm, state.activeUrl); // round 2 close -- footer, not a strap
         rc.dataset.wbText = text;
         hydrateLocalImages(rc);
+        cvMountEmbeds(rc); // CV
         finishReaderRender(); // Session 2 -- table-width measurement + section bar
         // S34: headings always render expanded after a re-render too.
         applyLiFoldState(state.activeUrl); // re-rendered content — restore collapsed list items

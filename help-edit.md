@@ -1,7 +1,7 @@
 # Editing in Obsidian
 
 > [!NOTE] About this guide
-> This guide is for Contributors and Administrators. Pages are written in Obsidian, and Folio is where people read them. This guide covers setting Obsidian up, writing a page so it looks right in Folio, and what Folio does and does not show. Reading and commenting are in [Using Folio](help.md). Reviewing is in [Contributing](help-contrib.md). Written for **Version 0.86.1**.
+> This guide is for Contributors and Administrators. Pages are written in Obsidian, and Folio is where people read them. This guide covers setting Obsidian up, writing a page so it looks right in Folio, and what Folio does and does not show. Reading and commenting are in [Using Folio](help.md). Reviewing is in [Contributing](help-contrib.md). Written for **Version 0.87.1**.
 
 Folio and Obsidian read the same folder of files. Change a page in one and it is changed in the other, with nothing to copy across. **New here? Do the first two topics.** The rest is a reference you can come back to. For every rule here written out as a finished page, open **Admin**, then **Templates**, then the **Sample** tab.
 
@@ -232,6 +232,34 @@ The reader sits on the latch side of the door.
 > **Pictures from the web.** Write `![words](https://example.com/picture.jpg)`.
 >
 > **While editing.** If the cursor behaves oddly around a wrapped picture in Obsidian, the Folio theme has a Style Settings switch to keep it on its own line while you edit. Reading view always wraps.
+
+## Put a board on a page
+%% card: Show a Canvas board in a page, across it or beside the text | icon: board | updated: 0.87 | key: board-embeds %%
+
+Make the board in Obsidian with New canvas. Folio reads it as it is: cards, groups, colours, arrows and their labels. To show it inside a page, write its name the way you place a picture, on a line of its own.
+
+`![[Site walk.canvas]]` shows the whole board across the page, fitted, with a height that follows the board's shape. `![[Site walk.canvas|inlR]]` puts a small picture of it on the right with the text wrapping on the left, and `inlL` puts it on the left. Readers click the small one to see the board full screen.
+
+```md
+![[Site walk.canvas]]
+
+![[Site walk.canvas|inlR]]
+The route starts at the lobby and ends at the security office.
+```
+
+> [!tip]
+> Keep `.canvas` in the name. Without it, Folio looks for a page of that name instead.
+
+> [!note]+ More detail
+> **Colours** set on a card, group or arrow in Obsidian show as the same colour in Folio, in the light or dark version that suits the reader's theme.
+>
+> **Page cards** show the top of the page in Folio, and a click opens the page. Make the card tall enough for the opening lines that matter.
+>
+> **Web link cards** show the site's address and open it in the reader's browser. Folio does not show the live site inside the card.
+>
+> **A board's name mid-sentence** becomes a link that opens the board.
+>
+> **Long text cards** scroll inside the card when the board is open on its own.
 
 ## Draw table column widths
 %% card: The line of dashes under the header sets how wide each column is | icon: table | updated: 0.86 | key: tables %%

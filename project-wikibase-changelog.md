@@ -8,6 +8,36 @@
 
 *Note: the entries reconstructed as v0.8c / v0.8d / v0.8e-1 below are from partial notes — those sessions moved the app forward without a session-log entry at the time (a known documentation gap). Everything from v0.9a onward was tracked in full going forward.*
 
+## 0.87.1 — 2026-10-21
+
+**Changed:** `index.html`, `demo/` (the sample vault and the printed guide), version lines in all four guides. Demo source: `supporting/help-render/` (`demo_board.py` new; `demo_pages.py`, `make_vault.py`, `demo_extras.py`), `supporting/demo-guide/`. Tests: `cv-canvas.test.js` (65 checks, a section for the demo board), `s115-demo.test.js` (a board embed counts as a resolved link).
+
+*CV follow-up: a board for presenting and training.*
+
+### Demo
+- **The sample vault has a board.** *Project Lifecycle* lays out the five phases as coloured groups, with a card for each process page, a picture, a web link and a note. It is shown across **Our Project Lifecycle** (in place of the old picture) and as the small card beside the text in **Site Walk**. Both pages keep their approvals, so Review shows only this week's edits.
+- **The printed guide walks through it.** Ellen's step 11 opens the board full screen, moves and zooms it; step 12 opens a page from its card. Ellen's part is now about 10 minutes, and Dana's part starts its own page.
+
+### Fixes
+- A page card whose title wraps onto two lines no longer runs into the page text under it.
+- Full screen closes whenever another page opens (Back, a link, search), not only from a card.
+
+## 0.87.0 — 2026-10-21
+
+**Changed:** `index.html`, `help.md` (new topic Look at a board), `help-edit.md` (new topic Put a board on a page), version lines in all four guides. Tests: `cv-canvas.test.js` (new, 59 checks, 12 reverts).
+
+*CV, the canvas session. Spec and Jayson's calls: `docs/CANVAS-VIEWER-KICKOFF.md`.*
+
+### New
+- **Obsidian Canvas boards, read only.** A `.canvas` file shows in Vault Files with a purple board icon, among the pages in name order, and opens to fill the reading area. Every card type draws: text with its formatting, page cards (the top of the page, a click opens it), pictures, other boards, other files, web links, groups, Obsidian's colours (in Folio's light and dark tones, hex colours kept) and arrows with their labels and ends.
+- **The view fits the cards.** A board opens with every card in view, centred, never above 100% and never below 25%. Drag to move, Ctrl or a pinch to zoom, Fit to come back, and full screen with a Back button (or Esc).
+- **Boards in pages.** `![[Name.canvas]]` on its own line draws the board across the page, at the column's width, with a height from the board's shape between 300 and 600. A plain scroll keeps moving down the page; Ctrl zooms the board. `|inlR` or `|inlL` makes a small floated picture of the whole board that opens full screen. Mid-sentence, the name is a link.
+- **Search finds card text.** Board results carry the board icon and a CANVAS label in both search places; opening one brings the matching card to the middle and marks it.
+- **Web link cards open in the browser,** never as a live page inside the card.
+
+### Kept out on purpose
+- Boards are not pages: What's New, Review, Vault check, Format health, must reads and comments never see them, and the header keeps Copy link only on a board.
+
 ## 0.86.1 — 2026-10-04
 
 **Changed:** `index.html`, `help.md` (Resizing and Email digests lines), version lines in all four guides, `demo/` (demo vault templates no longer carry the retired properties). Tests: `s116-columns.test.js` (new, 35 checks); `docks`, `p11-columns`, `review-bugfix-0321` and `s103-screens` updated for the new floor and measurement; `change-detection` no longer depends on today's date.

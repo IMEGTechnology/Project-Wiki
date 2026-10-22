@@ -3,7 +3,7 @@
 > [!NOTE] About this guide
 > This guide lives with the app, not inside your vault, so it never appears in the folder list. Press the **?** in the header to come back at any time.
 >
-> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.86.1**.
+> **The amber bar at the top means you are in help, not on a page.** Click **Back** on its right to return to the page you were reading. Click **Help** on its left to see all the guides. The line under the bar shows where you are, and each part of it is a link. The folder list and Outline are hidden while you are in help, and come back when you leave. Written for **Version 0.87.1**.
 
 Folio is the team's shared reference: a folder of notes you can browse, search, save and comment on. **New here? Do the first two topics and stop.** That is enough to use Folio. The rest is there when you need it.
 
@@ -290,6 +290,27 @@ A table that fits stays in line with the text. Text in a table always wraps, so 
 >
 > **Spacer rows.** A row made only of five or more periods is hidden on the page but still sets the column widths. If any cell has real text, the row shows as normal.
 
+## Look at a board
+%% card: Move around a board, open its cards, see it full screen | icon: board | updated: 0.87 | key: boards %%
+
+A board is a sheet of cards and arrows made with Canvas in Obsidian. It shows in Vault Files with a purple icon, and it can also sit inside a page. Folio draws it the way Obsidian does, to read.
+
+1. **Drag** the empty space to move around. **Ctrl and scroll**, or pinch, to zoom.
+2. **Fit** brings the whole board back into view. The arrows button beside it opens the board full screen, and **Back** or `Esc` returns.
+3. **Click a page card** to open that page. A web link card opens the site in your browser.
+
+> [!tip]
+> Inside a page, a plain scroll keeps moving down the page. Hold Ctrl to zoom the board instead.
+
+> [!note]+ More detail
+> **On its own.** Opened from Vault Files, a board fills the reading area, and a plain scroll moves around it.
+>
+> **A small card beside the text** is a picture of the whole board. Click it to see the board full screen.
+>
+> **Search** finds the words on a board's cards. Those results carry the purple icon and the word CANVAS, and opening one brings its card to the middle of the screen.
+>
+> **Boards are for reading.** Comments, Saved and must reads are for pages.
+
 ## See what's new
 %% card: Pages added or changed since you last looked, and which sections | icon: bell | updated: 0.82 | key: whats-new %%
 
@@ -571,4 +592,4 @@ Nobody is locked out. Ask whoever runs Folio: an Administrator can reset it from
 
 ---
 
-Written for **Version 0.86.1**.
+Written for **Version 0.87.1**.
